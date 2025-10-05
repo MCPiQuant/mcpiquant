@@ -12595,242 +12595,6 @@ div [container][horizontal] {
 		}
 	},
 });
-`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/mcp/worker.js":{content:`let ts;
-let tsLibCache = {};
-async function loadCjsModule(url) {
-	try {
-		const response = await fetch(url);
-		if (!response.ok) {
-			throw new Error(\`HTTP error! status: \${response.status}\`);
-		}
-		const scriptText = await response.text();
-
-		// Prepare a fake CJS environment
-		const module = { exports: {} };
-		const exports = module.exports;
-
-		// Wrap the script text in a function and execute it
-		const scriptFunc = new Function("module", "exports", scriptText);
-		scriptFunc(module, exports);
-
-		// If the module uses \`module.exports = ...\`, it will be on module.exports.
-		// If it just uses \`exports.foo = ...\`, it will be on exports.
-		// We check \`module.exports\` first.
-		const exportedModule = module.exports;
-
-		// Sometimes the main export isn't \`default\`, we check if the object is empty.
-		if (Object.keys(exportedModule).length === 0) {
-			return exports;
-		}
-
-		return exportedModule;
-	} catch (error) {
-		console.error(\`Failed to load module from \${url}:\`, error);
-		throw error;
-	}
-}
-
-const loadTypeScript = async () => {
-	if (ts) return;
-	try {
-		const tsModule = await loadCjsModule(
-			"https://unpkg.com/typescript@latest/lib/typescript.js",
-		);
-		ts = tsModule;
-		self.ts = ts;
-		console.log({ ts }, self.ts);
-	} catch (error) {
-		console.error("Failed to load TypeScript:", error);
-	}
-};
-
-const loadTypeScriptLibs = async () => {
-	if (Object.keys(tsLibCache).length > 0) return;
-	const libsToFetch = [
-		"lib.es2020.d.ts",
-		"lib.es2018.d.ts",
-		"lib.es2019.d.ts",
-		"lib.es2019.string.d.ts",
-		"lib.es2019.array.d.ts",
-		"lib.es2019.object.d.ts",
-		"lib.es2020.bigint.d.ts",
-		"lib.es2020.date.d.ts",
-		"lib.es2020.number.d.ts",
-		"lib.es2020.promise.d.ts",
-		"lib.es2020.sharedmemory.d.ts",
-		"lib.es2020.string.d.ts",
-		"lib.es2020.symbol.wellknown.d.ts",
-		"lib.es2015.symbol.d.ts",
-		"lib.es2019.symbol.d.ts",
-		"lib.es2019.intl.d.ts",
-		"lib.es2015.iterable.d.ts",
-		"lib.es2018.intl.d.ts",
-		"lib.es2020.intl.d.ts",
-		"lib.es5.d.ts",
-		"lib.dom.d.ts",
-		"lib.es2017.d.ts",
-		"lib.es2018.asynciterable.d.ts",
-		"lib.es2018.asyncgenerator.d.ts",
-		"lib.es2018.promise.d.ts",
-		"lib.es2018.regexp.d.ts",
-		"lib.es2016.d.ts",
-		"lib.es2017.arraybuffer.d.ts",
-		"lib.es2017.date.d.ts",
-		"lib.es2017.intl.d.ts",
-		"lib.es2017.object.d.ts",
-		"lib.es2017.sharedmemory.d.ts",
-		"lib.es2017.string.d.ts",
-		"lib.es2017.typedarrays.d.ts",
-		"lib.es2015.d.ts",
-		"lib.es2016.array.include.d.ts",
-		"lib.es2016.intl.d.ts",
-		"lib.es2015.symbol.wellknown.d.ts",
-		"lib.es2015.core.d.ts",
-		"lib.es2015.collection.d.ts",
-		"lib.es2015.generator.d.ts",
-		"lib.es2015.promise.d.ts",
-		"lib.es2015.proxy.d.ts",
-		"lib.es2015.reflect.d.ts",
-		"lib.decorators.d.ts",
-		"lib.decorators.legacy.d.ts",
-	];
-
-	try {
-		const promises = libsToFetch.map((lib) =>
-			fetch(\`https://unpkg.com/typescript@latest/lib/\${lib}\`).then((res) => {
-				if (!res.ok) throw new Error(\`Failed to fetch \${lib}\`);
-				return res.text();
-			}),
-		);
-		const contents = await Promise.all(promises);
-		const newCache = {};
-		libsToFetch.forEach((lib, index) => {
-			newCache[lib] = contents[index];
-		});
-
-		return newCache;
-	} catch (e) {
-		console.error(
-			"Could not fetch TypeScript library definitions. Type checking will be less accurate.",
-			e,
-		);
-	}
-};
-
-self.onmessage = async (e) => {
-	const { type, payload } = e.data;
-	switch (type) {
-		case "init":
-			await loadTypeScript();
-			tsLibCache = await loadTypeScriptLibs();
-			break;
-		case "validate": {
-			if (!ts) return;
-			const validationErrors = validate(payload.code, payload.filePath);
-			self.postMessage({
-				type: "validationComplete",
-				payload: { errors: validationErrors },
-			});
-			break;
-		}
-		case "transpile": {
-			if (!ts) {
-				// Fallback if TS isn't loaded yet
-				self.postMessage({
-					type: "transpileComplete",
-					payload: {
-						transpiledCode: payload.code,
-						requestId: payload.requestId,
-					},
-				});
-				return;
-			}
-			const transpiledResult = transpile(payload.code);
-			self.postMessage({
-				type: "transpileComplete",
-				payload: {
-					transpiledCode: transpiledResult,
-					requestId: payload.requestId,
-				},
-			});
-			break;
-		}
-	}
-};
-
-const validate = (code, filePath) => {
-	try {
-		const defaultLibFileName = "lib.es2020.d.ts";
-		const compilerOptions = {
-			target: ts.ScriptTarget.ES2020,
-			module: ts.ModuleKind.CommonJS,
-			allowJs: true,
-			esModuleInterop: true,
-			noEmit: true,
-		};
-
-		const host = {
-			getSourceFile: (fileName, languageVersion) => {
-				const sourceText =
-					tsLibCache[fileName] || (fileName === filePath ? code : undefined);
-				return sourceText !== undefined
-					? ts.createSourceFile(fileName, sourceText, languageVersion)
-					: undefined;
-			},
-			writeFile: () => {},
-			getDefaultLibFileName: () => defaultLibFileName,
-			useCaseSensitiveFileNames: () => false,
-			getCanonicalFileName: (fileName) => fileName,
-			getCurrentDirectory: () => "/",
-			getNewLine: () => "\\n",
-			fileExists: (fileName) => fileName === filePath || !!tsLibCache[fileName],
-			readFile: (fileName) =>
-				fileName === filePath ? code : tsLibCache[fileName],
-		};
-
-		const program = ts.createProgram([filePath], compilerOptions, host);
-		const diagnostics = ts.getPreEmitDiagnostics(program);
-
-		return diagnostics.map((diagnostic) => {
-			const message = ts.flattenDiagnosticMessageText(
-				diagnostic.messageText,
-				"\\n",
-			);
-			if (diagnostic.file && diagnostic.start) {
-				const { line, character } = ts.getLineAndCharacterOfPosition(
-					diagnostic.file,
-					diagnostic.start,
-				);
-				return { line: line + 1, character: character + 1, message };
-			}
-			return { line: 0, character: 0, message };
-		});
-	} catch (error) {
-		console.error("Error during code validation in worker:", error);
-		return [
-			{
-				line: 0,
-				character: 0,
-				message: "An unexpected error occurred during validation.",
-			},
-		];
-	}
-};
-
-const transpile = (code) => {
-	try {
-		const jsResult = ts.transpileModule(code, {
-			compilerOptions: {
-				module: ts.ModuleKind.CommonJS,
-				target: ts.ScriptTarget.ES2020,
-			},
-		});
-		return jsResult.outputText;
-	} catch (error) {
-		console.error("TypeScript compilation failed in worker:", error);
-		return code;
-	}
-};
 `,mimeType:"application/javascript",skipSW:!1},"/modules/apps/mcp/views/sidebar.js":{content:`export default ({ html, T }) => ({
 	class:
 		"w-64 bg-[#3c3836] text-[#ebdbb2] flex flex-col h-screen shrink-0 border-r border-[#504945]",
@@ -15269,805 +15033,7 @@ export const ifDefined = (value) => value ?? nothing;
 		},
 	};
 };
-`,mimeType:"application/javascript",skipSW:!1},"/modules/icon-lucide/lucide/chevron-down.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 9l6 6l6-6"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/templates/servers/basic.js":{content:`import {
-	McpServer,
-	ResourceTemplate,
-} from "@modelcontextprotocol/sdk/server/mcp.js";
-import z from "zod";
-
-export default () => {
-	const server = new McpServer(
-		{
-			name: "example-server",
-			version: "0.1.0",
-		},
-		{
-			capabilities: {
-				tools: {},
-				resources: { subscribe: true },
-				logging: {},
-				prompts: {},
-				sampling: {},
-				elicitation: {},
-			},
-		},
-	);
-
-	// In-memory data storage
-	const dataStore = {
-		users: [
-			{ id: 1, name: "Alice", email: "alice@example.com", role: "admin" },
-			{ id: 2, name: "Bob", email: "bob@example.com", role: "user" },
-			{ id: 3, name: "Charlie", email: "charlie@example.com", role: "user" },
-		],
-		posts: [
-			{
-				id: 1,
-				title: "Welcome Post",
-				content: "Welcome to our platform!",
-				authorId: 1,
-			},
-			{
-				id: 2,
-				title: "Getting Started",
-				content: "Here's how to get started...",
-				authorId: 1,
-			},
-		],
-		settings: {
-			theme: "dark",
-			language: "en",
-			notifications: true,
-			maxUsers: 100,
-		},
-	};
-
-	const subscriptions = new Set();
-
-	server.registerTool(
-		"echo",
-		{
-			title: "Echo Tool",
-			description: "Echo back the input text with optional formatting",
-			inputSchema: {
-				text: z.string().describe("Text to echo back"),
-				uppercase: z.boolean().optional().describe("Convert to uppercase"),
-				repeat: z
-					.number()
-					.min(1)
-					.max(5)
-					.optional()
-					.default(1)
-					.describe("Number of times to repeat"),
-			},
-		},
-		async ({ text, uppercase = false, repeat = 1 }) => {
-			let result = uppercase ? text.toUpperCase() : text;
-			result = Array(repeat).fill(result).join(" | ");
-
-			return {
-				content: [
-					{
-						type: "text",
-						text: \`Echo: \${result}\`,
-					},
-				],
-			};
-		},
-	);
-
-	// Math calculator tool
-	server.registerTool(
-		"calculate",
-		{
-			title: "Calculator",
-			description: "Perform basic mathematical operations",
-			inputSchema: {
-				operation: z
-					.enum(["add", "subtract", "multiply", "divide", "power"])
-					.describe("Mathematical operation to perform"),
-				a: z.number().describe("First number"),
-				b: z.number().describe("Second number"),
-			},
-		},
-		async ({ operation, a, b }) => {
-			let result;
-
-			switch (operation) {
-				case "add":
-					result = a + b;
-					break;
-				case "subtract":
-					result = a - b;
-					break;
-				case "multiply":
-					result = a * b;
-					break;
-				case "divide":
-					if (b === 0) throw new Error("Division by zero is not allowed");
-					result = a / b;
-					break;
-				case "power":
-					result = a ** b;
-					break;
-			}
-
-			return {
-				content: [
-					{
-						type: "text",
-						text: \`\${a} \${operation} \${b} = \${result}\`,
-					},
-				],
-			};
-		},
-	);
-
-	// User management tool with elicitation
-	server.registerTool(
-		"manage_user",
-		{
-			title: "User Management",
-			description: "Create, update, or delete users",
-			inputSchema: {
-				action: z
-					.enum(["create", "update", "delete", "list"])
-					.describe("Action to perform"),
-				userId: z
-					.number()
-					.optional()
-					.describe("User ID (required for update/delete)"),
-				name: z.string().optional().describe("User name (required for create)"),
-				email: z
-					.string()
-					.email()
-					.optional()
-					.describe("User email (required for create)"),
-				role: z.enum(["admin", "user"]).optional().describe("User role"),
-			},
-		},
-		async ({ action, userId, name, email, role }) => {
-			switch (action) {
-				case "list": {
-					return {
-						content: [
-							{
-								type: "text",
-								text: \`Users:\\n\${dataStore.users.map((u) => \`\${u.id}: \${u.name} (\${u.email}) - \${u.role}\`).join("\\n")}\`,
-							},
-						],
-					};
-				}
-				case "create": {
-					if (!name || !email)
-						throw new Error("Name and email are required for creating a user");
-					const newUser = {
-						id: Math.max(...dataStore.users.map((u) => u.id)) + 1,
-						name,
-						email,
-						role: role || "user",
-					};
-					dataStore.users.push(newUser);
-
-					// Notify subscribers
-					if (subscriptions.has("data://users")) {
-						server.notifyResourceUpdated("data://users");
-					}
-
-					return {
-						content: [
-							{
-								type: "text",
-								text: \`Created user: \${newUser.name} (ID: \${newUser.id})\`,
-							},
-						],
-					};
-				}
-				case "update": {
-					if (!userId) throw new Error("User ID is required for updating");
-					const userIndex = dataStore.users.findIndex((u) => u.id === userId);
-					if (userIndex === -1)
-						throw new Error(\`User with ID \${userId} not found\`);
-
-					if (name) dataStore.users[userIndex].name = name;
-					if (email) dataStore.users[userIndex].email = email;
-					if (role) dataStore.users[userIndex].role = role;
-
-					// Notify subscribers
-					if (subscriptions.has("data://users")) {
-						server.notifyResourceUpdated("data://users");
-					}
-					if (subscriptions.has(\`data://users/\${userId}\`)) {
-						server.notifyResourceUpdated(\`data://users/\${userId}\`);
-					}
-
-					return {
-						content: [
-							{
-								type: "text",
-								text: \`Updated user: \${dataStore.users[userIndex].name}\`,
-							},
-						],
-					};
-				}
-				case "delete": {
-					if (!userId) throw new Error("User ID is required for deletion");
-					const deleteIndex = dataStore.users.findIndex((u) => u.id === userId);
-					if (deleteIndex === -1)
-						throw new Error(\`User with ID \${userId} not found\`);
-
-					const deletedUser = dataStore.users.splice(deleteIndex, 1)[0];
-
-					// Notify subscribers
-					if (subscriptions.has("data://users")) {
-						server.notifyResourceUpdated("data://users");
-					}
-
-					return {
-						content: [
-							{
-								type: "text",
-								text: \`Deleted user: \${deletedUser.name}\`,
-							},
-						],
-					};
-				}
-			}
-		},
-	);
-
-	// NEW: Delete user with confirmation using elicitation
-	server.registerTool(
-		"delete_user_with_confirmation",
-		{
-			title: "Delete User with Confirmation",
-			description: "Deletes a user after confirming with the user",
-			inputSchema: {
-				userId: z.number().describe("ID of the user to delete"),
-				force: z
-					.boolean()
-					.optional()
-					.describe("Skip confirmation if true (default: false)"),
-			},
-		},
-		async ({ userId, force = false }) => {
-			const userIndex = dataStore.users.findIndex((u) => u.id === userId);
-			if (userIndex === -1) {
-				throw new Error(\`User with ID \${userId} not found\`);
-			}
-
-			const user = dataStore.users[userIndex];
-
-			if (!force) {
-				const result = await server.server.elicitInput({
-					message: \`Are you sure you want to delete user "\${user.name}" (\${user.email})?\`,
-					requestedSchema: {
-						type: "object",
-						properties: {
-							confirm: {
-								type: "boolean",
-								title: "Confirm deletion",
-								description: \`Confirm deletion of user "\${user.name}"\`,
-							},
-							transferPosts: {
-								type: "boolean",
-								title: "Transfer posts",
-								description: "Transfer user's posts to another user",
-								default: false,
-							},
-							newAuthorId: {
-								type: "number",
-								title: "New author ID",
-								description:
-									"ID of user to transfer posts to (if transferring)",
-							},
-						},
-						required: ["confirm"],
-					},
-				});
-
-				if (result.action !== "accept" || !result.content?.confirm) {
-					return {
-						content: [
-							{
-								type: "text",
-								text: \`Deletion cancelled by user for \${user.name}\`,
-							},
-						],
-					};
-				}
-
-				if (result.content?.transferPosts && result.content?.newAuthorId) {
-					const newAuthor = dataStore.users.find(
-						(u) => u.id === result.content.newAuthorId,
-					);
-					if (newAuthor) {
-						dataStore.posts.forEach((post) => {
-							if (post.authorId === userId) {
-								post.authorId = result.content.newAuthorId;
-							}
-						});
-						await server.sendLoggingMessage({
-							level: "info",
-							data: \`Transferred posts from \${user.name} to \${newAuthor.name}\`,
-						});
-					}
-				}
-			}
-
-			// Delete the user
-			dataStore.users.splice(userIndex, 1);
-
-			// Notify subscribers
-			if (subscriptions.has("data://users")) {
-				server.notifyResourceUpdated("data://users");
-			}
-
-			return {
-				content: [
-					{
-						type: "text",
-						text: \`Successfully deleted user: \${user.name}\`,
-					},
-				],
-			};
-		},
-	);
-
-	// NEW: Generate post content using sampling
-	server.registerTool(
-		"generate_post",
-		{
-			title: "Generate Post Content",
-			description:
-				"Uses AI to generate a blog post with the specified parameters",
-			inputSchema: {
-				title: z.string().describe("Title of the post"),
-				authorId: z.number().describe("ID of the author"),
-				topic: z.string().optional().describe("Topic or theme for the post"),
-				style: z
-					.enum(["professional", "casual", "technical", "creative"])
-					.optional()
-					.default("professional")
-					.describe("Writing style for the post"),
-			},
-		},
-		async ({ title, authorId, topic, style = "professional" }) => {
-			const author = dataStore.users.find((u) => u.id === authorId);
-			if (!author) {
-				throw new Error(\`Author with ID \${authorId} not found\`);
-			}
-
-			let generationPrompt = \`Write a blog post with the title "\${title}"\`;
-			if (topic) {
-				generationPrompt += \` about \${topic}\`;
-			}
-			generationPrompt += \`. Use a \${style} writing style. Keep it concise (2-3 paragraphs).\`;
-
-			try {
-				const response = await server.server.createMessage({
-					messages: [
-						{
-							role: "user",
-							content: {
-								type: "text",
-								text: generationPrompt,
-							},
-						},
-					],
-					maxTokens: 500,
-					temperature: style === "creative" ? 0.8 : 0.3,
-				});
-
-				let generatedContent = "";
-				if (response.content.type === "text") {
-					generatedContent = response.content.text;
-				} else {
-					throw new Error("Failed to generate text content");
-				}
-
-				// Create the new post
-				const newPost = {
-					id: Math.max(...dataStore.posts.map((p) => p.id)) + 1,
-					title,
-					content: generatedContent,
-					authorId,
-				};
-
-				dataStore.posts.push(newPost);
-
-				// Notify subscribers
-				if (subscriptions.has("data://posts")) {
-					server.notifyResourceUpdated("data://posts");
-				}
-
-				await server.sendLoggingMessage({
-					level: "info",
-					data: \`Generated post "\${title}" for author \${author.name} in \${style} style\`,
-				});
-
-				return {
-					content: [
-						{
-							type: "text",
-							text: \`Successfully generated post "\${title}" (ID: \${newPost.id})\\n\\nContent preview:\\n\${generatedContent.substring(0, 200)}\${generatedContent.length > 200 ? "..." : ""}\`,
-						},
-					],
-				};
-			} catch (error) {
-				await server.sendLoggingMessage({
-					level: "error",
-					data: \`Failed to generate post: \${error.message}\`,
-				});
-
-				throw new Error(\`Post generation failed: \${error.message}\`);
-			}
-		},
-	);
-
-	// Slow operation with progress
-	server.registerTool(
-		"slow_task",
-		{
-			title: "Slow Task Simulator",
-			description: "Simulates a long-running task with progress updates",
-			inputSchema: {
-				taskName: z.string().describe("Name of the task to simulate"),
-				duration: z.number().min(1).max(10).describe("Duration in seconds"),
-			},
-		},
-		async ({ taskName, duration }, { progress }) => {
-			await server.sendLoggingMessage({
-				level: "info",
-				data: \`Starting task: \${taskName} (\${duration}s)\`,
-			});
-
-			const steps = duration * 2; // Update every 500ms
-			for (let i = 1; i <= steps; i++) {
-				await new Promise((resolve) => setTimeout(resolve, 500));
-				progress({ progress: i, total: steps });
-			}
-
-			await server.sendLoggingMessage({
-				level: "info",
-				data: \`Completed task: \${taskName}\`,
-			});
-
-			return {
-				content: [
-					{
-						type: "text",
-						text: \`Task "\${taskName}" completed successfully after \${duration} seconds!\`,
-					},
-				],
-			};
-		},
-	);
-
-	// ===== STATIC RESOURCES =====
-
-	// App configuration
-	server.registerResource(
-		"config",
-		"config://app",
-		{
-			title: "App Configuration",
-			description: "Application configuration settings",
-			mimeType: "application/json",
-		},
-		async (uri) => ({
-			contents: [
-				{
-					uri: uri.href,
-					mimeType: "application/json",
-					text: JSON.stringify(
-						{
-							name: "MCP Dev Server",
-							version: "1.0.0",
-							features: ["tools", "resources", "templates"],
-							status: "active",
-							...dataStore.settings,
-						},
-						null,
-						2,
-					),
-				},
-			],
-		}),
-	);
-
-	// Users list resource
-	server.registerResource(
-		"data_users",
-		"data://users",
-		{
-			title: "Users List",
-			description: "List of all users in the system",
-			mimeType: "application/json",
-		},
-		async (uri) => ({
-			contents: [
-				{
-					uri: uri.href,
-					mimeType: "application/json",
-					text: JSON.stringify(dataStore.users, null, 2),
-				},
-			],
-		}),
-	);
-
-	// Posts list resource
-	server.registerResource(
-		"data_posts",
-		"data://posts",
-		{
-			title: "Posts List",
-			description: "List of all posts in the system",
-			mimeType: "application/json",
-		},
-		async (uri) => ({
-			contents: [
-				{
-					uri: uri.href,
-					mimeType: "application/json",
-					text: JSON.stringify(dataStore.posts, null, 2),
-				},
-			],
-		}),
-	);
-
-	// ===== RESOURCE TEMPLATES =====
-
-	// Individual user resource template
-	server.registerResource(
-		"data_users_template",
-		new ResourceTemplate("data://users/{id}", {
-			list: undefined,
-		}),
-		{
-			title: "User Resource",
-			description: "Individual user data by ID",
-		},
-		async (uri, { id }) => {
-			const userId = Number.parseInt(id);
-			const user = dataStore.users.find((u) => u.id === userId);
-
-			if (!user) {
-				throw new Error(\`User with ID \${userId} not found\`);
-			}
-
-			// Include user's posts
-			const userPosts = dataStore.posts.filter((p) => p.authorId === userId);
-			const userData = {
-				...user,
-				posts: userPosts,
-			};
-
-			return {
-				contents: [
-					{
-						uri: uri.href,
-						mimeType: "application/json",
-						text: JSON.stringify(userData, null, 2),
-					},
-				],
-			};
-		},
-	);
-
-	// Individual post resource template
-	server.registerResource(
-		"data_posts_template",
-		new ResourceTemplate("data://posts/{id}", {
-			list: undefined,
-		}),
-		{
-			title: "Post Resource",
-			description: "Individual post data by ID",
-		},
-		async (uri, { id }) => {
-			const postId = Number.parseInt(id);
-			const post = dataStore.posts.find((p) => p.id === postId);
-
-			if (!post) {
-				throw new Error(\`Post with ID \${postId} not found\`);
-			}
-
-			// Include author information
-			const author = dataStore.users.find((u) => u.id === post.authorId);
-			const postData = {
-				...post,
-				author: author ? { name: author.name, email: author.email } : null,
-			};
-
-			return {
-				contents: [
-					{
-						uri: uri.href,
-						mimeType: "application/json",
-						text: JSON.stringify(postData, null, 2),
-					},
-				],
-			};
-		},
-	);
-
-	// Dynamic report template
-	server.registerResource(
-		"reports",
-		new ResourceTemplate("reports://{type}/{format}", {
-			list: undefined,
-		}),
-		{
-			title: "Dynamic Reports",
-			description: "Generate various reports in different formats",
-		},
-		async (uri, { type, format }) => {
-			let reportData;
-			let mimeType;
-
-			// Generate report based on type
-			switch (type) {
-				case "users":
-					reportData = {
-						title: "User Report",
-						generated: new Date().toISOString(),
-						summary: {
-							total: dataStore.users.length,
-							admins: dataStore.users.filter((u) => u.role === "admin").length,
-							users: dataStore.users.filter((u) => u.role === "user").length,
-						},
-						users: dataStore.users,
-					};
-					break;
-				case "posts":
-					reportData = {
-						title: "Posts Report",
-						generated: new Date().toISOString(),
-						summary: {
-							total: dataStore.posts.length,
-							byAuthor: dataStore.users.map((u) => ({
-								author: u.name,
-								count: dataStore.posts.filter((p) => p.authorId === u.id)
-									.length,
-							})),
-						},
-						posts: dataStore.posts,
-					};
-					break;
-				default:
-					throw new Error(\`Unknown report type: \${type}\`);
-			}
-
-			// Format the report
-			let content;
-			switch (format) {
-				case "json":
-					mimeType = "application/json";
-					content = JSON.stringify(reportData, null, 2);
-					break;
-				case "csv":
-					mimeType = "text/csv";
-					if (type === "users") {
-						content =
-							"ID,Name,Email,Role\\n" +
-							dataStore.users
-								.map((u) => \`\${u.id},\${u.name},\${u.email},\${u.role}\`)
-								.join("\\n");
-					} else {
-						content =
-							"ID,Title,Author ID\\n" +
-							dataStore.posts
-								.map((p) => \`\${p.id},\${p.title},\${p.authorId}\`)
-								.join("\\n");
-					}
-					break;
-				case "txt":
-					mimeType = "text/plain";
-					content = \`\${reportData.title}\\nGenerated: \${reportData.generated}\\n\\n\${JSON.stringify(reportData.summary, null, 2)}\`;
-					break;
-				default:
-					throw new Error(\`Unknown format: \${format}\`);
-			}
-
-			return {
-				contents: [
-					{
-						uri: uri.href,
-						mimeType,
-						text: content,
-					},
-				],
-			};
-		},
-	);
-
-	// ===== PROMPTS =====
-
-	server.registerPrompt(
-		"simple_greeting",
-		{
-			title: "Simple Greeting",
-			description: "A basic greeting prompt",
-		},
-		() => ({
-			messages: [
-				{
-					role: "user",
-					content: {
-						type: "text",
-						text: "Please greet the user in a friendly and professional manner.",
-					},
-				},
-			],
-		}),
-	);
-
-	server.registerPrompt(
-		"analyze_user_data",
-		{
-			title: "Analyze User Data",
-			description: "Analyze user data with specific parameters",
-			argsSchema: {
-				userId: z.number().describe("ID of the user to analyze"),
-				includeStats: z
-					.boolean()
-					.default(true)
-					.describe("Include statistical analysis"),
-			},
-		},
-		({ userId, includeStats }) => ({
-			messages: [
-				{
-					role: "user",
-					content: {
-						type: "text",
-						text: \`Please analyze the user data for user ID \${userId}.\${includeStats ? " Include detailed statistics and insights." : " Provide a basic summary only."}\`,
-					},
-				},
-				{
-					role: "user",
-					content: {
-						type: "resource",
-						uri: \`data://users/\${userId}\`,
-					},
-				},
-			],
-		}),
-	);
-
-	server.registerPrompt(
-		"summarize_post",
-		{
-			title: "Summarize Post",
-			description: "Generate a summary of a specific post",
-			argsSchema: {
-				postId: z.number().describe("ID of the post to summarize"),
-			},
-		},
-		({ postId }) => ({
-			messages: [
-				{
-					role: "user",
-					content: {
-						type: "text",
-						text: "Please provide a concise summary of the following post:",
-					},
-				},
-				{
-					role: "user",
-					content: {
-						type: "resource",
-						uri: \`data://posts/\${postId}\`,
-					},
-				},
-			],
-		}),
-	);
-
-	return server;
-};
-`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/navigation/tabs.js":{content:`export default ({ T, html }) => ({
+`,mimeType:"application/javascript",skipSW:!1},"/modules/icon-lucide/lucide/chevron-down.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 9l6 6l6-6"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/uix/navigation/tabs.js":{content:`export default ({ T, html }) => ({
 	tag: "uix-tabs",
 	style: true,
 	class: "overflow-auto",
@@ -16918,7 +15884,7 @@ export default () => {
 		},
 	};
 };
-`,mimeType:"application/javascript",skipSW:!1},"/modules/icon-lucide/lucide/layout-dashboard.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/wrench.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/key.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m15.5 7.5l2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4m2-2l-9.6 9.6"/><circle cx="7.5" cy="15.5" r="5.5"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/database.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/terminal.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m4 17l6-6l-6-6m8 14h8"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/git-branch-plus.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M6 3v12m12-6a3 3 0 1 0 0-6a3 3 0 0 0 0 6M6 21a3 3 0 1 0 0-6a3 3 0 0 0 0 6"/><path d="M15 6a9 9 0 0 0-9 9m12 0v6m3-3h-6"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/uix/display/card.js":{content:`export default {
+`,mimeType:"application/javascript",skipSW:!1},"/modules/icon-lucide/lucide/key.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m15.5 7.5l2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4m2-2l-9.6 9.6"/><circle cx="7.5" cy="15.5" r="5.5"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/git-branch-plus.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M6 3v12m12-6a3 3 0 1 0 0-6a3 3 0 0 0 0 6M6 21a3 3 0 1 0 0-6a3 3 0 0 0 0 6"/><path d="M15 6a9 9 0 0 0-9 9m12 0v6m3-3h-6"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/uix/display/card.js":{content:`export default {
 	tag: "uix-card",
 	style: true,
 };
@@ -16939,5 +15905,1949 @@ export default () => {
 		cursor: pointer;
 	}
 }
-`,mimeType:"text/css",skipSW:!1},"/modules/icon-lucide/lucide/file-text.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4M10 9H8m8 4H8m8 4H8"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/file-code-2.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v4"/><path d="M14 2v4a2 2 0 0 0 2 2h4M5 12l-3 3l3 3m4 0l3-3l-3-3"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/chevron-right.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 18l6-6l-6-6"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/style.css":{content:`@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_P-bnBeA.woff2) format("woff2");unicode-range:U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_G-bnBeA.woff2) format("woff2");unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_B-bnBeA.woff2) format("woff2");unicode-range:U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_N-bnBeA.woff2) format("woff2");unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_M-bnBeA.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_C-bk.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}@supports ((-webkit-hyphens: none) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color:rgb(from red r g b)))){*,:before,:after,::backdrop{--un-bg-opacity:100%;--un-text-opacity:100%;--un-translate-x:initial;--un-translate-y:initial;--un-translate-z:initial;--un-ease:initial;--un-border-opacity:100%;--un-space-x-reverse:initial;--un-space-y-reverse:initial;--un-ring-opacity:100%;--un-placeholder-opacity:100%}}@property --un-text-opacity{syntax:"<percentage>";inherits:false;initial-value:100%;}@property --un-border-opacity{syntax:"<percentage>";inherits:false;initial-value:100%;}@property --un-bg-opacity{syntax:"<percentage>";inherits:false;initial-value:100%;}@property --un-ring-opacity{syntax:"<percentage>";inherits:false;initial-value:100%;}@property --un-inset-ring-color{syntax:"*";inherits:false;}@property --un-inset-ring-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-inset-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-inset-shadow-color{syntax:"*";inherits:false;}@property --un-ring-color{syntax:"*";inherits:false;}@property --un-ring-inset{syntax:"*";inherits:false;}@property --un-ring-offset-color{syntax:"*";inherits:false;}@property --un-ring-offset-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-ring-offset-width{syntax:"<length>";inherits:false;initial-value:0px;}@property --un-ring-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-shadow-color{syntax:"*";inherits:false;}@property --un-translate-x{syntax:"*";inherits:false;initial-value:0;}@property --un-translate-y{syntax:"*";inherits:false;initial-value:0;}@property --un-translate-z{syntax:"*";inherits:false;initial-value:0;}@property --un-ease{syntax:"*";inherits:false;}@property --un-placeholder-opacity{syntax:"<percentage>";inherits:false;initial-value:100%;}@property --un-space-x-reverse{syntax:"*";inherits:false;initial-value:0;}@property --un-space-y-reverse{syntax:"*";inherits:false;initial-value:0;}:root,:host{--spacing: .25rem;--font-sans: "Manrope",ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";--font-serif: ui-serif,Georgia,Cambria,"Times New Roman",Times,serif;--font-mono: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;--font-family: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;--font-icon-family: lucide;--colors-black: #000;--colors-white: #fff;--colors-slate-50: oklch(98.4% .003 247.858);--colors-slate-100: oklch(96.8% .007 247.896);--colors-slate-200: oklch(92.9% .013 255.508);--colors-slate-300: oklch(86.9% .022 252.894);--colors-slate-400: oklch(70.4% .04 256.788);--colors-slate-500: oklch(55.4% .046 257.417);--colors-slate-600: oklch(44.6% .043 257.281);--colors-slate-700: oklch(37.2% .044 257.287);--colors-slate-800: oklch(27.9% .041 260.031);--colors-slate-900: oklch(20.8% .042 265.755);--colors-slate-950: oklch(12.9% .042 264.695);--colors-slate-DEFAULT: oklch(70.4% .04 256.788);--colors-gray-50: oklch(98.5% .002 247.839);--colors-gray-100: oklch(96.7% .003 264.542);--colors-gray-200: oklch(92.8% .006 264.531);--colors-gray-300: oklch(87.2% .01 258.338);--colors-gray-400: oklch(70.7% .022 261.325);--colors-gray-500: oklch(55.1% .027 264.364);--colors-gray-600: oklch(44.6% .03 256.802);--colors-gray-700: oklch(37.3% .034 259.733);--colors-gray-800: oklch(27.8% .033 256.848);--colors-gray-900: oklch(21% .034 264.665);--colors-gray-950: oklch(13% .028 261.692);--colors-gray-DEFAULT: oklch(70.7% .022 261.325);--colors-zinc-50: oklch(98.5% 0 0);--colors-zinc-100: oklch(96.7% .001 286.375);--colors-zinc-200: oklch(92% .004 286.32);--colors-zinc-300: oklch(87.1% .006 286.286);--colors-zinc-400: oklch(70.5% .015 286.067);--colors-zinc-500: oklch(55.2% .016 285.938);--colors-zinc-600: oklch(44.2% .017 285.786);--colors-zinc-700: oklch(37% .013 285.805);--colors-zinc-800: oklch(27.4% .006 286.033);--colors-zinc-900: oklch(21% .006 285.885);--colors-zinc-950: oklch(14.1% .005 285.823);--colors-zinc-DEFAULT: oklch(70.5% .015 286.067);--colors-neutral-50: oklch(98.5% 0 0);--colors-neutral-100: oklch(97% 0 0);--colors-neutral-200: oklch(92.2% 0 0);--colors-neutral-300: oklch(87% 0 0);--colors-neutral-400: oklch(70.8% 0 0);--colors-neutral-500: oklch(55.6% 0 0);--colors-neutral-600: oklch(43.9% 0 0);--colors-neutral-700: oklch(37.1% 0 0);--colors-neutral-800: oklch(26.9% 0 0);--colors-neutral-900: oklch(20.5% 0 0);--colors-neutral-950: oklch(14.5% 0 0);--colors-neutral-DEFAULT: oklch(70.8% 0 0);--colors-stone-50: oklch(98.5% .001 106.423);--colors-stone-100: oklch(97% .001 106.424);--colors-stone-200: oklch(92.3% .003 48.717);--colors-stone-300: oklch(86.9% .005 56.366);--colors-stone-400: oklch(70.9% .01 56.259);--colors-stone-500: oklch(55.3% .013 58.071);--colors-stone-600: oklch(44.4% .011 73.639);--colors-stone-700: oklch(37.4% .01 67.558);--colors-stone-800: oklch(26.8% .007 34.298);--colors-stone-900: oklch(21.6% .006 56.043);--colors-stone-950: oklch(14.7% .004 49.25);--colors-stone-DEFAULT: oklch(70.9% .01 56.259);--colors-red-50: oklch(97.1% .013 17.38);--colors-red-100: oklch(93.6% .032 17.717);--colors-red-200: oklch(88.5% .062 18.334);--colors-red-300: oklch(80.8% .114 19.571);--colors-red-400: oklch(70.4% .191 22.216);--colors-red-500: oklch(63.7% .237 25.331);--colors-red-600: oklch(57.7% .245 27.325);--colors-red-700: oklch(50.5% .213 27.518);--colors-red-800: oklch(44.4% .177 26.899);--colors-red-900: oklch(39.6% .141 25.723);--colors-red-950: oklch(25.8% .092 26.042);--colors-red-DEFAULT: oklch(70.4% .191 22.216);--colors-orange-50: oklch(98% .016 73.684);--colors-orange-100: oklch(95.4% .038 75.164);--colors-orange-200: oklch(90.1% .076 70.697);--colors-orange-300: oklch(83.7% .128 66.29);--colors-orange-400: oklch(75% .183 55.934);--colors-orange-500: oklch(70.5% .213 47.604);--colors-orange-600: oklch(64.6% .222 41.116);--colors-orange-700: oklch(55.3% .195 38.402);--colors-orange-800: oklch(47% .157 37.304);--colors-orange-900: oklch(40.8% .123 38.172);--colors-orange-950: oklch(26.6% .079 36.259);--colors-orange-DEFAULT: oklch(75% .183 55.934);--colors-amber-50: oklch(98.7% .022 95.277);--colors-amber-100: oklch(96.2% .059 95.617);--colors-amber-200: oklch(92.4% .12 95.746);--colors-amber-300: oklch(87.9% .169 91.605);--colors-amber-400: oklch(82.8% .189 84.429);--colors-amber-500: oklch(76.9% .188 70.08);--colors-amber-600: oklch(66.6% .179 58.318);--colors-amber-700: oklch(55.5% .163 48.998);--colors-amber-800: oklch(47.3% .137 46.201);--colors-amber-900: oklch(41.4% .112 45.904);--colors-amber-950: oklch(27.9% .077 45.635);--colors-amber-DEFAULT: oklch(82.8% .189 84.429);--colors-yellow-50: oklch(98.7% .026 102.212);--colors-yellow-100: oklch(97.3% .071 103.193);--colors-yellow-200: oklch(94.5% .129 101.54);--colors-yellow-300: oklch(90.5% .182 98.111);--colors-yellow-400: oklch(85.2% .199 91.936);--colors-yellow-500: oklch(79.5% .184 86.047);--colors-yellow-600: oklch(68.1% .162 75.834);--colors-yellow-700: oklch(55.4% .135 66.442);--colors-yellow-800: oklch(47.6% .114 61.907);--colors-yellow-900: oklch(42.1% .095 57.708);--colors-yellow-950: oklch(28.6% .066 53.813);--colors-yellow-DEFAULT: oklch(85.2% .199 91.936);--colors-lime-50: oklch(98.6% .031 120.757);--colors-lime-100: oklch(96.7% .067 122.328);--colors-lime-200: oklch(93.8% .127 124.321);--colors-lime-300: oklch(89.7% .196 126.665);--colors-lime-400: oklch(84.1% .238 128.85);--colors-lime-500: oklch(76.8% .233 130.85);--colors-lime-600: oklch(64.8% .2 131.684);--colors-lime-700: oklch(53.2% .157 131.589);--colors-lime-800: oklch(45.3% .124 130.933);--colors-lime-900: oklch(40.5% .101 131.063);--colors-lime-950: oklch(27.4% .072 132.109);--colors-lime-DEFAULT: oklch(84.1% .238 128.85);--colors-green-50: oklch(98.2% .018 155.826);--colors-green-100: oklch(96.2% .044 156.743);--colors-green-200: oklch(92.5% .084 155.995);--colors-green-300: oklch(87.1% .15 154.449);--colors-green-400: oklch(79.2% .209 151.711);--colors-green-500: oklch(72.3% .219 149.579);--colors-green-600: oklch(62.7% .194 149.214);--colors-green-700: oklch(52.7% .154 150.069);--colors-green-800: oklch(44.8% .119 151.328);--colors-green-900: oklch(39.3% .095 152.535);--colors-green-950: oklch(26.6% .065 152.934);--colors-green-DEFAULT: oklch(79.2% .209 151.711);--colors-emerald-50: oklch(97.9% .021 166.113);--colors-emerald-100: oklch(95% .052 163.051);--colors-emerald-200: oklch(90.5% .093 164.15);--colors-emerald-300: oklch(84.5% .143 164.978);--colors-emerald-400: oklch(76.5% .177 163.223);--colors-emerald-500: oklch(69.6% .17 162.48);--colors-emerald-600: oklch(59.6% .145 163.225);--colors-emerald-700: oklch(50.8% .118 165.612);--colors-emerald-800: oklch(43.2% .095 166.913);--colors-emerald-900: oklch(37.8% .077 168.94);--colors-emerald-950: oklch(26.2% .051 172.552);--colors-emerald-DEFAULT: oklch(76.5% .177 163.223);--colors-teal-50: oklch(98.4% .014 180.72);--colors-teal-100: oklch(95.3% .051 180.801);--colors-teal-200: oklch(91% .096 180.426);--colors-teal-300: oklch(85.5% .138 181.071);--colors-teal-400: oklch(77.7% .152 181.912);--colors-teal-500: oklch(70.4% .14 182.503);--colors-teal-600: oklch(60% .118 184.704);--colors-teal-700: oklch(51.1% .096 186.391);--colors-teal-800: oklch(43.7% .078 188.216);--colors-teal-900: oklch(38.6% .063 188.416);--colors-teal-950: oklch(27.7% .046 192.524);--colors-teal-DEFAULT: oklch(77.7% .152 181.912);--colors-cyan-50: oklch(98.4% .019 200.873);--colors-cyan-100: oklch(95.6% .045 203.388);--colors-cyan-200: oklch(91.7% .08 205.041);--colors-cyan-300: oklch(86.5% .127 207.078);--colors-cyan-400: oklch(78.9% .154 211.53);--colors-cyan-500: oklch(71.5% .143 215.221);--colors-cyan-600: oklch(60.9% .126 221.723);--colors-cyan-700: oklch(52% .105 223.128);--colors-cyan-800: oklch(45% .085 224.283);--colors-cyan-900: oklch(39.8% .07 227.392);--colors-cyan-950: oklch(30.2% .056 229.695);--colors-cyan-DEFAULT: oklch(78.9% .154 211.53);--colors-sky-50: oklch(97.7% .013 236.62);--colors-sky-100: oklch(95.1% .026 236.824);--colors-sky-200: oklch(90.1% .058 230.902);--colors-sky-300: oklch(82.8% .111 230.318);--colors-sky-400: oklch(74.6% .16 232.661);--colors-sky-500: oklch(68.5% .169 237.323);--colors-sky-600: oklch(58.8% .158 241.966);--colors-sky-700: oklch(50% .134 242.749);--colors-sky-800: oklch(44.3% .11 240.79);--colors-sky-900: oklch(39.1% .09 240.876);--colors-sky-950: oklch(29.3% .066 243.157);--colors-sky-DEFAULT: oklch(74.6% .16 232.661);--colors-blue-50: oklch(97% .014 254.604);--colors-blue-100: oklch(93.2% .032 255.585);--colors-blue-200: oklch(88.2% .059 254.128);--colors-blue-300: oklch(80.9% .105 251.813);--colors-blue-400: oklch(70.7% .165 254.624);--colors-blue-500: oklch(62.3% .214 259.815);--colors-blue-600: oklch(54.6% .245 262.881);--colors-blue-700: oklch(48.8% .243 264.376);--colors-blue-800: oklch(42.4% .199 265.638);--colors-blue-900: oklch(37.9% .146 265.522);--colors-blue-950: oklch(28.2% .091 267.935);--colors-blue-DEFAULT: oklch(70.7% .165 254.624);--colors-indigo-50: oklch(96.2% .018 272.314);--colors-indigo-100: oklch(93% .034 272.788);--colors-indigo-200: oklch(87% .065 274.039);--colors-indigo-300: oklch(78.5% .115 274.713);--colors-indigo-400: oklch(67.3% .182 276.935);--colors-indigo-500: oklch(58.5% .233 277.117);--colors-indigo-600: oklch(51.1% .262 276.966);--colors-indigo-700: oklch(45.7% .24 277.023);--colors-indigo-800: oklch(39.8% .195 277.366);--colors-indigo-900: oklch(35.9% .144 278.697);--colors-indigo-950: oklch(25.7% .09 281.288);--colors-indigo-DEFAULT: oklch(67.3% .182 276.935);--colors-violet-50: oklch(96.9% .016 293.756);--colors-violet-100: oklch(94.3% .029 294.588);--colors-violet-200: oklch(89.4% .057 293.283);--colors-violet-300: oklch(81.1% .111 293.571);--colors-violet-400: oklch(70.2% .183 293.541);--colors-violet-500: oklch(60.6% .25 292.717);--colors-violet-600: oklch(54.1% .281 293.009);--colors-violet-700: oklch(49.1% .27 292.581);--colors-violet-800: oklch(43.2% .232 292.759);--colors-violet-900: oklch(38% .189 293.745);--colors-violet-950: oklch(28.3% .141 291.089);--colors-violet-DEFAULT: oklch(70.2% .183 293.541);--colors-purple-50: oklch(97.7% .014 308.299);--colors-purple-100: oklch(94.6% .033 307.174);--colors-purple-200: oklch(90.2% .063 306.703);--colors-purple-300: oklch(82.7% .119 306.383);--colors-purple-400: oklch(71.4% .203 305.504);--colors-purple-500: oklch(62.7% .265 303.9);--colors-purple-600: oklch(55.8% .288 302.321);--colors-purple-700: oklch(49.6% .265 301.924);--colors-purple-800: oklch(43.8% .218 303.724);--colors-purple-900: oklch(38.1% .176 304.987);--colors-purple-950: oklch(29.1% .149 302.717);--colors-purple-DEFAULT: oklch(71.4% .203 305.504);--colors-fuchsia-50: oklch(97.7% .017 320.058);--colors-fuchsia-100: oklch(95.2% .037 318.852);--colors-fuchsia-200: oklch(90.3% .076 319.62);--colors-fuchsia-300: oklch(83.3% .145 321.434);--colors-fuchsia-400: oklch(74% .238 322.16);--colors-fuchsia-500: oklch(66.7% .295 322.15);--colors-fuchsia-600: oklch(59.1% .293 322.896);--colors-fuchsia-700: oklch(51.8% .253 323.949);--colors-fuchsia-800: oklch(45.2% .211 324.591);--colors-fuchsia-900: oklch(40.1% .17 325.612);--colors-fuchsia-950: oklch(29.3% .136 325.661);--colors-fuchsia-DEFAULT: oklch(74% .238 322.16);--colors-pink-50: oklch(97.1% .014 343.198);--colors-pink-100: oklch(94.8% .028 342.258);--colors-pink-200: oklch(89.9% .061 343.231);--colors-pink-300: oklch(82.3% .12 346.018);--colors-pink-400: oklch(71.8% .202 349.761);--colors-pink-500: oklch(65.6% .241 354.308);--colors-pink-600: oklch(59.2% .249 .584);--colors-pink-700: oklch(52.5% .223 3.958);--colors-pink-800: oklch(45.9% .187 3.815);--colors-pink-900: oklch(40.8% .153 2.432);--colors-pink-950: oklch(28.4% .109 3.907);--colors-pink-DEFAULT: oklch(71.8% .202 349.761);--colors-rose-50: oklch(96.9% .015 12.422);--colors-rose-100: oklch(94.1% .03 12.58);--colors-rose-200: oklch(89.2% .058 10.001);--colors-rose-300: oklch(81% .117 11.638);--colors-rose-400: oklch(71.2% .194 13.428);--colors-rose-500: oklch(64.5% .246 16.439);--colors-rose-600: oklch(58.6% .253 17.585);--colors-rose-700: oklch(51.4% .222 16.935);--colors-rose-800: oklch(45.5% .188 13.697);--colors-rose-900: oklch(41% .159 10.272);--colors-rose-950: oklch(27.1% .105 12.094);--colors-rose-DEFAULT: oklch(71.2% .194 13.428);--colors-light-50: oklch(99.4% 0 0);--colors-light-100: oklch(99.11% 0 0);--colors-light-200: oklch(98.51% 0 0);--colors-light-300: oklch(98.16% .0017 247.84);--colors-light-400: oklch(97.31% 0 0);--colors-light-500: oklch(96.12% 0 0);--colors-light-600: oklch(96.32% .0034 247.86);--colors-light-700: oklch(94.17% .0052 247.88);--colors-light-800: oklch(91.09% .007 247.9);--colors-light-900: oklch(90.72% .0051 228.82);--colors-light-950: oklch(89.23% .006 239.83);--colors-light-DEFAULT: oklch(97.31% 0 0);--colors-dark-50: oklch(40.91% 0 0);--colors-dark-100: oklch(35.62% 0 0);--colors-dark-200: oklch(31.71% 0 0);--colors-dark-300: oklch(29.72% 0 0);--colors-dark-400: oklch(25.2% 0 0);--colors-dark-500: oklch(23.93% 0 0);--colors-dark-600: oklch(22.73% .0038 286.09);--colors-dark-700: oklch(22.21% 0 0);--colors-dark-800: oklch(20.9% 0 0);--colors-dark-900: oklch(16.84% 0 0);--colors-dark-950: oklch(13.44% 0 0);--colors-dark-DEFAULT: oklch(25.2% 0 0);--colors-primary-50: hsl(198, 100%, 97%);--colors-primary-100: hsl(198, 100%, 92%);--colors-primary-200: hsl(198, 100%, 84%);--colors-primary-300: hsl(198, 100%, 75%);--colors-primary-400: hsl(198, 100%, 66%);--colors-primary-500: hsl(198, 100%, 55%);--colors-primary-600: hsl(198, 100%, 45%);--colors-primary-700: hsl(198, 100%, 35%);--colors-primary-800: hsl(198, 100%, 24%);--colors-primary-900: hsl(198, 100%, 15%);--colors-primary-DEFAULT: hsl(198, 100%, 55%);--colors-secondary-50: hsl(120, 100%, 97%);--colors-secondary-100: hsl(120, 100%, 92%);--colors-secondary-200: hsl(120, 100%, 84%);--colors-secondary-300: hsl(120, 100%, 75%);--colors-secondary-400: hsl(120, 100%, 66%);--colors-secondary-500: hsl(120, 100%, 55%);--colors-secondary-600: hsl(120, 100%, 45%);--colors-secondary-700: hsl(120, 100%, 35%);--colors-secondary-800: hsl(120, 100%, 24%);--colors-secondary-900: hsl(120, 100%, 15%);--colors-secondary-DEFAULT: hsl(120, 100%, 55%);--colors-tertiary-50: hsl(175, 100%, 97%);--colors-tertiary-100: hsl(175, 100%, 92%);--colors-tertiary-200: hsl(175, 100%, 84%);--colors-tertiary-300: hsl(175, 100%, 75%);--colors-tertiary-400: hsl(175, 100%, 66%);--colors-tertiary-500: hsl(175, 100%, 55%);--colors-tertiary-600: hsl(175, 100%, 45%);--colors-tertiary-700: hsl(175, 100%, 35%);--colors-tertiary-800: hsl(175, 100%, 24%);--colors-tertiary-900: hsl(175, 100%, 15%);--colors-tertiary-DEFAULT: hsl(175, 100%, 55%);--colors-success-50: hsl(149, 87%, 97%);--colors-success-100: hsl(149, 87%, 92%);--colors-success-200: hsl(149, 87%, 84%);--colors-success-300: hsl(149, 87%, 75%);--colors-success-400: hsl(149, 87%, 66%);--colors-success-500: hsl(149, 87%, 55%);--colors-success-600: hsl(149, 87%, 45%);--colors-success-700: hsl(149, 87%, 35%);--colors-success-800: hsl(149, 87%, 24%);--colors-success-900: hsl(149, 87%, 15%);--colors-success-DEFAULT: hsl(149, 87%, 55%);--colors-warning-50: hsl(32, 100%, 97%);--colors-warning-100: hsl(32, 100%, 92%);--colors-warning-200: hsl(32, 100%, 84%);--colors-warning-300: hsl(32, 100%, 75%);--colors-warning-400: hsl(32, 100%, 66%);--colors-warning-500: hsl(32, 100%, 55%);--colors-warning-600: hsl(32, 100%, 45%);--colors-warning-700: hsl(32, 100%, 35%);--colors-warning-800: hsl(32, 100%, 24%);--colors-warning-900: hsl(32, 100%, 15%);--colors-warning-DEFAULT: hsl(32, 100%, 55%);--colors-danger-50: hsl(345, 100%, 97%);--colors-danger-100: hsl(345, 100%, 92%);--colors-danger-200: hsl(345, 100%, 84%);--colors-danger-300: hsl(345, 100%, 75%);--colors-danger-400: hsl(345, 100%, 66%);--colors-danger-500: hsl(345, 100%, 55%);--colors-danger-600: hsl(345, 100%, 45%);--colors-danger-700: hsl(345, 100%, 35%);--colors-danger-800: hsl(345, 100%, 24%);--colors-danger-900: hsl(345, 100%, 15%);--colors-danger-DEFAULT: hsl(345, 100%, 55%);--colors-default-50: hsl(0, 0%, 97%);--colors-default-100: hsl(0, 0%, 92%);--colors-default-200: hsl(0, 0%, 84%);--colors-default-300: hsl(0, 0%, 75%);--colors-default-400: hsl(0, 0%, 66%);--colors-default-500: hsl(0, 0%, 55%);--colors-default-600: hsl(0, 0%, 45%);--colors-default-700: hsl(0, 0%, 35%);--colors-default-800: hsl(0, 0%, 24%);--colors-default-900: hsl(0, 0%, 15%);--colors-default-DEFAULT: hsl(0, 0%, 35%);--colors-surface-50: hsl(0, 0%, 97%);--colors-surface-100: hsl(0, 0%, 92%);--colors-surface-200: hsl(0, 0%, 84%);--colors-surface-300: hsl(0, 0%, 75%);--colors-surface-400: hsl(0, 0%, 66%);--colors-surface-500: hsl(0, 0%, 55%);--colors-surface-600: hsl(0, 0%, 45%);--colors-surface-700: hsl(0, 0%, 35%);--colors-surface-800: hsl(0, 0%, 24%);--colors-surface-900: hsl(0, 0%, 15%);--colors-surface-DEFAULT: hsl(0, 0%, 35%);--text-xs-fontSize: .75rem;--text-xs-lineHeight: 1rem;--text-sm-fontSize: .875rem;--text-sm-lineHeight: 1.25rem;--text-base-fontSize: 1rem;--text-base-lineHeight: 1.5rem;--text-lg-fontSize: 1.125rem;--text-lg-lineHeight: 1.75rem;--text-xl-fontSize: 1.25rem;--text-xl-lineHeight: 1.75rem;--text-2xl-fontSize: 1.5rem;--text-2xl-lineHeight: 2rem;--text-3xl-fontSize: 1.875rem;--text-3xl-lineHeight: 2.25rem;--text-4xl-fontSize: 2.25rem;--text-4xl-lineHeight: 2.5rem;--text-5xl-fontSize: 3rem;--text-5xl-lineHeight: 1;--text-6xl-fontSize: 3.75rem;--text-6xl-lineHeight: 1;--text-7xl-fontSize: 4.5rem;--text-7xl-lineHeight: 1;--text-8xl-fontSize: 6rem;--text-8xl-lineHeight: 1;--text-9xl-fontSize: 8rem;--text-9xl-lineHeight: 1;--text-color: var(--color-surface-100);--fontWeight-thin: 100;--fontWeight-extralight: 200;--fontWeight-light: 300;--fontWeight-normal: 400;--fontWeight-medium: 500;--fontWeight-semibold: 600;--fontWeight-bold: 700;--fontWeight-extrabold: 800;--fontWeight-black: 900;--tracking-tighter: -.05em;--tracking-tight: -.025em;--tracking-normal: 0em;--tracking-wide: .025em;--tracking-wider: .05em;--tracking-widest: .1em;--leading-none: 1;--leading-tight: 1.25;--leading-snug: 1.375;--leading-normal: 1.5;--leading-relaxed: 1.625;--leading-loose: 2;--textStrokeWidth-DEFAULT: 1.5rem;--textStrokeWidth-none: 0;--textStrokeWidth-sm: thin;--textStrokeWidth-md: medium;--textStrokeWidth-lg: thick;--radius-DEFAULT: .25rem;--radius-none: 0;--radius-xs: .125rem;--radius-sm: .25rem;--radius-md: .375rem;--radius-lg: .5rem;--radius-xl: .75rem;--radius-2xl: 1rem;--radius-3xl: 1.5rem;--radius-4xl: 2rem;--ease-linear: linear;--ease-in: cubic-bezier(.4, 0, 1, 1);--ease-out: cubic-bezier(0, 0, .2, 1);--ease-in-out: cubic-bezier(.4, 0, .2, 1);--ease-DEFAULT: cubic-bezier(.4, 0, .2, 1);--blur-DEFAULT: 8px;--blur-xs: 4px;--blur-sm: 8px;--blur-md: 12px;--blur-lg: 16px;--blur-xl: 24px;--blur-2xl: 40px;--blur-3xl: 64px;--perspective-dramatic: 100px;--perspective-near: 300px;--perspective-normal: 500px;--perspective-midrange: 800px;--perspective-distant: 1200px;--default-transition-duration: .15s;--default-transition-timingFunction: cubic-bezier(.4, 0, .2, 1);--default-font-family: var(--font-sans);--default-font-featureSettings: var(--font-sans--font-feature-settings);--default-font-variationSettings: var(--font-sans--font-variation-settings);--default-monoFont-family: var(--font-mono);--default-monoFont-featureSettings: var(--font-mono--font-feature-settings);--default-monoFont-variationSettings: var(--font-mono--font-variation-settings);--container-3xs: 16rem;--container-2xs: 18rem;--container-xs: 20rem;--container-sm: 24rem;--container-md: 28rem;--container-lg: 32rem;--container-xl: 36rem;--container-2xl: 42rem;--container-3xl: 48rem;--container-4xl: 56rem;--container-5xl: 64rem;--container-6xl: 72rem;--container-7xl: 80rem;--container-prose: 65ch;--background-color: var(--colors-primary-100);--boxShadow-md: 0 4px 6px -1px rgb(0 0 0 / .1), 0 2px 4px -2px rgb(0 0 0 / .1);--boxShadow-lg: 0 10px 15px -3px rgb(0 0 0 / .1), 0 4px 6px -4px rgb(0 0 0 / .1);--theme-font-family: "Manrope"}*,:after,:before,::backdrop,::file-selector-button{box-sizing:border-box;margin:0;padding:0;border:0 solid}html,:host{line-height:1.5;-webkit-text-size-adjust:100%;tab-size:4;font-family:var( --default-font-family, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" );font-feature-settings:var(--default-font-featureSettings, normal);font-variation-settings:var(--default-font-variationSettings, normal);-webkit-tap-highlight-color:transparent}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;-webkit-text-decoration:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,samp,pre{font-family:var( --default-monoFont-family, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace );font-feature-settings:var(--default-monoFont-featureSettings, normal);font-variation-settings:var(--default-monoFont-variationSettings, normal);font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}:-moz-focusring{outline:auto}progress{vertical-align:baseline}summary{display:list-item}ol,ul,menu{list-style:none}img,svg,video,canvas,audio,iframe,embed,object{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}button,input,select,optgroup,textarea,::file-selector-button{font:inherit;font-feature-settings:inherit;font-variation-settings:inherit;letter-spacing:inherit;color:inherit;border-radius:0;background-color:transparent;opacity:1}:where(select:is([multiple],[size])) optgroup{font-weight:bolder}:where(select:is([multiple],[size])) optgroup option{padding-inline-start:20px}::file-selector-button{margin-inline-end:4px}::placeholder{opacity:1}@supports (not (-webkit-appearance: -apple-pay-button)) or (contain-intrinsic-size: 1px){::placeholder{color:color-mix(in oklab,currentcolor 50%,transparent)}}textarea{resize:vertical}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-date-and-time-value{min-height:1lh;text-align:inherit}::-webkit-datetime-edit{display:inline-flex}::-webkit-datetime-edit-fields-wrapper{padding:0}::-webkit-datetime-edit,::-webkit-datetime-edit-year-field,::-webkit-datetime-edit-month-field,::-webkit-datetime-edit-day-field,::-webkit-datetime-edit-hour-field,::-webkit-datetime-edit-minute-field,::-webkit-datetime-edit-second-field,::-webkit-datetime-edit-millisecond-field,::-webkit-datetime-edit-meridiem-field{padding-block:0}:-moz-ui-invalid{box-shadow:none}button,input:where([type=button],[type=reset],[type=submit]),::file-selector-button{appearance:button}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[hidden]:where(:not([hidden=until-found])){display:none!important}.container{width:100%}@media (min-width: 40rem){.container{max-width:40rem}}@media (min-width: 48rem){.container{max-width:48rem}}@media (min-width: 64rem){.container{max-width:64rem}}@media (min-width: 80rem){.container{max-width:80rem}}@media (min-width: 96rem){.container{max-width:96rem}}.text-2xl{font-size:var(--text-2xl-fontSize);line-height:var(--un-leading, var(--text-2xl-lineHeight))}.text-3xl{font-size:var(--text-3xl-fontSize);line-height:var(--un-leading, var(--text-3xl-lineHeight))}.text-4xl{font-size:var(--text-4xl-fontSize);line-height:var(--un-leading, var(--text-4xl-lineHeight))}.text-5xl{font-size:var(--text-5xl-fontSize);line-height:var(--un-leading, var(--text-5xl-lineHeight))}.text-6xl{font-size:var(--text-6xl-fontSize);line-height:var(--un-leading, var(--text-6xl-lineHeight))}.text-lg{font-size:var(--text-lg-fontSize);line-height:var(--un-leading, var(--text-lg-lineHeight))}.text-sm{font-size:var(--text-sm-fontSize);line-height:var(--un-leading, var(--text-sm-lineHeight))}.text-xl{font-size:var(--text-xl-fontSize);line-height:var(--un-leading, var(--text-xl-lineHeight))}.text-xs{font-size:var(--text-xs-fontSize);line-height:var(--un-leading, var(--text-xs-lineHeight))}.text-\\[\\#1d2021\\]{color:color-mix(in oklab,#1d2021 var(--un-text-opacity),transparent)}.text-\\[\\#282828\\]{color:color-mix(in oklab,#282828 var(--un-text-opacity),transparent)}.text-\\[\\#83a598\\]{color:color-mix(in oklab,#83a598 var(--un-text-opacity),transparent)}.text-\\[\\#928374\\]{color:color-mix(in oklab,#928374 var(--un-text-opacity),transparent)}.text-\\[\\#a89984\\]{color:color-mix(in oklab,#a89984 var(--un-text-opacity),transparent)}.text-\\[\\#b8bb26\\]{color:color-mix(in oklab,#b8bb26 var(--un-text-opacity),transparent)}.text-\\[\\#bdae93\\]{color:color-mix(in oklab,#bdae93 var(--un-text-opacity),transparent)}.text-\\[\\#d5c4a1\\]{color:color-mix(in oklab,#d5c4a1 var(--un-text-opacity),transparent)}.text-\\[\\#ebdbb2\\]{color:color-mix(in oklab,#ebdbb2 var(--un-text-opacity),transparent)}.text-\\[\\#fabd2f\\]{color:color-mix(in oklab,#fabd2f var(--un-text-opacity),transparent)}.text-amber-600{color:color-mix(in srgb,var(--colors-amber-600) var(--un-text-opacity),transparent)}.text-amber-900{color:color-mix(in srgb,var(--colors-amber-900) var(--un-text-opacity),transparent)}.text-blue-100{color:color-mix(in srgb,var(--colors-blue-100) var(--un-text-opacity),transparent)}.text-blue-600{color:color-mix(in srgb,var(--colors-blue-600) var(--un-text-opacity),transparent)}.text-gray-200{color:color-mix(in srgb,var(--colors-gray-200) var(--un-text-opacity),transparent)}.text-gray-400{color:color-mix(in srgb,var(--colors-gray-400) var(--un-text-opacity),transparent)}.text-gray-500{color:color-mix(in srgb,var(--colors-gray-500) var(--un-text-opacity),transparent)}.text-gray-600{color:color-mix(in srgb,var(--colors-gray-600) var(--un-text-opacity),transparent)}.text-gray-700{color:color-mix(in srgb,var(--colors-gray-700) var(--un-text-opacity),transparent)}.text-gray-800{color:color-mix(in srgb,var(--colors-gray-800) var(--un-text-opacity),transparent)}.text-gray-900{color:color-mix(in srgb,var(--colors-gray-900) var(--un-text-opacity),transparent)}.text-green-400{color:color-mix(in srgb,var(--colors-green-400) var(--un-text-opacity),transparent)}.text-green-800{color:color-mix(in srgb,var(--colors-green-800) var(--un-text-opacity),transparent)}.text-red-100{color:color-mix(in srgb,var(--colors-red-100) var(--un-text-opacity),transparent)}.text-red-400{color:color-mix(in srgb,var(--colors-red-400) var(--un-text-opacity),transparent)}.text-red-700{color:color-mix(in srgb,var(--colors-red-700) var(--un-text-opacity),transparent)}.text-red-800{color:color-mix(in srgb,var(--colors-red-800) var(--un-text-opacity),transparent)}.text-white{color:color-mix(in srgb,var(--colors-white) var(--un-text-opacity),transparent)}.text-yellow-800{color:color-mix(in srgb,var(--colors-yellow-800) var(--un-text-opacity),transparent)}.hover\\:text-\\[\\#ebdbb2\\]:hover{color:color-mix(in oklab,#ebdbb2 var(--un-text-opacity),transparent)}.hover\\:text-\\[\\#fb4934\\]:hover{color:color-mix(in oklab,#fb4934 var(--un-text-opacity),transparent)}.tracking-wider{--un-tracking:var(--tracking-wider);letter-spacing:var(--tracking-wider)}.font-bold{--un-font-weight:var(--fontWeight-bold);font-weight:var(--fontWeight-bold)}.font-extrabold{--un-font-weight:var(--fontWeight-extrabold);font-weight:var(--fontWeight-extrabold)}.font-family{font-family:var(--font-family)}.font-medium{--un-font-weight:var(--fontWeight-medium);font-weight:var(--fontWeight-medium)}.font-mono{font-family:var(--font-mono)}.font-sans{font-family:var(--font-sans)}.font-semibold{--un-font-weight:var(--fontWeight-semibold);font-weight:var(--fontWeight-semibold)}.tab{-moz-tab-size:4;-o-tab-size:4;tab-size:4}.m\\[1\\]{margin:1}.m\\[W\\]{margin:W}.m16{margin:calc(var(--spacing) * 16)}.m21{margin:calc(var(--spacing) * 21)}.m21\\.73{margin:calc(var(--spacing) * 21.73)}.m22{margin:calc(var(--spacing) * 22)}.m6{margin:calc(var(--spacing) * 6)}.m9{margin:calc(var(--spacing) * 9)}.mx-auto{margin-inline:auto}.my-2{margin-block:calc(var(--spacing) * 2)}.my-4{margin-block:calc(var(--spacing) * 4)}.my-6{margin-block:calc(var(--spacing) * 6)}.mb-1{margin-bottom:calc(var(--spacing) * 1)}.mb-2{margin-bottom:calc(var(--spacing) * 2)}.mb-3{margin-bottom:calc(var(--spacing) * 3)}.mb-4{margin-bottom:calc(var(--spacing) * 4)}.mb-6{margin-bottom:calc(var(--spacing) * 6)}.ml-1{margin-left:calc(var(--spacing) * 1)}.ml-2{margin-left:calc(var(--spacing) * 2)}.ml-auto{margin-left:auto}.mr-2{margin-right:calc(var(--spacing) * 2)}.mr-3{margin-right:calc(var(--spacing) * 3)}.mt-1{margin-top:calc(var(--spacing) * 1)}.mt-2{margin-top:calc(var(--spacing) * 2)}.mt-4{margin-top:calc(var(--spacing) * 4)}.p-1{padding:calc(var(--spacing) * 1)}.p-1\\.5{padding:calc(var(--spacing) * 1.5)}.p-2{padding:calc(var(--spacing) * 2)}.p-3{padding:calc(var(--spacing) * 3)}.p-4{padding:calc(var(--spacing) * 4)}.p-6{padding:calc(var(--spacing) * 6)}.p-8{padding:calc(var(--spacing) * 8)}.px-2{padding-inline:calc(var(--spacing) * 2)}.px-4{padding-inline:calc(var(--spacing) * 4)}.px-6{padding-inline:calc(var(--spacing) * 6)}.py-0\\.5{padding-block:calc(var(--spacing) * .5)}.py-1{padding-block:calc(var(--spacing) * 1)}.py-2{padding-block:calc(var(--spacing) * 2)}.py-8{padding-block:calc(var(--spacing) * 8)}.pb-2{padding-bottom:calc(var(--spacing) * 2)}.pb-4{padding-bottom:calc(var(--spacing) * 4)}.pr-10{padding-right:calc(var(--spacing) * 10)}.pr-16{padding-right:calc(var(--spacing) * 16)}.pr-4{padding-right:calc(var(--spacing) * 4)}.pt-2{padding-top:calc(var(--spacing) * 2)}.pt-4{padding-top:calc(var(--spacing) * 4)}.text-center{text-align:center}.text-left{text-align:left}.text-right{text-align:right}.focus\\:outline-none:focus{--un-outline-style:none;outline-style:none}.b,.border{border-width:1px}.border-2{border-width:2px}.border-b{border-bottom-width:1px}.border-b-2{border-bottom-width:2px}.border-l-4{border-left-width:4px}.border-r{border-right-width:1px}.border-t{border-top-width:1px}.border-t-2{border-top-width:2px}.border-\\[\\#3c3836\\]{border-color:color-mix(in oklab,#3c3836 var(--un-border-opacity),transparent)}.border-\\[\\#504945\\]{border-color:color-mix(in oklab,#504945 var(--un-border-opacity),transparent)}.border-\\[\\#665c54\\]{border-color:color-mix(in oklab,#665c54 var(--un-border-opacity),transparent)}.border-\\[\\#fb4934\\]{border-color:color-mix(in oklab,#fb4934 var(--un-border-opacity),transparent)}.border-amber-200{border-color:color-mix(in srgb,var(--colors-amber-200) var(--un-border-opacity),transparent)}.border-amber-400{border-color:color-mix(in srgb,var(--colors-amber-400) var(--un-border-opacity),transparent)}.border-gray-200{border-color:color-mix(in srgb,var(--colors-gray-200) var(--un-border-opacity),transparent)}.border-gray-700{border-color:color-mix(in srgb,var(--colors-gray-700) var(--un-border-opacity),transparent)}.border-white{border-color:color-mix(in srgb,var(--colors-white) var(--un-border-opacity),transparent)}.hover\\:border-\\[\\#83a598\\]:hover{border-color:color-mix(in oklab,#83a598 var(--un-border-opacity),transparent)}.focus\\:border-\\[\\#83a598\\]:focus{border-color:color-mix(in oklab,#83a598 var(--un-border-opacity),transparent)}.border-t-transparent{border-top-color:transparent}.rounded{border-radius:var(--radius-DEFAULT)}.rounded-full{border-radius:calc(infinity * 1px)}.rounded-lg{border-radius:var(--radius-lg)}.rounded-md{border-radius:var(--radius-md)}.rounded-xl{border-radius:var(--radius-xl)}.rounded-b-lg{border-bottom-left-radius:var(--radius-lg);border-bottom-right-radius:var(--radius-lg)}.rounded-bl-none{border-bottom-left-radius:var(--radius-none)}.rounded-br-none{border-bottom-right-radius:var(--radius-none)}.border-dashed{--un-border-style:dashed;border-style:dashed}.bg-\\[\\#1d2021\\]{background-color:color-mix(in oklab,#1d2021 var(--un-bg-opacity),transparent)}.bg-\\[\\#282828\\]{background-color:color-mix(in oklab,#282828 var(--un-bg-opacity),transparent)}.bg-\\[\\#3c3836\\]{background-color:color-mix(in oklab,#3c3836 var(--un-bg-opacity),transparent)}.bg-\\[\\#458588\\]{background-color:color-mix(in oklab,#458588 var(--un-bg-opacity),transparent)}.bg-\\[\\#504945\\],.data-\\[active\\=true\\]\\:bg-\\[\\#504945\\][data-active=true]{background-color:color-mix(in oklab,#504945 var(--un-bg-opacity),transparent)}.bg-\\[\\#83a598\\]{background-color:color-mix(in oklab,#83a598 var(--un-bg-opacity),transparent)}.bg-\\[\\#b16286\\]{background-color:color-mix(in oklab,#b16286 var(--un-bg-opacity),transparent)}.bg-\\[\\#b8bb26\\]{background-color:color-mix(in oklab,#b8bb26 var(--un-bg-opacity),transparent)}.bg-\\[\\#ebdbb2\\]{background-color:color-mix(in oklab,#ebdbb2 var(--un-bg-opacity),transparent)}.bg-\\[\\#fb4934\\]{background-color:color-mix(in oklab,#fb4934 var(--un-bg-opacity),transparent)}.bg-amber-50{background-color:color-mix(in srgb,var(--colors-amber-50) var(--un-bg-opacity),transparent)}.bg-blue-600{background-color:color-mix(in srgb,var(--colors-blue-600) var(--un-bg-opacity),transparent)}.bg-gray-100{background-color:color-mix(in srgb,var(--colors-gray-100) var(--un-bg-opacity),transparent)}.bg-gray-200{background-color:color-mix(in srgb,var(--colors-gray-200) var(--un-bg-opacity),transparent)}.bg-gray-50{background-color:color-mix(in srgb,var(--colors-gray-50) var(--un-bg-opacity),transparent)}.bg-gray-600{background-color:color-mix(in srgb,var(--colors-gray-600) var(--un-bg-opacity),transparent)}.bg-gray-700{background-color:color-mix(in srgb,var(--colors-gray-700) var(--un-bg-opacity),transparent)}.bg-gray-800{background-color:color-mix(in srgb,var(--colors-gray-800) var(--un-bg-opacity),transparent)}.bg-gray-900{background-color:color-mix(in srgb,var(--colors-gray-900) var(--un-bg-opacity),transparent)}.bg-green-100{background-color:color-mix(in srgb,var(--colors-green-100) var(--un-bg-opacity),transparent)}.bg-red-100{background-color:color-mix(in srgb,var(--colors-red-100) var(--un-bg-opacity),transparent)}.bg-red-700{background-color:color-mix(in srgb,var(--colors-red-700) var(--un-bg-opacity),transparent)}.bg-red-900\\/50{background-color:color-mix(in srgb,var(--colors-red-900) 50%,transparent)}.bg-white{background-color:color-mix(in srgb,var(--colors-white) var(--un-bg-opacity),transparent)}.bg-yellow-100{background-color:color-mix(in srgb,var(--colors-yellow-100) var(--un-bg-opacity),transparent)}.hover\\:bg-\\[\\#1d2021\\]:hover{background-color:color-mix(in oklab,#1d2021 var(--un-bg-opacity),transparent)}.hover\\:bg-\\[\\#3c3836\\]:hover{background-color:color-mix(in oklab,#3c3836 var(--un-bg-opacity),transparent)}.hover\\:bg-\\[\\#504945\\]:hover{background-color:color-mix(in oklab,#504945 var(--un-bg-opacity),transparent)}.hover\\:bg-\\[\\#665c54\\]:hover{background-color:color-mix(in oklab,#665c54 var(--un-bg-opacity),transparent)}.hover\\:bg-\\[\\#83a598\\]:hover{background-color:color-mix(in oklab,#83a598 var(--un-bg-opacity),transparent)}.hover\\:bg-amber-100:hover{background-color:color-mix(in srgb,var(--colors-amber-100) var(--un-bg-opacity),transparent)}.hover\\:bg-gray-700:hover{background-color:color-mix(in srgb,var(--colors-gray-700) var(--un-bg-opacity),transparent)}.opacity-0{opacity:0%}.group:hover .group-hover\\:opacity-100{opacity:100%}.hover\\:underline:hover{text-decoration-line:underline}.flex{display:flex}.flex-1{flex:1 1 0%}.flex-shrink-0,.shrink-0{flex-shrink:0}.selection\\:shrink-selection *::selection,.selection\\:shrink-selection::selection{flex-shrink:1}.flex-grow{flex-grow:1}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.gap-1{gap:calc(var(--spacing) * 1)}.gap-1\\.5{gap:calc(var(--spacing) * 1.5)}.gap-2{gap:calc(var(--spacing) * 2)}.gap-3{gap:calc(var(--spacing) * 3)}.gap-4{gap:calc(var(--spacing) * 4)}.gap-6{gap:calc(var(--spacing) * 6)}.grid{display:grid}.grid-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))}.grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.h-12{height:calc(var(--spacing) * 12)}.h-15{height:calc(var(--spacing) * 15)}.h-16{height:calc(var(--spacing) * 16)}.h-3\\.5{height:calc(var(--spacing) * 3.5)}.h-4{height:calc(var(--spacing) * 4)}.h-5{height:calc(var(--spacing) * 5)}.h-50{height:calc(var(--spacing) * 50)}.h-7{height:calc(var(--spacing) * 7)}.h-8{height:calc(var(--spacing) * 8)}.h-full{height:100%}.h-screen{height:100vh}.max-h-32{max-height:calc(var(--spacing) * 32)}.max-h-48{max-height:calc(var(--spacing) * 48)}.max-w-\\[75\\%\\]{max-width:75%}.max-w-lg{max-width:var(--container-lg)}.max-w-md{max-width:var(--container-md)}.max-w-none{max-width:none}.min-h-\\[2\\.5rem\\]{min-height:2.5rem}.min-h-0{min-height:calc(var(--spacing) * 0)}.min-h-screen{min-height:100vh}.min-w-0{min-width:calc(var(--spacing) * 0)}.w-10{width:calc(var(--spacing) * 10)}.w-12{width:calc(var(--spacing) * 12)}.w-16{width:calc(var(--spacing) * 16)}.w-2{width:calc(var(--spacing) * 2)}.w-28{width:calc(var(--spacing) * 28)}.w-3\\.5{width:calc(var(--spacing) * 3.5)}.w-3xs{width:var(--container-3xs)}.w-4{width:calc(var(--spacing) * 4)}.w-5{width:calc(var(--spacing) * 5)}.w-64{width:calc(var(--spacing) * 64)}.w-8{width:calc(var(--spacing) * 8)}.w-80{width:calc(var(--spacing) * 80)}.w-full{width:100%}.w\\[M\\]{width:M}.inline{display:inline}.block{display:block}.inline-block{display:inline-block}.contents{display:contents}.hidden{display:none}.visible{visibility:visible}.cursor-pointer{cursor:pointer}.cursor-not-allowed{cursor:not-allowed}.resize-none{resize:none}.selection\\:select-all *::selection,.selection\\:select-all::selection{-webkit-user-select:all;user-select:all}.whitespace-pre-wrap{white-space:pre-wrap}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.text-ellipsis{text-overflow:ellipsis}.uppercase{text-transform:uppercase}.capitalize{text-transform:capitalize}.italic{font-style:italic}.antialiased{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.focus\\:ring-2:focus{--un-ring-shadow:var(--un-ring-inset,) 0 0 0 calc(2px + var(--un-ring-offset-width)) var(--un-ring-color, currentColor);box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.focus\\:ring-\\[\\#83a598\\]:focus{--un-ring-color:color-mix(in oklab, #83a598 var(--un-ring-opacity), transparent)}.shadow,.shadow-sm{--un-shadow:0 1px 3px 0 var(--un-shadow-color, rgb(0 0 0 / .1)),0 1px 2px -1px var(--un-shadow-color, rgb(0 0 0 / .1));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.shadow-\\[4px_4px_0px_\\#1d2021\\]{--un-shadow:4px 4px 0px var(--un-shadow-color, rgb(29 32 33));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.shadow-lg{--un-shadow:0 10px 15px -3px var(--un-shadow-color, rgb(0 0 0 / .1)),0 4px 6px -4px var(--un-shadow-color, rgb(0 0 0 / .1));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.shadow-md{--un-shadow:0 4px 6px -1px var(--un-shadow-color, rgb(0 0 0 / .1)),0 2px 4px -2px var(--un-shadow-color, rgb(0 0 0 / .1));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.shadow-xl{--un-shadow:0 20px 25px -5px var(--un-shadow-color, rgb(0 0 0 / .1)),0 8px 10px -6px var(--un-shadow-color, rgb(0 0 0 / .1));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.hover\\:shadow-\\[6px_6px_0px_\\#83a598\\]:hover{--un-shadow:6px 6px 0px var(--un-shadow-color, rgb(131 165 152));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.focus\\:shadow-\\[2px_2px_0px_\\#1d2021\\]:focus{--un-shadow:2px 2px 0px var(--un-shadow-color, rgb(29 32 33));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.translate-x-4{--un-translate-x:calc(var(--spacing) * 4);translate:var(--un-translate-x) var(--un-translate-y)}.transform{transform:var(--un-rotate-x) var(--un-rotate-y) var(--un-rotate-z) var(--un-skew-x) var(--un-skew-y)}.transition{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,--un-gradient-from,--un-gradient-via,--un-gradient-to,opacity,box-shadow,transform,translate,scale,rotate,filter,-webkit-backdrop-filter,backdrop-filter;transition-timing-function:var(--un-ease, var(--default-transition-timingFunction));transition-duration:var(--un-duration, var(--default-transition-duration))}.transition-all{transition-property:all;transition-timing-function:var(--un-ease, var(--default-transition-timingFunction));transition-duration:var(--un-duration, var(--default-transition-duration))}.transition-colors{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,--un-gradient-from,--un-gradient-via,--un-gradient-to;transition-timing-function:var(--un-ease, var(--default-transition-timingFunction));transition-duration:var(--un-duration, var(--default-transition-duration))}.transition-opacity{transition-property:opacity;transition-timing-function:var(--un-ease, var(--default-transition-timingFunction));transition-duration:var(--un-duration, var(--default-transition-duration))}.transition-transform{transition-property:transform,translate,scale,rotate;transition-timing-function:var(--un-ease, var(--default-transition-timingFunction));transition-duration:var(--un-duration, var(--default-transition-duration))}.duration-200{--un-duration:.2s;transition-duration:.2s}.ease-in-out{--un-ease:var(--ease-in-out);transition-timing-function:var(--ease-in-out)}.items-start{align-items:flex-start}.items-end{align-items:flex-end}.items-center{align-items:center}.items-baseline{align-items:baseline}.bottom-2\\.5{bottom:calc(var(--spacing) * 2.5)}.right-2{right:calc(var(--spacing) * 2)}.right-3{right:calc(var(--spacing) * 3)}.top-2{top:calc(var(--spacing) * 2)}.justify-start{justify-content:flex-start}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.absolute{position:absolute}.fixed{position:fixed}.relative{position:relative}.static{position:static}.overflow-auto{overflow:auto}.overflow-y-auto{overflow-y:auto}@keyframes pulse{0%,to{opacity:1}50%{opacity:.5}}@keyframes spin{0%{transform:rotate(0)}to{transform:rotate(360deg)}}.animate-pulse{animation:pulse 2s cubic-bezier(.4,0,.6,1) infinite}.animate-spin{animation:spin 1s linear infinite}.filter{filter:var(--un-blur,) var(--un-brightness,) var(--un-contrast,) var(--un-grayscale,) var(--un-hue-rotate,) var(--un-invert,) var(--un-saturate,) var(--un-sepia,) var(--un-drop-shadow,)}.placeholder-\\[\\#928374\\]::placeholder{color:color-mix(in oklab,#928374 var(--un-placeholder-opacity),transparent)}.table{display:table}.table-row{display:table-row}.space-x-2>:not(:last-child){--un-space-x-reverse:0;margin-inline-start:calc(calc(var(--spacing) * 2) * var(--un-space-x-reverse));margin-inline-end:calc(calc(var(--spacing) * 2) * calc(1 - var(--un-space-x-reverse)))}.space-x-3>:not(:last-child){--un-space-x-reverse:0;margin-inline-start:calc(calc(var(--spacing) * 3) * var(--un-space-x-reverse));margin-inline-end:calc(calc(var(--spacing) * 3) * calc(1 - var(--un-space-x-reverse)))}.space-y-1>:not(:last-child){--un-space-y-reverse:0;margin-block-start:calc(calc(var(--spacing) * 1) * var(--un-space-y-reverse));margin-block-end:calc(calc(var(--spacing) * 1) * calc(1 - var(--un-space-y-reverse)))}.space-y-2>:not(:last-child){--un-space-y-reverse:0;margin-block-start:calc(calc(var(--spacing) * 2) * var(--un-space-y-reverse));margin-block-end:calc(calc(var(--spacing) * 2) * calc(1 - var(--un-space-y-reverse)))}.space-y-3>:not(:last-child){--un-space-y-reverse:0;margin-block-start:calc(calc(var(--spacing) * 3) * var(--un-space-y-reverse));margin-block-end:calc(calc(var(--spacing) * 3) * calc(1 - var(--un-space-y-reverse)))}.space-y-4>:not(:last-child){--un-space-y-reverse:0;margin-block-start:calc(calc(var(--spacing) * 4) * var(--un-space-y-reverse));margin-block-end:calc(calc(var(--spacing) * 4) * calc(1 - var(--un-space-y-reverse)))}.space-y-6>:not(:last-child){--un-space-y-reverse:0;margin-block-start:calc(calc(var(--spacing) * 6) * var(--un-space-y-reverse));margin-block-end:calc(calc(var(--spacing) * 6) * calc(1 - var(--un-space-y-reverse)))}@supports (color: color-mix(in lab,red,red)){.text-amber-600{color:color-mix(in oklab,var(--colors-amber-600) var(--un-text-opacity),transparent)}.text-amber-900{color:color-mix(in oklab,var(--colors-amber-900) var(--un-text-opacity),transparent)}.text-blue-100{color:color-mix(in oklab,var(--colors-blue-100) var(--un-text-opacity),transparent)}.text-blue-600{color:color-mix(in oklab,var(--colors-blue-600) var(--un-text-opacity),transparent)}.text-gray-200{color:color-mix(in oklab,var(--colors-gray-200) var(--un-text-opacity),transparent)}.text-gray-400{color:color-mix(in oklab,var(--colors-gray-400) var(--un-text-opacity),transparent)}.text-gray-500{color:color-mix(in oklab,var(--colors-gray-500) var(--un-text-opacity),transparent)}.text-gray-600{color:color-mix(in oklab,var(--colors-gray-600) var(--un-text-opacity),transparent)}.text-gray-700{color:color-mix(in oklab,var(--colors-gray-700) var(--un-text-opacity),transparent)}.text-gray-800{color:color-mix(in oklab,var(--colors-gray-800) var(--un-text-opacity),transparent)}.text-gray-900{color:color-mix(in oklab,var(--colors-gray-900) var(--un-text-opacity),transparent)}.text-green-400{color:color-mix(in oklab,var(--colors-green-400) var(--un-text-opacity),transparent)}.text-green-800{color:color-mix(in oklab,var(--colors-green-800) var(--un-text-opacity),transparent)}.text-red-100{color:color-mix(in oklab,var(--colors-red-100) var(--un-text-opacity),transparent)}.text-red-400{color:color-mix(in oklab,var(--colors-red-400) var(--un-text-opacity),transparent)}.text-red-700{color:color-mix(in oklab,var(--colors-red-700) var(--un-text-opacity),transparent)}.text-red-800{color:color-mix(in oklab,var(--colors-red-800) var(--un-text-opacity),transparent)}.text-white{color:color-mix(in oklab,var(--colors-white) var(--un-text-opacity),transparent)}.text-yellow-800{color:color-mix(in oklab,var(--colors-yellow-800) var(--un-text-opacity),transparent)}.border-amber-200{border-color:color-mix(in oklab,var(--colors-amber-200) var(--un-border-opacity),transparent)}.border-amber-400{border-color:color-mix(in oklab,var(--colors-amber-400) var(--un-border-opacity),transparent)}.border-gray-200{border-color:color-mix(in oklab,var(--colors-gray-200) var(--un-border-opacity),transparent)}.border-gray-700{border-color:color-mix(in oklab,var(--colors-gray-700) var(--un-border-opacity),transparent)}.border-white{border-color:color-mix(in oklab,var(--colors-white) var(--un-border-opacity),transparent)}.bg-amber-50{background-color:color-mix(in oklab,var(--colors-amber-50) var(--un-bg-opacity),transparent)}.bg-blue-600{background-color:color-mix(in oklab,var(--colors-blue-600) var(--un-bg-opacity),transparent)}.bg-gray-100{background-color:color-mix(in oklab,var(--colors-gray-100) var(--un-bg-opacity),transparent)}.bg-gray-200{background-color:color-mix(in oklab,var(--colors-gray-200) var(--un-bg-opacity),transparent)}.bg-gray-50{background-color:color-mix(in oklab,var(--colors-gray-50) var(--un-bg-opacity),transparent)}.bg-gray-600{background-color:color-mix(in oklab,var(--colors-gray-600) var(--un-bg-opacity),transparent)}.bg-gray-700{background-color:color-mix(in oklab,var(--colors-gray-700) var(--un-bg-opacity),transparent)}.bg-gray-800{background-color:color-mix(in oklab,var(--colors-gray-800) var(--un-bg-opacity),transparent)}.bg-gray-900{background-color:color-mix(in oklab,var(--colors-gray-900) var(--un-bg-opacity),transparent)}.bg-green-100{background-color:color-mix(in oklab,var(--colors-green-100) var(--un-bg-opacity),transparent)}.bg-red-100{background-color:color-mix(in oklab,var(--colors-red-100) var(--un-bg-opacity),transparent)}.bg-red-700{background-color:color-mix(in oklab,var(--colors-red-700) var(--un-bg-opacity),transparent)}.bg-red-900\\/50{background-color:color-mix(in oklab,var(--colors-red-900) 50%,transparent)}.bg-white{background-color:color-mix(in oklab,var(--colors-white) var(--un-bg-opacity),transparent)}.bg-yellow-100{background-color:color-mix(in oklab,var(--colors-yellow-100) var(--un-bg-opacity),transparent)}.hover\\:bg-amber-100:hover{background-color:color-mix(in oklab,var(--colors-amber-100) var(--un-bg-opacity),transparent)}.hover\\:bg-gray-700:hover{background-color:color-mix(in oklab,var(--colors-gray-700) var(--un-bg-opacity),transparent)}}@media (min-width: 48rem){.md\\:p-8{padding:calc(var(--spacing) * 8)}.md\\:flex-row{flex-direction:row}.md\\:col-span-2{grid-column:span 2/span 2}.md\\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.md\\:w-64{width:calc(var(--spacing) * 64)}.md\\:items-center{align-items:center}.md\\:justify-between{justify-content:space-between}}@media (min-width: 64rem){.lg\\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}}@media (min-width: 80rem){.xl\\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}}body{font-family:var(--font-family)}html,body{font-family:var(--theme-font-family);background-color:var(--theme-background-color)!important;color:var(--text-color)!important;width:100%;min-height:100%;height:100%;padding:0;margin:0}body:not(.production) *:not(:defined){border:1px solid red}.dark{filter:invert(1) hue-rotate(180deg)}.dark img,.dark dialog,.dark video,.dark iframe{filter:invert(1) hue-rotate(180deg)}html{font-size:14px}@media (max-width: 768px){html{font-size:18px}}@media (max-width: 480px){html{font-size:20px}}textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;color:inherit;margin:0;padding:0}:root{box-sizing:border-box;-moz-text-size-adjust:none;-webkit-text-size-adjust:none;text-size-adjust:none;line-height:1.2;-webkit-font-smoothing:antialiased}*,*:before,*:after{box-sizing:border-box}*{margin:0}body{-webkit-font-smoothing:antialiased;font-family:var(--font-family)}button,textarea,select{background-color:inherit;border-width:0;color:inherit}img,picture,video,canvas,svg{display:block;max-width:100%}input,button,textarea,select{font:inherit}p,h1,h2,h3,h4,h5,h6{font-family:var(--font-family);overflow-wrap:break-word}dialog::backdrop{background-color:#000c}*::-webkit-scrollbar{width:8px;margin-right:10px}*::-webkit-scrollbar-track{background:transparent}*::-webkit-scrollbar-thumb{&:hover{scrollbar-color:rgba(154,153,150,.8) transparent}border-radius:10px;border:none}*::-webkit-scrollbar-button{background:transparent;color:transparent}*{scrollbar-width:thin;scrollbar-color:transparent transparent;&:hover{scrollbar-color:rgba(154,153,150,.8) transparent}}[full]{width:100%;height:100vh}[w-full]{width:100%}[grow]{flex-grow:1}[hide],.hide{display:none!important}[noscroll]{overflow:hidden}div [container]{display:flex}div [container][horizontal]{display:flex;flex-direction:col}:where(.uix-link){font-weight:var(--uix-link-font-weight, 600);width:var(--uix-link-width, auto);color:var(--uix-link-text-color, var(--colors-default-900));--uix-link-indent: 0;cursor:pointer;&[vertical]{margin:0 auto}a,button{width:inherit;cursor:pointer;padding:var(--uix-link-padding);&:hover{color:var(--uix-link-hover-color, var(--uix-link-text-color))}}.uix-text-icon__element{display:flex;align-items:center;gap:var(--uix-link-icon-gap, .5rem);&[reverse][vertical]{flex-direction:column-reverse}&:not([reverse])[vertical]{flex-direction:column}&[reverse]:not([vertical]){flex-direction:row-reverse}&:not([reverse]):not([vertical]){flex-direction:row}}transition:all .3s ease-in-out;&[indent]{>a,>button{padding-left:var(--uix-link-indent)}}&[active]:hover{color:var(--uix-link-hover-text-color, var(--colors-primary-400))}&[selectable][selected]{background-color:var(--colors-primary-400)}&:hover{[tooltip]{display:flex}}&[tooltip]{display:inline-block;&:hover{[tooltip]{visibility:visible}}[tooltip]{visibility:hidden;width:120px;background-color:#000;color:#fff;text-align:center;border-radius:6px;padding:5px 10px;margin-left:3px;position:absolute;z-index:1000000000;top:50%;left:100%;transform:translateY(-50%)}}&[position~=top] [tooltip]{bottom:100%;left:50%;transform:translate(-50%)}&[position~=bottom] [tooltip]{top:100%;left:50%;transform:translate(-50%)}&[position~=left] [tooltip]{top:50%;right:100%;transform:translateY(-50%)}&[tooltip],&[dropdown],&[context],&[float]{position:relative}&[dropdown],&[accordion]{flex-direction:column}[float],[dropdown],[accordion],[context]{display:none}&[floatopen]>a{display:none}&[floatopen] [float]{display:block;position:relative;bottom:0;right:0}&[context]{z-index:auto}[context][open]{display:flex;flex-direction:column}[dropdown],[context][open]{position:absolute;left:0;top:100%;width:100%;min-width:200px;z-index:1000;background-color:var(--colors-primary-100);box-shadow:0 8px 16px #0003;.uix-link:hover,input{background-color:var(--colors-primary-200)}>.uix-link{width:100%}}[context][open]{display:flex}&[selected]{[dropdown],[accordion]{display:flex;flex-direction:column}}}:where(.uix-button){border:var(--uix-button-borderSize, 0) solid var(--uix-button-borderColor);border-radius:var(--uix-button-borderRadius, var(--radius-md));box-shadow:var(--uix-button-shadow);width:var(--uix-button-width);min-width:fit-content;background-color:var(--uix-button-backgroundColor, black);color:var(--uix-button-textColor, var(--colors-default-100));font-weight:var(--uix-button-fontWeight, 700);display:flex;text-align:center;transition:transform .2s ease-in-out,opacity .2s ease-in-out,background-color .2s ease-in-out;&:hover{opacity:var(--uix-button-hover-opacity, .4)}&:active{transform:scale(.97)}>button,>a,>input{width:max-content;display:block;border-radius:inherit;cursor:var(--uix-button-cursor, pointer);height:calc(var(--spacing) * 10);line-height:calc(var(--spacing) * 5);padding:var( --uix-button-padding, calc(var(--spacing) * 2.5) calc(var(--spacing) * 4) );word-break:keep-all;flex-basis:100%}.uix-icon,button,input,a{cursor:pointer}&[bordered]{--uix-button-border-size: 1px;--uix-button-backgroundColor: transparent;--uix-button-hoverBackgroundColor: var(--_variant-color-300);--uix-button-borderColor: var(--_variant-color-400);--uix-button-textColor: var(--_variant-color-700)}&[ghost]{--uix-button-backgroundColor: transparent;--uix-button-hoverBackgroundColor: var(--_variant-color-300);--uix-button-borderSize: 0px;--uix-button-textColor: var(--_variant-color-700)}&[outline]{--uix-button-backgroundColor: transparent;--uix-button-hoverBackgroundColor: var(--_variant-color-300);--uix-button-textColor: var(--_variant-color-800);--uix-button-borderSize: 1px;--uix-button-borderColor: var(--_variant-color-400)}&[float]{background-color:#000;--uix-button-hoverBackgroundColor: var(--_variant-color-500);--uix-button-textColor: var(--_variant-color-50);--uix-button-borderSize: 0px;--uix-button-borderRadius: 9999px;--uix-button-width: var(--uix-button-height);box-shadow:var(--shadow-md, 0 4px 6px -1px rgb(0 0 0 / .1));--uix-button-padding: .5rem}&[float]:hover{box-shadow:var(--shadow-lg, 0 10px 15px -3px rgb(0 0 0 / .1))}}.uix-list{display:flex;&[vertical]{flex-direction:column}}.uix-navbar{--uix-navbar-text-color: var(--color-default-90);--uix-navbar-hover-text-color: var(--color-surface-80);--uix-navbar-border-radius: 0px;--uix-navbar-border-color: var(--color-default-60);--uix-navbar-border-size: 1px;--uix-navbar-border-style: solid;--uix-navbar-hover-background-color: var(--color-default-40);--uix-container-position: var(--uix-navbar-position);display:flex;flex-direction:column;&[docked]{--uix-list-button-radius: 0;border-bottom:0;position:fixed;bottom:0;background-color:var(--uix-navbar-background-color, var(--color-default-5));>*{border-right:0;border-bottom:0;&:first-child{border-left:0}}}}.uix-icon{display:inline-block;vertical-align:middle;svg{height:inherit;width:inherit}}&[solid]{stroke:currentColor;fill:currentColor}:where(.uix-input){--uix-input-background-color: var(--colors-surface-100);--uix-input-border-color: var(--colors-gray-900);--uix-input-text-color: var(--colors-gray-900);--uix-input-placeholder-color: var(--colors-default-500);--uix-input-border-radius: var(--border-radius-md);--uix-input-border-width: 2px;--uix-input-padding-x: calc(var(--spacing) * 4);--uix-input-padding-y: calc(var(--spacing) * 2.5);--uix-input-font-size: var(--font-size-base);--uix-input-height: 2.5rem;--uix-input-disabled-opacity: .6;--uix-input-label-font-size: var(--font-size-sm);--uix-input-label-font-weight: var(--font-weight-bold);--uix-input-label-color: var(--colors-default-700);--uix-input-checkbox-size: 1.5rem;--uix-input-checkbox-border-radius: var(--border-radius-sm);--uix-input-checkbox-checked-bg: var(--colors-primary-600);--uix-input-checkbox-check-color: var(--colors-surface-100);width:100%;display:flex;flex-direction:column;input,select,textarea{width:100%;height:var(--uix-input-height);border-radius:var(--uix-input-border-radius);border:var(--uix-input-border-width) solid var(--uix-input-border-color);font-size:var(--uix-input-font-size);background-color:var(--uix-input-background-color);color:var(--uix-input-text-color);transition:var(--uix-transition);outline:none;padding:var(--uix-input-padding-y) var(--uix-input-padding-x)}textarea{resize:vertical}&:has(textarea){height:auto}select{appearance:none;-webkit-appearance:none;cursor:pointer;font-weight:600;padding-block:0;option{font-weight:600;background-color:var(--uix-input-background-color);font-size:1.1rem;line-height:1.5rem;color:#333;padding:50px;border:2px solid red}}.select-container{position:relative;.select-arrow{position:absolute;right:calc(2 * var(--spacing))}}input::placeholder{color:transparent}label{font-weight:var(--uix-input-label-font-weight);color:var(--uix-input-label-color, var(--colors-gray-600));margin-bottom:var(--spacing);font-size:.9rem;padding:0 4px;transition:all .2s ease-in-out;pointer-events:none;&[required]:after{content:"*";color:var(--colors-danger-500);margin-left:2px}}input:not(:placeholder-shown)+label,textarea:not(:placeholder-shown)+label,&:focus-within label,&.has-value label{top:-2px;transform:translateY(0);font-size:var(--uix-input-label-font-size)}&:focus-within input,&:focus-within select,&:focus-within textarea{box-shadow:0 0 var(--uix-input-focus-ring-width, 5px) var(--uix-input-focus-ring-color, rgba(0, 0, 255, .5))}&[disabled]{cursor:not-allowed;opacity:var(--uix-input-disabled-opacity);& label{cursor:not-allowed}}.input-icon,.select-arrow{position:absolute;top:50%;right:var(--spacing);transform:translateY(-50%);pointer-events:none;color:var(--uix-input-label-color);transition:transform .2s ease-in-out}&:has(select:hover:active) .select-arrow{transform:translateY(-50%) rotate(180deg)}&:has(.input-icon:not(.select-arrow))>input{padding-right:calc(var(--uix-input-padding-x) + 1.75em)}&[type=checkbox],&[type=radio]{flex-direction:row;align-items:center;border:0;height:auto;width:auto;background-color:transparent;box-shadow:none;gap:.75rem;cursor:pointer;label{margin:0;line-height:1.5rem;position:static;transform:none;background-color:transparent;padding:0;cursor:pointer;font-weight:var(--font-weight-normal);order:2;pointer-events:auto}input{appearance:none;-webkit-appearance:none;width:var(--uix-input-checkbox-size);height:var(--uix-input-checkbox-size);margin:0;border:var(--uix-input-border-width) solid var(--uix-input-border-color);background-color:var(--uix-input-background-color);cursor:pointer;position:relative;transition:var(--uix-transition);padding:0;&:after{content:"";position:absolute;display:none;left:50%;top:50%}&:checked{background-color:var(--uix-input-checkbox-checked-bg);border-color:var(--uix-input-checkbox-checked-bg);&:after{display:block}}&:focus-visible{box-shadow:0 0 0 var(--uix-input-focus-ring-width) var(--uix-input-focus-ring-color);border-color:var(--uix-input-focus-ring-color)}}}&[type=checkbox] input:after{width:.375rem;height:.75rem;border:solid var(--uix-input-checkbox-check-color);border-width:0 2px 2px 0;transform:translate(-50%,-60%) rotate(45deg)}&[type=radio] input{border-radius:var(--border-radius-full);&:after{width:calc(var(--uix-input-checkbox-size) / 2);height:calc(var(--uix-input-checkbox-size) / 2);border-radius:var(--border-radius-full);background-color:var(--uix-input-checkbox-check-color);transform:translate(-50%,-50%)}}&[ghost]{&:focus-within select{box-shadow:none}.select-arrow{margin-left:5px;padding-left:5px}select{background:inherit;border:0}}}
+`,mimeType:"text/css",skipSW:!1},"/main.js":{content:`const ensureSWController = () => {
+	const timeoutPromise = new Promise((_, reject) => {
+		setTimeout(() => reject(new Error("Service Worker timed out.")), 100);
+	});
+	const controllerPromise = new Promise((resolve) => {
+		if (navigator.serviceWorker.controller) {
+			return resolve();
+		}
+		navigator.serviceWorker.addEventListener("controllerchange", () => {
+			return resolve();
+		});
+	});
+	return Promise.race([controllerPromise, timeoutPromise]);
+};
+
+const startApp = async () => {
+	if (!("serviceWorker" in navigator)) {
+		console.warn("Service Worker not supported.");
+		throw new Error("Platform not supported");
+	}
+
+	await navigator.serviceWorker.register("/sw.js", {
+		scope: "/",
+		type: "module",
+	});
+
+	try {
+		console.log("Waiting for Service Worker to take control...");
+		await ensureSWController();
+		console.log("\u2705 Service Worker is in control!");
+		const { default: $APP } = await import("/bootstrap.js");
+		await $APP.loadApp();
+	} catch (error) {
+		console.log({ error });
+		console.warn("Service Worker did not take control in time. Reloading...");
+		window.location.reload();
+	}
+};
+
+startApp();
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/mcp/views/dev.js":{content:`export default ({ $APP, html, AI, T }) => {
+	return {
+		tag: "mcp-dev",
+		class: "w-full bg-[#282828] text-[#ebdbb2] flex font-sans text-sm",
+		properties: {
+			content: T.string(""),
+			language: T.string({ sync: "local", defaultValue: "javascript" }),
+			filePath: T.string({ sync: "local" }),
+			selectedServer: T.string({ sync: "local", defaultValue: "default" }),
+			serverOptions: T.object({
+				defaultValue: {
+					default: {
+						label: "Default Feature-Rich Server",
+						path: "/templates/servers/basic.js",
+					},
+					simple: {
+						label: "Simple Greeter Server",
+						path: "/templates/servers/basic.js",
+					},
+				},
+			}),
+			isServerConnected: T.boolean({ sync: "local" }),
+			transportType: T.string({ sync: "local", defaultValue: "JavaScript" }),
+			command: T.string({ sync: "local" }),
+			args: T.string({ sync: "local" }),
+			history: T.array([]),
+			selectedHistoryItem: T.object(null),
+			activeTab: T.string(),
+			isDirty: T.boolean(false),
+			isSaving: T.boolean(false),
+			lastSaved: T.object(null),
+			compilerErrors: T.array([]),
+			validationTimeout: T.object(null),
+			tsLibCache: T.object({ defaultValue: {} }),
+			worker: T.object(null),
+			transpilePromises: T.object({ defaultValue: {} }),
+		},
+		async connected() {
+			this.initializeWorker();
+			const initialPath = this.serverOptions[this.selectedServer].path;
+			await this.loadServerContent(initialPath);
+		},
+		disconnected() {
+			if (this.validationTimeout) clearTimeout(this.validationTimeout);
+			if (this.worker) this.worker.terminate();
+		},
+		async onServerChange(newServerKey) {
+			if (this.isDirty) {
+				console.warn(
+					"Switching server templates with unsaved changes. The changes will be lost.",
+				);
+			}
+			this.selectedServer = newServerKey;
+			const newPath = this.serverOptions[newServerKey].path;
+			await this.loadServerContent(newPath);
+
+			if (this.isServerConnected) {
+				await this.disconnectFromServer();
+			}
+		},
+		async loadServerContent(path) {
+			this.filePath = path;
+			this.command = path.replace(/\\.ts$/, ".js");
+			try {
+				const response = await fetch(path);
+				const fileContent = await response.text();
+				this.content = fileContent;
+				this.isDirty = false;
+				this.validateCode();
+			} catch (error) {
+				this.isDirty = true;
+				this.content = \`// Failed to load file: \${path}\\n// You can start editing here to create it.\`;
+				console.log(
+					\`File \${path} couldn't be loaded, starting with placeholder content.\`,
+					error,
+				);
+				this.validateCode();
+			}
+		},
+		initializeWorker() {
+			this.worker = new Worker("/modules/apps/mcp/worker.js", {
+				type: "module",
+			});
+			this.worker.onmessage = (e) => {
+				const { type, payload } = e.data;
+				switch (type) {
+					case "validationComplete":
+						this.compilerErrors = payload.errors;
+						break;
+					case "transpileComplete": {
+						const promise = this.transpilePromises[payload.requestId];
+						if (promise) {
+							promise.resolve(payload.transpiledCode);
+							delete this.transpilePromises[payload.requestId];
+						}
+						break;
+					}
+				}
+			};
+			this.worker.onerror = (event) => {
+				console.error("Error in worker:", event);
+			};
+			this.worker.postMessage({
+				type: "init",
+			});
+		},
+		validateCode() {
+			if (!this.worker) {
+				this.compilerErrors = [];
+				return;
+			}
+			this.worker.postMessage({
+				type: "validate",
+				payload: { code: this.content, filePath: this.filePath },
+			});
+		},
+		getTranspiledContent() {
+			if (this.language !== "typescript") {
+				return Promise.resolve(this.content);
+			}
+			return new Promise((resolve, reject) => {
+				const requestId = \`req_\${Date.now()}_\${Math.random()}\`;
+				this.transpilePromises[requestId] = { resolve, reject };
+				this.worker.postMessage({
+					type: "transpile",
+					payload: { code: this.content, requestId },
+				});
+				setTimeout(() => {
+					if (this.transpilePromises[requestId]) {
+						reject(new Error("Transpilation timed out."));
+						delete this.transpilePromises[requestId];
+					}
+				}, 10000);
+			});
+		},
+		async applyCodeChanges() {
+			if (!$APP.fs || !$APP.fs.writeFile) {
+				console.warn("File system not available");
+				return;
+			}
+			this.isSaving = true;
+			try {
+				await this.validateCode();
+				if (this.compilerErrors.length > 0) {
+					console.warn(
+						"Applying changes with errors. The resulting code may not run correctly.",
+					);
+				}
+				await $APP.fs.writeFile(this.filePath, this.content);
+				if (this.language === "typescript") {
+					const executableCode = await this.getTranspiledContent();
+					const executablePath = this.filePath.replace(/\\.ts$/, ".js");
+					await $APP.fs.writeFile(executablePath, executableCode);
+					this.command = executablePath;
+				} else {
+					this.command = this.filePath;
+				}
+
+				this.lastSaved = new Date();
+				this.isDirty = false;
+			} catch (error) {
+				console.error("Failed to apply code changes:", error);
+			} finally {
+				this.isSaving = false;
+			}
+		},
+		onEditorUpdate(newContent) {
+			this.content = newContent;
+			this.isDirty = true;
+			if (this.validationTimeout) clearTimeout(this.validationTimeout);
+			this.validationTimeout = setTimeout(() => this.validateCode(), 500);
+		},
+		toggleLanguage() {
+			const newLang =
+				this.language === "javascript" ? "typescript" : "javascript";
+			const oldExt = this.language === "javascript" ? ".js" : ".ts";
+			const newExt = newLang === "javascript" ? ".js" : ".ts";
+
+			this.language = newLang;
+			const newPath = this.filePath.replace(oldExt, newExt);
+
+			this.loadServerContent(newPath);
+		},
+		async connectToServer() {
+			if (!this.command) {
+				console.error("Connection command/URL cannot be empty.");
+				return;
+			}
+			try {
+				const transportConfig = {
+					type: this.transportType,
+					command: this.command,
+					args: this.args ? this.args.split(" ") : [],
+				};
+				await AI.connect(transportConfig, { alias: "dev_server" });
+				this.isServerConnected = true;
+			} catch (e) {
+				console.error("Failed to connect:", e);
+				this.isServerConnected = false;
+			}
+		},
+		async disconnectFromServer() {
+			try {
+				await AI.disconnect("dev_server");
+				this.isServerConnected = false;
+			} catch (e) {
+				console.error("Failed to disconnect:", e);
+			}
+		},
+		async reconnectToServer() {
+			if (this.isServerConnected) {
+				await this.disconnectFromServer();
+				setTimeout(() => {
+					this.connectToServer();
+				}, 200);
+			}
+		},
+		onSelectHistory(item) {
+			this.selectedHistoryItem = item;
+		},
+		clearSelectedHistory() {
+			this.selectedHistoryItem = null;
+		},
+		renderErrorPanel() {
+			return html\`<div class="flex flex-col h-full bg-[#1d2021]">
+				<div class="p-2 border-b border-[#504945] flex items-center">
+					<uix-icon
+						name="triangle-alert"
+						class="w-4 h-4 mr-2 text-red-400"
+					></uix-icon>
+					<h3 class="text-md font-semibold text-[#ebdbb2]">
+						Problems (\${this.compilerErrors.length})
+					</h3>
+				</div>
+				<div class="flex-1 overflow-auto font-mono text-xs">
+					\${this.compilerErrors.map(
+						(error) => html\`
+							<div
+								class="p-2 border-b border-[#3c3836] hover:bg-[#3c3836]"
+							>
+								<span class="text-red-400">Error:</span>
+								<span class="text-[#bdae93]"
+									>(\${error.line}:\${error.character})</span
+								>
+								<span class="text-white ml-2">\${error.message}</span>
+							</div>
+						\`,
+					)}
+				</div>
+			</div>\`;
+		},
+		selectTab(index) {
+			this.activeTab = index;
+		},
+		render() {
+			const tabs = [
+				{ key: "dashboard", label: "Dashboard", icon: "layout-dashboard" },
+				{ key: "tools", label: "Tools", icon: "wrench" },
+				{ key: "resources", label: "Resources", icon: "database" },
+				{ key: "prompts", label: "Prompts", icon: "terminal" },
+			];
+			const renderTabContent = (tab) => {
+				switch (tab.key) {
+					case "dashboard":
+						return html\`<mcp-dashboard></mcp-dashboard>\`;
+					case "tools":
+						return html\`<mcp-tools></mcp-tools>\`;
+					case "resources":
+						return html\`<mcp-resources></mcp-resources>\`;
+					case "prompts":
+						return html\`<mcp-prompts></mcp-prompts>\`;
+					default:
+						return html\`<div class="text-center p-8 text-gray-500">View not implemented: \${tab.key}</div>\`;
+				}
+			};
+			return html\`
+						<editor-textarea
+							content=\${this.content}
+							.language=\${this.language}
+							.onUpdate=\${this.onEditorUpdate.bind(this)}
+							class="flex-1"
+						></editor-textarea>
+						<uix-divider
+							vertical
+							resizable
+							style="--uix-divider-color: #3c3836;"
+						></uix-divider>
+						<div class="flex-1 h-full flex flex-col min-w-0">
+							\${
+								this.isServerConnected
+									? html\`<div class="flex-1 flex flex-col min-h-0">
+            <uix-tabs
+              style="--uix-tabs-font-size: 1rem; --uix-tabs-active-background-color: var(--colors-red-700); --uix-tabs-border-color: var(--colors-red-800); --uix-tabs-text: #ebdbb2; --uix-tabs-active-text: #ebdbb2;"
+              class="flex flex-col flex-grow" .activeTab=\${this.activeTab} .selectTab=\${this.selectTab.bind(this)}
+              .tabs=\${tabs.map((tab) => [html\`<uix-icon name=\${tab.icon} class="mr-2 w-5"></uix-icon> \${tab.label}\`, html\`<div class="p-4 flex-grow overflow-auto">\${renderTabContent(tab)}</div>\`])}
+            ></uix-tabs>
+          </div>\`
+									: html\`
+                                      <div class="flex-1 flex items-center justify-center bg-[#282828]">
+                                          <div class="text-center max-w-md p-4">
+                                              <uix-icon name="server-off" class="w-16 h-16 text-[#928374] mx-auto mb-4"></uix-icon>
+                                              <h3 class="text-lg font-semibold text-[#ebdbb2] mb-2">Server Not Connected</h3>
+                                              <p class="text-[#bdae93] mb-6">Edit your server code, then click Connect to run it.</p>
+																						<uix-button
+																							label="Connect"
+																							@click=\${this.connectToServer.bind(this)}
+																							size="small"
+																						></uix-button>
+																							
+                                          </div>
+                                      </div>
+                                  \`
+							}
+							<mcp-requests></mcp-requests>
+							\${
+								this.compilerErrors.length > 0
+									? html\`
+										<uix-divider resizable></uix-divider>
+										<div class="flex-shrink-0 h-50 overflow-auto">
+											\${this.renderErrorPanel()}
+										</div>
+								  \`
+									: ""
+							}
+						</div>
+			\`;
+		},
+	};
+};
+`,mimeType:"application/javascript",skipSW:!1},"/templates/servers/basic.js":{content:`import {
+	McpServer,
+	ResourceTemplate,
+} from "@modelcontextprotocol/sdk/server/mcp.js";
+import z from "zod";
+
+export default () => {
+	const server = new McpServer(
+		{
+			name: "example-server",
+			version: "0.1.0",
+		},
+		{
+			capabilities: {
+				tools: {},
+				resources: { subscribe: true },
+				logging: {},
+				prompts: {},
+				sampling: {},
+				elicitation: {},
+			},
+		},
+	);
+
+	// In-memory data storage
+	const dataStore = {
+		users: [
+			{ id: 1, name: "Alice", email: "alice@example.com", role: "admin" },
+			{ id: 2, name: "Bob", email: "bob@example.com", role: "user" },
+			{ id: 3, name: "Charlie", email: "charlie@example.com", role: "user" },
+		],
+		posts: [
+			{
+				id: 1,
+				title: "Welcome Post",
+				content: "Welcome to our platform!",
+				authorId: 1,
+			},
+			{
+				id: 2,
+				title: "Getting Started",
+				content: "Here's how to get started...",
+				authorId: 1,
+			},
+		],
+		settings: {
+			theme: "dark",
+			language: "en",
+			notifications: true,
+			maxUsers: 100,
+		},
+	};
+
+	const subscriptions = new Set();
+
+	server.registerTool(
+		"echo",
+		{
+			title: "Echo Tool",
+			description: "Echo back the input text with optional formatting",
+			inputSchema: {
+				text: z.string().describe("Text to echo back"),
+				uppercase: z.boolean().optional().describe("Convert to uppercase"),
+				repeat: z
+					.number()
+					.min(1)
+					.max(5)
+					.optional()
+					.default(1)
+					.describe("Number of times to repeat"),
+			},
+		},
+		async ({ text, uppercase = false, repeat = 1 }) => {
+			let result = uppercase ? text.toUpperCase() : text;
+			result = Array(repeat).fill(result).join(" | ");
+
+			return {
+				content: [
+					{
+						type: "text",
+						text: \`Echo: \${result}\`,
+					},
+				],
+			};
+		},
+	);
+
+	// Math calculator tool
+	server.registerTool(
+		"calculate",
+		{
+			title: "Calculator",
+			description: "Perform basic mathematical operations",
+			inputSchema: {
+				operation: z
+					.enum(["add", "subtract", "multiply", "divide", "power"])
+					.describe("Mathematical operation to perform"),
+				a: z.number().describe("First number"),
+				b: z.number().describe("Second number"),
+			},
+		},
+		async ({ operation, a, b }) => {
+			let result;
+
+			switch (operation) {
+				case "add":
+					result = a + b;
+					break;
+				case "subtract":
+					result = a - b;
+					break;
+				case "multiply":
+					result = a * b;
+					break;
+				case "divide":
+					if (b === 0) throw new Error("Division by zero is not allowed");
+					result = a / b;
+					break;
+				case "power":
+					result = a ** b;
+					break;
+			}
+
+			return {
+				content: [
+					{
+						type: "text",
+						text: \`\${a} \${operation} \${b} = \${result}\`,
+					},
+				],
+			};
+		},
+	);
+
+	// User management tool with elicitation
+	server.registerTool(
+		"manage_user",
+		{
+			title: "User Management",
+			description: "Create, update, or delete users",
+			inputSchema: {
+				action: z
+					.enum(["create", "update", "delete", "list"])
+					.describe("Action to perform"),
+				userId: z
+					.number()
+					.optional()
+					.describe("User ID (required for update/delete)"),
+				name: z.string().optional().describe("User name (required for create)"),
+				email: z
+					.string()
+					.email()
+					.optional()
+					.describe("User email (required for create)"),
+				role: z.enum(["admin", "user"]).optional().describe("User role"),
+			},
+		},
+		async ({ action, userId, name, email, role }) => {
+			switch (action) {
+				case "list": {
+					return {
+						content: [
+							{
+								type: "text",
+								text: \`Users:\\n\${dataStore.users.map((u) => \`\${u.id}: \${u.name} (\${u.email}) - \${u.role}\`).join("\\n")}\`,
+							},
+						],
+					};
+				}
+				case "create": {
+					if (!name || !email)
+						throw new Error("Name and email are required for creating a user");
+					const newUser = {
+						id: Math.max(...dataStore.users.map((u) => u.id)) + 1,
+						name,
+						email,
+						role: role || "user",
+					};
+					dataStore.users.push(newUser);
+
+					// Notify subscribers
+					if (subscriptions.has("data://users")) {
+						server.notifyResourceUpdated("data://users");
+					}
+
+					return {
+						content: [
+							{
+								type: "text",
+								text: \`Created user: \${newUser.name} (ID: \${newUser.id})\`,
+							},
+						],
+					};
+				}
+				case "update": {
+					if (!userId) throw new Error("User ID is required for updating");
+					const userIndex = dataStore.users.findIndex((u) => u.id === userId);
+					if (userIndex === -1)
+						throw new Error(\`User with ID \${userId} not found\`);
+
+					if (name) dataStore.users[userIndex].name = name;
+					if (email) dataStore.users[userIndex].email = email;
+					if (role) dataStore.users[userIndex].role = role;
+
+					// Notify subscribers
+					if (subscriptions.has("data://users")) {
+						server.notifyResourceUpdated("data://users");
+					}
+					if (subscriptions.has(\`data://users/\${userId}\`)) {
+						server.notifyResourceUpdated(\`data://users/\${userId}\`);
+					}
+
+					return {
+						content: [
+							{
+								type: "text",
+								text: \`Updated user: \${dataStore.users[userIndex].name}\`,
+							},
+						],
+					};
+				}
+				case "delete": {
+					if (!userId) throw new Error("User ID is required for deletion");
+					const deleteIndex = dataStore.users.findIndex((u) => u.id === userId);
+					if (deleteIndex === -1)
+						throw new Error(\`User with ID \${userId} not found\`);
+
+					const deletedUser = dataStore.users.splice(deleteIndex, 1)[0];
+
+					// Notify subscribers
+					if (subscriptions.has("data://users")) {
+						server.notifyResourceUpdated("data://users");
+					}
+
+					return {
+						content: [
+							{
+								type: "text",
+								text: \`Deleted user: \${deletedUser.name}\`,
+							},
+						],
+					};
+				}
+			}
+		},
+	);
+
+	// NEW: Delete user with confirmation using elicitation
+	server.registerTool(
+		"delete_user_with_confirmation",
+		{
+			title: "Delete User with Confirmation",
+			description: "Deletes a user after confirming with the user",
+			inputSchema: {
+				userId: z.number().describe("ID of the user to delete"),
+				force: z
+					.boolean()
+					.optional()
+					.describe("Skip confirmation if true (default: false)"),
+			},
+		},
+		async ({ userId, force = false }) => {
+			const userIndex = dataStore.users.findIndex((u) => u.id === userId);
+			if (userIndex === -1) {
+				throw new Error(\`User with ID \${userId} not found\`);
+			}
+
+			const user = dataStore.users[userIndex];
+
+			if (!force) {
+				const result = await server.server.elicitInput({
+					message: \`Are you sure you want to delete user "\${user.name}" (\${user.email})?\`,
+					requestedSchema: {
+						type: "object",
+						properties: {
+							confirm: {
+								type: "boolean",
+								title: "Confirm deletion",
+								description: \`Confirm deletion of user "\${user.name}"\`,
+							},
+							transferPosts: {
+								type: "boolean",
+								title: "Transfer posts",
+								description: "Transfer user's posts to another user",
+								default: false,
+							},
+							newAuthorId: {
+								type: "number",
+								title: "New author ID",
+								description:
+									"ID of user to transfer posts to (if transferring)",
+							},
+						},
+						required: ["confirm"],
+					},
+				});
+
+				if (result.action !== "accept" || !result.content?.confirm) {
+					return {
+						content: [
+							{
+								type: "text",
+								text: \`Deletion cancelled by user for \${user.name}\`,
+							},
+						],
+					};
+				}
+
+				if (result.content?.transferPosts && result.content?.newAuthorId) {
+					const newAuthor = dataStore.users.find(
+						(u) => u.id === result.content.newAuthorId,
+					);
+					if (newAuthor) {
+						dataStore.posts.forEach((post) => {
+							if (post.authorId === userId) {
+								post.authorId = result.content.newAuthorId;
+							}
+						});
+						await server.sendLoggingMessage({
+							level: "info",
+							data: \`Transferred posts from \${user.name} to \${newAuthor.name}\`,
+						});
+					}
+				}
+			}
+
+			// Delete the user
+			dataStore.users.splice(userIndex, 1);
+
+			// Notify subscribers
+			if (subscriptions.has("data://users")) {
+				server.notifyResourceUpdated("data://users");
+			}
+
+			return {
+				content: [
+					{
+						type: "text",
+						text: \`Successfully deleted user: \${user.name}\`,
+					},
+				],
+			};
+		},
+	);
+
+	// NEW: Generate post content using sampling
+	server.registerTool(
+		"generate_post",
+		{
+			title: "Generate Post Content",
+			description:
+				"Uses AI to generate a blog post with the specified parameters",
+			inputSchema: {
+				title: z.string().describe("Title of the post"),
+				authorId: z.number().describe("ID of the author"),
+				topic: z.string().optional().describe("Topic or theme for the post"),
+				style: z
+					.enum(["professional", "casual", "technical", "creative"])
+					.optional()
+					.default("professional")
+					.describe("Writing style for the post"),
+			},
+		},
+		async ({ title, authorId, topic, style = "professional" }) => {
+			const author = dataStore.users.find((u) => u.id === authorId);
+			if (!author) {
+				throw new Error(\`Author with ID \${authorId} not found\`);
+			}
+
+			let generationPrompt = \`Write a blog post with the title "\${title}"\`;
+			if (topic) {
+				generationPrompt += \` about \${topic}\`;
+			}
+			generationPrompt += \`. Use a \${style} writing style. Keep it concise (2-3 paragraphs).\`;
+
+			try {
+				const response = await server.server.createMessage({
+					messages: [
+						{
+							role: "user",
+							content: {
+								type: "text",
+								text: generationPrompt,
+							},
+						},
+					],
+					maxTokens: 500,
+					temperature: style === "creative" ? 0.8 : 0.3,
+				});
+
+				let generatedContent = "";
+				if (response.content.type === "text") {
+					generatedContent = response.content.text;
+				} else {
+					throw new Error("Failed to generate text content");
+				}
+
+				// Create the new post
+				const newPost = {
+					id: Math.max(...dataStore.posts.map((p) => p.id)) + 1,
+					title,
+					content: generatedContent,
+					authorId,
+				};
+
+				dataStore.posts.push(newPost);
+
+				// Notify subscribers
+				if (subscriptions.has("data://posts")) {
+					server.notifyResourceUpdated("data://posts");
+				}
+
+				await server.sendLoggingMessage({
+					level: "info",
+					data: \`Generated post "\${title}" for author \${author.name} in \${style} style\`,
+				});
+
+				return {
+					content: [
+						{
+							type: "text",
+							text: \`Successfully generated post "\${title}" (ID: \${newPost.id})\\n\\nContent preview:\\n\${generatedContent.substring(0, 200)}\${generatedContent.length > 200 ? "..." : ""}\`,
+						},
+					],
+				};
+			} catch (error) {
+				await server.sendLoggingMessage({
+					level: "error",
+					data: \`Failed to generate post: \${error.message}\`,
+				});
+
+				throw new Error(\`Post generation failed: \${error.message}\`);
+			}
+		},
+	);
+
+	// Slow operation with progress
+	server.registerTool(
+		"slow_task",
+		{
+			title: "Slow Task Simulator",
+			description: "Simulates a long-running task with progress updates",
+			inputSchema: {
+				taskName: z.string().describe("Name of the task to simulate"),
+				duration: z.number().min(1).max(10).describe("Duration in seconds"),
+			},
+		},
+		async ({ taskName, duration }, { progress }) => {
+			await server.sendLoggingMessage({
+				level: "info",
+				data: \`Starting task: \${taskName} (\${duration}s)\`,
+			});
+
+			const steps = duration * 2; // Update every 500ms
+			for (let i = 1; i <= steps; i++) {
+				await new Promise((resolve) => setTimeout(resolve, 500));
+				progress({ progress: i, total: steps });
+			}
+
+			await server.sendLoggingMessage({
+				level: "info",
+				data: \`Completed task: \${taskName}\`,
+			});
+
+			return {
+				content: [
+					{
+						type: "text",
+						text: \`Task "\${taskName}" completed successfully after \${duration} seconds!\`,
+					},
+				],
+			};
+		},
+	);
+
+	// ===== STATIC RESOURCES =====
+
+	// App configuration
+	server.registerResource(
+		"config",
+		"config://app",
+		{
+			title: "App Configuration",
+			description: "Application configuration settings",
+			mimeType: "application/json",
+		},
+		async (uri) => ({
+			contents: [
+				{
+					uri: uri.href,
+					mimeType: "application/json",
+					text: JSON.stringify(
+						{
+							name: "MCP Dev Server",
+							version: "1.0.0",
+							features: ["tools", "resources", "templates"],
+							status: "active",
+							...dataStore.settings,
+						},
+						null,
+						2,
+					),
+				},
+			],
+		}),
+	);
+
+	// Users list resource
+	server.registerResource(
+		"data_users",
+		"data://users",
+		{
+			title: "Users List",
+			description: "List of all users in the system",
+			mimeType: "application/json",
+		},
+		async (uri) => ({
+			contents: [
+				{
+					uri: uri.href,
+					mimeType: "application/json",
+					text: JSON.stringify(dataStore.users, null, 2),
+				},
+			],
+		}),
+	);
+
+	// Posts list resource
+	server.registerResource(
+		"data_posts",
+		"data://posts",
+		{
+			title: "Posts List",
+			description: "List of all posts in the system",
+			mimeType: "application/json",
+		},
+		async (uri) => ({
+			contents: [
+				{
+					uri: uri.href,
+					mimeType: "application/json",
+					text: JSON.stringify(dataStore.posts, null, 2),
+				},
+			],
+		}),
+	);
+
+	// ===== RESOURCE TEMPLATES =====
+
+	// Individual user resource template
+	server.registerResource(
+		"data_users_template",
+		new ResourceTemplate("data://users/{id}", {
+			list: undefined,
+		}),
+		{
+			title: "User Resource",
+			description: "Individual user data by ID",
+		},
+		async (uri, { id }) => {
+			const userId = Number.parseInt(id);
+			const user = dataStore.users.find((u) => u.id === userId);
+
+			if (!user) {
+				throw new Error(\`User with ID \${userId} not found\`);
+			}
+
+			// Include user's posts
+			const userPosts = dataStore.posts.filter((p) => p.authorId === userId);
+			const userData = {
+				...user,
+				posts: userPosts,
+			};
+
+			return {
+				contents: [
+					{
+						uri: uri.href,
+						mimeType: "application/json",
+						text: JSON.stringify(userData, null, 2),
+					},
+				],
+			};
+		},
+	);
+
+	// Individual post resource template
+	server.registerResource(
+		"data_posts_template",
+		new ResourceTemplate("data://posts/{id}", {
+			list: undefined,
+		}),
+		{
+			title: "Post Resource",
+			description: "Individual post data by ID",
+		},
+		async (uri, { id }) => {
+			const postId = Number.parseInt(id);
+			const post = dataStore.posts.find((p) => p.id === postId);
+
+			if (!post) {
+				throw new Error(\`Post with ID \${postId} not found\`);
+			}
+
+			// Include author information
+			const author = dataStore.users.find((u) => u.id === post.authorId);
+			const postData = {
+				...post,
+				author: author ? { name: author.name, email: author.email } : null,
+			};
+
+			return {
+				contents: [
+					{
+						uri: uri.href,
+						mimeType: "application/json",
+						text: JSON.stringify(postData, null, 2),
+					},
+				],
+			};
+		},
+	);
+
+	// Dynamic report template
+	server.registerResource(
+		"reports",
+		new ResourceTemplate("reports://{type}/{format}", {
+			list: undefined,
+		}),
+		{
+			title: "Dynamic Reports",
+			description: "Generate various reports in different formats",
+		},
+		async (uri, { type, format }) => {
+			let reportData;
+			let mimeType;
+
+			// Generate report based on type
+			switch (type) {
+				case "users":
+					reportData = {
+						title: "User Report",
+						generated: new Date().toISOString(),
+						summary: {
+							total: dataStore.users.length,
+							admins: dataStore.users.filter((u) => u.role === "admin").length,
+							users: dataStore.users.filter((u) => u.role === "user").length,
+						},
+						users: dataStore.users,
+					};
+					break;
+				case "posts":
+					reportData = {
+						title: "Posts Report",
+						generated: new Date().toISOString(),
+						summary: {
+							total: dataStore.posts.length,
+							byAuthor: dataStore.users.map((u) => ({
+								author: u.name,
+								count: dataStore.posts.filter((p) => p.authorId === u.id)
+									.length,
+							})),
+						},
+						posts: dataStore.posts,
+					};
+					break;
+				default:
+					throw new Error(\`Unknown report type: \${type}\`);
+			}
+
+			// Format the report
+			let content;
+			switch (format) {
+				case "json":
+					mimeType = "application/json";
+					content = JSON.stringify(reportData, null, 2);
+					break;
+				case "csv":
+					mimeType = "text/csv";
+					if (type === "users") {
+						content =
+							"ID,Name,Email,Role\\n" +
+							dataStore.users
+								.map((u) => \`\${u.id},\${u.name},\${u.email},\${u.role}\`)
+								.join("\\n");
+					} else {
+						content =
+							"ID,Title,Author ID\\n" +
+							dataStore.posts
+								.map((p) => \`\${p.id},\${p.title},\${p.authorId}\`)
+								.join("\\n");
+					}
+					break;
+				case "txt":
+					mimeType = "text/plain";
+					content = \`\${reportData.title}\\nGenerated: \${reportData.generated}\\n\\n\${JSON.stringify(reportData.summary, null, 2)}\`;
+					break;
+				default:
+					throw new Error(\`Unknown format: \${format}\`);
+			}
+
+			return {
+				contents: [
+					{
+						uri: uri.href,
+						mimeType,
+						text: content,
+					},
+				],
+			};
+		},
+	);
+
+	// ===== PROMPTS =====
+
+	server.registerPrompt(
+		"simple_greeting",
+		{
+			title: "Simple Greeting",
+			description: "A basic greeting prompt",
+		},
+		() => ({
+			messages: [
+				{
+					role: "user",
+					content: {
+						type: "text",
+						text: "Please greet the user in a friendly and professional manner.",
+					},
+				},
+			],
+		}),
+	);
+
+	server.registerPrompt(
+		"analyze_user_data",
+		{
+			title: "Analyze User Data",
+			description: "Analyze user data with specific parameters",
+			argsSchema: {
+				userId: z.number().describe("ID of the user to analyze"),
+				includeStats: z
+					.boolean()
+					.default(true)
+					.describe("Include statistical analysis"),
+			},
+		},
+		({ userId, includeStats }) => ({
+			messages: [
+				{
+					role: "user",
+					content: {
+						type: "text",
+						text: \`Please analyze the user data for user ID \${userId}.\${includeStats ? " Include detailed statistics and insights." : " Provide a basic summary only."}\`,
+					},
+				},
+				{
+					role: "user",
+					content: {
+						type: "resource",
+						uri: \`data://users/\${userId}\`,
+					},
+				},
+			],
+		}),
+	);
+
+	server.registerPrompt(
+		"summarize_post",
+		{
+			title: "Summarize Post",
+			description: "Generate a summary of a specific post",
+			argsSchema: {
+				postId: z.number().describe("ID of the post to summarize"),
+			},
+		},
+		({ postId }) => ({
+			messages: [
+				{
+					role: "user",
+					content: {
+						type: "text",
+						text: "Please provide a concise summary of the following post:",
+					},
+				},
+				{
+					role: "user",
+					content: {
+						type: "resource",
+						uri: \`data://posts/\${postId}\`,
+					},
+				},
+			],
+		}),
+	);
+
+	return server;
+};
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/editor/views/textarea.js":{content:`const cm = {
+	core: () => import("https://esm.sh/@codemirror/state"),
+	view: () => import("https://esm.sh/@codemirror/view"),
+	commands: () => import("https://esm.sh/@codemirror/commands"),
+	language: () => import("https://esm.sh/@codemirror/language"),
+	theme: () => import("https://esm.sh/@fsegurai/codemirror-theme-gruvbox-dark"),
+	lang: {
+		typescript: () => import("https://esm.sh/@codemirror/lang-javascript"),
+		javascript: () => import("https://esm.sh/@codemirror/lang-javascript"),
+		css: () => import("https://esm.sh/@codemirror/lang-css"),
+		html: () => import("https://esm.sh/@codemirror/lang-html"),
+	},
+};
+
+export default ({ T }) => ({
+	tag: "textarea",
+	class: "flex flex-grow",
+	style: true,
+	properties: {
+		content: T.string(),
+		language: T.string(),
+		onUpdate: T.function(),
+	},
+
+	view: null,
+	isUpdatingFromOutside: false,
+
+	async connected() {
+		const parent = this;
+		if (!parent || this.view) return;
+
+		const [
+			{ EditorState },
+			{ EditorView, keymap, lineNumbers, highlightSpecialChars },
+			{ defaultKeymap, history, historyKeymap, indentWithTab },
+			{ indentUnit },
+			{ gruvboxDark }, // Import the new theme
+		] = await Promise.all([
+			cm.core(),
+			cm.view(),
+			cm.commands(),
+			cm.language(),
+			cm.theme(),
+		]);
+
+		const langExtension = [];
+		if (this.language && cm.lang[this.language]) {
+			const langModule = await cm.lang[this.language]();
+			const langFunc = langModule[this.language];
+			console.log({ langFunc, langModule });
+			if (typeof langFunc === "function") {
+				langExtension.push(langFunc());
+			} else {
+				console.warn(
+					\`CodeMirror language function for "\${this.language}" not found.\`,
+				);
+			}
+		}
+
+		const updateListener = EditorView.updateListener.of((update) => {
+			if (update.docChanged && this.onUpdate) {
+				const newContent = update.state.doc.toString();
+				this.isUpdatingFromOutside = true;
+				this.onUpdate(newContent);
+				queueMicrotask(() => {
+					this.isUpdatingFromOutside = false;
+				});
+			}
+		});
+
+		const customFontSize = EditorView.theme({
+			".cm-editor": {
+				fontSize: "12px",
+			},
+		});
+
+		const state = EditorState.create({
+			doc: this.content || "",
+			extensions: [
+				lineNumbers(),
+				highlightSpecialChars(),
+				history(),
+				keymap.of([...defaultKeymap, ...historyKeymap, indentWithTab]),
+				gruvboxDark, // Use the gruvbox dark theme
+				customFontSize,
+				EditorView.lineWrapping,
+				...langExtension,
+				updateListener,
+				indentUnit.of("  "),
+				EditorState.tabSize.of(2),
+			],
+		});
+
+		this.view = new EditorView({ state, parent });
+	},
+
+	updated(changedProperties) {
+		if (
+			this.view &&
+			Object.hasOwn(changedProperties, "content") &&
+			!this.isUpdatingFromOutside
+		) {
+			const currentDoc = this.view.state.doc.toString();
+			if (currentDoc !== this.content) {
+				this.view.dispatch({
+					changes: {
+						from: 0,
+						to: currentDoc.length,
+						insert: this.content || "",
+					},
+				});
+			}
+		}
+	},
+
+	disconnected() {
+		if (this.view) {
+			this.view.destroy();
+			this.view = null;
+		}
+	},
+
+	render() {
+		return null;
+	},
+});
+`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/layout/divider.js":{content:`let throttleTimeout = null;
+let lastEvent = null;
+
+export default ({ html, T }) => ({
+	tag: "uix-divider",
+	style: true,
+	properties: {
+		label: T.string(),
+		vertical: T.boolean(),
+		resizable: T.boolean({ defaultValue: false }),
+	},
+	firstUpdated() {
+		if (this.resizable) {
+			window.addEventListener("pointerdown", this.pointerDown.bind(this));
+		}
+	},
+
+	pointerDown(e) {
+		if (e.target !== this) return;
+		e.preventDefault();
+		this.setPointerCapture(e.pointerId);
+
+		this._startX = e.clientX;
+		this._startY = e.clientY;
+
+		this._prevElem = this.previousElementSibling;
+		this._nextElem = this.nextElementSibling;
+
+		this._prevElemStartWidth = this._prevElem ? this._prevElem.offsetWidth : 0;
+		this._nextElemStartWidth = this._nextElem ? this._nextElem.offsetWidth : 0;
+		this._prevElemStartHeight = this._prevElem
+			? this._prevElem.offsetHeight
+			: 0;
+		this._nextElemStartHeight = this._nextElem
+			? this._nextElem.offsetHeight
+			: 0;
+
+		window.addEventListener("pointermove", this.pointerMove.bind(this));
+		window.addEventListener("pointerup", this.pointerUp.bind(this));
+	},
+	pointerMove(e) {
+		lastEvent = e;
+		if (throttleTimeout) return;
+
+		throttleTimeout = setTimeout(() => {
+			throttleTimeout = null;
+			this.handleMouseMove(lastEvent);
+		}, 15);
+	},
+
+	handleMouseMove(e) {
+		if (!this._prevElem || !this._nextElem) return;
+
+		if (this.vertical) {
+			let dx = e.clientX - this._startX;
+			if (dx > 0) dx += 20;
+			const newPrevWidth = this._prevElemStartWidth + dx;
+			const newNextWidth = this._nextElemStartWidth - dx;
+
+			if (newPrevWidth > 0 && newNextWidth > 0) {
+				this._prevElem.style.flexBasis = \`\${newPrevWidth}px\`;
+				this._nextElem.style.flexBasis = \`\${newNextWidth}px\`;
+			}
+		} else {
+			const dy = e.clientY - this._startY;
+			const newPrevHeight = this._prevElemStartHeight + dy;
+			const newNextHeight = this._nextElemStartHeight - dy;
+
+			if (newPrevHeight > 0 && newNextHeight > 0) {
+				this._prevElem.style.flexBasis = \`\${newPrevHeight}px\`;
+				this._nextElem.style.flexBasis = \`\${newNextHeight}px\`;
+			}
+		}
+	},
+
+	pointerUp(e) {
+		this.releasePointerCapture(e.pointerId);
+		this._startX = null;
+		this._startY = null;
+
+		this._prevElem = null;
+		this._nextElem = null;
+
+		this._prevElemStartWidth = null;
+		this._nextElemStartWidth = null;
+		this._prevElemStartHeight = null;
+		this._nextElemStartHeight = null;
+		window.removeEventListener("pointermove", this.pointerMove.bind(this));
+		window.removeEventListener("pointerup", this.pointerUp.bind(this));
+	},
+
+	render() {
+		return !this.label ? null : html\`<span>\${this.label}</span>\`;
+	},
+});
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/mcp/views/requests.js":{content:`export default ({ html, AI, T }) => {
+	return {
+		properties: {
+			pendingRequests: T.array([]),
+			isLoading: T.boolean(true),
+			isExpanded: T.boolean(false),
+			formValues: T.object({}),
+			requestUnsubscribe: T.object(null),
+		},
+
+		async connected() {
+			this.requestUnsubscribe = AI.onRequestChange(
+				this.loadAllPendingRequests.bind(this),
+			);
+			// Initial load
+			await this.loadAllPendingRequests();
+		},
+
+		disconnected() {
+			if (this.requestUnsubscribe) {
+				this.requestUnsubscribe();
+			}
+		},
+
+		async loadAllPendingRequests() {
+			// Store the count before fetching to detect new requests.
+			const previousRequestCount = this.pendingRequests.length;
+
+			if (!AI.isInitialized || AI.listClients().length === 0) {
+				this.pendingRequests = [];
+				this.isLoading = false;
+				return;
+			}
+
+			this.isLoading = true;
+			try {
+				const [samplings, elicitations] = await Promise.all([
+					AI.listSamplingRequests(),
+					AI.listElicitationRequests(),
+				]);
+
+				// Tag each request with its type ('elicitation' or 'sampling').
+				const elicitationReqs = (elicitations.elicitationRequests || []).map(
+					(req) => ({ ...req, type: "elicitation" }),
+				);
+				const samplingReqs = (samplings.samplingRequests || []).map((req) => ({
+					...req,
+					type: "sampling",
+				}));
+
+				// Combine into a single list.
+				this.pendingRequests = [...elicitationReqs, ...samplingReqs];
+
+				// Automatically expand if new requests have arrived.
+				if (this.pendingRequests.length > previousRequestCount) {
+					this.isExpanded = true;
+				}
+			} catch (error) {
+				console.error("Error loading pending requests:", error);
+				this.pendingRequests = [];
+			} finally {
+				this.isLoading = false;
+			}
+		},
+
+		toggleExpanded() {
+			this.isExpanded = !this.isExpanded;
+		},
+
+		// --- Event Handlers ---
+		// Sampling handlers
+		async handleSamplingResponse(request, action) {
+			try {
+				if (action === "approve") {
+					await AI.approveSamplingRequest({
+						id: request.id,
+						server: request.server,
+					});
+				} else {
+					await AI.rejectSamplingRequest({
+						id: request.id,
+						server: request.server,
+					});
+				}
+			} catch (e) {
+				console.error(\`Failed to \${action} sampling request:\`, e);
+			}
+		},
+
+		// Elicitation handlers
+		handleInput(requestId, fieldName, event, schema) {
+			const newValues = {
+				...(this.formValues?.[requestId] || {}),
+				[fieldName]:
+					schema.type === "boolean"
+						? !!event.target.checked
+						: event.target.value,
+			};
+			this.formValues = { ...this.formValues, [requestId]: newValues };
+		},
+
+		async handleElicitationSubmit(request) {
+			const response = this.formValues[request.id] || {};
+			try {
+				await AI.respondToElicitation({
+					id: request.id,
+					response,
+					server: request.server,
+				});
+				const newFormValues = { ...this.formValues };
+				delete newFormValues[request.id];
+				this.formValues = newFormValues;
+			} catch (e) {
+				console.error("Failed to respond to elicitation:", e);
+			}
+		},
+
+		async handleElicitationDecline(request) {
+			try {
+				await AI.respondToElicitation({
+					id: request.id,
+					response: {},
+					server: request.server,
+					action: "decline",
+				});
+				const newFormValues = { ...this.formValues };
+				delete newFormValues[request.id];
+				this.formValues = newFormValues;
+			} catch (e) {
+				console.error("Failed to decline elicitation:", e);
+			}
+		},
+
+		// --- Render Methods (Updated for unified list) ---
+		renderFormField(req, fieldName, schema) {
+			const value = this.formValues?.[req.id]?.[fieldName] || "";
+			return html\`
+                 <uix-input
+                     label=\${fieldName}
+                     value=\${value}
+                     type=\${schema.enum ? "select" : { boolean: "checkbox", enum: "select" }[schema.type] || "text"}
+                     .options=\${schema.enum}
+                     placeholder=\${schema.description}
+                     @input=\${(e) => this.handleInput(req.id, fieldName, e, schema)}
+                     class="font-mono text-sm w-full"
+                 ></uix-input>
+             \`;
+		},
+
+		renderSamplingRequest(req) {
+			return html\`
+                 <div class="bg-white border border-gray-200 rounded-lg shadow-sm mb-4">
+                     <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                         <div>
+                             <h5 class="font-semibold text-sm mb-2 text-gray-700">Request</h5>
+                             <pre class="text-xs whitespace-pre-wrap bg-gray-800 text-gray-200 p-3 rounded-lg font-mono overflow-auto max-h-48">\${JSON.stringify(req.request, null, 2)}</pre>
+                         </div>
+                         <div>
+                             <h5 class="font-semibold text-sm mb-2 text-gray-700">Response Preview</h5>
+                             <pre class="text-xs whitespace-pre-wrap bg-gray-100 text-gray-800 p-3 rounded-lg font-mono overflow-auto max-h-48">\${JSON.stringify(req.responseStub, null, 2)}</pre>
+                         </div>
+                     </div>
+                     <div class="flex justify-end gap-3 p-3 bg-gray-50 border-t border-gray-200 rounded-b-lg">
+                         <uix-button @click=\${() => this.handleSamplingResponse(req, "reject")} label="Reject" size="small" class="is-danger"></uix-button>
+                         <uix-button @click=\${() => this.handleSamplingResponse(req, "approve")} label="Approve" size="small" class="is-primary"></uix-button>
+                     </div>
+                 </div>
+             \`;
+		},
+
+		renderElicitationRequest(req) {
+			return html\`
+                 <div class="bg-white border border-gray-200 rounded-lg shadow-sm mb-4">
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+                         <div class="pr-4 border-r border-gray-200">
+                             <h5 class="font-semibold text-sm mb-2 text-gray-700">Information Request</h5>
+                             <p class="text-sm text-gray-800 mb-4">\${req.requestText}</p>
+                             <h6 class="font-mono text-xs font-bold text-gray-600 mb-2">Schema</h6>
+                             <pre class="text-xs whitespace-pre-wrap bg-gray-800 text-gray-200 p-3 rounded-lg font-mono overflow-auto max-h-32">\${JSON.stringify(req.schema, null, 2)}</pre>
+                         </div>
+                         <div>
+                             <h5 class="font-semibold text-sm mb-3 text-gray-700">Response Form</h5>
+                             <div class="space-y-3">
+                                 \${Object.entries(req.schema.properties).map(
+																		([fieldName, fieldSchema]) =>
+																			this.renderFormField(
+																				req,
+																				fieldName,
+																				fieldSchema,
+																			),
+																	)}
+                             </div>
+                         </div>
+                     </div>
+                     <div class="flex justify-end gap-3 p-3 bg-gray-50 border-t border-gray-200 rounded-b-lg">
+                         <uix-button @click=\${() => (this.formValues[req.id] = {})} label="Reset" size="small"></uix-button>
+                         <uix-button @click=\${() => this.handleElicitationDecline(req)} label="Decline" size="small" class="is-danger"></uix-button>
+                         <uix-button @click=\${() => this.handleElicitationSubmit(req)} label="Submit" size="small" class="is-primary"></uix-button>
+                     </div>
+                 </div>
+             \`;
+		},
+
+		renderCollapsedBanner() {
+			return html\`
+                <div class="bg-amber-50 border-b-2 border-amber-400 px-4 py-2 flex items-center justify-between cursor-pointer hover:bg-amber-100 transition-colors" @click=\${this.toggleExpanded.bind(this)}>
+                    <div class="flex items-center space-x-3">
+                        <uix-icon name="bell" class="w-5 h-5 text-amber-600 animate-pulse"></uix-icon>
+                        <div>
+                            <!-- SIMPLIFIED: Display total count directly. -->
+                            <span class="font-semibold text-amber-900">
+                                \${this.pendingRequests.length} Pending Request\${this.pendingRequests.length !== 1 ? "s" : ""}
+                            </span>
+                        </div>
+                    </div>
+                    <uix-icon name="chevron-down" class="w-5 h-5 text-amber-600"></uix-icon>
+                </div>
+            \`;
+		},
+
+		renderExpandedPanel() {
+			return html\`
+                <div class="flex flex-col bg-white border-b-2 border-amber-400">
+                    <!-- Header -->
+                    <div class="bg-amber-50 px-4 py-2 flex items-center justify-between border-b border-amber-200">
+                        <div class="flex items-center space-x-3">
+                            <uix-icon name="bell" class="w-5 h-5 text-amber-600"></uix-icon>
+                            <span class="font-semibold text-amber-900">Pending Requests</span>
+                        </div>
+                        <uix-button @click=\${this.toggleExpanded} size="small" ghost>
+                            <uix-icon name="chevron-up" class="w-4 h-4"></uix-icon>
+                        </uix-button>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="flex-1 overflow-auto p-4">
+                        \${
+													this.pendingRequests.length > 0
+														? this.pendingRequests.map((req) =>
+																// Conditionally render based on the request 'type'.
+																req.type === "sampling"
+																	? this.renderSamplingRequest(req)
+																	: this.renderElicitationRequest(req),
+															)
+														: html\`<div class="text-center text-gray-500 py-8">No pending requests</div>\`
+												}
+                    </div>
+                </div>
+            \`;
+		},
+
+		render() {
+			// SIMPLIFIED: Check the length of the unified pendingRequests array.
+			if (this.isLoading || this.pendingRequests.length === 0) {
+				return html\`\`;
+			}
+			return this.isExpanded
+				? this.renderExpandedPanel()
+				: this.renderCollapsedBanner();
+		},
+	};
+};
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/mcp/worker.js":{content:`let ts;
+let tsLibCache = {};
+async function loadCjsModule(url) {
+	try {
+		const response = await fetch(url);
+		if (!response.ok) {
+			throw new Error(\`HTTP error! status: \${response.status}\`);
+		}
+		const scriptText = await response.text();
+
+		// Prepare a fake CJS environment
+		const module = { exports: {} };
+		const exports = module.exports;
+
+		// Wrap the script text in a function and execute it
+		const scriptFunc = new Function("module", "exports", scriptText);
+		scriptFunc(module, exports);
+
+		// If the module uses \`module.exports = ...\`, it will be on module.exports.
+		// If it just uses \`exports.foo = ...\`, it will be on exports.
+		// We check \`module.exports\` first.
+		const exportedModule = module.exports;
+
+		// Sometimes the main export isn't \`default\`, we check if the object is empty.
+		if (Object.keys(exportedModule).length === 0) {
+			return exports;
+		}
+
+		return exportedModule;
+	} catch (error) {
+		console.error(\`Failed to load module from \${url}:\`, error);
+		throw error;
+	}
+}
+
+const loadTypeScript = async () => {
+	if (ts) return;
+	try {
+		const tsModule = await loadCjsModule(
+			"https://unpkg.com/typescript@latest/lib/typescript.js",
+		);
+		ts = tsModule;
+		self.ts = ts;
+		console.log({ ts }, self.ts);
+	} catch (error) {
+		console.error("Failed to load TypeScript:", error);
+	}
+};
+
+const loadTypeScriptLibs = async () => {
+	if (Object.keys(tsLibCache).length > 0) return;
+	const libsToFetch = [
+		"lib.es2020.d.ts",
+		"lib.es2018.d.ts",
+		"lib.es2019.d.ts",
+		"lib.es2019.string.d.ts",
+		"lib.es2019.array.d.ts",
+		"lib.es2019.object.d.ts",
+		"lib.es2020.bigint.d.ts",
+		"lib.es2020.date.d.ts",
+		"lib.es2020.number.d.ts",
+		"lib.es2020.promise.d.ts",
+		"lib.es2020.sharedmemory.d.ts",
+		"lib.es2020.string.d.ts",
+		"lib.es2020.symbol.wellknown.d.ts",
+		"lib.es2015.symbol.d.ts",
+		"lib.es2019.symbol.d.ts",
+		"lib.es2019.intl.d.ts",
+		"lib.es2015.iterable.d.ts",
+		"lib.es2018.intl.d.ts",
+		"lib.es2020.intl.d.ts",
+		"lib.es5.d.ts",
+		"lib.dom.d.ts",
+		"lib.es2017.d.ts",
+		"lib.es2018.asynciterable.d.ts",
+		"lib.es2018.asyncgenerator.d.ts",
+		"lib.es2018.promise.d.ts",
+		"lib.es2018.regexp.d.ts",
+		"lib.es2016.d.ts",
+		"lib.es2017.arraybuffer.d.ts",
+		"lib.es2017.date.d.ts",
+		"lib.es2017.intl.d.ts",
+		"lib.es2017.object.d.ts",
+		"lib.es2017.sharedmemory.d.ts",
+		"lib.es2017.string.d.ts",
+		"lib.es2017.typedarrays.d.ts",
+		"lib.es2015.d.ts",
+		"lib.es2016.array.include.d.ts",
+		"lib.es2016.intl.d.ts",
+		"lib.es2015.symbol.wellknown.d.ts",
+		"lib.es2015.core.d.ts",
+		"lib.es2015.collection.d.ts",
+		"lib.es2015.generator.d.ts",
+		"lib.es2015.promise.d.ts",
+		"lib.es2015.proxy.d.ts",
+		"lib.es2015.reflect.d.ts",
+		"lib.decorators.d.ts",
+		"lib.decorators.legacy.d.ts",
+	];
+
+	try {
+		const promises = libsToFetch.map((lib) =>
+			fetch(\`https://unpkg.com/typescript@latest/lib/\${lib}\`).then((res) => {
+				if (!res.ok) throw new Error(\`Failed to fetch \${lib}\`);
+				return res.text();
+			}),
+		);
+		const contents = await Promise.all(promises);
+		const newCache = {};
+		libsToFetch.forEach((lib, index) => {
+			newCache[lib] = contents[index];
+		});
+
+		return newCache;
+	} catch (e) {
+		console.error(
+			"Could not fetch TypeScript library definitions. Type checking will be less accurate.",
+			e,
+		);
+	}
+};
+
+self.onmessage = async (e) => {
+	const { type, payload } = e.data;
+	switch (type) {
+		case "init":
+			await loadTypeScript();
+			tsLibCache = await loadTypeScriptLibs();
+			break;
+		case "validate": {
+			if (!ts) return;
+			const validationErrors = validate(payload.code, payload.filePath);
+			self.postMessage({
+				type: "validationComplete",
+				payload: { errors: validationErrors },
+			});
+			break;
+		}
+		case "transpile": {
+			if (!ts) {
+				// Fallback if TS isn't loaded yet
+				self.postMessage({
+					type: "transpileComplete",
+					payload: {
+						transpiledCode: payload.code,
+						requestId: payload.requestId,
+					},
+				});
+				return;
+			}
+			const transpiledResult = transpile(payload.code);
+			self.postMessage({
+				type: "transpileComplete",
+				payload: {
+					transpiledCode: transpiledResult,
+					requestId: payload.requestId,
+				},
+			});
+			break;
+		}
+	}
+};
+
+const validate = (code, filePath) => {
+	try {
+		const defaultLibFileName = "lib.es2020.d.ts";
+		const compilerOptions = {
+			target: ts.ScriptTarget.ES2020,
+			module: ts.ModuleKind.CommonJS,
+			allowJs: true,
+			esModuleInterop: true,
+			noEmit: true,
+		};
+
+		const host = {
+			getSourceFile: (fileName, languageVersion) => {
+				const sourceText =
+					tsLibCache[fileName] || (fileName === filePath ? code : undefined);
+				return sourceText !== undefined
+					? ts.createSourceFile(fileName, sourceText, languageVersion)
+					: undefined;
+			},
+			writeFile: () => {},
+			getDefaultLibFileName: () => defaultLibFileName,
+			useCaseSensitiveFileNames: () => false,
+			getCanonicalFileName: (fileName) => fileName,
+			getCurrentDirectory: () => "/",
+			getNewLine: () => "\\n",
+			fileExists: (fileName) => fileName === filePath || !!tsLibCache[fileName],
+			readFile: (fileName) =>
+				fileName === filePath ? code : tsLibCache[fileName],
+		};
+
+		const program = ts.createProgram([filePath], compilerOptions, host);
+		const diagnostics = ts.getPreEmitDiagnostics(program);
+
+		return diagnostics.map((diagnostic) => {
+			const message = ts.flattenDiagnosticMessageText(
+				diagnostic.messageText,
+				"\\n",
+			);
+			if (diagnostic.file && diagnostic.start) {
+				const { line, character } = ts.getLineAndCharacterOfPosition(
+					diagnostic.file,
+					diagnostic.start,
+				);
+				return { line: line + 1, character: character + 1, message };
+			}
+			return { line: 0, character: 0, message };
+		});
+	} catch (error) {
+		console.error("Error during code validation in worker:", error);
+		return [
+			{
+				line: 0,
+				character: 0,
+				message: "An unexpected error occurred during validation.",
+			},
+		];
+	}
+};
+
+const transpile = (code) => {
+	try {
+		const jsResult = ts.transpileModule(code, {
+			compilerOptions: {
+				module: ts.ModuleKind.CommonJS,
+				target: ts.ScriptTarget.ES2020,
+			},
+		});
+		return jsResult.outputText;
+	} catch (error) {
+		console.error("TypeScript compilation failed in worker:", error);
+		return code;
+	}
+};
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/editor/views/textarea.css":{content:`.cm-scroller {
+	overflow: auto !important;
+}
+
+.cm-editor {
+	width: 100%;
+}
+`,mimeType:"text/css",skipSW:!1},"/modules/uix/layout/divider.css":{content:`.uix-divider {
+	--uix-divider-color: rgba(0, 0, 0, 0.05);
+	--uix-divider-size: 2px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+	padding: 0;
+	width: 100%;
+	height: var(--uix-divider-size);
+	span {
+		padding: 0 0.75rem;
+		font-weight: bold;
+		font-size: var(--uix-divider-font-size, 1.5rem);
+	}
+
+	&[resizable] {
+		cursor: row-resize;
+		&[vertical] {
+			cursor: col-resize;
+		}
+	}
+	&::before,
+	&::after {
+		content: "";
+		flex-grow: 1;
+		height: var(--uix-divider-size);
+		background-color: var(--uix-divider-color);
+	}
+	&[label] {
+		padding: var(--uix-divider-padding, 1rem) 0;
+	}
+	&[label]::before,
+	&[label]::after {
+		flex-grow: 1;
+	}
+	&[vertical] {
+		flex-direction: column;
+		width: 1px;
+		height: 100%;
+		background-color: transparent;
+		&::before,
+		&::after {
+			width: 1px;
+			height: auto;
+		}
+		&[label] {
+			padding: 0 var(--uix-divider-padding, 1rem);
+		}
+	}
+}
+`,mimeType:"text/css",skipSW:!1},"/modules/icon-lucide/lucide/server-off.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-5m-5 0L2.5 2.5C2 2 2 2.5 2 5v3a2 2 0 0 0 2 2zm12 7v-1a2 2 0 0 0-2-2h-1M4 14a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h16.5l1-.5l.5.5l-8-8zm2 4h.01M2 2l20 20"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/layout-dashboard.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/wrench.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/terminal.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m4 17l6-6l-6-6m8 14h8"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/database.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/chevron-right.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 18l6-6l-6-6"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/file-text.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4M10 9H8m8 4H8m8 4H8"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/file-code-2.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v4"/><path d="M14 2v4a2 2 0 0 0 2 2h4M5 12l-3 3l3 3m4 0l3-3l-3-3"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/style.css":{content:`@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_P-bnBeA.woff2) format("woff2");unicode-range:U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_G-bnBeA.woff2) format("woff2");unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_B-bnBeA.woff2) format("woff2");unicode-range:U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_N-bnBeA.woff2) format("woff2");unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_M-bnBeA.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_C-bk.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}@supports ((-webkit-hyphens: none) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color:rgb(from red r g b)))){*,:before,:after,::backdrop{--un-bg-opacity:100%;--un-text-opacity:100%;--un-translate-x:initial;--un-translate-y:initial;--un-translate-z:initial;--un-ease:initial;--un-border-opacity:100%;--un-space-x-reverse:initial;--un-space-y-reverse:initial;--un-ring-opacity:100%;--un-placeholder-opacity:100%}}@property --un-text-opacity{syntax:"<percentage>";inherits:false;initial-value:100%;}@property --un-border-opacity{syntax:"<percentage>";inherits:false;initial-value:100%;}@property --un-bg-opacity{syntax:"<percentage>";inherits:false;initial-value:100%;}@property --un-ring-opacity{syntax:"<percentage>";inherits:false;initial-value:100%;}@property --un-inset-ring-color{syntax:"*";inherits:false;}@property --un-inset-ring-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-inset-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-inset-shadow-color{syntax:"*";inherits:false;}@property --un-ring-color{syntax:"*";inherits:false;}@property --un-ring-inset{syntax:"*";inherits:false;}@property --un-ring-offset-color{syntax:"*";inherits:false;}@property --un-ring-offset-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-ring-offset-width{syntax:"<length>";inherits:false;initial-value:0px;}@property --un-ring-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-shadow-color{syntax:"*";inherits:false;}@property --un-translate-x{syntax:"*";inherits:false;initial-value:0;}@property --un-translate-y{syntax:"*";inherits:false;initial-value:0;}@property --un-translate-z{syntax:"*";inherits:false;initial-value:0;}@property --un-ease{syntax:"*";inherits:false;}@property --un-placeholder-opacity{syntax:"<percentage>";inherits:false;initial-value:100%;}@property --un-space-x-reverse{syntax:"*";inherits:false;initial-value:0;}@property --un-space-y-reverse{syntax:"*";inherits:false;initial-value:0;}:root,:host{--spacing: .25rem;--font-sans: "Manrope",ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";--font-serif: ui-serif,Georgia,Cambria,"Times New Roman",Times,serif;--font-mono: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;--font-family: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;--font-icon-family: lucide;--colors-black: #000;--colors-white: #fff;--colors-slate-50: oklch(98.4% .003 247.858);--colors-slate-100: oklch(96.8% .007 247.896);--colors-slate-200: oklch(92.9% .013 255.508);--colors-slate-300: oklch(86.9% .022 252.894);--colors-slate-400: oklch(70.4% .04 256.788);--colors-slate-500: oklch(55.4% .046 257.417);--colors-slate-600: oklch(44.6% .043 257.281);--colors-slate-700: oklch(37.2% .044 257.287);--colors-slate-800: oklch(27.9% .041 260.031);--colors-slate-900: oklch(20.8% .042 265.755);--colors-slate-950: oklch(12.9% .042 264.695);--colors-slate-DEFAULT: oklch(70.4% .04 256.788);--colors-gray-50: oklch(98.5% .002 247.839);--colors-gray-100: oklch(96.7% .003 264.542);--colors-gray-200: oklch(92.8% .006 264.531);--colors-gray-300: oklch(87.2% .01 258.338);--colors-gray-400: oklch(70.7% .022 261.325);--colors-gray-500: oklch(55.1% .027 264.364);--colors-gray-600: oklch(44.6% .03 256.802);--colors-gray-700: oklch(37.3% .034 259.733);--colors-gray-800: oklch(27.8% .033 256.848);--colors-gray-900: oklch(21% .034 264.665);--colors-gray-950: oklch(13% .028 261.692);--colors-gray-DEFAULT: oklch(70.7% .022 261.325);--colors-zinc-50: oklch(98.5% 0 0);--colors-zinc-100: oklch(96.7% .001 286.375);--colors-zinc-200: oklch(92% .004 286.32);--colors-zinc-300: oklch(87.1% .006 286.286);--colors-zinc-400: oklch(70.5% .015 286.067);--colors-zinc-500: oklch(55.2% .016 285.938);--colors-zinc-600: oklch(44.2% .017 285.786);--colors-zinc-700: oklch(37% .013 285.805);--colors-zinc-800: oklch(27.4% .006 286.033);--colors-zinc-900: oklch(21% .006 285.885);--colors-zinc-950: oklch(14.1% .005 285.823);--colors-zinc-DEFAULT: oklch(70.5% .015 286.067);--colors-neutral-50: oklch(98.5% 0 0);--colors-neutral-100: oklch(97% 0 0);--colors-neutral-200: oklch(92.2% 0 0);--colors-neutral-300: oklch(87% 0 0);--colors-neutral-400: oklch(70.8% 0 0);--colors-neutral-500: oklch(55.6% 0 0);--colors-neutral-600: oklch(43.9% 0 0);--colors-neutral-700: oklch(37.1% 0 0);--colors-neutral-800: oklch(26.9% 0 0);--colors-neutral-900: oklch(20.5% 0 0);--colors-neutral-950: oklch(14.5% 0 0);--colors-neutral-DEFAULT: oklch(70.8% 0 0);--colors-stone-50: oklch(98.5% .001 106.423);--colors-stone-100: oklch(97% .001 106.424);--colors-stone-200: oklch(92.3% .003 48.717);--colors-stone-300: oklch(86.9% .005 56.366);--colors-stone-400: oklch(70.9% .01 56.259);--colors-stone-500: oklch(55.3% .013 58.071);--colors-stone-600: oklch(44.4% .011 73.639);--colors-stone-700: oklch(37.4% .01 67.558);--colors-stone-800: oklch(26.8% .007 34.298);--colors-stone-900: oklch(21.6% .006 56.043);--colors-stone-950: oklch(14.7% .004 49.25);--colors-stone-DEFAULT: oklch(70.9% .01 56.259);--colors-red-50: oklch(97.1% .013 17.38);--colors-red-100: oklch(93.6% .032 17.717);--colors-red-200: oklch(88.5% .062 18.334);--colors-red-300: oklch(80.8% .114 19.571);--colors-red-400: oklch(70.4% .191 22.216);--colors-red-500: oklch(63.7% .237 25.331);--colors-red-600: oklch(57.7% .245 27.325);--colors-red-700: oklch(50.5% .213 27.518);--colors-red-800: oklch(44.4% .177 26.899);--colors-red-900: oklch(39.6% .141 25.723);--colors-red-950: oklch(25.8% .092 26.042);--colors-red-DEFAULT: oklch(70.4% .191 22.216);--colors-orange-50: oklch(98% .016 73.684);--colors-orange-100: oklch(95.4% .038 75.164);--colors-orange-200: oklch(90.1% .076 70.697);--colors-orange-300: oklch(83.7% .128 66.29);--colors-orange-400: oklch(75% .183 55.934);--colors-orange-500: oklch(70.5% .213 47.604);--colors-orange-600: oklch(64.6% .222 41.116);--colors-orange-700: oklch(55.3% .195 38.402);--colors-orange-800: oklch(47% .157 37.304);--colors-orange-900: oklch(40.8% .123 38.172);--colors-orange-950: oklch(26.6% .079 36.259);--colors-orange-DEFAULT: oklch(75% .183 55.934);--colors-amber-50: oklch(98.7% .022 95.277);--colors-amber-100: oklch(96.2% .059 95.617);--colors-amber-200: oklch(92.4% .12 95.746);--colors-amber-300: oklch(87.9% .169 91.605);--colors-amber-400: oklch(82.8% .189 84.429);--colors-amber-500: oklch(76.9% .188 70.08);--colors-amber-600: oklch(66.6% .179 58.318);--colors-amber-700: oklch(55.5% .163 48.998);--colors-amber-800: oklch(47.3% .137 46.201);--colors-amber-900: oklch(41.4% .112 45.904);--colors-amber-950: oklch(27.9% .077 45.635);--colors-amber-DEFAULT: oklch(82.8% .189 84.429);--colors-yellow-50: oklch(98.7% .026 102.212);--colors-yellow-100: oklch(97.3% .071 103.193);--colors-yellow-200: oklch(94.5% .129 101.54);--colors-yellow-300: oklch(90.5% .182 98.111);--colors-yellow-400: oklch(85.2% .199 91.936);--colors-yellow-500: oklch(79.5% .184 86.047);--colors-yellow-600: oklch(68.1% .162 75.834);--colors-yellow-700: oklch(55.4% .135 66.442);--colors-yellow-800: oklch(47.6% .114 61.907);--colors-yellow-900: oklch(42.1% .095 57.708);--colors-yellow-950: oklch(28.6% .066 53.813);--colors-yellow-DEFAULT: oklch(85.2% .199 91.936);--colors-lime-50: oklch(98.6% .031 120.757);--colors-lime-100: oklch(96.7% .067 122.328);--colors-lime-200: oklch(93.8% .127 124.321);--colors-lime-300: oklch(89.7% .196 126.665);--colors-lime-400: oklch(84.1% .238 128.85);--colors-lime-500: oklch(76.8% .233 130.85);--colors-lime-600: oklch(64.8% .2 131.684);--colors-lime-700: oklch(53.2% .157 131.589);--colors-lime-800: oklch(45.3% .124 130.933);--colors-lime-900: oklch(40.5% .101 131.063);--colors-lime-950: oklch(27.4% .072 132.109);--colors-lime-DEFAULT: oklch(84.1% .238 128.85);--colors-green-50: oklch(98.2% .018 155.826);--colors-green-100: oklch(96.2% .044 156.743);--colors-green-200: oklch(92.5% .084 155.995);--colors-green-300: oklch(87.1% .15 154.449);--colors-green-400: oklch(79.2% .209 151.711);--colors-green-500: oklch(72.3% .219 149.579);--colors-green-600: oklch(62.7% .194 149.214);--colors-green-700: oklch(52.7% .154 150.069);--colors-green-800: oklch(44.8% .119 151.328);--colors-green-900: oklch(39.3% .095 152.535);--colors-green-950: oklch(26.6% .065 152.934);--colors-green-DEFAULT: oklch(79.2% .209 151.711);--colors-emerald-50: oklch(97.9% .021 166.113);--colors-emerald-100: oklch(95% .052 163.051);--colors-emerald-200: oklch(90.5% .093 164.15);--colors-emerald-300: oklch(84.5% .143 164.978);--colors-emerald-400: oklch(76.5% .177 163.223);--colors-emerald-500: oklch(69.6% .17 162.48);--colors-emerald-600: oklch(59.6% .145 163.225);--colors-emerald-700: oklch(50.8% .118 165.612);--colors-emerald-800: oklch(43.2% .095 166.913);--colors-emerald-900: oklch(37.8% .077 168.94);--colors-emerald-950: oklch(26.2% .051 172.552);--colors-emerald-DEFAULT: oklch(76.5% .177 163.223);--colors-teal-50: oklch(98.4% .014 180.72);--colors-teal-100: oklch(95.3% .051 180.801);--colors-teal-200: oklch(91% .096 180.426);--colors-teal-300: oklch(85.5% .138 181.071);--colors-teal-400: oklch(77.7% .152 181.912);--colors-teal-500: oklch(70.4% .14 182.503);--colors-teal-600: oklch(60% .118 184.704);--colors-teal-700: oklch(51.1% .096 186.391);--colors-teal-800: oklch(43.7% .078 188.216);--colors-teal-900: oklch(38.6% .063 188.416);--colors-teal-950: oklch(27.7% .046 192.524);--colors-teal-DEFAULT: oklch(77.7% .152 181.912);--colors-cyan-50: oklch(98.4% .019 200.873);--colors-cyan-100: oklch(95.6% .045 203.388);--colors-cyan-200: oklch(91.7% .08 205.041);--colors-cyan-300: oklch(86.5% .127 207.078);--colors-cyan-400: oklch(78.9% .154 211.53);--colors-cyan-500: oklch(71.5% .143 215.221);--colors-cyan-600: oklch(60.9% .126 221.723);--colors-cyan-700: oklch(52% .105 223.128);--colors-cyan-800: oklch(45% .085 224.283);--colors-cyan-900: oklch(39.8% .07 227.392);--colors-cyan-950: oklch(30.2% .056 229.695);--colors-cyan-DEFAULT: oklch(78.9% .154 211.53);--colors-sky-50: oklch(97.7% .013 236.62);--colors-sky-100: oklch(95.1% .026 236.824);--colors-sky-200: oklch(90.1% .058 230.902);--colors-sky-300: oklch(82.8% .111 230.318);--colors-sky-400: oklch(74.6% .16 232.661);--colors-sky-500: oklch(68.5% .169 237.323);--colors-sky-600: oklch(58.8% .158 241.966);--colors-sky-700: oklch(50% .134 242.749);--colors-sky-800: oklch(44.3% .11 240.79);--colors-sky-900: oklch(39.1% .09 240.876);--colors-sky-950: oklch(29.3% .066 243.157);--colors-sky-DEFAULT: oklch(74.6% .16 232.661);--colors-blue-50: oklch(97% .014 254.604);--colors-blue-100: oklch(93.2% .032 255.585);--colors-blue-200: oklch(88.2% .059 254.128);--colors-blue-300: oklch(80.9% .105 251.813);--colors-blue-400: oklch(70.7% .165 254.624);--colors-blue-500: oklch(62.3% .214 259.815);--colors-blue-600: oklch(54.6% .245 262.881);--colors-blue-700: oklch(48.8% .243 264.376);--colors-blue-800: oklch(42.4% .199 265.638);--colors-blue-900: oklch(37.9% .146 265.522);--colors-blue-950: oklch(28.2% .091 267.935);--colors-blue-DEFAULT: oklch(70.7% .165 254.624);--colors-indigo-50: oklch(96.2% .018 272.314);--colors-indigo-100: oklch(93% .034 272.788);--colors-indigo-200: oklch(87% .065 274.039);--colors-indigo-300: oklch(78.5% .115 274.713);--colors-indigo-400: oklch(67.3% .182 276.935);--colors-indigo-500: oklch(58.5% .233 277.117);--colors-indigo-600: oklch(51.1% .262 276.966);--colors-indigo-700: oklch(45.7% .24 277.023);--colors-indigo-800: oklch(39.8% .195 277.366);--colors-indigo-900: oklch(35.9% .144 278.697);--colors-indigo-950: oklch(25.7% .09 281.288);--colors-indigo-DEFAULT: oklch(67.3% .182 276.935);--colors-violet-50: oklch(96.9% .016 293.756);--colors-violet-100: oklch(94.3% .029 294.588);--colors-violet-200: oklch(89.4% .057 293.283);--colors-violet-300: oklch(81.1% .111 293.571);--colors-violet-400: oklch(70.2% .183 293.541);--colors-violet-500: oklch(60.6% .25 292.717);--colors-violet-600: oklch(54.1% .281 293.009);--colors-violet-700: oklch(49.1% .27 292.581);--colors-violet-800: oklch(43.2% .232 292.759);--colors-violet-900: oklch(38% .189 293.745);--colors-violet-950: oklch(28.3% .141 291.089);--colors-violet-DEFAULT: oklch(70.2% .183 293.541);--colors-purple-50: oklch(97.7% .014 308.299);--colors-purple-100: oklch(94.6% .033 307.174);--colors-purple-200: oklch(90.2% .063 306.703);--colors-purple-300: oklch(82.7% .119 306.383);--colors-purple-400: oklch(71.4% .203 305.504);--colors-purple-500: oklch(62.7% .265 303.9);--colors-purple-600: oklch(55.8% .288 302.321);--colors-purple-700: oklch(49.6% .265 301.924);--colors-purple-800: oklch(43.8% .218 303.724);--colors-purple-900: oklch(38.1% .176 304.987);--colors-purple-950: oklch(29.1% .149 302.717);--colors-purple-DEFAULT: oklch(71.4% .203 305.504);--colors-fuchsia-50: oklch(97.7% .017 320.058);--colors-fuchsia-100: oklch(95.2% .037 318.852);--colors-fuchsia-200: oklch(90.3% .076 319.62);--colors-fuchsia-300: oklch(83.3% .145 321.434);--colors-fuchsia-400: oklch(74% .238 322.16);--colors-fuchsia-500: oklch(66.7% .295 322.15);--colors-fuchsia-600: oklch(59.1% .293 322.896);--colors-fuchsia-700: oklch(51.8% .253 323.949);--colors-fuchsia-800: oklch(45.2% .211 324.591);--colors-fuchsia-900: oklch(40.1% .17 325.612);--colors-fuchsia-950: oklch(29.3% .136 325.661);--colors-fuchsia-DEFAULT: oklch(74% .238 322.16);--colors-pink-50: oklch(97.1% .014 343.198);--colors-pink-100: oklch(94.8% .028 342.258);--colors-pink-200: oklch(89.9% .061 343.231);--colors-pink-300: oklch(82.3% .12 346.018);--colors-pink-400: oklch(71.8% .202 349.761);--colors-pink-500: oklch(65.6% .241 354.308);--colors-pink-600: oklch(59.2% .249 .584);--colors-pink-700: oklch(52.5% .223 3.958);--colors-pink-800: oklch(45.9% .187 3.815);--colors-pink-900: oklch(40.8% .153 2.432);--colors-pink-950: oklch(28.4% .109 3.907);--colors-pink-DEFAULT: oklch(71.8% .202 349.761);--colors-rose-50: oklch(96.9% .015 12.422);--colors-rose-100: oklch(94.1% .03 12.58);--colors-rose-200: oklch(89.2% .058 10.001);--colors-rose-300: oklch(81% .117 11.638);--colors-rose-400: oklch(71.2% .194 13.428);--colors-rose-500: oklch(64.5% .246 16.439);--colors-rose-600: oklch(58.6% .253 17.585);--colors-rose-700: oklch(51.4% .222 16.935);--colors-rose-800: oklch(45.5% .188 13.697);--colors-rose-900: oklch(41% .159 10.272);--colors-rose-950: oklch(27.1% .105 12.094);--colors-rose-DEFAULT: oklch(71.2% .194 13.428);--colors-light-50: oklch(99.4% 0 0);--colors-light-100: oklch(99.11% 0 0);--colors-light-200: oklch(98.51% 0 0);--colors-light-300: oklch(98.16% .0017 247.84);--colors-light-400: oklch(97.31% 0 0);--colors-light-500: oklch(96.12% 0 0);--colors-light-600: oklch(96.32% .0034 247.86);--colors-light-700: oklch(94.17% .0052 247.88);--colors-light-800: oklch(91.09% .007 247.9);--colors-light-900: oklch(90.72% .0051 228.82);--colors-light-950: oklch(89.23% .006 239.83);--colors-light-DEFAULT: oklch(97.31% 0 0);--colors-dark-50: oklch(40.91% 0 0);--colors-dark-100: oklch(35.62% 0 0);--colors-dark-200: oklch(31.71% 0 0);--colors-dark-300: oklch(29.72% 0 0);--colors-dark-400: oklch(25.2% 0 0);--colors-dark-500: oklch(23.93% 0 0);--colors-dark-600: oklch(22.73% .0038 286.09);--colors-dark-700: oklch(22.21% 0 0);--colors-dark-800: oklch(20.9% 0 0);--colors-dark-900: oklch(16.84% 0 0);--colors-dark-950: oklch(13.44% 0 0);--colors-dark-DEFAULT: oklch(25.2% 0 0);--colors-primary-50: hsl(198, 100%, 97%);--colors-primary-100: hsl(198, 100%, 92%);--colors-primary-200: hsl(198, 100%, 84%);--colors-primary-300: hsl(198, 100%, 75%);--colors-primary-400: hsl(198, 100%, 66%);--colors-primary-500: hsl(198, 100%, 55%);--colors-primary-600: hsl(198, 100%, 45%);--colors-primary-700: hsl(198, 100%, 35%);--colors-primary-800: hsl(198, 100%, 24%);--colors-primary-900: hsl(198, 100%, 15%);--colors-primary-DEFAULT: hsl(198, 100%, 55%);--colors-secondary-50: hsl(120, 100%, 97%);--colors-secondary-100: hsl(120, 100%, 92%);--colors-secondary-200: hsl(120, 100%, 84%);--colors-secondary-300: hsl(120, 100%, 75%);--colors-secondary-400: hsl(120, 100%, 66%);--colors-secondary-500: hsl(120, 100%, 55%);--colors-secondary-600: hsl(120, 100%, 45%);--colors-secondary-700: hsl(120, 100%, 35%);--colors-secondary-800: hsl(120, 100%, 24%);--colors-secondary-900: hsl(120, 100%, 15%);--colors-secondary-DEFAULT: hsl(120, 100%, 55%);--colors-tertiary-50: hsl(175, 100%, 97%);--colors-tertiary-100: hsl(175, 100%, 92%);--colors-tertiary-200: hsl(175, 100%, 84%);--colors-tertiary-300: hsl(175, 100%, 75%);--colors-tertiary-400: hsl(175, 100%, 66%);--colors-tertiary-500: hsl(175, 100%, 55%);--colors-tertiary-600: hsl(175, 100%, 45%);--colors-tertiary-700: hsl(175, 100%, 35%);--colors-tertiary-800: hsl(175, 100%, 24%);--colors-tertiary-900: hsl(175, 100%, 15%);--colors-tertiary-DEFAULT: hsl(175, 100%, 55%);--colors-success-50: hsl(149, 87%, 97%);--colors-success-100: hsl(149, 87%, 92%);--colors-success-200: hsl(149, 87%, 84%);--colors-success-300: hsl(149, 87%, 75%);--colors-success-400: hsl(149, 87%, 66%);--colors-success-500: hsl(149, 87%, 55%);--colors-success-600: hsl(149, 87%, 45%);--colors-success-700: hsl(149, 87%, 35%);--colors-success-800: hsl(149, 87%, 24%);--colors-success-900: hsl(149, 87%, 15%);--colors-success-DEFAULT: hsl(149, 87%, 55%);--colors-warning-50: hsl(32, 100%, 97%);--colors-warning-100: hsl(32, 100%, 92%);--colors-warning-200: hsl(32, 100%, 84%);--colors-warning-300: hsl(32, 100%, 75%);--colors-warning-400: hsl(32, 100%, 66%);--colors-warning-500: hsl(32, 100%, 55%);--colors-warning-600: hsl(32, 100%, 45%);--colors-warning-700: hsl(32, 100%, 35%);--colors-warning-800: hsl(32, 100%, 24%);--colors-warning-900: hsl(32, 100%, 15%);--colors-warning-DEFAULT: hsl(32, 100%, 55%);--colors-danger-50: hsl(345, 100%, 97%);--colors-danger-100: hsl(345, 100%, 92%);--colors-danger-200: hsl(345, 100%, 84%);--colors-danger-300: hsl(345, 100%, 75%);--colors-danger-400: hsl(345, 100%, 66%);--colors-danger-500: hsl(345, 100%, 55%);--colors-danger-600: hsl(345, 100%, 45%);--colors-danger-700: hsl(345, 100%, 35%);--colors-danger-800: hsl(345, 100%, 24%);--colors-danger-900: hsl(345, 100%, 15%);--colors-danger-DEFAULT: hsl(345, 100%, 55%);--colors-default-50: hsl(0, 0%, 97%);--colors-default-100: hsl(0, 0%, 92%);--colors-default-200: hsl(0, 0%, 84%);--colors-default-300: hsl(0, 0%, 75%);--colors-default-400: hsl(0, 0%, 66%);--colors-default-500: hsl(0, 0%, 55%);--colors-default-600: hsl(0, 0%, 45%);--colors-default-700: hsl(0, 0%, 35%);--colors-default-800: hsl(0, 0%, 24%);--colors-default-900: hsl(0, 0%, 15%);--colors-default-DEFAULT: hsl(0, 0%, 35%);--colors-surface-50: hsl(0, 0%, 97%);--colors-surface-100: hsl(0, 0%, 92%);--colors-surface-200: hsl(0, 0%, 84%);--colors-surface-300: hsl(0, 0%, 75%);--colors-surface-400: hsl(0, 0%, 66%);--colors-surface-500: hsl(0, 0%, 55%);--colors-surface-600: hsl(0, 0%, 45%);--colors-surface-700: hsl(0, 0%, 35%);--colors-surface-800: hsl(0, 0%, 24%);--colors-surface-900: hsl(0, 0%, 15%);--colors-surface-DEFAULT: hsl(0, 0%, 35%);--text-xs-fontSize: .75rem;--text-xs-lineHeight: 1rem;--text-sm-fontSize: .875rem;--text-sm-lineHeight: 1.25rem;--text-base-fontSize: 1rem;--text-base-lineHeight: 1.5rem;--text-lg-fontSize: 1.125rem;--text-lg-lineHeight: 1.75rem;--text-xl-fontSize: 1.25rem;--text-xl-lineHeight: 1.75rem;--text-2xl-fontSize: 1.5rem;--text-2xl-lineHeight: 2rem;--text-3xl-fontSize: 1.875rem;--text-3xl-lineHeight: 2.25rem;--text-4xl-fontSize: 2.25rem;--text-4xl-lineHeight: 2.5rem;--text-5xl-fontSize: 3rem;--text-5xl-lineHeight: 1;--text-6xl-fontSize: 3.75rem;--text-6xl-lineHeight: 1;--text-7xl-fontSize: 4.5rem;--text-7xl-lineHeight: 1;--text-8xl-fontSize: 6rem;--text-8xl-lineHeight: 1;--text-9xl-fontSize: 8rem;--text-9xl-lineHeight: 1;--text-color: var(--color-surface-100);--fontWeight-thin: 100;--fontWeight-extralight: 200;--fontWeight-light: 300;--fontWeight-normal: 400;--fontWeight-medium: 500;--fontWeight-semibold: 600;--fontWeight-bold: 700;--fontWeight-extrabold: 800;--fontWeight-black: 900;--tracking-tighter: -.05em;--tracking-tight: -.025em;--tracking-normal: 0em;--tracking-wide: .025em;--tracking-wider: .05em;--tracking-widest: .1em;--leading-none: 1;--leading-tight: 1.25;--leading-snug: 1.375;--leading-normal: 1.5;--leading-relaxed: 1.625;--leading-loose: 2;--textStrokeWidth-DEFAULT: 1.5rem;--textStrokeWidth-none: 0;--textStrokeWidth-sm: thin;--textStrokeWidth-md: medium;--textStrokeWidth-lg: thick;--radius-DEFAULT: .25rem;--radius-none: 0;--radius-xs: .125rem;--radius-sm: .25rem;--radius-md: .375rem;--radius-lg: .5rem;--radius-xl: .75rem;--radius-2xl: 1rem;--radius-3xl: 1.5rem;--radius-4xl: 2rem;--ease-linear: linear;--ease-in: cubic-bezier(.4, 0, 1, 1);--ease-out: cubic-bezier(0, 0, .2, 1);--ease-in-out: cubic-bezier(.4, 0, .2, 1);--ease-DEFAULT: cubic-bezier(.4, 0, .2, 1);--blur-DEFAULT: 8px;--blur-xs: 4px;--blur-sm: 8px;--blur-md: 12px;--blur-lg: 16px;--blur-xl: 24px;--blur-2xl: 40px;--blur-3xl: 64px;--perspective-dramatic: 100px;--perspective-near: 300px;--perspective-normal: 500px;--perspective-midrange: 800px;--perspective-distant: 1200px;--default-transition-duration: .15s;--default-transition-timingFunction: cubic-bezier(.4, 0, .2, 1);--default-font-family: var(--font-sans);--default-font-featureSettings: var(--font-sans--font-feature-settings);--default-font-variationSettings: var(--font-sans--font-variation-settings);--default-monoFont-family: var(--font-mono);--default-monoFont-featureSettings: var(--font-mono--font-feature-settings);--default-monoFont-variationSettings: var(--font-mono--font-variation-settings);--container-3xs: 16rem;--container-2xs: 18rem;--container-xs: 20rem;--container-sm: 24rem;--container-md: 28rem;--container-lg: 32rem;--container-xl: 36rem;--container-2xl: 42rem;--container-3xl: 48rem;--container-4xl: 56rem;--container-5xl: 64rem;--container-6xl: 72rem;--container-7xl: 80rem;--container-prose: 65ch;--background-color: var(--colors-primary-100);--boxShadow-md: 0 4px 6px -1px rgb(0 0 0 / .1), 0 2px 4px -2px rgb(0 0 0 / .1);--boxShadow-lg: 0 10px 15px -3px rgb(0 0 0 / .1), 0 4px 6px -4px rgb(0 0 0 / .1);--theme-font-family: "Manrope"}*,:after,:before,::backdrop,::file-selector-button{box-sizing:border-box;margin:0;padding:0;border:0 solid}html,:host{line-height:1.5;-webkit-text-size-adjust:100%;tab-size:4;font-family:var( --default-font-family, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" );font-feature-settings:var(--default-font-featureSettings, normal);font-variation-settings:var(--default-font-variationSettings, normal);-webkit-tap-highlight-color:transparent}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;-webkit-text-decoration:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,samp,pre{font-family:var( --default-monoFont-family, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace );font-feature-settings:var(--default-monoFont-featureSettings, normal);font-variation-settings:var(--default-monoFont-variationSettings, normal);font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}:-moz-focusring{outline:auto}progress{vertical-align:baseline}summary{display:list-item}ol,ul,menu{list-style:none}img,svg,video,canvas,audio,iframe,embed,object{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}button,input,select,optgroup,textarea,::file-selector-button{font:inherit;font-feature-settings:inherit;font-variation-settings:inherit;letter-spacing:inherit;color:inherit;border-radius:0;background-color:transparent;opacity:1}:where(select:is([multiple],[size])) optgroup{font-weight:bolder}:where(select:is([multiple],[size])) optgroup option{padding-inline-start:20px}::file-selector-button{margin-inline-end:4px}::placeholder{opacity:1}@supports (not (-webkit-appearance: -apple-pay-button)) or (contain-intrinsic-size: 1px){::placeholder{color:color-mix(in oklab,currentcolor 50%,transparent)}}textarea{resize:vertical}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-date-and-time-value{min-height:1lh;text-align:inherit}::-webkit-datetime-edit{display:inline-flex}::-webkit-datetime-edit-fields-wrapper{padding:0}::-webkit-datetime-edit,::-webkit-datetime-edit-year-field,::-webkit-datetime-edit-month-field,::-webkit-datetime-edit-day-field,::-webkit-datetime-edit-hour-field,::-webkit-datetime-edit-minute-field,::-webkit-datetime-edit-second-field,::-webkit-datetime-edit-millisecond-field,::-webkit-datetime-edit-meridiem-field{padding-block:0}:-moz-ui-invalid{box-shadow:none}button,input:where([type=button],[type=reset],[type=submit]),::file-selector-button{appearance:button}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[hidden]:where(:not([hidden=until-found])){display:none!important}.container{width:100%}@media (min-width: 40rem){.container{max-width:40rem}}@media (min-width: 48rem){.container{max-width:48rem}}@media (min-width: 64rem){.container{max-width:64rem}}@media (min-width: 80rem){.container{max-width:80rem}}@media (min-width: 96rem){.container{max-width:96rem}}.text-2xl{font-size:var(--text-2xl-fontSize);line-height:var(--un-leading, var(--text-2xl-lineHeight))}.text-3xl{font-size:var(--text-3xl-fontSize);line-height:var(--un-leading, var(--text-3xl-lineHeight))}.text-4xl{font-size:var(--text-4xl-fontSize);line-height:var(--un-leading, var(--text-4xl-lineHeight))}.text-5xl{font-size:var(--text-5xl-fontSize);line-height:var(--un-leading, var(--text-5xl-lineHeight))}.text-6xl{font-size:var(--text-6xl-fontSize);line-height:var(--un-leading, var(--text-6xl-lineHeight))}.text-lg{font-size:var(--text-lg-fontSize);line-height:var(--un-leading, var(--text-lg-lineHeight))}.text-sm{font-size:var(--text-sm-fontSize);line-height:var(--un-leading, var(--text-sm-lineHeight))}.text-xl{font-size:var(--text-xl-fontSize);line-height:var(--un-leading, var(--text-xl-lineHeight))}.text-xs{font-size:var(--text-xs-fontSize);line-height:var(--un-leading, var(--text-xs-lineHeight))}.text-\\[\\#1d2021\\]{color:color-mix(in oklab,#1d2021 var(--un-text-opacity),transparent)}.text-\\[\\#282828\\]{color:color-mix(in oklab,#282828 var(--un-text-opacity),transparent)}.text-\\[\\#83a598\\]{color:color-mix(in oklab,#83a598 var(--un-text-opacity),transparent)}.text-\\[\\#928374\\]{color:color-mix(in oklab,#928374 var(--un-text-opacity),transparent)}.text-\\[\\#a89984\\]{color:color-mix(in oklab,#a89984 var(--un-text-opacity),transparent)}.text-\\[\\#b8bb26\\]{color:color-mix(in oklab,#b8bb26 var(--un-text-opacity),transparent)}.text-\\[\\#bdae93\\]{color:color-mix(in oklab,#bdae93 var(--un-text-opacity),transparent)}.text-\\[\\#d5c4a1\\]{color:color-mix(in oklab,#d5c4a1 var(--un-text-opacity),transparent)}.text-\\[\\#ebdbb2\\]{color:color-mix(in oklab,#ebdbb2 var(--un-text-opacity),transparent)}.text-\\[\\#fabd2f\\]{color:color-mix(in oklab,#fabd2f var(--un-text-opacity),transparent)}.text-amber-600{color:color-mix(in srgb,var(--colors-amber-600) var(--un-text-opacity),transparent)}.text-amber-900{color:color-mix(in srgb,var(--colors-amber-900) var(--un-text-opacity),transparent)}.text-blue-100{color:color-mix(in srgb,var(--colors-blue-100) var(--un-text-opacity),transparent)}.text-blue-600{color:color-mix(in srgb,var(--colors-blue-600) var(--un-text-opacity),transparent)}.text-blue-700{color:color-mix(in srgb,var(--colors-blue-700) var(--un-text-opacity),transparent)}.text-gray-200{color:color-mix(in srgb,var(--colors-gray-200) var(--un-text-opacity),transparent)}.text-gray-300{color:color-mix(in srgb,var(--colors-gray-300) var(--un-text-opacity),transparent)}.text-gray-400{color:color-mix(in srgb,var(--colors-gray-400) var(--un-text-opacity),transparent)}.text-gray-500{color:color-mix(in srgb,var(--colors-gray-500) var(--un-text-opacity),transparent)}.text-gray-600{color:color-mix(in srgb,var(--colors-gray-600) var(--un-text-opacity),transparent)}.text-gray-700{color:color-mix(in srgb,var(--colors-gray-700) var(--un-text-opacity),transparent)}.text-gray-800{color:color-mix(in srgb,var(--colors-gray-800) var(--un-text-opacity),transparent)}.text-gray-900{color:color-mix(in srgb,var(--colors-gray-900) var(--un-text-opacity),transparent)}.text-green-400{color:color-mix(in srgb,var(--colors-green-400) var(--un-text-opacity),transparent)}.text-green-800{color:color-mix(in srgb,var(--colors-green-800) var(--un-text-opacity),transparent)}.text-red-100{color:color-mix(in srgb,var(--colors-red-100) var(--un-text-opacity),transparent)}.text-red-400{color:color-mix(in srgb,var(--colors-red-400) var(--un-text-opacity),transparent)}.text-red-700{color:color-mix(in srgb,var(--colors-red-700) var(--un-text-opacity),transparent)}.text-red-800{color:color-mix(in srgb,var(--colors-red-800) var(--un-text-opacity),transparent)}.text-white{color:color-mix(in srgb,var(--colors-white) var(--un-text-opacity),transparent)}.text-yellow-800{color:color-mix(in srgb,var(--colors-yellow-800) var(--un-text-opacity),transparent)}.hover\\:text-\\[\\#ebdbb2\\]:hover{color:color-mix(in oklab,#ebdbb2 var(--un-text-opacity),transparent)}.hover\\:text-\\[\\#fb4934\\]:hover{color:color-mix(in oklab,#fb4934 var(--un-text-opacity),transparent)}.tracking-wider{--un-tracking:var(--tracking-wider);letter-spacing:var(--tracking-wider)}.font-bold{--un-font-weight:var(--fontWeight-bold);font-weight:var(--fontWeight-bold)}.font-extrabold{--un-font-weight:var(--fontWeight-extrabold);font-weight:var(--fontWeight-extrabold)}.font-family{font-family:var(--font-family)}.font-medium{--un-font-weight:var(--fontWeight-medium);font-weight:var(--fontWeight-medium)}.font-mono{font-family:var(--font-mono)}.font-sans{font-family:var(--font-sans)}.font-semibold{--un-font-weight:var(--fontWeight-semibold);font-weight:var(--fontWeight-semibold)}.tab{-moz-tab-size:4;-o-tab-size:4;tab-size:4}.m\\[1\\]{margin:1}.m\\[W\\]{margin:W}.m15\\.5{margin:calc(var(--spacing) * 15.5)}.m16{margin:calc(var(--spacing) * 16)}.m21{margin:calc(var(--spacing) * 21)}.m21\\.73{margin:calc(var(--spacing) * 21.73)}.m22{margin:calc(var(--spacing) * 22)}.m4{margin:calc(var(--spacing) * 4)}.m6{margin:calc(var(--spacing) * 6)}.m9{margin:calc(var(--spacing) * 9)}.mx-auto{margin-inline:auto}.my-2{margin-block:calc(var(--spacing) * 2)}.my-4{margin-block:calc(var(--spacing) * 4)}.my-6{margin-block:calc(var(--spacing) * 6)}.mb-1{margin-bottom:calc(var(--spacing) * 1)}.mb-2{margin-bottom:calc(var(--spacing) * 2)}.mb-3{margin-bottom:calc(var(--spacing) * 3)}.mb-4{margin-bottom:calc(var(--spacing) * 4)}.mb-6{margin-bottom:calc(var(--spacing) * 6)}.ml-1{margin-left:calc(var(--spacing) * 1)}.ml-2{margin-left:calc(var(--spacing) * 2)}.ml-auto{margin-left:auto}.mr-2{margin-right:calc(var(--spacing) * 2)}.mr-3{margin-right:calc(var(--spacing) * 3)}.mt-1{margin-top:calc(var(--spacing) * 1)}.mt-2{margin-top:calc(var(--spacing) * 2)}.mt-4{margin-top:calc(var(--spacing) * 4)}.mt-6{margin-top:calc(var(--spacing) * 6)}.mt-8{margin-top:calc(var(--spacing) * 8)}.p-1{padding:calc(var(--spacing) * 1)}.p-1\\.5{padding:calc(var(--spacing) * 1.5)}.p-2{padding:calc(var(--spacing) * 2)}.p-3{padding:calc(var(--spacing) * 3)}.p-4{padding:calc(var(--spacing) * 4)}.p-6{padding:calc(var(--spacing) * 6)}.p-8{padding:calc(var(--spacing) * 8)}.px-2{padding-inline:calc(var(--spacing) * 2)}.px-4{padding-inline:calc(var(--spacing) * 4)}.px-6{padding-inline:calc(var(--spacing) * 6)}.py-0\\.5{padding-block:calc(var(--spacing) * .5)}.py-1{padding-block:calc(var(--spacing) * 1)}.py-2{padding-block:calc(var(--spacing) * 2)}.py-8{padding-block:calc(var(--spacing) * 8)}.pb-2{padding-bottom:calc(var(--spacing) * 2)}.pb-4{padding-bottom:calc(var(--spacing) * 4)}.pr-10{padding-right:calc(var(--spacing) * 10)}.pr-16{padding-right:calc(var(--spacing) * 16)}.pr-2{padding-right:calc(var(--spacing) * 2)}.pr-4{padding-right:calc(var(--spacing) * 4)}.pt-2{padding-top:calc(var(--spacing) * 2)}.pt-4{padding-top:calc(var(--spacing) * 4)}.pt-6{padding-top:calc(var(--spacing) * 6)}.text-center{text-align:center}.text-left{text-align:left}.text-right{text-align:right}.focus\\:outline-none:focus{--un-outline-style:none;outline-style:none}.b,.border{border-width:1px}.border-2{border-width:2px}.border-b{border-bottom-width:1px}.border-b-2{border-bottom-width:2px}.border-l-4{border-left-width:4px}.border-r{border-right-width:1px}.border-t{border-top-width:1px}.border-t-2{border-top-width:2px}.border-\\[\\#3c3836\\]{border-color:color-mix(in oklab,#3c3836 var(--un-border-opacity),transparent)}.border-\\[\\#504945\\]{border-color:color-mix(in oklab,#504945 var(--un-border-opacity),transparent)}.border-\\[\\#665c54\\]{border-color:color-mix(in oklab,#665c54 var(--un-border-opacity),transparent)}.border-\\[\\#fb4934\\]{border-color:color-mix(in oklab,#fb4934 var(--un-border-opacity),transparent)}.border-amber-200{border-color:color-mix(in srgb,var(--colors-amber-200) var(--un-border-opacity),transparent)}.border-amber-400{border-color:color-mix(in srgb,var(--colors-amber-400) var(--un-border-opacity),transparent)}.border-gray-200{border-color:color-mix(in srgb,var(--colors-gray-200) var(--un-border-opacity),transparent)}.border-gray-700{border-color:color-mix(in srgb,var(--colors-gray-700) var(--un-border-opacity),transparent)}.border-white{border-color:color-mix(in srgb,var(--colors-white) var(--un-border-opacity),transparent)}.hover\\:border-\\[\\#83a598\\]:hover{border-color:color-mix(in oklab,#83a598 var(--un-border-opacity),transparent)}.focus\\:border-\\[\\#83a598\\]:focus{border-color:color-mix(in oklab,#83a598 var(--un-border-opacity),transparent)}.border-t-transparent{border-top-color:transparent}.rounded{border-radius:var(--radius-DEFAULT)}.rounded-full{border-radius:calc(infinity * 1px)}.rounded-lg{border-radius:var(--radius-lg)}.rounded-md{border-radius:var(--radius-md)}.rounded-xl{border-radius:var(--radius-xl)}.rounded-b-lg{border-bottom-left-radius:var(--radius-lg);border-bottom-right-radius:var(--radius-lg)}.rounded-bl-none{border-bottom-left-radius:var(--radius-none)}.rounded-br-none{border-bottom-right-radius:var(--radius-none)}.border-dashed{--un-border-style:dashed;border-style:dashed}.bg-\\[\\#1d2021\\]{background-color:color-mix(in oklab,#1d2021 var(--un-bg-opacity),transparent)}.bg-\\[\\#282828\\]{background-color:color-mix(in oklab,#282828 var(--un-bg-opacity),transparent)}.bg-\\[\\#3c3836\\]{background-color:color-mix(in oklab,#3c3836 var(--un-bg-opacity),transparent)}.bg-\\[\\#458588\\]{background-color:color-mix(in oklab,#458588 var(--un-bg-opacity),transparent)}.bg-\\[\\#504945\\],.data-\\[active\\=true\\]\\:bg-\\[\\#504945\\][data-active=true]{background-color:color-mix(in oklab,#504945 var(--un-bg-opacity),transparent)}.bg-\\[\\#83a598\\]{background-color:color-mix(in oklab,#83a598 var(--un-bg-opacity),transparent)}.bg-\\[\\#b16286\\]{background-color:color-mix(in oklab,#b16286 var(--un-bg-opacity),transparent)}.bg-\\[\\#b8bb26\\]{background-color:color-mix(in oklab,#b8bb26 var(--un-bg-opacity),transparent)}.bg-\\[\\#ebdbb2\\]{background-color:color-mix(in oklab,#ebdbb2 var(--un-bg-opacity),transparent)}.bg-\\[\\#fb4934\\]{background-color:color-mix(in oklab,#fb4934 var(--un-bg-opacity),transparent)}.bg-amber-50{background-color:color-mix(in srgb,var(--colors-amber-50) var(--un-bg-opacity),transparent)}.bg-blue-50{background-color:color-mix(in srgb,var(--colors-blue-50) var(--un-bg-opacity),transparent)}.bg-blue-600{background-color:color-mix(in srgb,var(--colors-blue-600) var(--un-bg-opacity),transparent)}.bg-gray-100{background-color:color-mix(in srgb,var(--colors-gray-100) var(--un-bg-opacity),transparent)}.bg-gray-200{background-color:color-mix(in srgb,var(--colors-gray-200) var(--un-bg-opacity),transparent)}.bg-gray-50{background-color:color-mix(in srgb,var(--colors-gray-50) var(--un-bg-opacity),transparent)}.bg-gray-600{background-color:color-mix(in srgb,var(--colors-gray-600) var(--un-bg-opacity),transparent)}.bg-gray-700{background-color:color-mix(in srgb,var(--colors-gray-700) var(--un-bg-opacity),transparent)}.bg-gray-800{background-color:color-mix(in srgb,var(--colors-gray-800) var(--un-bg-opacity),transparent)}.bg-gray-900{background-color:color-mix(in srgb,var(--colors-gray-900) var(--un-bg-opacity),transparent)}.bg-green-100{background-color:color-mix(in srgb,var(--colors-green-100) var(--un-bg-opacity),transparent)}.bg-red-100{background-color:color-mix(in srgb,var(--colors-red-100) var(--un-bg-opacity),transparent)}.bg-red-50{background-color:color-mix(in srgb,var(--colors-red-50) var(--un-bg-opacity),transparent)}.bg-red-700{background-color:color-mix(in srgb,var(--colors-red-700) var(--un-bg-opacity),transparent)}.bg-red-900\\/50{background-color:color-mix(in srgb,var(--colors-red-900) 50%,transparent)}.bg-white{background-color:color-mix(in srgb,var(--colors-white) var(--un-bg-opacity),transparent)}.bg-yellow-100{background-color:color-mix(in srgb,var(--colors-yellow-100) var(--un-bg-opacity),transparent)}.hover\\:bg-\\[\\#1d2021\\]:hover{background-color:color-mix(in oklab,#1d2021 var(--un-bg-opacity),transparent)}.hover\\:bg-\\[\\#3c3836\\]:hover{background-color:color-mix(in oklab,#3c3836 var(--un-bg-opacity),transparent)}.hover\\:bg-\\[\\#504945\\]:hover{background-color:color-mix(in oklab,#504945 var(--un-bg-opacity),transparent)}.hover\\:bg-\\[\\#665c54\\]:hover{background-color:color-mix(in oklab,#665c54 var(--un-bg-opacity),transparent)}.hover\\:bg-\\[\\#83a598\\]:hover{background-color:color-mix(in oklab,#83a598 var(--un-bg-opacity),transparent)}.hover\\:bg-amber-100:hover{background-color:color-mix(in srgb,var(--colors-amber-100) var(--un-bg-opacity),transparent)}.hover\\:bg-gray-100:hover{background-color:color-mix(in srgb,var(--colors-gray-100) var(--un-bg-opacity),transparent)}.hover\\:bg-gray-700:hover{background-color:color-mix(in srgb,var(--colors-gray-700) var(--un-bg-opacity),transparent)}.opacity-0{opacity:0%}.group:hover .group-hover\\:opacity-100{opacity:100%}.hover\\:underline:hover{text-decoration-line:underline}.flex{display:flex}.flex-1{flex:1 1 0%}.flex-shrink-0,.shrink-0{flex-shrink:0}.selection\\:shrink-selection *::selection,.selection\\:shrink-selection::selection{flex-shrink:1}.flex-grow{flex-grow:1}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.gap-1{gap:calc(var(--spacing) * 1)}.gap-1\\.5{gap:calc(var(--spacing) * 1.5)}.gap-2{gap:calc(var(--spacing) * 2)}.gap-3{gap:calc(var(--spacing) * 3)}.gap-4{gap:calc(var(--spacing) * 4)}.gap-6{gap:calc(var(--spacing) * 6)}.grid{display:grid}.grid-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))}.grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.h-12{height:calc(var(--spacing) * 12)}.h-15{height:calc(var(--spacing) * 15)}.h-16{height:calc(var(--spacing) * 16)}.h-3\\.5{height:calc(var(--spacing) * 3.5)}.h-4{height:calc(var(--spacing) * 4)}.h-5{height:calc(var(--spacing) * 5)}.h-50{height:calc(var(--spacing) * 50)}.h-60{height:calc(var(--spacing) * 60)}.h-7{height:calc(var(--spacing) * 7)}.h-8{height:calc(var(--spacing) * 8)}.h-full{height:100%}.h-screen{height:100vh}.max-h-32{max-height:calc(var(--spacing) * 32)}.max-h-48{max-height:calc(var(--spacing) * 48)}.max-w-\\[75\\%\\]{max-width:75%}.max-w-lg{max-width:var(--container-lg)}.max-w-md{max-width:var(--container-md)}.max-w-none{max-width:none}.min-h-\\[2\\.5rem\\]{min-height:2.5rem}.min-h-\\[200px\\]{min-height:200px}.min-h-0{min-height:calc(var(--spacing) * 0)}.min-h-screen{min-height:100vh}.min-w-0{min-width:calc(var(--spacing) * 0)}.w-1\\/3{width:33.3333333333%}.w-10{width:calc(var(--spacing) * 10)}.w-12{width:calc(var(--spacing) * 12)}.w-16{width:calc(var(--spacing) * 16)}.w-2{width:calc(var(--spacing) * 2)}.w-2\\/3{width:66.6666666667%}.w-28{width:calc(var(--spacing) * 28)}.w-3{width:calc(var(--spacing) * 3)}.w-3\\.5{width:calc(var(--spacing) * 3.5)}.w-3xs{width:var(--container-3xs)}.w-4{width:calc(var(--spacing) * 4)}.w-5{width:calc(var(--spacing) * 5)}.w-64{width:calc(var(--spacing) * 64)}.w-8{width:calc(var(--spacing) * 8)}.w-80{width:calc(var(--spacing) * 80)}.w-full{width:100%}.w\\[M\\]{width:M}.inline{display:inline}.block{display:block}.inline-block{display:inline-block}.contents{display:contents}.hidden{display:none}.visible{visibility:visible}.cursor-pointer{cursor:pointer}.cursor-not-allowed{cursor:not-allowed}.resize-none{resize:none}.selection\\:select-all *::selection,.selection\\:select-all::selection{-webkit-user-select:all;user-select:all}.whitespace-pre-wrap{white-space:pre-wrap}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.text-ellipsis{text-overflow:ellipsis}.uppercase{text-transform:uppercase}.capitalize{text-transform:capitalize}.italic{font-style:italic}.antialiased{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.focus\\:ring-2:focus{--un-ring-shadow:var(--un-ring-inset,) 0 0 0 calc(2px + var(--un-ring-offset-width)) var(--un-ring-color, currentColor);box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.focus\\:ring-\\[\\#83a598\\]:focus{--un-ring-color:color-mix(in oklab, #83a598 var(--un-ring-opacity), transparent)}.shadow,.shadow-sm{--un-shadow:0 1px 3px 0 var(--un-shadow-color, rgb(0 0 0 / .1)),0 1px 2px -1px var(--un-shadow-color, rgb(0 0 0 / .1));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.shadow-\\[4px_4px_0px_\\#1d2021\\]{--un-shadow:4px 4px 0px var(--un-shadow-color, rgb(29 32 33));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.shadow-lg{--un-shadow:0 10px 15px -3px var(--un-shadow-color, rgb(0 0 0 / .1)),0 4px 6px -4px var(--un-shadow-color, rgb(0 0 0 / .1));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.shadow-md{--un-shadow:0 4px 6px -1px var(--un-shadow-color, rgb(0 0 0 / .1)),0 2px 4px -2px var(--un-shadow-color, rgb(0 0 0 / .1));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.shadow-xl{--un-shadow:0 20px 25px -5px var(--un-shadow-color, rgb(0 0 0 / .1)),0 8px 10px -6px var(--un-shadow-color, rgb(0 0 0 / .1));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.hover\\:shadow-\\[6px_6px_0px_\\#83a598\\]:hover{--un-shadow:6px 6px 0px var(--un-shadow-color, rgb(131 165 152));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.focus\\:shadow-\\[2px_2px_0px_\\#1d2021\\]:focus{--un-shadow:2px 2px 0px var(--un-shadow-color, rgb(29 32 33));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.translate-x-4{--un-translate-x:calc(var(--spacing) * 4);translate:var(--un-translate-x) var(--un-translate-y)}.transform{transform:var(--un-rotate-x) var(--un-rotate-y) var(--un-rotate-z) var(--un-skew-x) var(--un-skew-y)}.transition{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,--un-gradient-from,--un-gradient-via,--un-gradient-to,opacity,box-shadow,transform,translate,scale,rotate,filter,-webkit-backdrop-filter,backdrop-filter;transition-timing-function:var(--un-ease, var(--default-transition-timingFunction));transition-duration:var(--un-duration, var(--default-transition-duration))}.transition-all{transition-property:all;transition-timing-function:var(--un-ease, var(--default-transition-timingFunction));transition-duration:var(--un-duration, var(--default-transition-duration))}.transition-colors{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,--un-gradient-from,--un-gradient-via,--un-gradient-to;transition-timing-function:var(--un-ease, var(--default-transition-timingFunction));transition-duration:var(--un-duration, var(--default-transition-duration))}.transition-opacity{transition-property:opacity;transition-timing-function:var(--un-ease, var(--default-transition-timingFunction));transition-duration:var(--un-duration, var(--default-transition-duration))}.transition-transform{transition-property:transform,translate,scale,rotate;transition-timing-function:var(--un-ease, var(--default-transition-timingFunction));transition-duration:var(--un-duration, var(--default-transition-duration))}.duration-200{--un-duration:.2s;transition-duration:.2s}.ease-in-out{--un-ease:var(--ease-in-out);transition-timing-function:var(--ease-in-out)}.items-start{align-items:flex-start}.items-end{align-items:flex-end}.items-center{align-items:center}.items-baseline{align-items:baseline}.bottom-2\\.5{bottom:calc(var(--spacing) * 2.5)}.right-2{right:calc(var(--spacing) * 2)}.right-3{right:calc(var(--spacing) * 3)}.top-2{top:calc(var(--spacing) * 2)}.justify-start{justify-content:flex-start}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.absolute{position:absolute}.fixed{position:fixed}.relative{position:relative}.static{position:static}.overflow-auto{overflow:auto}.overflow-y-auto{overflow-y:auto}@keyframes pulse{0%,to{opacity:1}50%{opacity:.5}}@keyframes spin{0%{transform:rotate(0)}to{transform:rotate(360deg)}}.animate-pulse{animation:pulse 2s cubic-bezier(.4,0,.6,1) infinite}.animate-spin{animation:spin 1s linear infinite}.filter{filter:var(--un-blur,) var(--un-brightness,) var(--un-contrast,) var(--un-grayscale,) var(--un-hue-rotate,) var(--un-invert,) var(--un-saturate,) var(--un-sepia,) var(--un-drop-shadow,)}.placeholder-\\[\\#928374\\]::placeholder{color:color-mix(in oklab,#928374 var(--un-placeholder-opacity),transparent)}.table{display:table}.table-row{display:table-row}.space-x-2>:not(:last-child){--un-space-x-reverse:0;margin-inline-start:calc(calc(var(--spacing) * 2) * var(--un-space-x-reverse));margin-inline-end:calc(calc(var(--spacing) * 2) * calc(1 - var(--un-space-x-reverse)))}.space-x-3>:not(:last-child){--un-space-x-reverse:0;margin-inline-start:calc(calc(var(--spacing) * 3) * var(--un-space-x-reverse));margin-inline-end:calc(calc(var(--spacing) * 3) * calc(1 - var(--un-space-x-reverse)))}.space-y-1>:not(:last-child){--un-space-y-reverse:0;margin-block-start:calc(calc(var(--spacing) * 1) * var(--un-space-y-reverse));margin-block-end:calc(calc(var(--spacing) * 1) * calc(1 - var(--un-space-y-reverse)))}.space-y-2>:not(:last-child){--un-space-y-reverse:0;margin-block-start:calc(calc(var(--spacing) * 2) * var(--un-space-y-reverse));margin-block-end:calc(calc(var(--spacing) * 2) * calc(1 - var(--un-space-y-reverse)))}.space-y-3>:not(:last-child){--un-space-y-reverse:0;margin-block-start:calc(calc(var(--spacing) * 3) * var(--un-space-y-reverse));margin-block-end:calc(calc(var(--spacing) * 3) * calc(1 - var(--un-space-y-reverse)))}.space-y-4>:not(:last-child){--un-space-y-reverse:0;margin-block-start:calc(calc(var(--spacing) * 4) * var(--un-space-y-reverse));margin-block-end:calc(calc(var(--spacing) * 4) * calc(1 - var(--un-space-y-reverse)))}.space-y-6>:not(:last-child){--un-space-y-reverse:0;margin-block-start:calc(calc(var(--spacing) * 6) * var(--un-space-y-reverse));margin-block-end:calc(calc(var(--spacing) * 6) * calc(1 - var(--un-space-y-reverse)))}@supports (color: color-mix(in lab,red,red)){.text-amber-600{color:color-mix(in oklab,var(--colors-amber-600) var(--un-text-opacity),transparent)}.text-amber-900{color:color-mix(in oklab,var(--colors-amber-900) var(--un-text-opacity),transparent)}.text-blue-100{color:color-mix(in oklab,var(--colors-blue-100) var(--un-text-opacity),transparent)}.text-blue-600{color:color-mix(in oklab,var(--colors-blue-600) var(--un-text-opacity),transparent)}.text-blue-700{color:color-mix(in oklab,var(--colors-blue-700) var(--un-text-opacity),transparent)}.text-gray-200{color:color-mix(in oklab,var(--colors-gray-200) var(--un-text-opacity),transparent)}.text-gray-300{color:color-mix(in oklab,var(--colors-gray-300) var(--un-text-opacity),transparent)}.text-gray-400{color:color-mix(in oklab,var(--colors-gray-400) var(--un-text-opacity),transparent)}.text-gray-500{color:color-mix(in oklab,var(--colors-gray-500) var(--un-text-opacity),transparent)}.text-gray-600{color:color-mix(in oklab,var(--colors-gray-600) var(--un-text-opacity),transparent)}.text-gray-700{color:color-mix(in oklab,var(--colors-gray-700) var(--un-text-opacity),transparent)}.text-gray-800{color:color-mix(in oklab,var(--colors-gray-800) var(--un-text-opacity),transparent)}.text-gray-900{color:color-mix(in oklab,var(--colors-gray-900) var(--un-text-opacity),transparent)}.text-green-400{color:color-mix(in oklab,var(--colors-green-400) var(--un-text-opacity),transparent)}.text-green-800{color:color-mix(in oklab,var(--colors-green-800) var(--un-text-opacity),transparent)}.text-red-100{color:color-mix(in oklab,var(--colors-red-100) var(--un-text-opacity),transparent)}.text-red-400{color:color-mix(in oklab,var(--colors-red-400) var(--un-text-opacity),transparent)}.text-red-700{color:color-mix(in oklab,var(--colors-red-700) var(--un-text-opacity),transparent)}.text-red-800{color:color-mix(in oklab,var(--colors-red-800) var(--un-text-opacity),transparent)}.text-white{color:color-mix(in oklab,var(--colors-white) var(--un-text-opacity),transparent)}.text-yellow-800{color:color-mix(in oklab,var(--colors-yellow-800) var(--un-text-opacity),transparent)}.border-amber-200{border-color:color-mix(in oklab,var(--colors-amber-200) var(--un-border-opacity),transparent)}.border-amber-400{border-color:color-mix(in oklab,var(--colors-amber-400) var(--un-border-opacity),transparent)}.border-gray-200{border-color:color-mix(in oklab,var(--colors-gray-200) var(--un-border-opacity),transparent)}.border-gray-700{border-color:color-mix(in oklab,var(--colors-gray-700) var(--un-border-opacity),transparent)}.border-white{border-color:color-mix(in oklab,var(--colors-white) var(--un-border-opacity),transparent)}.bg-amber-50{background-color:color-mix(in oklab,var(--colors-amber-50) var(--un-bg-opacity),transparent)}.bg-blue-50{background-color:color-mix(in oklab,var(--colors-blue-50) var(--un-bg-opacity),transparent)}.bg-blue-600{background-color:color-mix(in oklab,var(--colors-blue-600) var(--un-bg-opacity),transparent)}.bg-gray-100{background-color:color-mix(in oklab,var(--colors-gray-100) var(--un-bg-opacity),transparent)}.bg-gray-200{background-color:color-mix(in oklab,var(--colors-gray-200) var(--un-bg-opacity),transparent)}.bg-gray-50{background-color:color-mix(in oklab,var(--colors-gray-50) var(--un-bg-opacity),transparent)}.bg-gray-600{background-color:color-mix(in oklab,var(--colors-gray-600) var(--un-bg-opacity),transparent)}.bg-gray-700{background-color:color-mix(in oklab,var(--colors-gray-700) var(--un-bg-opacity),transparent)}.bg-gray-800{background-color:color-mix(in oklab,var(--colors-gray-800) var(--un-bg-opacity),transparent)}.bg-gray-900{background-color:color-mix(in oklab,var(--colors-gray-900) var(--un-bg-opacity),transparent)}.bg-green-100{background-color:color-mix(in oklab,var(--colors-green-100) var(--un-bg-opacity),transparent)}.bg-red-100{background-color:color-mix(in oklab,var(--colors-red-100) var(--un-bg-opacity),transparent)}.bg-red-50{background-color:color-mix(in oklab,var(--colors-red-50) var(--un-bg-opacity),transparent)}.bg-red-700{background-color:color-mix(in oklab,var(--colors-red-700) var(--un-bg-opacity),transparent)}.bg-red-900\\/50{background-color:color-mix(in oklab,var(--colors-red-900) 50%,transparent)}.bg-white{background-color:color-mix(in oklab,var(--colors-white) var(--un-bg-opacity),transparent)}.bg-yellow-100{background-color:color-mix(in oklab,var(--colors-yellow-100) var(--un-bg-opacity),transparent)}.hover\\:bg-amber-100:hover{background-color:color-mix(in oklab,var(--colors-amber-100) var(--un-bg-opacity),transparent)}.hover\\:bg-gray-100:hover{background-color:color-mix(in oklab,var(--colors-gray-100) var(--un-bg-opacity),transparent)}.hover\\:bg-gray-700:hover{background-color:color-mix(in oklab,var(--colors-gray-700) var(--un-bg-opacity),transparent)}}@media (min-width: 48rem){.md\\:p-8{padding:calc(var(--spacing) * 8)}.md\\:flex-row{flex-direction:row}.md\\:col-span-2{grid-column:span 2/span 2}.md\\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.md\\:w-64{width:calc(var(--spacing) * 64)}.md\\:items-center{align-items:center}.md\\:justify-between{justify-content:space-between}}@media (min-width: 64rem){.lg\\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}}@media (min-width: 80rem){.xl\\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}}body{font-family:var(--font-family)}html,body{font-family:var(--theme-font-family);background-color:var(--theme-background-color)!important;color:var(--text-color)!important;width:100%;min-height:100%;height:100%;padding:0;margin:0}body:not(.production) *:not(:defined){border:1px solid red}.dark{filter:invert(1) hue-rotate(180deg)}.dark img,.dark dialog,.dark video,.dark iframe{filter:invert(1) hue-rotate(180deg)}html{font-size:14px}@media (max-width: 768px){html{font-size:18px}}@media (max-width: 480px){html{font-size:20px}}textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;color:inherit;margin:0;padding:0}:root{box-sizing:border-box;-moz-text-size-adjust:none;-webkit-text-size-adjust:none;text-size-adjust:none;line-height:1.2;-webkit-font-smoothing:antialiased}*,*:before,*:after{box-sizing:border-box}*{margin:0}body{-webkit-font-smoothing:antialiased;font-family:var(--font-family)}button,textarea,select{background-color:inherit;border-width:0;color:inherit}img,picture,video,canvas,svg{display:block;max-width:100%}input,button,textarea,select{font:inherit}p,h1,h2,h3,h4,h5,h6{font-family:var(--font-family);overflow-wrap:break-word}dialog::backdrop{background-color:#000c}*::-webkit-scrollbar{width:8px;margin-right:10px}*::-webkit-scrollbar-track{background:transparent}*::-webkit-scrollbar-thumb{&:hover{scrollbar-color:rgba(154,153,150,.8) transparent}border-radius:10px;border:none}*::-webkit-scrollbar-button{background:transparent;color:transparent}*{scrollbar-width:thin;scrollbar-color:transparent transparent;&:hover{scrollbar-color:rgba(154,153,150,.8) transparent}}[full]{width:100%;height:100vh}[w-full]{width:100%}[grow]{flex-grow:1}[hide],.hide{display:none!important}[noscroll]{overflow:hidden}div [container]{display:flex}div [container][horizontal]{display:flex;flex-direction:col}:where(.uix-link){font-weight:var(--uix-link-font-weight, 600);width:var(--uix-link-width, auto);color:var(--uix-link-text-color, var(--colors-default-900));--uix-link-indent: 0;cursor:pointer;&[vertical]{margin:0 auto}a,button{width:inherit;cursor:pointer;padding:var(--uix-link-padding);&:hover{color:var(--uix-link-hover-color, var(--uix-link-text-color))}}.uix-text-icon__element{display:flex;align-items:center;gap:var(--uix-link-icon-gap, .5rem);&[reverse][vertical]{flex-direction:column-reverse}&:not([reverse])[vertical]{flex-direction:column}&[reverse]:not([vertical]){flex-direction:row-reverse}&:not([reverse]):not([vertical]){flex-direction:row}}transition:all .3s ease-in-out;&[indent]{>a,>button{padding-left:var(--uix-link-indent)}}&[active]:hover{color:var(--uix-link-hover-text-color, var(--colors-primary-400))}&[selectable][selected]{background-color:var(--colors-primary-400)}&:hover{[tooltip]{display:flex}}&[tooltip]{display:inline-block;&:hover{[tooltip]{visibility:visible}}[tooltip]{visibility:hidden;width:120px;background-color:#000;color:#fff;text-align:center;border-radius:6px;padding:5px 10px;margin-left:3px;position:absolute;z-index:1000000000;top:50%;left:100%;transform:translateY(-50%)}}&[position~=top] [tooltip]{bottom:100%;left:50%;transform:translate(-50%)}&[position~=bottom] [tooltip]{top:100%;left:50%;transform:translate(-50%)}&[position~=left] [tooltip]{top:50%;right:100%;transform:translateY(-50%)}&[tooltip],&[dropdown],&[context],&[float]{position:relative}&[dropdown],&[accordion]{flex-direction:column}[float],[dropdown],[accordion],[context]{display:none}&[floatopen]>a{display:none}&[floatopen] [float]{display:block;position:relative;bottom:0;right:0}&[context]{z-index:auto}[context][open]{display:flex;flex-direction:column}[dropdown],[context][open]{position:absolute;left:0;top:100%;width:100%;min-width:200px;z-index:1000;background-color:var(--colors-primary-100);box-shadow:0 8px 16px #0003;.uix-link:hover,input{background-color:var(--colors-primary-200)}>.uix-link{width:100%}}[context][open]{display:flex}&[selected]{[dropdown],[accordion]{display:flex;flex-direction:column}}}:where(.uix-button){border:var(--uix-button-borderSize, 0) solid var(--uix-button-borderColor);border-radius:var(--uix-button-borderRadius, var(--radius-md));box-shadow:var(--uix-button-shadow);width:var(--uix-button-width);min-width:fit-content;background-color:var(--uix-button-backgroundColor, black);color:var(--uix-button-textColor, var(--colors-default-100));font-weight:var(--uix-button-fontWeight, 700);display:flex;text-align:center;transition:transform .2s ease-in-out,opacity .2s ease-in-out,background-color .2s ease-in-out;&:hover{opacity:var(--uix-button-hover-opacity, .4)}&:active{transform:scale(.97)}>button,>a,>input{width:max-content;display:block;border-radius:inherit;cursor:var(--uix-button-cursor, pointer);height:calc(var(--spacing) * 10);line-height:calc(var(--spacing) * 5);padding:var( --uix-button-padding, calc(var(--spacing) * 2.5) calc(var(--spacing) * 4) );word-break:keep-all;flex-basis:100%}.uix-icon,button,input,a{cursor:pointer}&[bordered]{--uix-button-border-size: 1px;--uix-button-backgroundColor: transparent;--uix-button-hoverBackgroundColor: var(--_variant-color-300);--uix-button-borderColor: var(--_variant-color-400);--uix-button-textColor: var(--_variant-color-700)}&[ghost]{--uix-button-backgroundColor: transparent;--uix-button-hoverBackgroundColor: var(--_variant-color-300);--uix-button-borderSize: 0px;--uix-button-textColor: var(--_variant-color-700)}&[outline]{--uix-button-backgroundColor: transparent;--uix-button-hoverBackgroundColor: var(--_variant-color-300);--uix-button-textColor: var(--_variant-color-800);--uix-button-borderSize: 1px;--uix-button-borderColor: var(--_variant-color-400)}&[float]{background-color:#000;--uix-button-hoverBackgroundColor: var(--_variant-color-500);--uix-button-textColor: var(--_variant-color-50);--uix-button-borderSize: 0px;--uix-button-borderRadius: 9999px;--uix-button-width: var(--uix-button-height);box-shadow:var(--shadow-md, 0 4px 6px -1px rgb(0 0 0 / .1));--uix-button-padding: .5rem}&[float]:hover{box-shadow:var(--shadow-lg, 0 10px 15px -3px rgb(0 0 0 / .1))}}.uix-list{display:flex;&[vertical]{flex-direction:column}}.uix-navbar{--uix-navbar-text-color: var(--color-default-90);--uix-navbar-hover-text-color: var(--color-surface-80);--uix-navbar-border-radius: 0px;--uix-navbar-border-color: var(--color-default-60);--uix-navbar-border-size: 1px;--uix-navbar-border-style: solid;--uix-navbar-hover-background-color: var(--color-default-40);--uix-container-position: var(--uix-navbar-position);display:flex;flex-direction:column;&[docked]{--uix-list-button-radius: 0;border-bottom:0;position:fixed;bottom:0;background-color:var(--uix-navbar-background-color, var(--color-default-5));>*{border-right:0;border-bottom:0;&:first-child{border-left:0}}}}.uix-icon{display:inline-block;vertical-align:middle;svg{height:inherit;width:inherit}}&[solid]{stroke:currentColor;fill:currentColor}:where(.uix-input){--uix-input-background-color: var(--colors-surface-100);--uix-input-border-color: var(--colors-gray-900);--uix-input-text-color: var(--colors-gray-900);--uix-input-placeholder-color: var(--colors-default-500);--uix-input-border-radius: var(--border-radius-md);--uix-input-border-width: 2px;--uix-input-padding-x: calc(var(--spacing) * 4);--uix-input-padding-y: calc(var(--spacing) * 2.5);--uix-input-font-size: var(--font-size-base);--uix-input-height: 2.5rem;--uix-input-disabled-opacity: .6;--uix-input-label-font-size: var(--font-size-sm);--uix-input-label-font-weight: var(--font-weight-bold);--uix-input-label-color: var(--colors-default-700);--uix-input-checkbox-size: 1.5rem;--uix-input-checkbox-border-radius: var(--border-radius-sm);--uix-input-checkbox-checked-bg: var(--colors-primary-600);--uix-input-checkbox-check-color: var(--colors-surface-100);width:100%;display:flex;flex-direction:column;input,select,textarea{width:100%;height:var(--uix-input-height);border-radius:var(--uix-input-border-radius);border:var(--uix-input-border-width) solid var(--uix-input-border-color);font-size:var(--uix-input-font-size);background-color:var(--uix-input-background-color);color:var(--uix-input-text-color);transition:var(--uix-transition);outline:none;padding:var(--uix-input-padding-y) var(--uix-input-padding-x)}textarea{resize:vertical}&:has(textarea){height:auto}select{appearance:none;-webkit-appearance:none;cursor:pointer;font-weight:600;padding-block:0;option{font-weight:600;background-color:var(--uix-input-background-color);font-size:1.1rem;line-height:1.5rem;color:#333;padding:50px;border:2px solid red}}.select-container{position:relative;.select-arrow{position:absolute;right:calc(2 * var(--spacing))}}input::placeholder{color:transparent}label{font-weight:var(--uix-input-label-font-weight);color:var(--uix-input-label-color, var(--colors-gray-600));margin-bottom:var(--spacing);font-size:.9rem;padding:0 4px;transition:all .2s ease-in-out;pointer-events:none;&[required]:after{content:"*";color:var(--colors-danger-500);margin-left:2px}}input:not(:placeholder-shown)+label,textarea:not(:placeholder-shown)+label,&:focus-within label,&.has-value label{top:-2px;transform:translateY(0);font-size:var(--uix-input-label-font-size)}&:focus-within input,&:focus-within select,&:focus-within textarea{box-shadow:0 0 var(--uix-input-focus-ring-width, 5px) var(--uix-input-focus-ring-color, rgba(0, 0, 255, .5))}&[disabled]{cursor:not-allowed;opacity:var(--uix-input-disabled-opacity);& label{cursor:not-allowed}}.input-icon,.select-arrow{position:absolute;top:50%;right:var(--spacing);transform:translateY(-50%);pointer-events:none;color:var(--uix-input-label-color);transition:transform .2s ease-in-out}&:has(select:hover:active) .select-arrow{transform:translateY(-50%) rotate(180deg)}&:has(.input-icon:not(.select-arrow))>input{padding-right:calc(var(--uix-input-padding-x) + 1.75em)}&[type=checkbox],&[type=radio]{flex-direction:row;align-items:center;border:0;height:auto;width:auto;background-color:transparent;box-shadow:none;gap:.75rem;cursor:pointer;label{margin:0;line-height:1.5rem;position:static;transform:none;background-color:transparent;padding:0;cursor:pointer;font-weight:var(--font-weight-normal);order:2;pointer-events:auto}input{appearance:none;-webkit-appearance:none;width:var(--uix-input-checkbox-size);height:var(--uix-input-checkbox-size);margin:0;border:var(--uix-input-border-width) solid var(--uix-input-border-color);background-color:var(--uix-input-background-color);cursor:pointer;position:relative;transition:var(--uix-transition);padding:0;&:after{content:"";position:absolute;display:none;left:50%;top:50%}&:checked{background-color:var(--uix-input-checkbox-checked-bg);border-color:var(--uix-input-checkbox-checked-bg);&:after{display:block}}&:focus-visible{box-shadow:0 0 0 var(--uix-input-focus-ring-width) var(--uix-input-focus-ring-color);border-color:var(--uix-input-focus-ring-color)}}}&[type=checkbox] input:after{width:.375rem;height:.75rem;border:solid var(--uix-input-checkbox-check-color);border-width:0 2px 2px 0;transform:translate(-50%,-60%) rotate(45deg)}&[type=radio] input{border-radius:var(--border-radius-full);&:after{width:calc(var(--uix-input-checkbox-size) / 2);height:calc(var(--uix-input-checkbox-size) / 2);border-radius:var(--border-radius-full);background-color:var(--uix-input-checkbox-check-color);transform:translate(-50%,-50%)}}&[ghost]{&:focus-within select{box-shadow:none}.select-arrow{margin-left:5px;padding-left:5px}select{background:inherit;border:0}}}
 `,metaType:"text/css"}};self.addEventListener("install",t=>t.waitUntil(self.skipWaiting())),self.addEventListener("activate",t=>t.waitUntil(self.clients.claim())),self.addEventListener("fetch",t=>{const e=new URL(t.request.url),n=FILE_BUNDLE[e.pathname];n&&t.respondWith(new Response(n.content,{headers:{"Content-Type":n.metaType||"application/javascript"}}))});
