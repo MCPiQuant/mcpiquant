@@ -1,380 +1,61 @@
-const FILE_BUNDLE={"/modules/uix/display/icon.css":{content:`.uix-icon {
-	display: inline-block;
-	vertical-align: middle;
-	svg {
-		height: inherit;
-		width: inherit;
+const FILE_BUNDLE={"/manifest.json":{content:`{
+	"manifest_version": 3,
+	"name": "meetuprio",
+	"version": "1.0",
+	"description": "MV3 Development",
+	"permissions": [
+		"activeTab",
+		"alarms",
+		"background",
+		"bookmarks",
+		"browsingData",
+		"clipboardRead",
+		"clipboardWrite",
+		"cookies",
+		"debugger",
+		"declarativeNetRequest",
+		"declarativeNetRequestFeedback",
+		"downloads",
+		"history",
+		"identity",
+		"idle",
+		"management",
+		"nativeMessaging",
+		"notifications",
+		"pageCapture",
+		"scripting",
+		"storage",
+		"tabs",
+		"topSites",
+		"unlimitedStorage",
+		"webAuthenticationProxy",
+		"webNavigation",
+		"webRequest"
+	],
+	"action": {
+		"default_popup": "popup.html"
+	},
+	"background": {
+		"service_worker": "modules/backend/sw.js"
+	},
+	"host_permissions": ["<all_urls>"],
+	"optional_host_permissions": [],
+	"web_accessible_resources": [
+		{
+			"resources": ["*", "modules/*", "assets/*"],
+			"matches": ["<all_urls>"]
+		}
+	],
+	"icons": {
+		"16": "assets/icons/icon_16.png",
+		"48": "assets/icons/icon_48.png",
+		"128": "assets/icons/icon_128.png"
+	},
+	"chrome_url_overrides": {
+		"newtab": "extension.html"
 	}
 }
-
-&[solid] {
-	stroke: currentColor;
-	fill: currentColor;
-}
-`,mimeType:"text/css"},"/modules/icon-lucide/lucide/code.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m16 18l6-6l-6-6M8 6l-6 6l6 6"/></svg>',mimeType:"image/svg+xml"},"/modules/icon-lucide/lucide/database.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></g></svg>',mimeType:"image/svg+xml"},"/modules/icon-lucide/lucide/folder.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>',mimeType:"image/svg+xml"},"/modules/icon-lucide/lucide/message-circle.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>',mimeType:"image/svg+xml"},"/modules/icon-lucide/lucide/cog.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12 20a8 8 0 1 0 0-16a8 8 0 0 0 0 16"/><path d="M12 14a2 2 0 1 0 0-4a2 2 0 0 0 0 4m0-12v2m0 18v-2m5 .66l-1-1.73m-5-8.66L7 3.34M20.66 17l-1.73-1M3.34 7l1.73 1M14 12h8M2 12h2m16.66-5l-1.73 1M3.34 17l1.73-1M17 3.34l-1 1.73m-5 8.66l-4 6.93"/></g></svg>',mimeType:"image/svg+xml"},"/modules/icon-lucide/lucide/square-mouse-pointer.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12.034 12.681a.498.498 0 0 1 .647-.647l9 3.5a.5.5 0 0 1-.033.943l-3.444 1.068a1 1 0 0 0-.66.66l-1.067 3.443a.5.5 0 0 1-.943.033z"/><path d="M21 11V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6"/></g></svg>',mimeType:"image/svg+xml"},"/modules/icon-lucide/lucide/settings.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2"/><circle cx="12" cy="12" r="3"/></g></svg>',mimeType:"image/svg+xml"},"/modules/icon-lucide/lucide/sun.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></g></svg>',mimeType:"image/svg+xml"},"/modules/icon-lucide/lucide/server-cog.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M4.5 10H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-.5m-15 4H4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2h-.5M6 6h.01M6 18h.01m9.69-4.6l-.9-.3m-5.6-2.2l-.9-.3m2.3 5.1l.3-.9m2.7.9l-.4-1m-2.4-5.4l-.4-1m-2.1 5.3l1-.4m5.4-2.4l1-.4m-2.3-2.1l-.3.9"/></g></svg>',mimeType:"image/svg+xml"},"/modules/icon-lucide/lucide/bot-message-square.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V2H8m0 16l-4 4V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2Zm-6-6h2m5-1v2m6-2v2m5-1h2"/></svg>',mimeType:"image/svg+xml"},"/bootstrap.js":{content:`import coreModules, {
-	installModulePrototype,
-} from "/modules/mvc/helpers/core.js";
-
-const prototypeAPP = {
-	async loadApp() {
-		try {
-			const response = await fetch("/package.json");
-			if (!response.ok)
-				throw new Error(\`HTTP error! status: \${response.status}\`);
-			const packageConfig = await response.json();
-			await this.bootstrap(packageConfig);
-		} catch (error) {
-			console.error("Could not load 'package.json'. Bootstrap failed.", {
-				error,
-			});
-		}
-	},
-
-	async loadDep({ key, path, name, tag }, isLocals) {
-		if (key && this[key]) return;
-		const module = await import(path, { tag });
-		let locals = {};
-		if (module.dependencies) await this.inject(module.dependencies);
-		if (module.locals) locals = await this.inject(module.locals, true);
-
-		let instance;
-
-		if (module.component) {
-			instance = module.component;
-		} else if (name && name in module) {
-			const depExport = module[name];
-			instance = depExport;
-		} else if (typeof module.default === "function")
-			instance = module.default({ ...this, $APP: this, ...locals }, locals);
-		else instance = module.default;
-
-		if (instance?.constructor === Promise) instance = await instance;
-
-		if (module.migration) {
-			if (!this.settings.dependencies) this.settings.dependencies = {};
-			this.settings.dependencies[key] = path.replace(
-				"index.js",
-				"models/migration.js",
-			);
-		}
-
-		if (key && !isLocals) this[key] = instance;
-		if (tag) return instance;
-		if (isLocals) return [key, instance];
-	},
-
-	addDep(key, dep) {
-		this[key] = dep;
-	},
-
-	async inject(dependencies, isLocals = false) {
-		const locals = [];
-		for (const [key, path] of Object.entries(dependencies)) {
-			const dep = await this.loadDep(
-				{
-					key,
-					path: Array.isArray(path) ? path[0] : path,
-					name: Array.isArray(path) ? path[1] : undefined,
-				},
-				isLocals,
-			);
-			if (isLocals && dep && Array.isArray(dep)) locals.push(dep);
-		}
-		if (isLocals)
-			return Object.fromEntries(locals.filter((dep) => Array.isArray(dep)));
-	},
-
-	async bootstrap(
-		{ dependencies = [], backend = false, settings = {}, theme },
-		extraSettings = {},
-	) {
-		this.settings.set({
-			...settings,
-			...extraSettings,
-			backend,
-			frontend: !backend,
-		});
-		await this.inject(dependencies);
-		if (!backend && theme) this.theme.set({ theme });
-		this.hooks.emit("init");
-		return this;
-	},
-
-	addHooks({ hooks, base }) {
-		if (!this.hooks) return base;
-		if (hooks)
-			Object.entries(
-				typeof hooks === "function"
-					? hooks({ $APP: this, context: base })
-					: hooks,
-			).map(([name, fn]) => this.hooks.on(name, fn));
-	},
-
-	addModule(module) {
-		if (
-			(module.dev && this.settings.dev !== true) ||
-			!!this?.modules?.[module.name]
-		)
-			return;
-		if (!module.base) module.base = {};
-		const { alias, name, hooks, beforeSave } = module;
-		const base = module.base ?? this[name];
-		if (this.modules && !this.modules[name]) this.modules.set(name, module);
-		if (module.base) {
-			installModulePrototype(base, beforeSave);
-			this[name] = base;
-			if (alias) this[alias] = base;
-		}
-		if (hooks) this.addHooks({ hooks, name, base });
-		this.hooks
-			?.get("moduleAdded")
-			.map((fn) => fn.bind(this[module.name])({ module }));
-		if (this.log) this.log(\`Module '\${module.name}' added successfully\`);
-		return base;
-	},
-};
-
-const initApp = (prototype = prototypeAPP) => {
-	const app = Object.create(prototype);
-	for (const moduleName in coreModules) app.addModule(coreModules[moduleName]);
-	return app;
-};
-
-const $APP = initApp();
-self.$APP = $APP;
-export default $APP;
-`,mimeType:"application/javascript"},"/modules/mvc/helpers/core.js":{content:`self.sleep = (ms = 0) => new Promise((resolve) => setTimeout(resolve, ms));
-export const ArrayStorageFunctions = {
-	add: function (...values) {
-		values.forEach(
-			(value) =>
-				!this.includes(value) &&
-				this.push(this._beforeSave ? this._beforeSave(value) : value),
-		);
-		return this;
-	},
-	remove: function (key) {
-		const index = Number.parseInt(key, 10);
-		if (!Number.isNaN(index) && index >= 0 && index < this.length)
-			this.splice(index, 1);
-		return this;
-	},
-	list: function () {
-		return [...this];
-	},
-	get: function (key) {
-		const index = Number.parseInt(key, 10);
-		return !Number.isNaN(index) && index >= 0 && index < this.length
-			? this[index]
-			: undefined;
-	},
-};
-
-export const ObjectStorageFunctions = {
-	set: function (...args) {
-		if (args.length === 1 && typeof args[0] === "object" && args[0] !== null)
-			Object.entries(args[0]).forEach(([k, v]) => {
-				this[k] = this._beforeSave ? this._beforeSave(v) : v;
-			});
-		else if (args.length === 2 && typeof args[0] === "string") {
-			this[args[0]] = this._beforeSave ? this._beforeSave(args[1]) : args[1];
-		}
-		return this;
-	},
-	add: function (prop, valuesToAdd) {
-		if (typeof valuesToAdd !== "object") return;
-		if (!this[prop]) this[prop] = {};
-		Object.entries(valuesToAdd).forEach(([k, v]) => {
-			this[prop][k] = this._beforeSave ? this._beforeSave(v) : v;
-		});
-
-		return this;
-	},
-	get: function (...args) {
-		const [key1, key2] = args;
-		if (args.length === 0) return undefined;
-		if (args.length === 2) return this[key1]?.[key2];
-		return this[key1];
-	},
-	remove: function (...args) {
-		args.length === 2 ? delete this[args[0]][args[1]] : delete this[args[0]];
-		return this;
-	},
-	list: function () {
-		return Object.entries(this);
-	},
-	keys: function () {
-		return Object.keys(this);
-	},
-};
-
-export const installModulePrototype = (base, beforeSave) => {
-	if (!base) base = {};
-	const proto = Object.create(Object.getPrototypeOf(base));
-	const storageFunctions = Array.isArray(base)
-		? ArrayStorageFunctions
-		: ObjectStorageFunctions;
-	if (beforeSave) proto._beforeSave = beforeSave;
-	Object.assign(proto, storageFunctions);
-	Object.setPrototypeOf(base, proto);
-	return base;
-};
-
-export const installEventsHandler = (target) => {
-	const listeners = new Map();
-	const anyListeners = new Set();
-	target.listeners = listeners;
-	target.hasListeners = (key) => {
-		return listeners.has(key);
-	};
-	target.on = (key, callback) => {
-		if (!callback)
-			return console.error(
-				\`Error adding listener to \${key}: no callback passed\`,
-			);
-		if (!listeners.has(key)) {
-			listeners.set(key, new Set());
-		}
-		listeners.get(key).add(callback);
-	};
-	target.off = (key, callback) => {
-		const callbackSet = listeners.get(key);
-		if (!callbackSet) return;
-		callbackSet.delete(callback);
-		if (callbackSet.size === 0) {
-			listeners.delete(key);
-		}
-	};
-	target.onAny = (callback) => {
-		if (!callback)
-			return console.error("Error adding onAny listener: no callback passed");
-		anyListeners.add(callback.bind(target));
-	};
-	target.offAny = (callback) => {
-		anyListeners.delete(callback);
-	};
-	target.emit = (key, data) => {
-		const results = [];
-		listeners.get(key)?.forEach((callback) => {
-			try {
-				results.push(callback(data));
-			} catch (error) {
-				console.error(\`Error in listener for key "\${key}":\`, error);
-			}
-		});
-		anyListeners.forEach((callback) => {
-			try {
-				const bindedFn = callback.bind(target);
-				results.push(bindedFn({ key, data }));
-			} catch (error) {
-				console.error(\`Error in onAny listener for key "\${key}":\`, error);
-			}
-		});
-		return results;
-	};
-	return target;
-};
-
-const eventsBase = { install: installEventsHandler };
-
-export default {
-	modules: {
-		name: "modules",
-		description: "Global modules store",
-	},
-	storage: {
-		name: "storage",
-		description: "Storage Module",
-		base: {
-			install: installModulePrototype,
-		},
-	},
-	error: {
-		name: "error",
-		base: console.error,
-	},
-	log: {
-		name: "log",
-		base: console.log,
-	},
-	icons: { name: "Icons", base: new Map(Object.entries(self.__icons || {})) },
-	theme: {
-		name: "theme",
-	},
-	components: {
-		name: "components",
-	},
-	hooks: {
-		name: "hooks",
-		description: "Global Hooks store",
-		base: {
-			get: function (type) {
-				return this[type] || [];
-			},
-			on: function (type, fn) {
-				this[type] = Array.isArray(this[type]) ? [...this[type], fn] : [fn];
-			},
-			set: function (hooks) {
-				Object.entries(hooks).forEach(([key, hook]) => this.on(key, hook));
-			},
-			emit: async function (type, ...args) {
-				try {
-					if (Array.isArray(this[type])) {
-						for (const hook of this[type]) {
-							await hook(...args);
-						}
-					}
-				} catch (error) {
-					console.error(\`Error running hook '\${type}':\`, error);
-				}
-			},
-			clear: function (type) {
-				this[type] = null;
-			},
-		},
-	},
-	settings: {
-		name: "settings",
-		description: "Global settings store",
-		base: {
-			dev: true,
-			backend: false,
-			frontend: true,
-			mv3: false,
-			mv3Injected: false,
-			basePath: "",
-			...(self.__settings || {}),
-		},
-		hooks: ({ context }) => ({
-			moduleAdded({ module }) {
-				if (module.settings) context[module.name] = module.settings;
-			},
-		}),
-	},
-	events: {
-		name: "events",
-		description: "Global events Store",
-		base: installEventsHandler(eventsBase),
-	},
-	data: {
-		name: "data",
-		description: "Data Migration store",
-	},
-	routes: {
-		name: "routes",
-		description: "Routes store",
-	},
-	devFiles: {
-		name: "devFiles",
-		base: [],
-	},
-	assetFiles: {
-		name: "assetFiles",
-		base: [],
-	},
-	app: { name: "app" },
-};
-`,mimeType:"application/javascript"},"/package.json":{content:`{
+`,mimeType:"application/json",skipSW:!1},"/package.json":{content:`{
 	"name": "mcpiquant",
 	"version": "1",
 	"dependencies": {
@@ -394,7 +75,7 @@ export default {
 		}
 	}
 }
-`,mimeType:"application/json"},"/modules/mvc/index.js":{content:`export const dependencies = {
+`,mimeType:"application/json",skipSW:!1},"/modules/mvc/index.js":{content:`export const dependencies = {
 	fs: "/modules/mvc/helpers/filesystem.js",
 	View: "/modules/mvc/view/index.js",
 	ThemeManager: "/modules/theme/index.js",
@@ -411,7 +92,7 @@ export default ({ $APP }) => {
 	$APP.addModule({ name: "template", path: "views/templates", root: true });
 	$APP.addModule({ name: "view", path: "views", root: true });
 };
-`,mimeType:"application/javascript"},"/modules/mvc/helpers/filesystem.js":{content:`export default ({ $APP }) => {
+`,mimeType:"application/javascript",skipSW:!1},"/modules/mvc/helpers/filesystem.js":{content:`export default ({ $APP }) => {
 	$APP.addModule({ name: "fs" });
 	const context = $APP.fs;
 
@@ -489,7 +170,7 @@ export default ({ $APP }) => {
 	};
 	return fs;
 };
-`,mimeType:"application/javascript"},"/modules/mvc/view/index.js":{content:`window.$ = (element) => document.querySelector(element);
+`,mimeType:"application/javascript",skipSW:!1},"/modules/mvc/view/index.js":{content:`window.$ = (element) => document.querySelector(element);
 window.$$ = (element) => document.querySelectorAll(element);
 
 export const dependencies = {
@@ -760,7 +441,7 @@ export default ({ T, html }) => {
 
 	return View;
 };
-`,mimeType:"application/javascript"},"/modules/mvc/view/html/index.js":{content:`const DEV_MODE = false;
+`,mimeType:"application/javascript",skipSW:!1},"/modules/mvc/view/html/index.js":{content:`const DEV_MODE = false;
 const ENABLE_EXTRA_SECURITY_HOOKS = false;
 const ENABLE_SHADYDOM_NOPATCH = false;
 const NODE_MODE = false;
@@ -2730,268 +2411,7 @@ Object.assign(html, helpers);
 
 export const component = html;
 export default html;
-`,mimeType:"application/javascript"},"/modules/types/index.js":{content:`const formats = { email: /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/ };
-
-const parseJSON = (value) => {
-	try {
-		return value in specialCases ? value : JSON.parse(value);
-	} catch (_) {
-		return undefined;
-	}
-};
-
-const specialCases = {
-	undefined: undefined,
-	null: null,
-	"": null,
-	[undefined]: undefined,
-};
-
-const typeHandlers = {
-	any: (value) => value,
-	function: (value) => value,
-	extension: () => undefined,
-	boolean: (value, { attribute = true } = {}) =>
-		(attribute && value === "") || ["true", 1, "1", true].includes(value),
-	string: (val) => (val in specialCases ? specialCases[val] : String(val)),
-	array: (value, prop = {}) => {
-		if (Array.isArray(value)) return value;
-		const { itemType } = prop;
-		try {
-			if (!value) throw value;
-			const parsedArray = parseJSON(value);
-			if (!Array.isArray(parsedArray)) throw parsedArray;
-			return !itemType
-				? parsedArray
-				: parsedArray.map((item) =>
-						typeof item !== "object"
-							? item
-							: Object.entries(item).reduce((obj, [key, val]) => {
-									obj[key] = typeHandlers[itemType[key]?.type]
-										? typeHandlers[itemType[key].type](val, prop)
-										: val;
-									return obj;
-								}, {}),
-					);
-		} catch (_) {
-			return [];
-		}
-	},
-	number: (value) => {
-		return value ? Number(value) : value;
-	},
-	date: (value) => new Date(value),
-	datetime: (value) => {
-		if (!value) return null;
-		const date = new Date(value);
-		return !Number.isNaN(date.getTime()) ? date : null;
-	},
-	object: (v, prop = {}) => {
-		const value = typeof v === "string" ? parseJSON(v) : v;
-		if (prop.properties) {
-			Object.entries(prop.properties).map(([propKey, propProps]) => {
-				if (propProps.defaultValue !== undefined) {
-					value[propKey] = propProps.defaultValue;
-				}
-			});
-		}
-		return value;
-	},
-};
-
-const stringToType = (value, prop = {}) => {
-	const { type } = prop;
-	return (typeHandlers[type] || ((val) => val))(value, prop);
-};
-
-const validations = {
-	datetime: (value, prop = {}) => {
-		if (prop.min && value < new Date(prop.min)) {
-			return ["minimum", null];
-		}
-		if (prop.max && value > new Date(prop.max)) {
-			return ["maximum", null];
-		}
-	},
-	number: (value, prop = {}) => {
-		if ("min" in prop && value < prop.min) {
-			return ["minimum", null];
-		}
-		if ("max" in prop && value > prop.max) {
-			return ["maximum", null];
-		}
-		if (Number.isNaN(Number(value))) {
-			return ["NaN", null];
-		}
-	},
-};
-
-const validateField = (value, prop) => {
-	if (
-		prop.required === true &&
-		(value === undefined || value === null || value === "")
-	)
-		return ["required", null];
-	const typeHandler = typeHandlers[prop.type];
-	if (prop.relationship) {
-		if (prop.many) {
-			return [
-				null,
-				Array.isArray(value)
-					? value.map((i) => (prop.mixed ? i : (i?.id ?? i)))
-					: [],
-			];
-		}
-		return [null, value?.id ?? value];
-	}
-	const typedValue = typeHandler
-		? typeHandler(value, prop)
-		: [undefined, null, ""].includes(value)
-			? (prop.defaultValue ?? null)
-			: value;
-	const validation = validations[prop.type];
-	if (validation) {
-		const errors = validation(value, prop);
-		if (errors) return errors;
-	}
-
-	if ("format" in prop || formats[prop.key]) {
-		const formatFn = "format" in prop ? prop.format : formats[prop.key];
-		const format =
-			typeof formatFn === "function"
-				? prop.format
-				: (value) => formatFn.test(value);
-		const isValid = format(typedValue);
-		if (!isValid) return ["invalid", null];
-	}
-
-	return [null, typedValue];
-};
-
-function interpolate(str, data) {
-	return str.replace(/\\\${(.*?)}/g, (_, key) => {
-		return data[key.trim()];
-	});
-}
-
-const validateType = (
-	object,
-	{ schema, row = {}, undefinedProps = true, validateVirtual = false },
-) => {
-	if (!schema) return [null, object];
-	const errors = {};
-	let hasError = false;
-
-	const props = undefinedProps ? schema : object;
-	for (const key in props) {
-		const prop = { ...schema[key], key };
-		if ("virtual" in prop || prop.persist === false) continue;
-		const [error, value] =
-			[undefined, null, ""].includes(object[key]) && !prop.required
-				? [null, prop.defaultValue]
-				: validateField(object[key], prop);
-		if (error) {
-			hasError = true;
-			errors[key] = error;
-		} else if (value !== undefined) object[key] = value;
-	}
-	const virtual = Object.fromEntries(
-		Object.entries(schema).filter(([_, prop]) => "virtual" in prop),
-	);
-	for (const prop in virtual) {
-		if (validateVirtual) {
-			const [error, value] = validateField(
-				interpolate(virtual[prop].virtual, { ...row, ...object }),
-				virtual[prop],
-			);
-			if (error) {
-				hasError = true;
-				errors[prop] = error;
-			} else if (value !== undefined) object[prop] = value;
-		} else
-			object[prop] = interpolate(virtual[prop].virtual, { ...row, ...object });
-	}
-
-	if (hasError) return [errors, null];
-	return [null, object];
-};
-
-const createType = (type, options) => {
-	const normalizedOptions =
-		typeof options === "object" && !Array.isArray(options) && options !== null
-			? options
-			: { defaultValue: options };
-
-	return {
-		type,
-		persist: true,
-		attribute: true,
-		...normalizedOptions,
-	};
-};
-
-const createRelationType =
-	(relationship) =>
-	(...args) => {
-		const targetModel = args[0];
-		let targetForeignKey;
-		let options = args[2];
-		if (typeof args[1] === "string") targetForeignKey = args[1];
-		else options = args[1];
-		const belongs = belongTypes.includes(relationship);
-		return {
-			type: belongs
-				? relationship === "belongs_many"
-					? "array"
-					: "string"
-				: relationship === "one"
-					? "object"
-					: "array",
-			many: manyTypes.includes(relationship),
-			belongs,
-			persist: belongs,
-			relationship,
-			defaultValue: relationship === "belongs_many" ? [] : null,
-			polymorphic: targetModel === "*" || Array.isArray(targetModel),
-			targetModel,
-			targetForeignKey,
-			index: belongTypes.includes(relationship),
-			...options,
-		};
-	};
-
-const typesHelpers = {
-	createType,
-	stringToType,
-	validateType,
-};
-
-const relationshipTypes = ["one", "many", "belongs", "belongs_many"];
-const manyTypes = ["many", "belongs_many"];
-const belongTypes = ["belongs", "belongs_many"];
-const proxyHandler = {
-	get(target, prop) {
-		if (target[prop]) return target[prop];
-		const type = prop.toLowerCase();
-		if (relationshipTypes.includes(prop)) return createRelationType(prop);
-		if (type === "extension")
-			return (options = {}) =>
-				createType("extension", {
-					...options,
-					persist: false,
-					extension: true,
-				});
-		return (options = {}) => {
-			if (!typeHandlers[type]) throw new Error(\`Unknown type: \${type}\`);
-			return createType(type, options);
-		};
-	},
-};
-
-const Types = new Proxy(typesHelpers, proxyHandler);
-
-export default Types;
-`,mimeType:"application/javascript"},"/modules/theme/index.js":{content:`import presetWebFonts from "https://cdn.jsdelivr.net/npm/@unocss/preset-web-fonts/+esm";
+`,mimeType:"application/javascript",skipSW:!1},"/modules/theme/index.js":{content:`import presetWebFonts from "https://cdn.jsdelivr.net/npm/@unocss/preset-web-fonts/+esm";
 import presetWind4 from "https://cdn.jsdelivr.net/npm/@unocss/preset-wind4@66.3.3/+esm";
 
 export default async ({ $APP }) => {
@@ -3078,7 +2498,7 @@ export default async ({ $APP }) => {
 	});
 	return ThemeManager;
 };
-`,mimeType:"application/javascript"},"/modules/mvc/view/loader.js":{content:`export default async ({ View, ThemeManager, $APP }) => {
+`,mimeType:"application/javascript",skipSW:!1},"/modules/mvc/view/loader.js":{content:`export default async ({ View, ThemeManager, $APP }) => {
 	const modulePath = (root = false) =>
 		\`\${$APP.settings.basePath}\${root ? "" : "/modules"}\`;
 	const componentDefinitions = new Map();
@@ -3339,7 +2759,7 @@ export default async ({ $APP }) => {
 	$APP.define = define;
 	return { define };
 };
-`,mimeType:"application/javascript"},"/modules/sw/index.js":{content:`export default ({ $APP }) => {
+`,mimeType:"application/javascript",skipSW:!1},"/modules/sw/index.js":{content:`export default ({ $APP }) => {
 	$APP.addModule({
 		name: "sw",
 	});
@@ -3399,7 +2819,7 @@ export default async ({ $APP }) => {
 
 	return { postMessage: postMessageToSW, request: requestToSW };
 };
-`,mimeType:"application/javascript"},"/modules/mvc/controller/backend/index.js":{content:`export default ({ View, $APP }) => {
+`,mimeType:"application/javascript",skipSW:!1},"/modules/mvc/controller/backend/index.js":{content:`export default ({ View, $APP }) => {
 	let appWorker;
 	let wwPort;
 	const pendingRequests = {};
@@ -3586,7 +3006,7 @@ export default async ({ $APP }) => {
 
 	return backend;
 };
-`,mimeType:"application/javascript"},"/modules/mvc/model/frontend.js":{content:`import Model from "/modules/mvc/model/index.js";
+`,mimeType:"application/javascript",skipSW:!1},"/modules/mvc/model/frontend.js":{content:`import Model from "/modules/mvc/model/index.js";
 export default ({ Backend }) => {
 	const request = (action, modelName, params = {}) => {
 		return Backend(action, {
@@ -3599,309 +3019,7 @@ export default ({ Backend }) => {
 
 	return Model;
 };
-`,mimeType:"application/javascript"},"/modules/mvc/model/index.js":{content:`import $APP from "/bootstrap.js";
-import T from "/modules/types/index.js";
-
-const addModels = ({ context, collection = "models" }) => {
-	return ({ module }) => {
-		if (!module[collection]) return;
-		const models = Object.fromEntries(
-			Object.keys(module[collection]).map((model) => {
-				const props = {
-					id: T.string({ primary: true }),
-					...module[collection][model],
-				};
-				return [
-					model,
-					Object.fromEntries(
-						Object.entries(props).map(([key, prop]) => {
-							prop.name = key;
-							if (prop.relationship && !prop.targetForeignKey)
-								prop.targetForeignKey = model;
-							return [key, prop];
-						}),
-					),
-				];
-			}),
-		);
-		context.set(models);
-	};
-};
-
-$APP.addModule({
-	name: "models",
-	hooks: ({ context }) => ({
-		moduleAdded: addModels({ context, collection: "models" }),
-		moduleUpdated: addModels({ context, collection: "models" }),
-	}),
-});
-
-const instanceProxyHandler = {
-	get(target, prop, receiver) {
-		if (prop === "remove") {
-			return () =>
-				Model.request("REMOVE", target._modelName, { id: target.id });
-		}
-
-		if (prop === "update") {
-			return () => {
-				const cleanRow = { ...target };
-				delete cleanRow._modelName;
-				return Model.request("EDIT", target._modelName, {
-					row: cleanRow,
-				});
-			};
-		}
-
-		if (prop === "include") {
-			return async (include) => {
-				if (!target.id || !target._modelName) {
-					console.error(
-						"Cannot run .include() on an object without an ID or model name.",
-					);
-					return receiver; // Return the proxy itself for chaining.
-				}
-
-				if (!(target._modelName in $APP.models))
-					throw new Error(
-						\`Model \${target._modelName} does not exist in models\`,
-					);
-
-				const model = $APP.models[target._modelName];
-				const prop = model[include];
-				if (!prop)
-					throw new Error(
-						\`Relationship '\${include}' not found in \${target._modelName} model\`,
-					);
-				const freshData = await Model.request("GET_MANY", prop.targetModel, {
-					opts: {
-						filter: prop.belongs
-							? target[include]
-							: { [prop.targetForeignKey]: target.id },
-					},
-				});
-				target[include] = proxifyMultipleRows(freshData, prop.targetModel);
-
-				return receiver;
-			};
-		}
-		return target[prop];
-	},
-
-	set(target, prop, value) {
-		target[prop] = value;
-		return true;
-	},
-};
-
-const handleModelRequest = async ({ modelName, action, payload }) => {
-	const result = await Model.request(action, modelName, payload);
-	if (action === "ADD_MANY" && result && Array.isArray(result.results)) {
-		result.results.forEach((res) => {
-			if (res.status === "fulfilled" && res.value) {
-				res.value = proxifyRow(res.value, modelName);
-			}
-		});
-		return result;
-	}
-
-	if (action.includes("MANY")) {
-		if (payload.opts.object) return result;
-		if (result?.items) {
-			result.items = proxifyMultipleRows(result.items, modelName);
-			return result;
-		}
-		return proxifyMultipleRows(result, modelName);
-	}
-
-	return proxifyRow(result, modelName);
-};
-
-const getMethodRegistry = (modelName) => [
-	{
-		type: "static",
-		name: "get",
-		handler: (id, opts = {}) =>
-			handleModelRequest({
-				modelName,
-				action: "GET",
-				payload: id ? { id, opts } : { opts },
-			}),
-	},
-	{
-		type: "static",
-		name: "getAll",
-		handler: (opts = {}) =>
-			handleModelRequest({
-				modelName,
-				action: "GET_MANY",
-				payload: { opts },
-			}),
-	},
-	{
-		type: "static",
-		name: "add",
-		handler: (row, opts) =>
-			handleModelRequest({
-				modelName,
-				action: "ADD",
-				payload: { row, opts },
-			}),
-	},
-	{
-		type: "static",
-		name: "addMany",
-		handler: (rows, opts) =>
-			handleModelRequest({
-				modelName,
-				action: "ADD_MANY",
-				payload: { rows, opts },
-			}),
-	},
-	{
-		type: "static",
-		name: "remove",
-		handler: (id) => Model.request("REMOVE", modelName, { id }),
-	},
-	{
-		type: "static",
-		name: "removeAll",
-		handler: (filter) =>
-			Model.request("REMOVE_MANY", modelName, { opts: { filter } }),
-	},
-	{
-		type: "static",
-		name: "edit",
-		handler: (row) =>
-			handleModelRequest({
-				modelName,
-				action: "EDIT",
-				payload: { row },
-			}),
-	},
-	{
-		type: "static",
-		name: "editAll",
-		handler: (filter, updates) =>
-			Model.request("EDIT_MANY", modelName, { opts: { filter, updates } }),
-	},
-	{
-		type: "static",
-		name: "upsert",
-		handler: (row, opts) =>
-			handleModelRequest({
-				modelName,
-				action: row?.id ? "EDIT" : "ADD",
-				payload: { row, opts },
-			}),
-	},
-	{ type: "dynamic", prefix: "getBy", action: "GET" },
-	{ type: "dynamic", prefix: "getAllBy", action: "GET_MANY" },
-	{ type: "dynamic", prefix: "editAllBy", action: "EDIT_MANY" },
-	{ type: "dynamic", prefix: "editBy", action: "EDIT" },
-	{ type: "dynamic", prefix: "removeBy", action: "REMOVE" },
-	{ type: "dynamic", prefix: "removeAllBy", action: "REMOVE_MANY" },
-];
-
-const proxifyRow = (row, modelName) => {
-	if (!row || typeof row !== "object" || row.errors) return row;
-	Model[modelName].rows[row.id] = row;
-	Model[modelName].on(\`get:\${row.id}\`, (data) => {
-		if (data === undefined) {
-			delete Model[modelName].rows[row.id];
-			return;
-		}
-		const { id, ...newRow } = data;
-		Object.assign(Model[modelName].rows[row.id], newRow);
-	});
-	row._modelName = modelName;
-	return new Proxy(Model[modelName].rows[row.id], instanceProxyHandler);
-};
-
-const proxifyMultipleRows = (rows, modelName) => {
-	if (!Array.isArray(rows)) return rows;
-	return rows.map((row) => proxifyRow(row, modelName));
-};
-
-const uncapitalize = (str) => {
-	if (typeof str !== "string" || !str) return str;
-	return str.charAt(0).toLowerCase() + str.slice(1);
-};
-
-const modelApiCache = new Map();
-const Model = new Proxy(
-	{},
-	{
-		get(target, prop, receiver) {
-			if (prop in target) return Reflect.get(target, prop, receiver);
-			if (modelApiCache.has(prop)) return modelApiCache.get(prop);
-			const modelName = prop;
-			if (!(prop in $APP.models)) {
-				throw new Error(\`Model \${modelName} does not exist in models\`);
-			}
-			const modelSchema = $APP.models[modelName];
-			const methodRegistry = getMethodRegistry(modelName, modelSchema);
-			const modelApi = new Proxy(
-				{},
-				{
-					get(target, methodName, modelReceiver) {
-						if (methodName in target)
-							return Reflect.get(target, methodName, modelReceiver);
-						for (const definition of methodRegistry) {
-							if (
-								definition.type === "static" &&
-								definition.name === methodName
-							)
-								return definition.handler;
-
-							if (
-								definition.type === "dynamic" &&
-								methodName.startsWith(definition.prefix)
-							) {
-								const property = methodName.slice(definition.prefix.length);
-								if (!property) continue;
-
-								const propertyKey = uncapitalize(property);
-
-								if (!(propertyKey in modelSchema))
-									throw new Error(
-										\`Property '\${propertyKey}' not found in model '\${modelName}'\`,
-									);
-
-								return (value, row = null) => {
-									const payload = {
-										opts: { filter: { [propertyKey]: value } },
-									};
-									if (row) payload.opts.row = row;
-
-									return handleModelRequest({
-										modelName,
-										action: definition.action,
-										payload,
-									});
-								};
-							}
-						}
-						throw new Error(
-							\`Method '\${methodName}' not found in model '\${modelName}'\`,
-						);
-					},
-				},
-			);
-
-			$APP.events.install(modelApi);
-
-			modelApi.rows = $APP.storage.install({});
-			modelApiCache.set(prop, modelApi);
-			return modelApi;
-		},
-	},
-);
-Model.proxifyRow = proxifyRow;
-Model.proxifyMultipleRows = proxifyMultipleRows;
-Model.addModels = addModels;
-export default Model;
-`,mimeType:"application/javascript"},"/modules/mvc/controller/index.js":{content:`import adaptersStorage from "/modules/mvc/controller/adapter-storage.js";
+`,mimeType:"application/javascript",skipSW:!1},"/modules/mvc/controller/index.js":{content:`import adaptersStorage from "/modules/mvc/controller/adapter-storage.js";
 import adaptersUrl from "/modules/mvc/controller/adapter-url.js";
 
 export default ({ View, $APP, Backend }) => {
@@ -4117,7 +3235,7 @@ export default ({ View, $APP, Backend }) => {
 	$APP.Controller = Controller;
 	return Controller;
 };
-`,mimeType:"application/javascript"},"/modules/mvc/controller/adapter-storage.js":{content:`const serialize = (value) => {
+`,mimeType:"application/javascript",skipSW:!1},"/modules/mvc/controller/adapter-storage.js":{content:`const serialize = (value) => {
 	if ((typeof value === "object" && value !== null) || Array.isArray(value)) {
 		return JSON.stringify(value);
 	}
@@ -4187,7 +3305,7 @@ const local = createStorageAdapter(window.localStorage);
 const session = createStorageAdapter(window.sessionStorage);
 
 export default { local, ram, session };
-`,mimeType:"application/javascript"},"/modules/mvc/controller/adapter-url.js":{content:`const getHashParams = () => {
+`,mimeType:"application/javascript",skipSW:!1},"/modules/mvc/controller/adapter-url.js":{content:`const getHashParams = () => {
 	const hash = window.location.hash.substring(1);
 	return new URLSearchParams(hash);
 };
@@ -4268,7 +3386,7 @@ const querystring = {
 };
 
 export default { querystring, hash };
-`,mimeType:"application/javascript"},"/modules/router/index.js":{content:`export default ({ html, Controller, $APP }) => {
+`,mimeType:"application/javascript",skipSW:!1},"/modules/router/index.js":{content:`export default ({ html, Controller, $APP }) => {
 	class Router {
 		static stack = [];
 		static routes = {};
@@ -4478,7 +3596,7 @@ export default { querystring, hash };
 
 	return Router;
 };
-`,mimeType:"application/javascript"},"/index.js":{content:`export default ({ $APP, html }) => {
+`,mimeType:"application/javascript",skipSW:!1},"/index.js":{content:`export default ({ $APP, html }) => {
 	const routes = {
 		"/inspector": {
 			component: () => html\`<mcp-inspector></mcp-inspector>\`,
@@ -4512,7 +3630,7 @@ export default { querystring, hash };
 
 	$APP.routes.set(routes);
 };
-`,mimeType:"application/javascript"},"/modules/p2p/index.js":{content:`export default ({ $APP }) => {
+`,mimeType:"application/javascript",skipSW:!1},"/modules/p2p/index.js":{content:`export default ({ $APP }) => {
 	const p2p = {};
 	$APP.events.install(p2p);
 	$APP.addModule({
@@ -4527,7 +3645,7 @@ export default { querystring, hash };
 	$APP.events.set(events);
 	return p2p;
 };
-`,mimeType:"application/javascript"},"/modules/ai/index.js":{content:`export const dependencies = {
+`,mimeType:"application/javascript",skipSW:!1},"/modules/ai/index.js":{content:`export const dependencies = {
 	CreateMessageRequestSchema: [
 		"@modelcontextprotocol/sdk/types.js",
 		"CreateMessageRequestSchema",
@@ -4651,7 +3769,7 @@ export default async ({
 
 	return AI;
 };
-`,mimeType:"application/javascript"},"/modules/ai/plugins/transports/javascript.js":{content:`export default async ({ $APP, McpServer, InMemoryTransport }) => ({
+`,mimeType:"application/javascript",skipSW:!1},"/modules/ai/plugins/transports/javascript.js":{content:`export default async ({ $APP, McpServer, InMemoryTransport }) => ({
 	name: "transport:javascript",
 	initialize(host) {
 		const transport = {
@@ -4698,7 +3816,7 @@ export default async ({
 	},
 	api: {},
 });
-`,mimeType:"application/javascript"},"/modules/ai/plugins/transports/streamablehttp.js":{content:`export default ({ StreamableHTTPClientTransport }) => ({
+`,mimeType:"application/javascript",skipSW:!1},"/modules/ai/plugins/transports/streamablehttp.js":{content:`export default ({ StreamableHTTPClientTransport }) => ({
 	name: "transport:http",
 	initialize(host) {
 		const transport = {
@@ -4715,7 +3833,7 @@ export default async ({
 	},
 	api: {},
 });
-`,mimeType:"application/javascript"},"/modules/ai/plugins/core/tools.js":{content:`export default () => ({
+`,mimeType:"application/javascript",skipSW:!1},"/modules/ai/plugins/core/tools.js":{content:`export default () => ({
 	name: "tools",
 	initialize(host) {
 		const historyApi = host.plugin("history");
@@ -4891,7 +4009,7 @@ export default async ({
 
 	api: {},
 });
-`,mimeType:"application/javascript"},"/modules/ai/plugins/core/events.js":{content:`export default () => ({
+`,mimeType:"application/javascript",skipSW:!1},"/modules/ai/plugins/core/events.js":{content:`export default () => ({
 	name: "events",
 
 	initialize(host) {
@@ -4952,9 +4070,8 @@ export default async ({
 
 	api: {},
 });
-`,mimeType:"application/javascript"},"/modules/ai/plugins/core/servers.js":{content:`export default () => ({
+`,mimeType:"application/javascript",skipSW:!1},"/modules/ai/plugins/core/servers.js":{content:`export default () => ({
 	name: "servers",
-
 	initialize(host) {
 		const state = {
 			availableServers: [
@@ -4976,6 +4093,117 @@ export default async ({
 					tags: ["Example", "Beginner"],
 					icon: \`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>\`,
 				},
+				// Code Generation Servers
+				{
+					id: "frontend-dev-agent",
+					name: "Frontend Developer Agent",
+					description:
+						"Your AI frontend developer. Generate complete SPAs, React components, interactive UIs, and modern web apps - all running in the browser.",
+					path: "/templates/servers/frontend-agent.js",
+					tags: ["Official", "AI Agent", "Code Generation", "Essential"],
+					icon: \`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>\`,
+				},
+				{
+					id: "ui-component-generator",
+					name: "UI Component Library",
+					description:
+						"Generate beautiful, production-ready UI components. Buttons, forms, modals, cards - all with modern styling and animations.",
+					path: "/templates/servers/ui-generator.js",
+					tags: ["Official", "UI", "Components", "Code Generation"],
+					icon: \`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>\`,
+				},
+				{
+					id: "visualization-generator",
+					name: "Data Visualization Generator",
+					description:
+						"Create stunning charts, graphs, and interactive data visualizations using Chart.js, D3, and Canvas.",
+					path: "/templates/servers/viz-generator.js",
+					tags: ["Visualization", "Code Generation", "Data"],
+					icon: \`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>\`,
+				},
+				{
+					id: "game-animation-generator",
+					name: "Game & Animation Studio",
+					description:
+						"Generate HTML5 games, 3D scenes with Three.js, and stunning CSS/Canvas animations.",
+					path: "/templates/servers/game-generator.js",
+					tags: ["Games", "Animation", "Code Generation", "Creative"],
+					icon: \`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15.91" y1="11" x2="18.36" y2="8.55"></line><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.91" y1="4.91" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.09" y2="19.09"></line></svg>\`,
+				},
+				{
+					id: "landing-page-generator",
+					name: "Landing Page Generator",
+					description:
+						"Create modern, responsive landing pages with hero sections, pricing tables, testimonials, and more.",
+					path: "/templates/servers/landing-generator.js",
+					tags: ["Web Design", "Code Generation", "Marketing"],
+					icon: \`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>\`,
+				},
+				{
+					id: "code-transformer",
+					name: "Code Refactoring Agent",
+					description:
+						"Modernize code, convert to hooks, optimize performance, and improve code quality.",
+					path: "/templates/servers/code-transformer.js",
+					tags: ["Refactoring", "Code Generation", "AI Agent"],
+					icon: \`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"></path></svg>\`,
+				},
+				{
+					id: "data-processor",
+					name: "Data Processing Generator",
+					description:
+						"Generate scripts for CSV/JSON processing, data transformation, and client-side analysis.",
+					path: "/templates/servers/data-processor.js",
+					tags: ["Data", "Code Generation", "Utility"],
+					icon: \`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>\`,
+				},
+				// Utility Servers
+				{
+					id: "virtual-filesystem",
+					name: "Virtual Filesystem",
+					description:
+						"IndexedDB-based file system for managing your projects entirely in the browser.",
+					path: "/templates/servers/virtual-fs.js",
+					tags: ["Official", "Development", "Storage"],
+					icon: \`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>\`,
+				},
+				{
+					id: "http-client",
+					name: "HTTP API Client",
+					description:
+						"Make API requests, test endpoints, and save collections. Perfect for API development.",
+					path: "/templates/servers/http-client.js",
+					tags: ["API", "Testing", "Utility"],
+					icon: \`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>\`,
+				},
+				{
+					id: "github-api",
+					name: "GitHub Integration",
+					description:
+						"Full GitHub workflow via REST API - manage repos, commits, issues, and PRs.",
+					path: "/templates/servers/github-api.js",
+					tags: ["Git", "Publishing", "Official"],
+					icon: \`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"></path><path d="M9 18c-4.51 2-5-2-7-2"></path></svg>\`,
+				},
+				// Creative & Interactive
+				{
+					id: "games-suite",
+					name: "Interactive Games",
+					description:
+						"Text adventures, chess, word games, and coding challenges. Fun way to test the AI!",
+					path: "/templates/servers/games.js",
+					tags: ["Games", "Entertainment", "Interactive"],
+					icon: \`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="12" x2="18" y2="12"></line><line x1="12" y1="6" x2="12" y2="18"></line></svg>\`,
+				},
+				{
+					id: "canvas-studio",
+					name: "Canvas Art Studio",
+					description:
+						"Create ASCII art, diagrams, charts, and visual content directly in the browser.",
+					path: "/templates/servers/canvas-studio.js",
+					tags: ["Creative", "Visualization", "Art"],
+					icon: \`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19l7-7 3 3-7 7-3-3z"></path><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path><path d="M2 2l7.586 7.586"></path><circle cx="11" cy="11" r="2"></circle></svg>\`,
+				},
 			],
 			favoriteServerIds: [],
 		};
@@ -4994,12 +4222,17 @@ export default async ({
 					...state.favoriteServerIds,
 				]);
 			},
+			getServerById: (serverId) => {
+				return state.availableServers.find((s) => s.id === serverId);
+			},
+			getServersByTag: (tag) => {
+				return state.availableServers.filter((s) => s.tags.includes(tag));
+			},
 		};
 	},
-
 	api: {},
 });
-`,mimeType:"application/javascript"},"/modules/ai/plugins/core/resources.js":{content:`export default () => ({
+`,mimeType:"application/javascript",skipSW:!1},"/modules/ai/plugins/core/resources.js":{content:`export default () => ({
 	name: "resources",
 
 	initialize(host) {
@@ -5109,8 +4342,8 @@ export default async ({
 
 	api: {},
 });
-`,mimeType:"application/javascript"},"/modules/ai/plugins/core/prompts.js":{content:`export default () => {};
-`,mimeType:"application/javascript"},"/modules/ai/plugins/core/requests.js":{content:`export default ({ ElicitRequestSchema, CreateMessageRequestSchema }) => ({
+`,mimeType:"application/javascript",skipSW:!1},"/modules/ai/plugins/core/prompts.js":{content:`export default () => {};
+`,mimeType:"application/javascript",skipSW:!1},"/modules/ai/plugins/core/requests.js":{content:`export default ({ ElicitRequestSchema, CreateMessageRequestSchema }) => ({
 	name: "requests",
 	initialize(host) {
 		const pendingElicitation = new Map();
@@ -5303,7 +4536,7 @@ export default async ({
 
 	api: {},
 });
-`,mimeType:"application/javascript"},"/modules/ai/plugins/core/notifications.js":{content:`export default ({ ServerNotificationSchema }) => ({
+`,mimeType:"application/javascript",skipSW:!1},"/modules/ai/plugins/core/notifications.js":{content:`export default ({ ServerNotificationSchema }) => ({
 	name: "notifications",
 	initialize(host) {
 		for (const schema of ServerNotificationSchema.options) {
@@ -5321,7 +4554,7 @@ export default async ({
 	},
 	api: {},
 });
-`,mimeType:"application/javascript"},"/modules/ai/plugins/core/clients.js":{content:`export default ({ McpClient }) => ({
+`,mimeType:"application/javascript",skipSW:!1},"/modules/ai/plugins/core/clients.js":{content:`export default ({ McpClient }) => ({
 	name: "clients",
 
 	initialize(host) {
@@ -5422,7 +4655,7 @@ export default async ({
 
 	api: {},
 });
-`,mimeType:"application/javascript"},"/modules/ai/plugins/core/roots.js":{content:`export default {
+`,mimeType:"application/javascript",skipSW:!1},"/modules/ai/plugins/core/roots.js":{content:`export default {
 	name: "roots",
 	initialize(host) {
 		const hostRoots = new Map();
@@ -5527,7 +4760,7 @@ export default async ({
 	},
 	api: {},
 };
-`,mimeType:"application/javascript"},"/modules/ai/plugins/history.js":{content:`export default () => ({
+`,mimeType:"application/javascript",skipSW:!1},"/modules/ai/plugins/history.js":{content:`export default () => ({
 	name: "history",
 	initialize(host) {
 		let history = [];
@@ -5612,7 +4845,7 @@ export default async ({
 
 	api: {},
 });
-`,mimeType:"application/javascript"},"/modules/ai/plugins/chat.js":{content:`const adaptMessageToGemini = (msg) => {
+`,mimeType:"application/javascript",skipSW:!1},"/modules/ai/plugins/chat.js":{content:`const adaptMessageToGemini = (msg) => {
 	if (msg.content) {
 		return {
 			role: msg.role === "assistant" ? "model" : "user",
@@ -6245,7 +5478,7 @@ export default () => ({
 	},
 	api: {},
 });
-`,mimeType:"application/javascript"},"/modules/ai/plugins/conversations.js":{content:`export default () => ({
+`,mimeType:"application/javascript",skipSW:!1},"/modules/ai/plugins/conversations.js":{content:`export default () => ({
 	name: "conversation",
 
 	initialize(host) {
@@ -6435,7 +5668,7 @@ export default () => ({
 
 	api: {},
 });
-`,mimeType:"application/javascript"},"/modules/apps/admin/index.js":{content:`export const dependencies = {
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/admin/index.js":{content:`export const dependencies = {
 	cms: "/modules/apps/cms/index.js",
 	drive: "/modules/apps/drive/index.js",
 	project: "/modules/apps/project/index.js",
@@ -6533,7 +5766,7 @@ export default ({ $APP, html }) => {
 
 	$APP.routes.set(routes);
 };
-`,mimeType:"application/javascript"},"/modules/apps/cms/index.js":{content:`export default ({ $APP }) =>
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/cms/index.js":{content:`export default ({ $APP }) =>
 	$APP.addModule({
 		name: "cms",
 		path: "apps/cms/views",
@@ -6544,14 +5777,14 @@ export default ({ $APP, html }) => {
 			},
 		},
 	});
-`,mimeType:"application/javascript"},"/modules/apps/drive/index.js":{content:`export const migration = true;
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/drive/index.js":{content:`export const migration = true;
 export default ({ $APP }) =>
 	$APP.addModule({
 		name: "drive",
 		path: "apps/drive",
 		backend: true,
 	});
-`,mimeType:"application/javascript"},"/modules/apps/project/index.js":{content:`export const migration = true;
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/project/index.js":{content:`export const migration = true;
 
 export default ({ $APP, Controller }) => {
 	const commands = {
@@ -6615,7 +5848,7 @@ export default ({ $APP, Controller }) => {
 		},
 	});
 };
-`,mimeType:"application/javascript"},"/modules/apps/ide/index.js":{content:`import "/modules/apps/ide/plugins/highlight.js";
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/ide/index.js":{content:`import "/modules/apps/ide/plugins/highlight.js";
 import "/modules/apps/ide/plugins/format.js";
 import "/modules/apps/ide/plugins/explorer.js";
 import "/modules/apps/ide/plugins/edit.js";
@@ -6819,7 +6052,7 @@ export default ({ $APP, FileSystemAdapter, Controller }) => {
 	ram.set("IDE", manager);
 	return manager;
 };
-`,mimeType:"application/javascript"},"/modules/apps/ide/plugins/highlight.js":{content:`import $APP from "/bootstrap.js";
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/ide/plugins/highlight.js":{content:`import $APP from "/bootstrap.js";
 
 const Highlight = {
 	name: "highlight",
@@ -6896,7 +6129,201 @@ const Highlight = {
 $APP.settings.add("commands", {
 	"highlight:apply": Highlight.applyHighlighting.bind(Highlight),
 });
-`,mimeType:"application/javascript"},"/modules/apps/ide/plugins/explorer.js":{content:`import $APP from "/bootstrap.js";
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/ide/plugins/format.js":{content:`import $APP from "/bootstrap.js";
+
+const Format = {
+	handleKeydown({ event, input, editor }) {
+		const { selectionStart: start, selectionEnd: end } = input;
+		const { key } = event;
+		if (Format.isCharacterKey(event)) {
+			if (Format.isOpeningBrace(key) || Format.isQuote(key)) {
+				event.preventDefault();
+				Format.handleAutoComplete({ key, start, end, input, editor });
+			} else if (start !== end) {
+				event.preventDefault();
+				Format.handleReplaceSelection({ key, start, end, input, editor });
+			}
+		} else if (key === "Backspace" || key === "Delete") {
+			Format.handleDelete({ key, start, end, input, editor, event });
+		}
+	},
+
+	handleAutoComplete({ key, start, end, input, editor }) {
+		const pair = Format.getPair(key);
+		const newText = \`\${key}\${pair}\`;
+		Format.updateContent({
+			input,
+			start,
+			end,
+			newText,
+			cursorPosition: start + 1,
+			editor,
+		});
+	},
+
+	handleReplaceSelection({ key, start, end, input, editor }) {
+		Format.updateContent({
+			input,
+			start,
+			end,
+			cursorPosition: start + 1,
+			newText: key,
+			editor,
+		});
+	},
+
+	handleDelete({ key, start, end, input, editor, event }) {
+		const charBefore = input.value[start - 1];
+		const charAfter = input.value[start];
+
+		if (Format.isMatchingPair(charBefore, charAfter)) {
+			event.preventDefault();
+			Format.updateContent({
+				input,
+				start: start - 1,
+				end: end + 1,
+				cursorPosition: start - 1,
+				newText: "",
+				editor,
+			});
+		} else if (Format.isIndentationDeletion({ key, start, input })) {
+			event.preventDefault();
+			Format.updateContent({
+				input,
+				start: start - 2,
+				cursorPosition: start - 2,
+				end,
+				newText: "",
+				editor,
+			});
+		}
+	},
+
+	updateContent({ input, start, end, cursorPosition, newText, editor }) {
+		const value = input.value;
+		const newValue = value.slice(0, start) + newText + value.slice(end);
+		if (newValue !== value) {
+			editor.updateContent(newValue);
+			if (cursorPosition) {
+				setTimeout(() => {
+					input.selectionStart = cursorPosition;
+					input.selectionEnd = cursorPosition;
+				}, 0);
+			}
+		}
+	},
+
+	trimTrailingLines(content) {
+		// Remove all trailing empty lines and leave only one maximum
+		return content.replace(/\\s+$/g, "\\n").replace(/\\n{2,}$/, "\\n");
+	},
+
+	// Utility functions
+	isOpeningBrace(key) {
+		return ["{", "(", "["].includes(key);
+	},
+
+	isQuote(key) {
+		return ['"', "'", "\`"].includes(key);
+	},
+
+	getPair(key) {
+		const pairs = {
+			"{": "}",
+			"(": ")",
+			"[": "]",
+			'"': '"',
+			"'": "'",
+			"\`": "\`",
+		};
+		return pairs[key];
+	},
+
+	isMatchingPair(charBefore, charAfter) {
+		const pair = Format.getPair(charBefore);
+		return pair === charAfter;
+	},
+
+	isIndentationDeletion({ key, start, input }) {
+		if (key !== "Backspace" || start < 2) return false;
+		const textBefore = input.value.slice(start - 2, start);
+		return textBefore === "  "; // Check if we're deleting an indent (two spaces)
+	},
+
+	isCharacterKey(event) {
+		if (event.ctrlKey || event.altKey || event.metaKey) {
+			return false;
+		}
+		// A key is a character key if event.key is a single character (excluding control keys)
+		// and event.code is not part of the non-character key codes.
+		const key = event.key;
+		const code = event.code;
+
+		if (key.length === 1) return true;
+
+		if (code === "Enter") return false;
+
+		return !(
+			code.startsWith("Arrow") ||
+			code.startsWith("Home") ||
+			code.startsWith("End") ||
+			code.startsWith("Page") ||
+			[
+				"Tab",
+				"Escape",
+				"Backspace",
+				"Delete",
+				"Control",
+				"Alt",
+				"Shift",
+				"ContextMenu",
+			].includes(key)
+		);
+	},
+};
+const editorCommands = {
+	"editor:auto-complete": ({ key, start, end, input, editor }) => {
+		const pair = Format.getPair(key);
+		const newText = \`\${key}\${pair}\`;
+		Format.updateContent({
+			input,
+			start,
+			end,
+			newText,
+			cursorPosition: start + 1,
+			editor,
+		});
+	},
+	"editor:replace-selection": (args) => {
+		Format.handleReplaceSelection(args);
+	},
+	"editor:delete-pair": (args) => {
+		Format.handleDelete(args);
+	},
+	"editor:trim-trailing-lines": (args) => {
+		Format.trimTrailingLines(args);
+	},
+};
+
+$APP.hooks.on("onEditorInit", ({ editor, input }) => {
+	input.addEventListener("keydown", (event) =>
+		Format.handleKeydown({ event, input, editor }),
+	);
+});
+
+$APP.hooks.on("onFileOpen", ({ editor, settings, file }) => {
+	let content;
+	if (!settings.useTabs) {
+		const tabSize = settings.tabSize || 2;
+		const spaceEquivalent = " ".repeat(tabSize);
+		content = file.content.replace(/\\t/g, spaceEquivalent);
+	}
+	content = Format.trimTrailingLines(content);
+	editor.updateContent(content);
+});
+
+$APP.settings.add("commands", editorCommands);
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/ide/plugins/explorer.js":{content:`import $APP from "/bootstrap.js";
 
 const explorerCommands = {
 	"file:new-file": async ({ IDE, explorer, directory = "/" }) => {
@@ -7033,7 +6460,232 @@ const fileMenu = {
 
 $APP.settings.add("commands", explorerCommands);
 $APP.settings.add("menu", fileMenu);
-`,mimeType:"application/javascript"},"/modules/apps/ide/plugins/markdown.js":{content:`// Implement https://overtype.dev/
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/ide/plugins/edit.js":{content:`import $APP from "/bootstrap.js";
+
+const editorCommands = {
+	"selection:select-all"({ input }) {
+		input.setSelectionRange(0, input.value.length);
+	},
+
+	"selection:expand-selection"({ input }) {
+		const { selectionStart, selectionEnd, value } = input;
+		let newStart = selectionStart;
+		let newEnd = selectionEnd;
+		if (newStart > 0) newStart--;
+		if (newEnd < value.length) newEnd++;
+		input.setSelectionRange(newStart, newEnd);
+	},
+
+	"selection:shrink-selection"({ input }) {
+		const { selectionStart, selectionEnd } = input;
+		let newStart = selectionStart;
+		let newEnd = selectionEnd;
+		if (newStart < newEnd) newStart++;
+		if (newEnd > newStart) newEnd--;
+		input.setSelectionRange(newStart, newEnd);
+	},
+
+	"selection:copy-line-up"({ input, editor }) {
+		const { selectionStart, selectionEnd, value } = input;
+		const lineStart = value.lastIndexOf("\\n", selectionStart - 1) + 1;
+		const lineEnd =
+			value.indexOf("\\n", selectionEnd) === -1
+				? value.length
+				: value.indexOf("\\n", selectionEnd);
+		const lineContent = value.slice(lineStart, lineEnd);
+		const newValue = \`\${value.slice(0, lineStart)}\${lineContent}\\n\${value.slice(lineStart)}\`;
+		editor.updateContent(newValue);
+		input.setSelectionRange(
+			selectionStart + lineContent.length + 1,
+			selectionEnd + lineContent.length + 1,
+		);
+	},
+
+	"selection:copy-line-down"({ input, editor }) {
+		const { selectionStart, selectionEnd, value } = input;
+		const lineStart = value.lastIndexOf("\\n", selectionStart - 1) + 1;
+		const lineEnd =
+			value.indexOf("\\n", selectionEnd) === -1
+				? value.length
+				: value.indexOf("\\n", selectionEnd);
+		const lineContent = value.slice(lineStart, lineEnd);
+		const newValue = \`\${value.slice(0, lineEnd)}\\n\${lineContent}\${value.slice(lineEnd)}\`;
+		editor.updateContent(newValue);
+		input.setSelectionRange(
+			selectionStart + lineContent.length + 1,
+			selectionEnd + lineContent.length + 1,
+		);
+	},
+
+	"selection:move-line-up"({ input, editor }) {
+		const { selectionStart, selectionEnd, value } = input;
+		const lineStart = value.lastIndexOf("\\n", selectionStart - 1) + 1;
+		const lineEnd =
+			value.indexOf("\\n", selectionEnd) === -1
+				? value.length
+				: value.indexOf("\\n", selectionEnd);
+		const prevLineEnd = lineStart - 1;
+		const prevLineStart = value.lastIndexOf("\\n", prevLineEnd - 1) + 1;
+		if (prevLineStart >= 0 && prevLineEnd >= 0) {
+			const lineContent = value.slice(lineStart, lineEnd);
+			const prevLineContent = value.slice(prevLineStart, prevLineEnd);
+			const newValue = \`\${value.slice(0, prevLineStart)}\${lineContent}\\n\${prevLineContent}\${value.slice(lineEnd)}\`;
+			editor.updateContent(newValue);
+			const offset = lineContent.length + 1;
+			input.setSelectionRange(selectionStart - offset, selectionEnd - offset);
+		}
+	},
+
+	"selection:move-line-down"({ input, editor }) {
+		const { selectionStart, selectionEnd, value } = input;
+		const lineStart = value.lastIndexOf("\\n", selectionStart - 1) + 1;
+		const lineEnd =
+			value.indexOf("\\n", selectionEnd) === -1
+				? value.length
+				: value.indexOf("\\n", selectionEnd);
+		const nextLineStart = lineEnd + 1;
+		const nextLineEnd =
+			value.indexOf("\\n", nextLineStart) === -1
+				? value.length
+				: value.indexOf("\\n", nextLineStart);
+		if (nextLineStart < value.length) {
+			const lineContent = value.slice(lineStart, lineEnd);
+			const nextLineContent = value.slice(nextLineStart, nextLineEnd);
+			const newValue = \`\${value.slice(0, lineStart)}\${nextLineContent}\\n\${lineContent}\${value.slice(nextLineEnd)}\`;
+			editor.updateContent(newValue);
+			const offset = nextLineContent.length + 1;
+			input.setSelectionRange(selectionStart + offset, selectionEnd + offset);
+		}
+	},
+
+	"selection:duplicate-selection"({ input, editor }) {
+		const { selectionStart, selectionEnd, value } = input;
+		const selectedText = value.slice(selectionStart, selectionEnd);
+		const newValue =
+			value.slice(0, selectionEnd) + selectedText + value.slice(selectionEnd);
+		editor.updateContent(newValue);
+		input.setSelectionRange(selectionStart, selectionEnd + selectedText.length);
+	},
+
+	"edit:undo"() {
+		document.execCommand("undo");
+	},
+
+	"edit:redo"() {
+		document.execCommand("redo");
+	},
+
+	"edit:cut"() {
+		document.execCommand("cut");
+	},
+
+	"edit:copy"() {
+		document.execCommand("copy");
+	},
+
+	"edit:paste"() {
+		document.execCommand("paste");
+	},
+
+	"edit:find"() {
+		// Implement find functionality using editor's built-in or custom method
+	},
+
+	"edit:replace"() {
+		// Implement replace functionality using editor's built-in or custom method
+	},
+
+	"edit:find-in-files"() {
+		// Implement find-in-files functionality
+	},
+
+	"edit:replace-in-files"() {
+		// Implement replace-in-files functionality
+	},
+
+	"edit:toggle-line-comment"({ input, editor }) {
+		const { value } = input;
+		const start = input.selectionStart;
+		const end = input.selectionEnd;
+		const selectedText = value.slice(start, end);
+		const lines = selectedText.split("\\n");
+		const allCommented = lines.every((line) => line.trim().startsWith("//"));
+		const newText = lines
+			.map((line) => {
+				if (allCommented) {
+					return line.replace(/^(\\s*)\\/\\/\\s?/, "$1");
+				}
+				return \`// \${line}\`;
+			})
+			.join("\\n");
+		editor.updateContent(value.slice(0, start) + newText + value.slice(end));
+		input.setSelectionRange(start, start + newText.length);
+	},
+
+	"edit:toggle-block-comment"({ input, editor }) {
+		const { value } = input;
+		const start = input.selectionStart;
+		const end = input.selectionEnd;
+		const selectedText = value.slice(start, end);
+		if (selectedText.startsWith("/*") && selectedText.endsWith("*/")) {
+			const newText = selectedText.slice(2, -2).trim();
+			editor.updateContent(value.slice(0, start) + newText + value.slice(end));
+			input.setSelectionRange(start, start + newText.length);
+		} else {
+			const newText = \`/* \${selectedText} */\`;
+			editor.updateContent(value.slice(0, start) + newText + value.slice(end));
+			input.setSelectionRange(start, start + newText.length);
+		}
+	},
+};
+
+const keyBindings = {
+	"ctrl+z": "edit:undo",
+	"ctrl+y": "edit:redo",
+	"ctrl+x": "edit:cut",
+	"ctrl+c": "edit:copy",
+	//"ctrl+v": "edit:paste",
+	//"ctrl+f": "edit:find",
+	"ctrl+h": "edit:replace",
+	"ctrl+shift+f": "edit:find-in-files",
+	"ctrl+shift+h": "edit:replace-in-files",
+	"ctrl+/": "edit:toggle-line-comment",
+	"ctrl+shift+/": "edit:toggle-block-comment",
+};
+
+const editorMenu = {
+	"edit:undo": "Undo",
+	"edit:redo": "Redo",
+	"edit:cut": "Cut",
+	"edit:copy": "Copy",
+	"edit:paste": "Paste",
+	"edit:find": "Find",
+	"edit:replace": "Replace",
+	"edit:find-in-files": "Find in Files",
+	"edit:replace-in-files": "Replace in Files",
+	"edit:toggle-line-comment": "Toggle Line Comment",
+	"edit:toggle-block-comment": "Toggle Block Comment",
+	"selection:select-all": "Select All",
+	"selection:expand-selection": "Expand Selection",
+	"selection:shrink-selection": "Shrink Selection",
+	"selection:copy-line-up": "Copy Line Up",
+	"selection:copy-line-down": "Copy Line Down",
+	"selection:move-line-up": "Move Line Up",
+	"selection:move-line-down": "Move Line Down",
+	"selection:duplicate-selection": "Duplicate Selection",
+};
+
+$APP.hooks.on("onEditorInit", ({ input, editor }) => {
+	input.addEventListener("input", (event) => {
+		const updatedCode = event.target.value || event.target.textContent;
+		editor.content = updatedCode;
+	});
+});
+
+$APP.settings.add("globalKeybindings", keyBindings);
+$APP.settings.add("commands", editorCommands);
+$APP.settings.add("menu", editorMenu);
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/ide/plugins/markdown.js":{content:`// Implement https://overtype.dev/
 import $APP from "/bootstrap.js";
 import html from "/modules/mvc/view/html/index.js";
 import T from "/modules/types/index.js";
@@ -7287,7 +6939,7 @@ function generateMarkdownTree(markdown) {
 
 $APP.settings.add("highlights", { markdown: markdownLanguage });
 $APP.define({ "markdown-viewer": MarkdownViewer });
-`,mimeType:"application/javascript"},"/modules/apps/ide/plugins/keybindings.js":{content:`import $APP from "/bootstrap.js";
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/ide/plugins/keybindings.js":{content:`import $APP from "/bootstrap.js";
 
 const Keybindings = {
 	name: "Keybindings",
@@ -7561,426 +7213,7 @@ $APP.hooks.on(
 		});
 	},
 );
-`,mimeType:"application/javascript"},"/modules/apps/ide/plugins/format.js":{content:`import $APP from "/bootstrap.js";
-
-const Format = {
-	handleKeydown({ event, input, editor }) {
-		const { selectionStart: start, selectionEnd: end } = input;
-		const { key } = event;
-		if (Format.isCharacterKey(event)) {
-			if (Format.isOpeningBrace(key) || Format.isQuote(key)) {
-				event.preventDefault();
-				Format.handleAutoComplete({ key, start, end, input, editor });
-			} else if (start !== end) {
-				event.preventDefault();
-				Format.handleReplaceSelection({ key, start, end, input, editor });
-			}
-		} else if (key === "Backspace" || key === "Delete") {
-			Format.handleDelete({ key, start, end, input, editor, event });
-		}
-	},
-
-	handleAutoComplete({ key, start, end, input, editor }) {
-		const pair = Format.getPair(key);
-		const newText = \`\${key}\${pair}\`;
-		Format.updateContent({
-			input,
-			start,
-			end,
-			newText,
-			cursorPosition: start + 1,
-			editor,
-		});
-	},
-
-	handleReplaceSelection({ key, start, end, input, editor }) {
-		Format.updateContent({
-			input,
-			start,
-			end,
-			cursorPosition: start + 1,
-			newText: key,
-			editor,
-		});
-	},
-
-	handleDelete({ key, start, end, input, editor, event }) {
-		const charBefore = input.value[start - 1];
-		const charAfter = input.value[start];
-
-		if (Format.isMatchingPair(charBefore, charAfter)) {
-			event.preventDefault();
-			Format.updateContent({
-				input,
-				start: start - 1,
-				end: end + 1,
-				cursorPosition: start - 1,
-				newText: "",
-				editor,
-			});
-		} else if (Format.isIndentationDeletion({ key, start, input })) {
-			event.preventDefault();
-			Format.updateContent({
-				input,
-				start: start - 2,
-				cursorPosition: start - 2,
-				end,
-				newText: "",
-				editor,
-			});
-		}
-	},
-
-	updateContent({ input, start, end, cursorPosition, newText, editor }) {
-		const value = input.value;
-		const newValue = value.slice(0, start) + newText + value.slice(end);
-		if (newValue !== value) {
-			editor.updateContent(newValue);
-			if (cursorPosition) {
-				setTimeout(() => {
-					input.selectionStart = cursorPosition;
-					input.selectionEnd = cursorPosition;
-				}, 0);
-			}
-		}
-	},
-
-	trimTrailingLines(content) {
-		// Remove all trailing empty lines and leave only one maximum
-		return content.replace(/\\s+$/g, "\\n").replace(/\\n{2,}$/, "\\n");
-	},
-
-	// Utility functions
-	isOpeningBrace(key) {
-		return ["{", "(", "["].includes(key);
-	},
-
-	isQuote(key) {
-		return ['"', "'", "\`"].includes(key);
-	},
-
-	getPair(key) {
-		const pairs = {
-			"{": "}",
-			"(": ")",
-			"[": "]",
-			'"': '"',
-			"'": "'",
-			"\`": "\`",
-		};
-		return pairs[key];
-	},
-
-	isMatchingPair(charBefore, charAfter) {
-		const pair = Format.getPair(charBefore);
-		return pair === charAfter;
-	},
-
-	isIndentationDeletion({ key, start, input }) {
-		if (key !== "Backspace" || start < 2) return false;
-		const textBefore = input.value.slice(start - 2, start);
-		return textBefore === "  "; // Check if we're deleting an indent (two spaces)
-	},
-
-	isCharacterKey(event) {
-		if (event.ctrlKey || event.altKey || event.metaKey) {
-			return false;
-		}
-		// A key is a character key if event.key is a single character (excluding control keys)
-		// and event.code is not part of the non-character key codes.
-		const key = event.key;
-		const code = event.code;
-
-		if (key.length === 1) return true;
-
-		if (code === "Enter") return false;
-
-		return !(
-			code.startsWith("Arrow") ||
-			code.startsWith("Home") ||
-			code.startsWith("End") ||
-			code.startsWith("Page") ||
-			[
-				"Tab",
-				"Escape",
-				"Backspace",
-				"Delete",
-				"Control",
-				"Alt",
-				"Shift",
-				"ContextMenu",
-			].includes(key)
-		);
-	},
-};
-const editorCommands = {
-	"editor:auto-complete": ({ key, start, end, input, editor }) => {
-		const pair = Format.getPair(key);
-		const newText = \`\${key}\${pair}\`;
-		Format.updateContent({
-			input,
-			start,
-			end,
-			newText,
-			cursorPosition: start + 1,
-			editor,
-		});
-	},
-	"editor:replace-selection": (args) => {
-		Format.handleReplaceSelection(args);
-	},
-	"editor:delete-pair": (args) => {
-		Format.handleDelete(args);
-	},
-	"editor:trim-trailing-lines": (args) => {
-		Format.trimTrailingLines(args);
-	},
-};
-
-$APP.hooks.on("onEditorInit", ({ editor, input }) => {
-	input.addEventListener("keydown", (event) =>
-		Format.handleKeydown({ event, input, editor }),
-	);
-});
-
-$APP.hooks.on("onFileOpen", ({ editor, settings, file }) => {
-	let content;
-	if (!settings.useTabs) {
-		const tabSize = settings.tabSize || 2;
-		const spaceEquivalent = " ".repeat(tabSize);
-		content = file.content.replace(/\\t/g, spaceEquivalent);
-	}
-	content = Format.trimTrailingLines(content);
-	editor.updateContent(content);
-});
-
-$APP.settings.add("commands", editorCommands);
-`,mimeType:"application/javascript"},"/modules/apps/ide/plugins/edit.js":{content:`import $APP from "/bootstrap.js";
-
-const editorCommands = {
-	"selection:select-all"({ input }) {
-		input.setSelectionRange(0, input.value.length);
-	},
-
-	"selection:expand-selection"({ input }) {
-		const { selectionStart, selectionEnd, value } = input;
-		let newStart = selectionStart;
-		let newEnd = selectionEnd;
-		if (newStart > 0) newStart--;
-		if (newEnd < value.length) newEnd++;
-		input.setSelectionRange(newStart, newEnd);
-	},
-
-	"selection:shrink-selection"({ input }) {
-		const { selectionStart, selectionEnd } = input;
-		let newStart = selectionStart;
-		let newEnd = selectionEnd;
-		if (newStart < newEnd) newStart++;
-		if (newEnd > newStart) newEnd--;
-		input.setSelectionRange(newStart, newEnd);
-	},
-
-	"selection:copy-line-up"({ input, editor }) {
-		const { selectionStart, selectionEnd, value } = input;
-		const lineStart = value.lastIndexOf("\\n", selectionStart - 1) + 1;
-		const lineEnd =
-			value.indexOf("\\n", selectionEnd) === -1
-				? value.length
-				: value.indexOf("\\n", selectionEnd);
-		const lineContent = value.slice(lineStart, lineEnd);
-		const newValue = \`\${value.slice(0, lineStart)}\${lineContent}\\n\${value.slice(lineStart)}\`;
-		editor.updateContent(newValue);
-		input.setSelectionRange(
-			selectionStart + lineContent.length + 1,
-			selectionEnd + lineContent.length + 1,
-		);
-	},
-
-	"selection:copy-line-down"({ input, editor }) {
-		const { selectionStart, selectionEnd, value } = input;
-		const lineStart = value.lastIndexOf("\\n", selectionStart - 1) + 1;
-		const lineEnd =
-			value.indexOf("\\n", selectionEnd) === -1
-				? value.length
-				: value.indexOf("\\n", selectionEnd);
-		const lineContent = value.slice(lineStart, lineEnd);
-		const newValue = \`\${value.slice(0, lineEnd)}\\n\${lineContent}\${value.slice(lineEnd)}\`;
-		editor.updateContent(newValue);
-		input.setSelectionRange(
-			selectionStart + lineContent.length + 1,
-			selectionEnd + lineContent.length + 1,
-		);
-	},
-
-	"selection:move-line-up"({ input, editor }) {
-		const { selectionStart, selectionEnd, value } = input;
-		const lineStart = value.lastIndexOf("\\n", selectionStart - 1) + 1;
-		const lineEnd =
-			value.indexOf("\\n", selectionEnd) === -1
-				? value.length
-				: value.indexOf("\\n", selectionEnd);
-		const prevLineEnd = lineStart - 1;
-		const prevLineStart = value.lastIndexOf("\\n", prevLineEnd - 1) + 1;
-		if (prevLineStart >= 0 && prevLineEnd >= 0) {
-			const lineContent = value.slice(lineStart, lineEnd);
-			const prevLineContent = value.slice(prevLineStart, prevLineEnd);
-			const newValue = \`\${value.slice(0, prevLineStart)}\${lineContent}\\n\${prevLineContent}\${value.slice(lineEnd)}\`;
-			editor.updateContent(newValue);
-			const offset = lineContent.length + 1;
-			input.setSelectionRange(selectionStart - offset, selectionEnd - offset);
-		}
-	},
-
-	"selection:move-line-down"({ input, editor }) {
-		const { selectionStart, selectionEnd, value } = input;
-		const lineStart = value.lastIndexOf("\\n", selectionStart - 1) + 1;
-		const lineEnd =
-			value.indexOf("\\n", selectionEnd) === -1
-				? value.length
-				: value.indexOf("\\n", selectionEnd);
-		const nextLineStart = lineEnd + 1;
-		const nextLineEnd =
-			value.indexOf("\\n", nextLineStart) === -1
-				? value.length
-				: value.indexOf("\\n", nextLineStart);
-		if (nextLineStart < value.length) {
-			const lineContent = value.slice(lineStart, lineEnd);
-			const nextLineContent = value.slice(nextLineStart, nextLineEnd);
-			const newValue = \`\${value.slice(0, lineStart)}\${nextLineContent}\\n\${lineContent}\${value.slice(nextLineEnd)}\`;
-			editor.updateContent(newValue);
-			const offset = nextLineContent.length + 1;
-			input.setSelectionRange(selectionStart + offset, selectionEnd + offset);
-		}
-	},
-
-	"selection:duplicate-selection"({ input, editor }) {
-		const { selectionStart, selectionEnd, value } = input;
-		const selectedText = value.slice(selectionStart, selectionEnd);
-		const newValue =
-			value.slice(0, selectionEnd) + selectedText + value.slice(selectionEnd);
-		editor.updateContent(newValue);
-		input.setSelectionRange(selectionStart, selectionEnd + selectedText.length);
-	},
-
-	"edit:undo"() {
-		document.execCommand("undo");
-	},
-
-	"edit:redo"() {
-		document.execCommand("redo");
-	},
-
-	"edit:cut"() {
-		document.execCommand("cut");
-	},
-
-	"edit:copy"() {
-		document.execCommand("copy");
-	},
-
-	"edit:paste"() {
-		document.execCommand("paste");
-	},
-
-	"edit:find"() {
-		// Implement find functionality using editor's built-in or custom method
-	},
-
-	"edit:replace"() {
-		// Implement replace functionality using editor's built-in or custom method
-	},
-
-	"edit:find-in-files"() {
-		// Implement find-in-files functionality
-	},
-
-	"edit:replace-in-files"() {
-		// Implement replace-in-files functionality
-	},
-
-	"edit:toggle-line-comment"({ input, editor }) {
-		const { value } = input;
-		const start = input.selectionStart;
-		const end = input.selectionEnd;
-		const selectedText = value.slice(start, end);
-		const lines = selectedText.split("\\n");
-		const allCommented = lines.every((line) => line.trim().startsWith("//"));
-		const newText = lines
-			.map((line) => {
-				if (allCommented) {
-					return line.replace(/^(\\s*)\\/\\/\\s?/, "$1");
-				}
-				return \`// \${line}\`;
-			})
-			.join("\\n");
-		editor.updateContent(value.slice(0, start) + newText + value.slice(end));
-		input.setSelectionRange(start, start + newText.length);
-	},
-
-	"edit:toggle-block-comment"({ input, editor }) {
-		const { value } = input;
-		const start = input.selectionStart;
-		const end = input.selectionEnd;
-		const selectedText = value.slice(start, end);
-		if (selectedText.startsWith("/*") && selectedText.endsWith("*/")) {
-			const newText = selectedText.slice(2, -2).trim();
-			editor.updateContent(value.slice(0, start) + newText + value.slice(end));
-			input.setSelectionRange(start, start + newText.length);
-		} else {
-			const newText = \`/* \${selectedText} */\`;
-			editor.updateContent(value.slice(0, start) + newText + value.slice(end));
-			input.setSelectionRange(start, start + newText.length);
-		}
-	},
-};
-
-const keyBindings = {
-	"ctrl+z": "edit:undo",
-	"ctrl+y": "edit:redo",
-	"ctrl+x": "edit:cut",
-	"ctrl+c": "edit:copy",
-	//"ctrl+v": "edit:paste",
-	//"ctrl+f": "edit:find",
-	"ctrl+h": "edit:replace",
-	"ctrl+shift+f": "edit:find-in-files",
-	"ctrl+shift+h": "edit:replace-in-files",
-	"ctrl+/": "edit:toggle-line-comment",
-	"ctrl+shift+/": "edit:toggle-block-comment",
-};
-
-const editorMenu = {
-	"edit:undo": "Undo",
-	"edit:redo": "Redo",
-	"edit:cut": "Cut",
-	"edit:copy": "Copy",
-	"edit:paste": "Paste",
-	"edit:find": "Find",
-	"edit:replace": "Replace",
-	"edit:find-in-files": "Find in Files",
-	"edit:replace-in-files": "Replace in Files",
-	"edit:toggle-line-comment": "Toggle Line Comment",
-	"edit:toggle-block-comment": "Toggle Block Comment",
-	"selection:select-all": "Select All",
-	"selection:expand-selection": "Expand Selection",
-	"selection:shrink-selection": "Shrink Selection",
-	"selection:copy-line-up": "Copy Line Up",
-	"selection:copy-line-down": "Copy Line Down",
-	"selection:move-line-up": "Move Line Up",
-	"selection:move-line-down": "Move Line Down",
-	"selection:duplicate-selection": "Duplicate Selection",
-};
-
-$APP.hooks.on("onEditorInit", ({ input, editor }) => {
-	input.addEventListener("input", (event) => {
-		const updatedCode = event.target.value || event.target.textContent;
-		editor.content = updatedCode;
-	});
-});
-
-$APP.settings.add("globalKeybindings", keyBindings);
-$APP.settings.add("commands", editorCommands);
-$APP.settings.add("menu", editorMenu);
-`,mimeType:"application/javascript"},"/modules/apps/ide/highlights/css.js":{content:`import $APP from "/bootstrap.js";
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/ide/highlights/css.js":{content:`import $APP from "/bootstrap.js";
 
 const css = {
 	name: "css",
@@ -7996,7 +7229,7 @@ const css = {
 };
 
 $APP.settings.add("highlights", { css });
-`,mimeType:"application/javascript"},"/modules/apps/ide/highlights/html.js":{content:`import $APP from "/bootstrap.js";
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/ide/highlights/html.js":{content:`import $APP from "/bootstrap.js";
 
 const html = {
 	name: "html",
@@ -8013,7 +7246,7 @@ const html = {
 };
 
 $APP.settings.add("highlights", { html });
-`,mimeType:"application/javascript"},"/modules/apps/ide/highlights/javascript.js":{content:`import $APP from "/bootstrap.js";
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/ide/highlights/javascript.js":{content:`import $APP from "/bootstrap.js";
 
 const javascript = {
 	name: "highlight-javascript",
@@ -8041,7 +7274,7 @@ const javascript = {
 };
 
 $APP.settings.add("highlights", { javascript });
-`,mimeType:"application/javascript"},"/modules/sw/adapter.js":{content:`export default ({ $APP }) => {
+`,mimeType:"application/javascript",skipSW:!1},"/modules/sw/adapter.js":{content:`export default ({ $APP }) => {
 	class SWAdapter {
 		async namespaceExists({ namespace }) {
 			try {
@@ -8114,7 +7347,7 @@ $APP.settings.add("highlights", { javascript });
 
 	return SWAdapter;
 };
-`,mimeType:"application/javascript"},"/modules/apps/chat/index.js":{content:`export const migration = true;
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/chat/index.js":{content:`export const migration = true;
 export default ({ $APP, T, AI, Model, html }) => {
 	$APP.events.on("INIT_APP", async () => {
 		$APP.define("app-chat-message", {
@@ -8414,12 +7647,12 @@ export default ({ $APP, T, AI, Model, html }) => {
 		},
 	});
 };
-`,mimeType:"application/javascript"},"/modules/apps/editor/index.js":{content:`export default ({ $APP }) =>
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/editor/index.js":{content:`export default ({ $APP }) =>
 	$APP.addModule({
 		name: "editor",
 		path: "apps/editor/views",
 	});
-`,mimeType:"application/javascript"},"/modules/apps/bundler/index.js":{content:"export default {}"},"/modules/integrations/github.js":{content:"export default {}"},"/modules/apps/mcp/index.js":{content:`export default ({ $APP }) => {
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/bundler/index.js":{content:"export default {}"},"/modules/integrations/github.js":{content:"export default {}"},"/modules/apps/mcp/index.js":{content:`export default ({ $APP }) => {
 	$APP.addModule({
 		name: "mcp",
 		path: "apps/mcp/views",
@@ -8451,7 +7684,7 @@ export default ({ $APP, T, AI, Model, html }) => {
 		},
 	});
 };
-`,mimeType:"application/javascript"},"/modules/uix/index.js":{content:`export default ({ $APP }) => {
+`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/index.js":{content:`export default ({ $APP }) => {
 	$APP.addModule({
 		name: "uix",
 		components: {
@@ -8539,10 +7772,10 @@ export default ({ $APP, T, AI, Model, html }) => {
 		},
 	});
 };
-`,mimeType:"application/javascript"},"/modules/icon-lucide/index.js":{content:`export default ({ $APP }) => {
+`,mimeType:"application/javascript",skipSW:!1},"/modules/icon-lucide/index.js":{content:`export default ({ $APP }) => {
 	$APP.addModule({ name: "icon-lucide", icon: true });
 };
-`,mimeType:"application/javascript"},"/worker.js":{content:`import $APP from "/bootstrap.js";
+`,mimeType:"application/javascript",skipSW:!1},"/worker.js":{content:`import $APP from "/bootstrap.js";
 
 let STARTED;
 
@@ -8631,7 +7864,631 @@ self.addEventListener("message", async (event) => {
 		})();
 	}
 });
-`,mimeType:"application/javascript"},"/modules/mvc/model/indexeddb/index.js":{content:`export default async () => {
+`,mimeType:"application/javascript",skipSW:!1},"/bootstrap.js":{content:`import coreModules, {
+	installModulePrototype,
+} from "/modules/mvc/helpers/core.js";
+
+const prototypeAPP = {
+	async loadApp() {
+		try {
+			const response = await fetch("/package.json");
+			if (!response.ok)
+				throw new Error(\`HTTP error! status: \${response.status}\`);
+			const packageConfig = await response.json();
+			await this.bootstrap(packageConfig);
+		} catch (error) {
+			console.error("Could not load 'package.json'. Bootstrap failed.", {
+				error,
+			});
+		}
+	},
+
+	async loadDep({ key, path, name, tag }, isLocals) {
+		if (key && this[key]) return;
+		const module = await import(path, { tag });
+		let locals = {};
+		if (module.dependencies) await this.inject(module.dependencies);
+		if (module.locals) locals = await this.inject(module.locals, true);
+
+		let instance;
+
+		if (module.component) {
+			instance = module.component;
+		} else if (name && name in module) {
+			const depExport = module[name];
+			instance = depExport;
+		} else if (typeof module.default === "function")
+			instance = module.default({ ...this, $APP: this, ...locals }, locals);
+		else instance = module.default;
+
+		if (instance?.constructor === Promise) instance = await instance;
+
+		if (module.migration) {
+			if (!this.settings.dependencies) this.settings.dependencies = {};
+			this.settings.dependencies[key] = path.replace(
+				"index.js",
+				"models/migration.js",
+			);
+		}
+
+		if (key && !isLocals) this[key] = instance;
+		if (tag) return instance;
+		if (isLocals) return [key, instance];
+	},
+
+	addDep(key, dep) {
+		this[key] = dep;
+	},
+
+	async inject(dependencies, isLocals = false) {
+		const locals = [];
+		for (const [key, path] of Object.entries(dependencies)) {
+			const dep = await this.loadDep(
+				{
+					key,
+					path: Array.isArray(path) ? path[0] : path,
+					name: Array.isArray(path) ? path[1] : undefined,
+				},
+				isLocals,
+			);
+			if (isLocals && dep && Array.isArray(dep)) locals.push(dep);
+		}
+		if (isLocals)
+			return Object.fromEntries(locals.filter((dep) => Array.isArray(dep)));
+	},
+
+	async bootstrap(
+		{ dependencies = [], backend = false, settings = {}, theme },
+		extraSettings = {},
+	) {
+		this.settings.set({
+			...settings,
+			...extraSettings,
+			backend,
+			frontend: !backend,
+		});
+		await this.inject(dependencies);
+		if (!backend && theme) this.theme.set({ theme });
+		this.hooks.emit("init");
+		return this;
+	},
+
+	addHooks({ hooks, base }) {
+		if (!this.hooks) return base;
+		if (hooks)
+			Object.entries(
+				typeof hooks === "function"
+					? hooks({ $APP: this, context: base })
+					: hooks,
+			).map(([name, fn]) => this.hooks.on(name, fn));
+	},
+
+	addModule(module) {
+		if (
+			(module.dev && this.settings.dev !== true) ||
+			!!this?.modules?.[module.name]
+		)
+			return;
+		if (!module.base) module.base = {};
+		const { alias, name, hooks, beforeSave } = module;
+		const base = module.base ?? this[name];
+		if (this.modules && !this.modules[name]) this.modules.set(name, module);
+		if (module.base) {
+			installModulePrototype(base, beforeSave);
+			this[name] = base;
+			if (alias) this[alias] = base;
+		}
+		if (hooks) this.addHooks({ hooks, name, base });
+		this.hooks
+			?.get("moduleAdded")
+			.map((fn) => fn.bind(this[module.name])({ module }));
+		if (this.log) this.log(\`Module '\${module.name}' added successfully\`);
+		return base;
+	},
+};
+
+const initApp = (prototype = prototypeAPP) => {
+	const app = Object.create(prototype);
+	for (const moduleName in coreModules) app.addModule(coreModules[moduleName]);
+	return app;
+};
+
+const $APP = initApp();
+self.$APP = $APP;
+export default $APP;
+`,mimeType:"application/javascript",skipSW:!1},"/modules/mvc/helpers/core.js":{content:`self.sleep = (ms = 0) => new Promise((resolve) => setTimeout(resolve, ms));
+export const ArrayStorageFunctions = {
+	add: function (...values) {
+		values.forEach(
+			(value) =>
+				!this.includes(value) &&
+				this.push(this._beforeSave ? this._beforeSave(value) : value),
+		);
+		return this;
+	},
+	remove: function (key) {
+		const index = Number.parseInt(key, 10);
+		if (!Number.isNaN(index) && index >= 0 && index < this.length)
+			this.splice(index, 1);
+		return this;
+	},
+	list: function () {
+		return [...this];
+	},
+	get: function (key) {
+		const index = Number.parseInt(key, 10);
+		return !Number.isNaN(index) && index >= 0 && index < this.length
+			? this[index]
+			: undefined;
+	},
+};
+
+export const ObjectStorageFunctions = {
+	set: function (...args) {
+		if (args.length === 1 && typeof args[0] === "object" && args[0] !== null)
+			Object.entries(args[0]).forEach(([k, v]) => {
+				this[k] = this._beforeSave ? this._beforeSave(v) : v;
+			});
+		else if (args.length === 2 && typeof args[0] === "string") {
+			this[args[0]] = this._beforeSave ? this._beforeSave(args[1]) : args[1];
+		}
+		return this;
+	},
+	add: function (prop, valuesToAdd) {
+		if (typeof valuesToAdd !== "object") return;
+		if (!this[prop]) this[prop] = {};
+		Object.entries(valuesToAdd).forEach(([k, v]) => {
+			this[prop][k] = this._beforeSave ? this._beforeSave(v) : v;
+		});
+
+		return this;
+	},
+	get: function (...args) {
+		const [key1, key2] = args;
+		if (args.length === 0) return undefined;
+		if (args.length === 2) return this[key1]?.[key2];
+		return this[key1];
+	},
+	remove: function (...args) {
+		args.length === 2 ? delete this[args[0]][args[1]] : delete this[args[0]];
+		return this;
+	},
+	list: function () {
+		return Object.entries(this);
+	},
+	keys: function () {
+		return Object.keys(this);
+	},
+};
+
+export const installModulePrototype = (base, beforeSave) => {
+	if (!base) base = {};
+	const proto = Object.create(Object.getPrototypeOf(base));
+	const storageFunctions = Array.isArray(base)
+		? ArrayStorageFunctions
+		: ObjectStorageFunctions;
+	if (beforeSave) proto._beforeSave = beforeSave;
+	Object.assign(proto, storageFunctions);
+	Object.setPrototypeOf(base, proto);
+	return base;
+};
+
+export const installEventsHandler = (target) => {
+	const listeners = new Map();
+	const anyListeners = new Set();
+	target.listeners = listeners;
+	target.hasListeners = (key) => {
+		return listeners.has(key);
+	};
+	target.on = (key, callback) => {
+		if (!callback)
+			return console.error(
+				\`Error adding listener to \${key}: no callback passed\`,
+			);
+		if (!listeners.has(key)) {
+			listeners.set(key, new Set());
+		}
+		listeners.get(key).add(callback);
+	};
+	target.off = (key, callback) => {
+		const callbackSet = listeners.get(key);
+		if (!callbackSet) return;
+		callbackSet.delete(callback);
+		if (callbackSet.size === 0) {
+			listeners.delete(key);
+		}
+	};
+	target.onAny = (callback) => {
+		if (!callback)
+			return console.error("Error adding onAny listener: no callback passed");
+		anyListeners.add(callback.bind(target));
+	};
+	target.offAny = (callback) => {
+		anyListeners.delete(callback);
+	};
+	target.emit = (key, data) => {
+		const results = [];
+		listeners.get(key)?.forEach((callback) => {
+			try {
+				results.push(callback(data));
+			} catch (error) {
+				console.error(\`Error in listener for key "\${key}":\`, error);
+			}
+		});
+		anyListeners.forEach((callback) => {
+			try {
+				const bindedFn = callback.bind(target);
+				results.push(bindedFn({ key, data }));
+			} catch (error) {
+				console.error(\`Error in onAny listener for key "\${key}":\`, error);
+			}
+		});
+		return results;
+	};
+	return target;
+};
+
+const eventsBase = { install: installEventsHandler };
+
+export default {
+	modules: {
+		name: "modules",
+		description: "Global modules store",
+	},
+	storage: {
+		name: "storage",
+		description: "Storage Module",
+		base: {
+			install: installModulePrototype,
+		},
+	},
+	error: {
+		name: "error",
+		base: console.error,
+	},
+	log: {
+		name: "log",
+		base: console.log,
+	},
+	icons: { name: "Icons", base: new Map(Object.entries(self.__icons || {})) },
+	theme: {
+		name: "theme",
+	},
+	components: {
+		name: "components",
+	},
+	hooks: {
+		name: "hooks",
+		description: "Global Hooks store",
+		base: {
+			get: function (type) {
+				return this[type] || [];
+			},
+			on: function (type, fn) {
+				this[type] = Array.isArray(this[type]) ? [...this[type], fn] : [fn];
+			},
+			set: function (hooks) {
+				Object.entries(hooks).forEach(([key, hook]) => this.on(key, hook));
+			},
+			emit: async function (type, ...args) {
+				try {
+					if (Array.isArray(this[type])) {
+						for (const hook of this[type]) {
+							await hook(...args);
+						}
+					}
+				} catch (error) {
+					console.error(\`Error running hook '\${type}':\`, error);
+				}
+			},
+			clear: function (type) {
+				this[type] = null;
+			},
+		},
+	},
+	settings: {
+		name: "settings",
+		description: "Global settings store",
+		base: {
+			dev: true,
+			backend: false,
+			frontend: true,
+			mv3: false,
+			mv3Injected: false,
+			basePath: "",
+			...(self.__settings || {}),
+		},
+		hooks: ({ context }) => ({
+			moduleAdded({ module }) {
+				if (module.settings) context[module.name] = module.settings;
+			},
+		}),
+	},
+	events: {
+		name: "events",
+		description: "Global events Store",
+		base: installEventsHandler(eventsBase),
+	},
+	data: {
+		name: "data",
+		description: "Data Migration store",
+	},
+	routes: {
+		name: "routes",
+		description: "Routes store",
+	},
+	devFiles: {
+		name: "devFiles",
+		base: [],
+	},
+	assetFiles: {
+		name: "assetFiles",
+		base: [],
+	},
+	app: { name: "app" },
+};
+`,mimeType:"application/javascript",skipSW:!1},"/modules/types/index.js":{content:`const formats = { email: /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/ };
+
+const parseJSON = (value) => {
+	try {
+		return value in specialCases ? value : JSON.parse(value);
+	} catch (_) {
+		return undefined;
+	}
+};
+
+const specialCases = {
+	undefined: undefined,
+	null: null,
+	"": null,
+	[undefined]: undefined,
+};
+
+const typeHandlers = {
+	any: (value) => value,
+	function: (value) => value,
+	extension: () => undefined,
+	boolean: (value, { attribute = true } = {}) =>
+		(attribute && value === "") || ["true", 1, "1", true].includes(value),
+	string: (val) => (val in specialCases ? specialCases[val] : String(val)),
+	array: (value, prop = {}) => {
+		if (Array.isArray(value)) return value;
+		const { itemType } = prop;
+		try {
+			if (!value) throw value;
+			const parsedArray = parseJSON(value);
+			if (!Array.isArray(parsedArray)) throw parsedArray;
+			return !itemType
+				? parsedArray
+				: parsedArray.map((item) =>
+						typeof item !== "object"
+							? item
+							: Object.entries(item).reduce((obj, [key, val]) => {
+									obj[key] = typeHandlers[itemType[key]?.type]
+										? typeHandlers[itemType[key].type](val, prop)
+										: val;
+									return obj;
+								}, {}),
+					);
+		} catch (_) {
+			return [];
+		}
+	},
+	number: (value) => {
+		return value ? Number(value) : value;
+	},
+	date: (value) => new Date(value),
+	datetime: (value) => {
+		if (!value) return null;
+		const date = new Date(value);
+		return !Number.isNaN(date.getTime()) ? date : null;
+	},
+	object: (v, prop = {}) => {
+		const value = typeof v === "string" ? parseJSON(v) : v;
+		if (prop.properties) {
+			Object.entries(prop.properties).map(([propKey, propProps]) => {
+				if (propProps.defaultValue !== undefined) {
+					value[propKey] = propProps.defaultValue;
+				}
+			});
+		}
+		return value;
+	},
+};
+
+const stringToType = (value, prop = {}) => {
+	const { type } = prop;
+	return (typeHandlers[type] || ((val) => val))(value, prop);
+};
+
+const validations = {
+	datetime: (value, prop = {}) => {
+		if (prop.min && value < new Date(prop.min)) {
+			return ["minimum", null];
+		}
+		if (prop.max && value > new Date(prop.max)) {
+			return ["maximum", null];
+		}
+	},
+	number: (value, prop = {}) => {
+		if ("min" in prop && value < prop.min) {
+			return ["minimum", null];
+		}
+		if ("max" in prop && value > prop.max) {
+			return ["maximum", null];
+		}
+		if (Number.isNaN(Number(value))) {
+			return ["NaN", null];
+		}
+	},
+};
+
+const validateField = (value, prop) => {
+	if (
+		prop.required === true &&
+		(value === undefined || value === null || value === "")
+	)
+		return ["required", null];
+	const typeHandler = typeHandlers[prop.type];
+	if (prop.relationship) {
+		if (prop.many) {
+			return [
+				null,
+				Array.isArray(value)
+					? value.map((i) => (prop.mixed ? i : (i?.id ?? i)))
+					: [],
+			];
+		}
+		return [null, value?.id ?? value];
+	}
+	const typedValue = typeHandler
+		? typeHandler(value, prop)
+		: [undefined, null, ""].includes(value)
+			? (prop.defaultValue ?? null)
+			: value;
+	const validation = validations[prop.type];
+	if (validation) {
+		const errors = validation(value, prop);
+		if (errors) return errors;
+	}
+
+	if ("format" in prop || formats[prop.key]) {
+		const formatFn = "format" in prop ? prop.format : formats[prop.key];
+		const format =
+			typeof formatFn === "function"
+				? prop.format
+				: (value) => formatFn.test(value);
+		const isValid = format(typedValue);
+		if (!isValid) return ["invalid", null];
+	}
+
+	return [null, typedValue];
+};
+
+function interpolate(str, data) {
+	return str.replace(/\\\${(.*?)}/g, (_, key) => {
+		return data[key.trim()];
+	});
+}
+
+const validateType = (
+	object,
+	{ schema, row = {}, undefinedProps = true, validateVirtual = false },
+) => {
+	if (!schema) return [null, object];
+	const errors = {};
+	let hasError = false;
+
+	const props = undefinedProps ? schema : object;
+	for (const key in props) {
+		const prop = { ...schema[key], key };
+		if ("virtual" in prop || prop.persist === false) continue;
+		const [error, value] =
+			[undefined, null, ""].includes(object[key]) && !prop.required
+				? [null, prop.defaultValue]
+				: validateField(object[key], prop);
+		if (error) {
+			hasError = true;
+			errors[key] = error;
+		} else if (value !== undefined) object[key] = value;
+	}
+	const virtual = Object.fromEntries(
+		Object.entries(schema).filter(([_, prop]) => "virtual" in prop),
+	);
+	for (const prop in virtual) {
+		if (validateVirtual) {
+			const [error, value] = validateField(
+				interpolate(virtual[prop].virtual, { ...row, ...object }),
+				virtual[prop],
+			);
+			if (error) {
+				hasError = true;
+				errors[prop] = error;
+			} else if (value !== undefined) object[prop] = value;
+		} else
+			object[prop] = interpolate(virtual[prop].virtual, { ...row, ...object });
+	}
+
+	if (hasError) return [errors, null];
+	return [null, object];
+};
+
+const createType = (type, options) => {
+	const normalizedOptions =
+		typeof options === "object" && !Array.isArray(options) && options !== null
+			? options
+			: { defaultValue: options };
+
+	return {
+		type,
+		persist: true,
+		attribute: true,
+		...normalizedOptions,
+	};
+};
+
+const createRelationType =
+	(relationship) =>
+	(...args) => {
+		const targetModel = args[0];
+		let targetForeignKey;
+		let options = args[2];
+		if (typeof args[1] === "string") targetForeignKey = args[1];
+		else options = args[1];
+		const belongs = belongTypes.includes(relationship);
+		return {
+			type: belongs
+				? relationship === "belongs_many"
+					? "array"
+					: "string"
+				: relationship === "one"
+					? "object"
+					: "array",
+			many: manyTypes.includes(relationship),
+			belongs,
+			persist: belongs,
+			relationship,
+			defaultValue: relationship === "belongs_many" ? [] : null,
+			polymorphic: targetModel === "*" || Array.isArray(targetModel),
+			targetModel,
+			targetForeignKey,
+			index: belongTypes.includes(relationship),
+			...options,
+		};
+	};
+
+const typesHelpers = {
+	createType,
+	stringToType,
+	validateType,
+};
+
+const relationshipTypes = ["one", "many", "belongs", "belongs_many"];
+const manyTypes = ["many", "belongs_many"];
+const belongTypes = ["belongs", "belongs_many"];
+const proxyHandler = {
+	get(target, prop) {
+		if (target[prop]) return target[prop];
+		const type = prop.toLowerCase();
+		if (relationshipTypes.includes(prop)) return createRelationType(prop);
+		if (type === "extension")
+			return (options = {}) =>
+				createType("extension", {
+					...options,
+					persist: false,
+					extension: true,
+				});
+		return (options = {}) => {
+			if (!typeHandlers[type]) throw new Error(\`Unknown type: \${type}\`);
+			return createType(type, options);
+		};
+	},
+};
+
+const Types = new Proxy(typesHelpers, proxyHandler);
+
+export default Types;
+`,mimeType:"application/javascript",skipSW:!1},"/modules/mvc/model/indexeddb/index.js":{content:`export default async () => {
 	const parseBoolean = { true: 1, false: 0 };
 	const parseBooleanReverse = { true: true, false: false };
 
@@ -9265,7 +9122,7 @@ self.addEventListener("message", async (event) => {
 
 	return { open };
 };
-`,mimeType:"application/javascript"},"/modules/mvc/model/database/index.js":{content:`export const dependencies = {
+`,mimeType:"application/javascript",skipSW:!1},"/modules/mvc/model/database/index.js":{content:`export const dependencies = {
 	metadata: "/modules/mvc/model/extensions/metadata.js",
 	operations: "/modules/mvc/model/extensions/operations.js",
 };
@@ -10114,7 +9971,7 @@ export default async ({ $APP, T, IndexedDBWrapper, metadata, operations }) => {
 
 	return Database;
 };
-`,mimeType:"application/javascript"},"/modules/mvc/model/extensions/metadata.js":{content:`export const module = true;
+`,mimeType:"application/javascript",skipSW:!1},"/modules/mvc/model/extensions/metadata.js":{content:`export const module = true;
 export default ({ T, $APP }) => {
 	$APP.hooks.set({
 		onAddRecord({ model, row, system, extensions }) {
@@ -10152,7 +10009,7 @@ export default ({ T, $APP }) => {
 		updatedBy: T.string({ index: true }),
 	};
 };
-`,mimeType:"application/javascript"},"/modules/mvc/model/extensions/operations.js":{content:`export const module = true;
+`,mimeType:"application/javascript",skipSW:!1},"/modules/mvc/model/extensions/operations.js":{content:`export const module = true;
 export default ({ T, $APP }) => {
 	$APP.hooks.set({
 		onAddRecord({ model, row, system, extensions }) {
@@ -10195,7 +10052,7 @@ export default ({ T, $APP }) => {
 		row: T.object(),
 	};
 };
-`,mimeType:"application/javascript"},"/modules/mvc/model/backend.js":{content:`import Model from "/modules/mvc/model/index.js";
+`,mimeType:"application/javascript",skipSW:!1},"/modules/mvc/model/backend.js":{content:`import Model from "/modules/mvc/model/index.js";
 
 export default ({ $APP, Database }) => {
 	const queryModelEvents = {
@@ -10377,7 +10234,309 @@ export default ({ $APP, Database }) => {
 	Model.request = request;
 	return Model;
 };
-`,mimeType:"application/javascript"},"/modules/mvc/controller/backend/worker.js":{content:`export default ({ $APP, Database }) => {
+`,mimeType:"application/javascript",skipSW:!1},"/modules/mvc/model/index.js":{content:`import $APP from "/bootstrap.js";
+import T from "/modules/types/index.js";
+
+const addModels = ({ context, collection = "models" }) => {
+	return ({ module }) => {
+		if (!module[collection]) return;
+		const models = Object.fromEntries(
+			Object.keys(module[collection]).map((model) => {
+				const props = {
+					id: T.string({ primary: true }),
+					...module[collection][model],
+				};
+				return [
+					model,
+					Object.fromEntries(
+						Object.entries(props).map(([key, prop]) => {
+							prop.name = key;
+							if (prop.relationship && !prop.targetForeignKey)
+								prop.targetForeignKey = model;
+							return [key, prop];
+						}),
+					),
+				];
+			}),
+		);
+		context.set(models);
+	};
+};
+
+$APP.addModule({
+	name: "models",
+	hooks: ({ context }) => ({
+		moduleAdded: addModels({ context, collection: "models" }),
+		moduleUpdated: addModels({ context, collection: "models" }),
+	}),
+});
+
+const instanceProxyHandler = {
+	get(target, prop, receiver) {
+		if (prop === "remove") {
+			return () =>
+				Model.request("REMOVE", target._modelName, { id: target.id });
+		}
+
+		if (prop === "update") {
+			return () => {
+				const cleanRow = { ...target };
+				delete cleanRow._modelName;
+				return Model.request("EDIT", target._modelName, {
+					row: cleanRow,
+				});
+			};
+		}
+
+		if (prop === "include") {
+			return async (include) => {
+				if (!target.id || !target._modelName) {
+					console.error(
+						"Cannot run .include() on an object without an ID or model name.",
+					);
+					return receiver; // Return the proxy itself for chaining.
+				}
+
+				if (!(target._modelName in $APP.models))
+					throw new Error(
+						\`Model \${target._modelName} does not exist in models\`,
+					);
+
+				const model = $APP.models[target._modelName];
+				const prop = model[include];
+				if (!prop)
+					throw new Error(
+						\`Relationship '\${include}' not found in \${target._modelName} model\`,
+					);
+				const freshData = await Model.request("GET_MANY", prop.targetModel, {
+					opts: {
+						filter: prop.belongs
+							? target[include]
+							: { [prop.targetForeignKey]: target.id },
+					},
+				});
+				target[include] = proxifyMultipleRows(freshData, prop.targetModel);
+
+				return receiver;
+			};
+		}
+		return target[prop];
+	},
+
+	set(target, prop, value) {
+		target[prop] = value;
+		return true;
+	},
+};
+
+const handleModelRequest = async ({ modelName, action, payload }) => {
+	const result = await Model.request(action, modelName, payload);
+	if (action === "ADD_MANY" && result && Array.isArray(result.results)) {
+		result.results.forEach((res) => {
+			if (res.status === "fulfilled" && res.value) {
+				res.value = proxifyRow(res.value, modelName);
+			}
+		});
+		return result;
+	}
+
+	if (action.includes("MANY")) {
+		if (payload.opts.object) return result;
+		if (result?.items) {
+			result.items = proxifyMultipleRows(result.items, modelName);
+			return result;
+		}
+		return proxifyMultipleRows(result, modelName);
+	}
+
+	return proxifyRow(result, modelName);
+};
+
+const getMethodRegistry = (modelName) => [
+	{
+		type: "static",
+		name: "get",
+		handler: (id, opts = {}) =>
+			handleModelRequest({
+				modelName,
+				action: "GET",
+				payload: id ? { id, opts } : { opts },
+			}),
+	},
+	{
+		type: "static",
+		name: "getAll",
+		handler: (opts = {}) =>
+			handleModelRequest({
+				modelName,
+				action: "GET_MANY",
+				payload: { opts },
+			}),
+	},
+	{
+		type: "static",
+		name: "add",
+		handler: (row, opts) =>
+			handleModelRequest({
+				modelName,
+				action: "ADD",
+				payload: { row, opts },
+			}),
+	},
+	{
+		type: "static",
+		name: "addMany",
+		handler: (rows, opts) =>
+			handleModelRequest({
+				modelName,
+				action: "ADD_MANY",
+				payload: { rows, opts },
+			}),
+	},
+	{
+		type: "static",
+		name: "remove",
+		handler: (id) => Model.request("REMOVE", modelName, { id }),
+	},
+	{
+		type: "static",
+		name: "removeAll",
+		handler: (filter) =>
+			Model.request("REMOVE_MANY", modelName, { opts: { filter } }),
+	},
+	{
+		type: "static",
+		name: "edit",
+		handler: (row) =>
+			handleModelRequest({
+				modelName,
+				action: "EDIT",
+				payload: { row },
+			}),
+	},
+	{
+		type: "static",
+		name: "editAll",
+		handler: (filter, updates) =>
+			Model.request("EDIT_MANY", modelName, { opts: { filter, updates } }),
+	},
+	{
+		type: "static",
+		name: "upsert",
+		handler: (row, opts) =>
+			handleModelRequest({
+				modelName,
+				action: row?.id ? "EDIT" : "ADD",
+				payload: { row, opts },
+			}),
+	},
+	{ type: "dynamic", prefix: "getBy", action: "GET" },
+	{ type: "dynamic", prefix: "getAllBy", action: "GET_MANY" },
+	{ type: "dynamic", prefix: "editAllBy", action: "EDIT_MANY" },
+	{ type: "dynamic", prefix: "editBy", action: "EDIT" },
+	{ type: "dynamic", prefix: "removeBy", action: "REMOVE" },
+	{ type: "dynamic", prefix: "removeAllBy", action: "REMOVE_MANY" },
+];
+
+const proxifyRow = (row, modelName) => {
+	if (!row || typeof row !== "object" || row.errors) return row;
+	Model[modelName].rows[row.id] = row;
+	Model[modelName].on(\`get:\${row.id}\`, (data) => {
+		if (data === undefined) {
+			delete Model[modelName].rows[row.id];
+			return;
+		}
+		const { id, ...newRow } = data;
+		Object.assign(Model[modelName].rows[row.id], newRow);
+	});
+	row._modelName = modelName;
+	return new Proxy(Model[modelName].rows[row.id], instanceProxyHandler);
+};
+
+const proxifyMultipleRows = (rows, modelName) => {
+	if (!Array.isArray(rows)) return rows;
+	return rows.map((row) => proxifyRow(row, modelName));
+};
+
+const uncapitalize = (str) => {
+	if (typeof str !== "string" || !str) return str;
+	return str.charAt(0).toLowerCase() + str.slice(1);
+};
+
+const modelApiCache = new Map();
+const Model = new Proxy(
+	{},
+	{
+		get(target, prop, receiver) {
+			if (prop in target) return Reflect.get(target, prop, receiver);
+			if (modelApiCache.has(prop)) return modelApiCache.get(prop);
+			const modelName = prop;
+			if (!(prop in $APP.models)) {
+				throw new Error(\`Model \${modelName} does not exist in models\`);
+			}
+			const modelSchema = $APP.models[modelName];
+			const methodRegistry = getMethodRegistry(modelName, modelSchema);
+			const modelApi = new Proxy(
+				{},
+				{
+					get(target, methodName, modelReceiver) {
+						if (methodName in target)
+							return Reflect.get(target, methodName, modelReceiver);
+						for (const definition of methodRegistry) {
+							if (
+								definition.type === "static" &&
+								definition.name === methodName
+							)
+								return definition.handler;
+
+							if (
+								definition.type === "dynamic" &&
+								methodName.startsWith(definition.prefix)
+							) {
+								const property = methodName.slice(definition.prefix.length);
+								if (!property) continue;
+
+								const propertyKey = uncapitalize(property);
+
+								if (!(propertyKey in modelSchema))
+									throw new Error(
+										\`Property '\${propertyKey}' not found in model '\${modelName}'\`,
+									);
+
+								return (value, row = null) => {
+									const payload = {
+										opts: { filter: { [propertyKey]: value } },
+									};
+									if (row) payload.opts.row = row;
+
+									return handleModelRequest({
+										modelName,
+										action: definition.action,
+										payload,
+									});
+								};
+							}
+						}
+						throw new Error(
+							\`Method '\${methodName}' not found in model '\${modelName}'\`,
+						);
+					},
+				},
+			);
+
+			$APP.events.install(modelApi);
+
+			modelApi.rows = $APP.storage.install({});
+			modelApiCache.set(prop, modelApi);
+			return modelApi;
+		},
+	},
+);
+Model.proxifyRow = proxifyRow;
+Model.proxifyMultipleRows = proxifyMultipleRows;
+Model.addModels = addModels;
+export default Model;
+`,mimeType:"application/javascript",skipSW:!1},"/modules/mvc/controller/backend/worker.js":{content:`export default ({ $APP, Database }) => {
 	const generateId = (() => {
 		let lastTimestamp = 0;
 		let sequentialCounter = 0;
@@ -10825,7 +10984,7 @@ export default ({ $APP, Database }) => {
 
 	return Backend;
 };
-`,mimeType:"application/javascript"},"/models/migration.js":{content:`export const version = 1;
+`,mimeType:"application/javascript",skipSW:!1},"/models/migration.js":{content:`export const version = 1;
 
 export default ({ T, $APP }) => {
 	const data = {
@@ -11076,7 +11235,7 @@ export default ({ T, $APP }) => {
 		}
 	});
 };
-`,mimeType:"application/javascript"},"/modules/apps/drive/models/migration.js":{content:`import $APP from "/bootstrap.js";
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/drive/models/migration.js":{content:`import $APP from "/bootstrap.js";
 import T from "/modules/types/index.js";
 
 const blogData = {
@@ -11124,7 +11283,7 @@ $APP.models.set({
 		content: T.string(),
 	},
 });
-`,mimeType:"application/javascript"},"/modules/apps/project/models/migration.js":{content:`const newProjectTemplate = (name) => {
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/project/models/migration.js":{content:`const newProjectTemplate = (name) => {
 	const htmlContent = \`<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11235,7 +11394,7 @@ export default ({ T, $APP }) => {
 		},
 	});
 };
-`,mimeType:"application/javascript"},"/modules/apps/chat/models/migration.js":{content:`import $APP from "/bootstrap.js";
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/chat/models/migration.js":{content:`import $APP from "/bootstrap.js";
 import T from "/modules/types/index.js";
 
 /**
@@ -11383,7 +11542,7 @@ $APP.models.set({
 		conversation: T.belongs("conversations", "messages"),
 	},
 });
-`,mimeType:"application/javascript"},"/modules/apps/bundler/models/migration.js":{content:`import $APP from "/bootstrap.js";
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/bundler/models/migration.js":{content:`import $APP from "/bootstrap.js";
 import T from "/modules/types/index.js";
 
 $APP.data.set({
@@ -11418,7 +11577,16 @@ $APP.models.set({
 		files: T.array(),
 	},
 });
-`,mimeType:"application/javascript"},"/theme.css":{content:`body {
+`,mimeType:"application/javascript",skipSW:!1},"/modules/app/container.js":{content:`export default ({ routes, T }) => ({
+	tag: "app-container",
+	class: "flex flex-grow",
+	extends: "router-ui",
+	properties: {
+		routes: T.object({ defaultValue: routes }),
+		full: T.boolean(true),
+	},
+});
+`,mimeType:"application/javascript",skipSW:!1},"/theme.css":{content:`body {
 	font-family: var(--font-family);
 }
 
@@ -11597,16 +11765,7 @@ div [container][horizontal] {
 	display: flex;
 	flex-direction: col;
 }
-`,mimeType:"text/css"},"/modules/app/container.js":{content:`export default ({ routes, T }) => ({
-	tag: "app-container",
-	class: "flex flex-grow",
-	extends: "router-ui",
-	properties: {
-		routes: T.object({ defaultValue: routes }),
-		full: T.boolean(true),
-	},
-});
-`,mimeType:"application/javascript"},"/modules/router/ui.js":{content:`export default ({ html, T }) => ({
+`,mimeType:"text/css",skipSW:!1},"/modules/router/ui.js":{content:`export default ({ html, T }) => ({
 	tag: "router-ui",
 
 	properties: {
@@ -11636,7 +11795,7 @@ div [container][horizontal] {
 			: html\`404: Page not found\`;
 	},
 });
-`,mimeType:"application/javascript"},"/views/templates/app.js":{content:`export default ({ $APP, html, AI, T }) => {
+`,mimeType:"application/javascript",skipSW:!1},"/views/templates/app.js":{content:`export default ({ $APP, html, AI, T }) => {
 	return {
 		style: true,
 		class: "w-full h-screen bg-[#282828] text-[#ebdbb2] flex font-sans text-sm",
@@ -11646,25 +11805,14 @@ div [container][horizontal] {
 			language: T.string({ sync: "local", defaultValue: "javascript" }),
 			filePath: T.string({ sync: "local" }),
 			selectedServer: T.string({ sync: "local", defaultValue: "default" }),
-			serverOptions: T.object({
-				defaultValue: {
-					default: {
-						label: "Default Feature-Rich Server",
-						path: "/templates/servers/basic.js",
-					},
-					simple: {
-						label: "Simple Greeter Server",
-						path: "/templates/servers/basic.js",
-					},
-				},
-			}),
+			availableServers: T.array(),
 			isServerConnected: T.boolean({ sync: "local" }),
 			transportType: T.string({ sync: "local", defaultValue: "JavaScript" }),
 			command: T.string({ sync: "local" }),
 			args: T.string({ sync: "local" }),
 			history: T.array([]),
 			selectedHistoryItem: T.object(null),
-			activeView: T.string("ide"), // Replaces activeTab, default to IDE
+			activeView: T.string("ide"),
 			isDirty: T.boolean(false),
 			isSaving: T.boolean(false),
 			lastSaved: T.object(null),
@@ -11676,8 +11824,8 @@ div [container][horizontal] {
 		},
 		async connected() {
 			this.initializeWorker();
-			this.initializeAI();
-			const initialPath = this.serverOptions[this.selectedServer].path;
+			await this.initializeAI();
+			const initialPath = this.availableServers[0].path;
 			await this.loadServerContent(initialPath);
 		},
 		disconnected() {
@@ -11692,7 +11840,7 @@ div [container][horizontal] {
 				);
 			}
 			this.selectedServer = newServerKey;
-			const newPath = this.serverOptions[newServerKey].path;
+			const newPath = this.availableServers[newServerKey].path;
 			await this.loadServerContent(newPath);
 
 			if (this.isServerConnected) {
@@ -11869,6 +12017,8 @@ div [container][horizontal] {
 					});
 				}
 				this.isServerConnected = AI.listClients().length > 0;
+
+				this.availableServers = AI.listServers();
 			} catch (error) {
 				console.error("Error initializing AI service:", error);
 				this.isServerConnected = false;
@@ -11920,10 +12070,14 @@ div [container][horizontal] {
 			this.selectedHistoryItem = null;
 		},
 		render() {
-			const serverOptionsForSelect = Object.entries(this.serverOptions).map(
-				([key, val]) => ({ value: key, label: val.label }),
+			const availableServersForSelect = this.availableServers.map(
+				(val) =>
+					!console.log({ val }) && {
+						value: val.id,
+						label: val.name,
+					},
 			);
-
+			console.log({ availableServersForSelect });
 			return html\`
 				<mcp-sidebar
 					.activeView=\${this.activeView}
@@ -11940,7 +12094,7 @@ div [container][horizontal] {
 								ghost
 								class="dark w-3xs"
 								type="select"
-								.options=\${serverOptionsForSelect}
+								.options=\${availableServersForSelect}
 								.value=\${this.selectedServer}
 								@change=\${(e) => this.onServerChange(e.target.value)}
 							></uix-input>
@@ -11986,7 +12140,83 @@ div [container][horizontal] {
 		},
 	};
 };
-`,mimeType:"application/javascript"},"/views/templates/app.css":{content:`.app-template {
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/admin/views/template.js":{content:`export default ({ T, html, $APP }) => ({
+	tag: "admin-template",
+
+	properties: {
+		component: T.object(),
+		horizontal: T.boolean(true),
+		full: T.boolean(true),
+		currentRoute: T.object({ sync: "ram" }),
+		class: T.string("flex"),
+	},
+	render() {
+		const { modules } = $APP;
+		const navbarItems = modules
+			? Object.keys($APP.settings)
+					.filter((ext) => $APP.settings[ext]?.appbar)
+					.map((ext) => ({
+						...$APP.settings[ext].appbar,
+						label: ext,
+						href: \`/admin/\${ext}\`,
+					}))
+					.map(
+						(item) => html\`
+              <uix-button
+                label=\${item.label}
+                href=\${item.href}
+                icon=\${item.icon}
+                hideLabel
+                tooltip
+                vertical
+                selectable
+                ghost
+                iconSize="lg"
+                class="w-full"
+              ></uix-button>
+            \`,
+					)
+			: [];
+
+		return html\`
+      <div class="flex flex-col flex-shrink-0 justify-between bg-gray-100">
+        <uix-navbar class="w-full flex flex-col">\${navbarItems}</uix-navbar>
+        <uix-navbar class="w-full flex flex-col">
+          <uix-darkmode
+              hideLabel               
+              tooltip
+              vertical
+              ghost
+              iconSize="lg"
+              label="Dark Mode"
+              class="w-full"></uix-darkmode>            
+          <uix-button
+          icon="settings"
+          hideLabel
+          tooltip
+          vertical
+          ghost
+          iconSize="lg"
+          label="Settings"
+          class="w-full"></uix-button>
+          </uix-navbar>
+      </div>
+      <div class="flex flex-1 h-full">
+        \${this.component}
+      </div>
+    \`;
+	},
+});
+`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/navigation/navbar.js":{content:`export default ({ T }) => ({
+	tag: "uix-navbar",
+	style: true,
+	extends: "uix-list",
+	properties: {
+		join: T.boolean({ defaultValue: true }),
+		docked: T.string(),
+	},
+});
+`,mimeType:"application/javascript",skipSW:!1},"/views/templates/app.css":{content:`.app-template {
 	.uix-card {
 		button {
 			color: #111;
@@ -11994,7 +12224,614 @@ div [container][horizontal] {
 		}
 	}
 }
-`,mimeType:"text/css"},"/modules/apps/mcp/views/sidebar.js":{content:`export default ({ html, T }) => ({
+`,mimeType:"text/css",skipSW:!1},"/modules/uix/utility/darkmode.js":{content:`export default ({ T }) => ({
+	tag: "uix-darkmode",
+	extends: "uix-button",
+	icons: ["moon", "sun"],
+	properties: {
+		width: T.string({ defaultValue: "fit" }),
+		darkmode: T.boolean({
+			sync: "local",
+			defaultValue: true,
+		}),
+	},
+
+	click(e) {
+		e.stopPropagation();
+		this.darkmode = !this.darkmode;
+		this.icon = this.darkmode ? "sun" : "moon";
+	},
+	willUpdate(changedProps) {
+		console.log({ changedProps });
+		if (Object.hasOwn(changedProps, "darkmode"))
+			document.documentElement.classList.toggle("dark");
+	},
+	connected() {
+		this.icon = this.darkmode ? "sun" : "moon";
+		if (this.darkmode) document.documentElement.classList.add("dark");
+	},
+});
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/bundler/views/ui.js":{content:`export default ({ T, html, $APP, Bundler }) => {
+	$APP.define("credentials-manager", {
+		class: "flex flex-col gap-4 p-4 border rounded-lg shadow-md bg-white",
+		properties: {
+			_row: T.object(), // Data binding to the 'credentials' model
+		},
+		render() {
+			if (!this._row)
+				return html\`<div class="text-center p-4">Loading credentials...</div>\`;
+
+			return html\`
+      <h2 class="text-2xl font-bold text-gray-800 border-b pb-2">
+        Deployment Credentials
+      </h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <uix-input
+          label="Owner"
+          .value=\${this._row.owner}
+          @change=\${(e) => (this._row.owner = e.target.value)}
+        ></uix-input>
+        <uix-input
+          label="Repository"
+          .value=\${this._row.repo}
+          @change=\${(e) => (this._row.repo = e.target.value)}
+        ></uix-input>
+        <uix-input
+          label="Branch"
+          .value=\${this._row.branch}
+          @change=\${(e) => (this._row.branch = e.target.value)}
+        ></uix-input>
+        <uix-input
+          label="GitHub Token"
+          type="password"
+          .value=\${this._row.token}
+          @change=\${(e) => (this._row.token = e.target.value)}
+        ></uix-input>
+      </div>
+      <div class="flex justify-end">
+        <uix-button
+          @click=\${() => !console.log(this._row) && $APP.Model.credentials.edit({ ...this._row })}
+          label="Save Credentials"
+        ></uix-button>
+      </div>
+    \`;
+		},
+	});
+
+	$APP.define("release-creator", {
+		class: "flex flex-col gap-4 p-4 border rounded-lg shadow-md bg-white",
+		properties: {
+			version: T.string(\`v\${new Date().toISOString().slice(0, 10)}\`),
+			notes: T.string(""),
+			deploymentType: T.string(null), // Can be 'spa', 'ssg', or null
+		},
+		async handleDeploy(type) {
+			this.deploymentType = type;
+			const credentials = await $APP.Model.credentials.get("singleton");
+			if (!credentials || !credentials.token) {
+				alert("Please provide a GitHub token before deploying.");
+				this.deploymentType = null;
+				return;
+			}
+
+			let newRelease;
+			try {
+				newRelease = await $APP.Model.releases.add({
+					version: this.version,
+					notes: this.notes,
+					status: "pending",
+					deployedAt: new Date(),
+					deployType: type,
+				});
+				console.log({ Bundler });
+				const files =
+					type === "spa"
+						? await Bundler.bundleSPA(credentials)
+						: await Bundler.bundleSSG(credentials);
+
+				await $APP.Model.releases.edit({
+					...newRelease,
+					status: "success",
+					files,
+				});
+
+				alert(\`Deployment (\${type.toUpperCase()}) successful!\`);
+			} catch (error) {
+				console.error(\`Deployment failed for \${type.toUpperCase()}:\`, error);
+				alert(\`Deployment failed: \${error.message}\`);
+				if (newRelease?._id) {
+					await $APP.Model.releases.edit({
+						...newRelease,
+						status: "failed",
+					});
+				}
+			} finally {
+				this.deploymentType = null;
+			}
+		},
+		render() {
+			return html\`
+      <h2 class="text-2xl font-bold text-gray-800 border-b pb-2">
+        New Release
+      </h2>
+      <uix-input
+        label="Version"
+        .value=\${this.version}
+        @change=\${(e) => (this.version = e.target.value)}
+      ></uix-input>
+      <uix-input
+        type="textarea"
+        label="Release Notes"
+        .value=\${this.notes}
+        @change=\${(e) => (this.notes = e.target.value)}
+      ></uix-input>
+      <div class="flex justify-end gap-2">
+        <uix-button
+          @click=\${() => this.handleDeploy("spa")}
+          label=\${this.deploymentType === "spa" ? "Deploying..." : "Deploy SPA"}
+          ?disabled=\${this.deploymentType !== null}
+        ></uix-button>
+        <uix-button
+          @click=\${() => this.handleDeploy("ssg")}
+          label=\${this.deploymentType === "ssg" ? "Deploying..." : "Deploy SSG"}
+          ?disabled=\${this.deploymentType !== null}
+        ></uix-button>
+      </div>
+    \`;
+		},
+	});
+
+	/**
+	 * A component to display the history of releases.
+	 * It lists all past deployments with their version, status, and deployment date.
+	 */
+	$APP.define("release-history", {
+		class: "flex flex-col gap-4 p-4 border rounded-lg shadow-md bg-white",
+		properties: {
+			_rows: T.array(), // Data binding to the 'releases' model
+		},
+		getStatusClass(status) {
+			switch (status) {
+				case "success":
+					return "bg-green-100 text-green-800";
+				case "failed":
+					return "bg-red-100 text-red-800";
+				default:
+					return "bg-yellow-100 text-yellow-800";
+			}
+		},
+		render() {
+			return html\`
+      <h2 class="text-2xl font-bold text-gray-800 border-b pb-2">
+        Release History
+      </h2>
+      <div class="flex flex-col gap-3">
+        \${
+					this._rows && this._rows.length > 0
+						? this._rows
+								.sort((a, b) => new Date(b.deployedAt) - new Date(a.deployedAt))
+								.map(
+									(release) => html\`
+                  <div
+                    class="flex flex-col p-2 rounded-md \${this.getStatusClass(
+											release.status,
+										)}"
+                  >
+                    <div class="grid grid-cols-3 items-center gap-2">
+                      <div class="font-semibold">\${release.version}</div>
+                      <div class="flex items-center gap-2">
+                        <span>\${release.status}</span>
+                        \${
+													release.deployType
+														? html\`<span
+                                    class="text-xs font-mono px-2 py-1 rounded bg-gray-200 text-gray-700"
+                                    >\${release.deployType.toUpperCase()}</span
+                                  >\`
+														: ""
+												}
+                      </div>
+                      <div class="text-sm text-right">
+                        \${new Date(release.deployedAt).toLocaleString()}
+                      </div>
+                    </div>
+                    \${
+											release.notes
+												? html\`<p class="text-sm text-gray-600 pt-2">
+                                \${release.notes}
+                              </p>\`
+												: ""
+										}
+                  </div>
+                \`,
+								)
+						: html\`<p class="text-center text-gray-500">
+                    No releases yet.
+                  </p>\`
+				}
+      </div>
+    \`;
+		},
+	});
+
+	// Add this new component to bundler-ui.js
+
+	$APP.define("settings-editor", {
+		class: "flex flex-col gap-4 p-4 border rounded-lg shadow-md bg-white",
+		properties: {
+			_settings: T.object(null), // Will hold the app settings
+		},
+		// Fetch settings when the component is added to the page
+		connected() {
+			this._settings = $APP.settings; // Assumes a function to get all current settings
+		},
+		async handleSave() {
+			try {
+				// The user provided \`$APP.settings.set()\` which we'll use here
+				await $APP.settings.set(this._settings);
+				alert("Settings saved successfully!");
+			} catch (error) {
+				console.error("Failed to save settings:", error);
+				alert("Error saving settings. Check the console for details.");
+			}
+		},
+		render() {
+			if (!this._settings) {
+				return html\`<div class="text-center p-4">Loading settings...</div>\`;
+			}
+			return html\`
+            <h2 class="text-2xl font-bold text-gray-800 border-b pb-2">
+                App Settings
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <uix-input
+                    label="App Name"
+                    .value=\${this._settings.name}
+                    @change=\${(e) => (this._settings.name = e.target.value)}
+                ></uix-input>
+                <uix-input
+                    label="Short Name"
+                    .value=\${this._settings.short_name}
+                    @change=\${(e) => (this._settings.short_name = e.target.value)}
+                ></uix-input>
+                <uix-input
+                    label="Start URL"
+                    .value=\${this._settings.url}
+                    @change=\${(e) => (this._settings.url = e.target.value)}
+                ></uix-input>
+                 <uix-input
+                    label="Theme Color"
+                    type="color" 
+                    .value=\${this._settings.theme_color}
+                    @change=\${(e) => (this._settings.theme_color = e.target.value)}
+                ></uix-input>
+                <uix-input
+                    class="md:col-span-2"
+                    label="Open Graph Image URL"
+                    .value=\${this._settings.og_image}
+                    @change=\${(e) => (this._settings.og_image = e.target.value)}
+                ></uix-input>
+                <uix-input
+                    class="md:col-span-2"
+                    type="textarea"
+                    label="Description"
+                    .value=\${this._settings.description}
+                    @change=\${(e) => (this._settings.description = e.target.value)}
+                ></uix-input>
+            </div>
+            <div class="flex justify-end">
+                <uix-button
+                    @click=\${this.handleSave.bind(this)}
+                    label="Save Settings"
+                ></uix-button>
+            </div>
+        \`;
+		},
+	});
+
+	return {
+		tag: "bundler-ui",
+		class: "flex flex-col gap-6 p-6 bg-gray-50 min-h-screen",
+		render() {
+			return html\`
+            <h1 class="text-4xl font-extrabold text-gray-900">Release Manager</h1>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="flex flex-col gap-6">
+                    <settings-editor></settings-editor> 
+                    <credentials-manager
+                        ._data=\${{ model: "credentials", id: "singleton" }}
+                    ></credentials-manager>
+                    <release-creator></release-creator>
+                </div>
+                <release-history
+                    ._data=\${{ model: "releases", order: "-deployedAt" }}
+                ></release-history>
+            </div>
+        \`;
+		},
+	};
+};
+`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/display/button.js":{content:`export default ({ T }) => ({
+	tag: "uix-button",
+	properties: { variant: T.string("default") },
+	extends: "uix-link",
+	style: true,
+	setVariant() {
+		const { variant } = this;
+		this.style.setProperty(
+			"--_variant-color-50",
+			\`var(--colors-\${variant}-50)\`,
+		);
+		this.style.setProperty(
+			"--_variant-color-300",
+			\`var(--colors-\${variant}-300)\`,
+		);
+		this.style.setProperty(
+			"--_variant-color-400",
+			\`var(--colors-\${variant}-400)\`,
+		);
+		this.style.setProperty(
+			"--_variant-color-500",
+			\`var(--colors-\${variant}-500)\`,
+		);
+		this.style.setProperty(
+			"--_variant-color-600",
+			\`var(--colors-\${variant}-600)\`,
+		);
+		this.style.setProperty(
+			"--_variant-color-700",
+			\`var(--colors-\${variant}-700)\`,
+		);
+		this.style.setProperty(
+			"--_variant-color-800",
+			\`var(--colors-\${variant}-800)\`,
+		);
+	},
+	connected() {
+		this.setVariant();
+	},
+	willUpdate(changedProps) {
+		if (Object.keys(changedProps).includes("variant")) {
+			this.setVariant();
+		}
+	},
+});
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/mcp/worker.js":{content:`let ts;
+let tsLibCache = {};
+async function loadCjsModule(url) {
+	try {
+		const response = await fetch(url);
+		if (!response.ok) {
+			throw new Error(\`HTTP error! status: \${response.status}\`);
+		}
+		const scriptText = await response.text();
+
+		// Prepare a fake CJS environment
+		const module = { exports: {} };
+		const exports = module.exports;
+
+		// Wrap the script text in a function and execute it
+		const scriptFunc = new Function("module", "exports", scriptText);
+		scriptFunc(module, exports);
+
+		// If the module uses \`module.exports = ...\`, it will be on module.exports.
+		// If it just uses \`exports.foo = ...\`, it will be on exports.
+		// We check \`module.exports\` first.
+		const exportedModule = module.exports;
+
+		// Sometimes the main export isn't \`default\`, we check if the object is empty.
+		if (Object.keys(exportedModule).length === 0) {
+			return exports;
+		}
+
+		return exportedModule;
+	} catch (error) {
+		console.error(\`Failed to load module from \${url}:\`, error);
+		throw error;
+	}
+}
+
+const loadTypeScript = async () => {
+	if (ts) return;
+	try {
+		const tsModule = await loadCjsModule(
+			"https://unpkg.com/typescript@latest/lib/typescript.js",
+		);
+		ts = tsModule;
+		self.ts = ts;
+		console.log({ ts }, self.ts);
+	} catch (error) {
+		console.error("Failed to load TypeScript:", error);
+	}
+};
+
+const loadTypeScriptLibs = async () => {
+	if (Object.keys(tsLibCache).length > 0) return;
+	const libsToFetch = [
+		"lib.es2020.d.ts",
+		"lib.es2018.d.ts",
+		"lib.es2019.d.ts",
+		"lib.es2019.string.d.ts",
+		"lib.es2019.array.d.ts",
+		"lib.es2019.object.d.ts",
+		"lib.es2020.bigint.d.ts",
+		"lib.es2020.date.d.ts",
+		"lib.es2020.number.d.ts",
+		"lib.es2020.promise.d.ts",
+		"lib.es2020.sharedmemory.d.ts",
+		"lib.es2020.string.d.ts",
+		"lib.es2020.symbol.wellknown.d.ts",
+		"lib.es2015.symbol.d.ts",
+		"lib.es2019.symbol.d.ts",
+		"lib.es2019.intl.d.ts",
+		"lib.es2015.iterable.d.ts",
+		"lib.es2018.intl.d.ts",
+		"lib.es2020.intl.d.ts",
+		"lib.es5.d.ts",
+		"lib.dom.d.ts",
+		"lib.es2017.d.ts",
+		"lib.es2018.asynciterable.d.ts",
+		"lib.es2018.asyncgenerator.d.ts",
+		"lib.es2018.promise.d.ts",
+		"lib.es2018.regexp.d.ts",
+		"lib.es2016.d.ts",
+		"lib.es2017.arraybuffer.d.ts",
+		"lib.es2017.date.d.ts",
+		"lib.es2017.intl.d.ts",
+		"lib.es2017.object.d.ts",
+		"lib.es2017.sharedmemory.d.ts",
+		"lib.es2017.string.d.ts",
+		"lib.es2017.typedarrays.d.ts",
+		"lib.es2015.d.ts",
+		"lib.es2016.array.include.d.ts",
+		"lib.es2016.intl.d.ts",
+		"lib.es2015.symbol.wellknown.d.ts",
+		"lib.es2015.core.d.ts",
+		"lib.es2015.collection.d.ts",
+		"lib.es2015.generator.d.ts",
+		"lib.es2015.promise.d.ts",
+		"lib.es2015.proxy.d.ts",
+		"lib.es2015.reflect.d.ts",
+		"lib.decorators.d.ts",
+		"lib.decorators.legacy.d.ts",
+	];
+
+	try {
+		const promises = libsToFetch.map((lib) =>
+			fetch(\`https://unpkg.com/typescript@latest/lib/\${lib}\`).then((res) => {
+				if (!res.ok) throw new Error(\`Failed to fetch \${lib}\`);
+				return res.text();
+			}),
+		);
+		const contents = await Promise.all(promises);
+		const newCache = {};
+		libsToFetch.forEach((lib, index) => {
+			newCache[lib] = contents[index];
+		});
+
+		return newCache;
+	} catch (e) {
+		console.error(
+			"Could not fetch TypeScript library definitions. Type checking will be less accurate.",
+			e,
+		);
+	}
+};
+
+self.onmessage = async (e) => {
+	const { type, payload } = e.data;
+	switch (type) {
+		case "init":
+			await loadTypeScript();
+			tsLibCache = await loadTypeScriptLibs();
+			break;
+		case "validate": {
+			if (!ts) return;
+			const validationErrors = validate(payload.code, payload.filePath);
+			self.postMessage({
+				type: "validationComplete",
+				payload: { errors: validationErrors },
+			});
+			break;
+		}
+		case "transpile": {
+			if (!ts) {
+				// Fallback if TS isn't loaded yet
+				self.postMessage({
+					type: "transpileComplete",
+					payload: {
+						transpiledCode: payload.code,
+						requestId: payload.requestId,
+					},
+				});
+				return;
+			}
+			const transpiledResult = transpile(payload.code);
+			self.postMessage({
+				type: "transpileComplete",
+				payload: {
+					transpiledCode: transpiledResult,
+					requestId: payload.requestId,
+				},
+			});
+			break;
+		}
+	}
+};
+
+const validate = (code, filePath) => {
+	try {
+		const defaultLibFileName = "lib.es2020.d.ts";
+		const compilerOptions = {
+			target: ts.ScriptTarget.ES2020,
+			module: ts.ModuleKind.CommonJS,
+			allowJs: true,
+			esModuleInterop: true,
+			noEmit: true,
+		};
+
+		const host = {
+			getSourceFile: (fileName, languageVersion) => {
+				const sourceText =
+					tsLibCache[fileName] || (fileName === filePath ? code : undefined);
+				return sourceText !== undefined
+					? ts.createSourceFile(fileName, sourceText, languageVersion)
+					: undefined;
+			},
+			writeFile: () => {},
+			getDefaultLibFileName: () => defaultLibFileName,
+			useCaseSensitiveFileNames: () => false,
+			getCanonicalFileName: (fileName) => fileName,
+			getCurrentDirectory: () => "/",
+			getNewLine: () => "\\n",
+			fileExists: (fileName) => fileName === filePath || !!tsLibCache[fileName],
+			readFile: (fileName) =>
+				fileName === filePath ? code : tsLibCache[fileName],
+		};
+
+		const program = ts.createProgram([filePath], compilerOptions, host);
+		const diagnostics = ts.getPreEmitDiagnostics(program);
+
+		return diagnostics.map((diagnostic) => {
+			const message = ts.flattenDiagnosticMessageText(
+				diagnostic.messageText,
+				"\\n",
+			);
+			if (diagnostic.file && diagnostic.start) {
+				const { line, character } = ts.getLineAndCharacterOfPosition(
+					diagnostic.file,
+					diagnostic.start,
+				);
+				return { line: line + 1, character: character + 1, message };
+			}
+			return { line: 0, character: 0, message };
+		});
+	} catch (error) {
+		console.error("Error during code validation in worker:", error);
+		return [
+			{
+				line: 0,
+				character: 0,
+				message: "An unexpected error occurred during validation.",
+			},
+		];
+	}
+};
+
+const transpile = (code) => {
+	try {
+		const jsResult = ts.transpileModule(code, {
+			compilerOptions: {
+				module: ts.ModuleKind.CommonJS,
+				target: ts.ScriptTarget.ES2020,
+			},
+		});
+		return jsResult.outputText;
+	} catch (error) {
+		console.error("TypeScript compilation failed in worker:", error);
+		return code;
+	}
+};
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/mcp/views/sidebar.js":{content:`export default ({ html, T }) => ({
 	class:
 		"w-64 bg-[#3c3836] text-[#ebdbb2] flex flex-col h-screen shrink-0 border-r border-[#504945]",
 	properties: {
@@ -12036,6 +12873,7 @@ div [container][horizontal] {
 			{ key: "chat", label: "Chat", icon: "message-circle" },
 			{ key: "inspector", label: "Inspector", icon: "search" },
 			{ key: "servers", label: "Servers", icon: "server" },
+			{ key: "agents", label: "Agents", icon: "bot", isComingSoon: true },
 			{ key: "apps", label: "Apps", icon: "layout-grid", isComingSoon: true },
 			{ key: "learn", label: "Learn", icon: "book", isComingSoon: true },
 			{
@@ -12088,7 +12926,99 @@ div [container][horizontal] {
       \`;
 	},
 });
-`,mimeType:"application/javascript"},"/modules/uix/form/input.js":{content:`import { ifDefined } from "/modules/mvc/view/html/directive.js";
+`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/layout/list.js":{content:`export default ({ T }) => ({
+	tag: "uix-list",
+	style: true,
+	properties: {
+		multiple: T.boolean(),
+		multipleWithCtrl: T.boolean(),
+		multipleWithShift: T.boolean(),
+		lastSelectedIndex: T.number(),
+		selectedIds: T.array(),
+		onSelectedChanged: T.function(),
+		gap: T.string({ defaultValue: "md" }),
+		itemId: T.string(".uix-link"),
+		selectable: T.boolean(),
+	},
+	connected() {
+		if (this.selectable)
+			this.addEventListener("click", this.handleClick.bind(this));
+	},
+	disconnected() {
+		if (this.selectable)
+			this.removeEventListener("click", this.handleClick.bind(this));
+	},
+	handleClick: function (e) {
+		const link = e.target.closest(".uix-link");
+		if (!link || !this.contains(link)) return;
+		e.preventDefault();
+		const links = Array.from(this.qa(".uix-link"));
+		const index = links.indexOf(link);
+		if (index === -1) return;
+		if (
+			this.multipleWithShift &&
+			e.shiftKey &&
+			this.lastSelectedIndex !== null
+		) {
+			const start = Math.min(this.lastSelectedIndex, index);
+			const end = Math.max(this.lastSelectedIndex, index);
+			links
+				.slice(start, end + 1)
+				.forEach((el) => el.setAttribute("selected", ""));
+			this.lastSelectedIndex = index;
+			this.updateSelectedIds();
+			return;
+		}
+		if (this.multipleWithCtrl) {
+			if (e.ctrlKey) {
+				link.hasAttribute("selected")
+					? link.removeAttribute("selected")
+					: link.setAttribute("selected", "");
+				this.lastSelectedIndex = index;
+				this.updateSelectedIds();
+				return;
+			}
+			links.forEach((el) => el.removeAttribute("selected"));
+			if (link.hasAttribute("selected")) {
+				link.removeAttribute("selected");
+				this.lastSelectedIndex = null;
+			} else {
+				link.setAttribute("selected", "");
+				this.lastSelectedIndex = index;
+			}
+			this.updateSelectedIds();
+			return;
+		}
+
+		if (this.multiple) {
+			link.hasAttribute("selected")
+				? link.removeAttribute("selected")
+				: link.setAttribute("selected", "");
+			this.lastSelectedIndex = index;
+			this.updateSelectedIds();
+			return;
+		}
+
+		if (link.hasAttribute("selected")) {
+			links.forEach((el) => el.removeAttribute("selected"));
+			this.lastSelectedIndex = null;
+		} else {
+			links.forEach((el) => el.removeAttribute("selected"));
+			link.setAttribute("selected", "");
+			this.lastSelectedIndex = index;
+		}
+		this.updateSelectedIds();
+	},
+	updateSelectedIds() {
+		const links = Array.from(this.qa(this.itemId));
+		this.selectedIds = links.reduce((ids, el, index) => {
+			if (el.hasAttribute("selected")) ids.push(index);
+			return ids;
+		}, []);
+		if (this.onSelectedChanged) this.onSelectedChanged(this.selectedIds);
+	},
+});
+`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/form/input.js":{content:`import { ifDefined } from "/modules/mvc/view/html/directive.js";
 
 const inputTypes = { string: "text" };
 let uniqueIdCounter = 0;
@@ -12328,617 +13258,206 @@ export default ({ T, html }) => ({
         \`;
 	},
 });
-`,mimeType:"application/javascript"},"/modules/uix/display/button.js":{content:`export default ({ T }) => ({
-	tag: "uix-button",
-	properties: { variant: T.string("default") },
-	extends: "uix-link",
-	style: true,
-	setVariant() {
-		const { variant } = this;
-		this.style.setProperty(
-			"--_variant-color-50",
-			\`var(--colors-\${variant}-50)\`,
-		);
-		this.style.setProperty(
-			"--_variant-color-300",
-			\`var(--colors-\${variant}-300)\`,
-		);
-		this.style.setProperty(
-			"--_variant-color-400",
-			\`var(--colors-\${variant}-400)\`,
-		);
-		this.style.setProperty(
-			"--_variant-color-500",
-			\`var(--colors-\${variant}-500)\`,
-		);
-		this.style.setProperty(
-			"--_variant-color-600",
-			\`var(--colors-\${variant}-600)\`,
-		);
-		this.style.setProperty(
-			"--_variant-color-700",
-			\`var(--colors-\${variant}-700)\`,
-		);
-		this.style.setProperty(
-			"--_variant-color-800",
-			\`var(--colors-\${variant}-800)\`,
-		);
-	},
-	connected() {
-		this.setVariant();
-	},
-	willUpdate(changedProps) {
-		if (Object.keys(changedProps).includes("variant")) {
-			this.setVariant();
-		}
-	},
-});
-`,mimeType:"application/javascript"},"/modules/apps/mcp/views/dev.js":{content:`export default ({ $APP, html, AI, T }) => {
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/mcp/views/servers.js":{content:`export default ({ html, AI, T }) => {
+	const starIcon = (isFilled = false) => html\`
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="\${isFilled ? "#fabd2f" : "none"}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="\${isFilled ? "text-[#fabd2f]" : "text-[#a89984]"}">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+        </svg>
+    \`;
+
 	return {
-		tag: "mcp-dev",
-		class: "w-full bg-[#282828] text-[#ebdbb2] flex font-sans text-sm",
+		tag: "mcp-servers",
+		class:
+			"w-full h-full bg-[#282828] text-[#ebdbb2] flex flex-col p-6 md:p-8 font-sans text-sm overflow-y-auto",
 		properties: {
-			content: T.string(""),
-			language: T.string({ sync: "local", defaultValue: "javascript" }),
-			filePath: T.string({ sync: "local" }),
-			selectedServer: T.string({ sync: "local", defaultValue: "default" }),
-			serverOptions: T.object({
-				defaultValue: {
-					default: {
-						label: "Default Feature-Rich Server",
-						path: "/templates/servers/basic.js",
-					},
-					simple: {
-						label: "Simple Greeter Server",
-						path: "/templates/servers/basic.js",
-					},
-				},
-			}),
-			isServerConnected: T.boolean({ sync: "local" }),
-			transportType: T.string({ sync: "local", defaultValue: "JavaScript" }),
-			command: T.string({ sync: "local" }),
-			args: T.string({ sync: "local" }),
-			history: T.array([]),
-			selectedHistoryItem: T.object(null),
-			activeTab: T.string(),
-			isDirty: T.boolean(false),
-			isSaving: T.boolean(false),
-			lastSaved: T.object(null),
-			compilerErrors: T.array([]),
-			validationTimeout: T.object(null),
-			tsLibCache: T.object({ defaultValue: {} }),
-			worker: T.object(null),
-			transpilePromises: T.object({ defaultValue: {} }),
+			searchQuery: T.string(""),
 		},
-		async connected() {
-			this.initializeWorker();
-			const initialPath = this.serverOptions[this.selectedServer].path;
-			await this.loadServerContent(initialPath);
+		availableServers: [],
+		favoriteServerIds: [],
+		connectedServerId: null,
+
+		connected() {
+			this.availableServers = AI.listServers();
+			this.availableServers.map((server) =>
+				$APP.SW.request("SW:CACHE_FILE", {
+					path: server.path,
+					skipSW: true,
+				}),
+			);
+			this.favoriteServerIds = AI.getFavorites();
+			this.updateConnectionStatus();
+			this._updateFavorites = this.updateFavorites.bind(this);
+			this._updateConnectionStatus = this.updateConnectionStatus.bind(this);
+			AI.events.on("servers:favoritesChanged", this._updateFavorites);
+			AI.events.on("connect", this._updateConnectionStatus);
+			AI.events.on("disconnect", this._updateConnectionStatus);
+			this.update();
 		},
+
 		disconnected() {
-			if (this.validationTimeout) clearTimeout(this.validationTimeout);
-			if (this.worker) this.worker.terminate();
+			AI.events.off("servers:favoritesChanged", this._updateFavorites);
+			AI.events.off("connect", this._updateConnectionStatus);
+			AI.events.off("disconnect", this._updateConnectionStatus);
 		},
-		async onServerChange(newServerKey) {
-			if (this.isDirty) {
-				console.warn(
-					"Switching server templates with unsaved changes. The changes will be lost.",
+		updateFavorites(newFavoriteIds) {
+			this.favoriteServerIds = newFavoriteIds;
+			this.update();
+		},
+
+		updateConnectionStatus() {
+			const clients = AI.listClients();
+			const devClient = clients.find((c) => c.alias === "dev_server");
+			let newConnectedServerId = null;
+			if (devClient && this.availableServers) {
+				const connectedServer = this.availableServers.find(
+					(s) => s.path === devClient.command,
 				);
+				if (connectedServer) newConnectedServerId = connectedServer.id;
 			}
-			this.selectedServer = newServerKey;
-			const newPath = this.serverOptions[newServerKey].path;
-			await this.loadServerContent(newPath);
-
-			if (this.isServerConnected) {
-				await this.disconnectFromServer();
+			if (this.connectedServerId !== newConnectedServerId) {
+				this.connectedServerId = newConnectedServerId;
+				this.update();
 			}
 		},
-		async loadServerContent(path) {
-			this.filePath = path;
-			this.command = path.replace(/\\.ts$/, ".js");
+		async connectToServer(server) {
 			try {
-				const response = await fetch(path);
-				const fileContent = await response.text();
-				this.content = fileContent;
-				this.isDirty = false;
-				this.validateCode();
-			} catch (error) {
-				this.isDirty = true;
-				this.content = \`// Failed to load file: \${path}\\n// You can start editing here to create it.\`;
-				console.log(
-					\`File \${path} couldn't be loaded, starting with placeholder content.\`,
-					error,
-				);
-				this.validateCode();
-			}
-		},
-		initializeWorker() {
-			this.worker = new Worker("/modules/apps/mcp/worker.js", {
-				type: "module",
-			});
-			this.worker.onmessage = (e) => {
-				const { type, payload } = e.data;
-				switch (type) {
-					case "validationComplete":
-						this.compilerErrors = payload.errors;
-						break;
-					case "transpileComplete": {
-						const promise = this.transpilePromises[payload.requestId];
-						if (promise) {
-							promise.resolve(payload.transpiledCode);
-							delete this.transpilePromises[payload.requestId];
-						}
-						break;
-					}
+				if (this.connectedServerId) {
+					await this.disconnectFromServer();
 				}
-			};
-			this.worker.onerror = (event) => {
-				console.error("Error in worker:", event);
-			};
-			this.worker.postMessage({
-				type: "init",
-			});
-		},
-		validateCode() {
-			if (!this.worker) {
-				this.compilerErrors = [];
-				return;
-			}
-			this.worker.postMessage({
-				type: "validate",
-				payload: { code: this.content, filePath: this.filePath },
-			});
-		},
-		getTranspiledContent() {
-			if (this.language !== "typescript") {
-				return Promise.resolve(this.content);
-			}
-			return new Promise((resolve, reject) => {
-				const requestId = \`req_\${Date.now()}_\${Math.random()}\`;
-				this.transpilePromises[requestId] = { resolve, reject };
-				this.worker.postMessage({
-					type: "transpile",
-					payload: { code: this.content, requestId },
-				});
-				setTimeout(() => {
-					if (this.transpilePromises[requestId]) {
-						reject(new Error("Transpilation timed out."));
-						delete this.transpilePromises[requestId];
-					}
-				}, 10000);
-			});
-		},
-		async applyCodeChanges() {
-			if (!$APP.fs || !$APP.fs.writeFile) {
-				console.warn("File system not available");
-				return;
-			}
-			this.isSaving = true;
-			try {
-				await this.validateCode();
-				if (this.compilerErrors.length > 0) {
-					console.warn(
-						"Applying changes with errors. The resulting code may not run correctly.",
-					);
-				}
-				await $APP.fs.writeFile(this.filePath, this.content);
-				if (this.language === "typescript") {
-					const executableCode = await this.getTranspiledContent();
-					const executablePath = this.filePath.replace(/\\.ts$/, ".js");
-					await $APP.fs.writeFile(executablePath, executableCode);
-					this.command = executablePath;
-				} else {
-					this.command = this.filePath;
-				}
-
-				this.lastSaved = new Date();
-				this.isDirty = false;
-			} catch (error) {
-				console.error("Failed to apply code changes:", error);
-			} finally {
-				this.isSaving = false;
-			}
-		},
-		onEditorUpdate(newContent) {
-			this.content = newContent;
-			this.isDirty = true;
-			if (this.validationTimeout) clearTimeout(this.validationTimeout);
-			this.validationTimeout = setTimeout(() => this.validateCode(), 500);
-		},
-		toggleLanguage() {
-			const newLang =
-				this.language === "javascript" ? "typescript" : "javascript";
-			const oldExt = this.language === "javascript" ? ".js" : ".ts";
-			const newExt = newLang === "javascript" ? ".js" : ".ts";
-
-			this.language = newLang;
-			const newPath = this.filePath.replace(oldExt, newExt);
-
-			this.loadServerContent(newPath);
-		},
-		async connectToServer() {
-			if (!this.command) {
-				console.error("Connection command/URL cannot be empty.");
-				return;
-			}
-			try {
 				const transportConfig = {
-					type: this.transportType,
-					command: this.command,
-					args: this.args ? this.args.split(" ") : [],
+					type: "JavaScript",
+					command: server.path,
+					args: [],
 				};
 				await AI.connect(transportConfig, { alias: "dev_server" });
-				this.isServerConnected = true;
 			} catch (e) {
-				console.error("Failed to connect:", e);
-				this.isServerConnected = false;
+				console.error(\`Failed to connect to \${server.name}:\`, e);
 			}
 		},
 		async disconnectFromServer() {
 			try {
 				await AI.disconnect("dev_server");
-				this.isServerConnected = false;
 			} catch (e) {
-				console.error("Failed to disconnect:", e);
+				console.error("Failed to disconnect from server:", e);
 			}
 		},
-		async reconnectToServer() {
-			if (this.isServerConnected) {
-				await this.disconnectFromServer();
-				setTimeout(() => {
-					this.connectToServer();
-				}, 200);
-			}
+
+		toggleFavorite(server) {
+			AI.toggleFavorite(server.id);
 		},
-		onSelectHistory(item) {
-			this.selectedHistoryItem = item;
-		},
-		clearSelectedHistory() {
-			this.selectedHistoryItem = null;
-		},
-		renderErrorPanel() {
-			return html\`<div class="flex flex-col h-full bg-[#1d2021]">
-				<div class="p-2 border-b border-[#504945] flex items-center">
-					<uix-icon
-						name="triangle-alert"
-						class="w-4 h-4 mr-2 text-red-400"
-					></uix-icon>
-					<h3 class="text-md font-semibold text-[#ebdbb2]">
-						Problems (\${this.compilerErrors.length})
-					</h3>
-				</div>
-				<div class="flex-1 overflow-auto font-mono text-xs">
-					\${this.compilerErrors.map(
-						(error) => html\`
-							<div
-								class="p-2 border-b border-[#3c3836] hover:bg-[#3c3836]"
-							>
-								<span class="text-red-400">Error:</span>
-								<span class="text-[#bdae93]"
-									>(\${error.line}:\${error.character})</span
-								>
-								<span class="text-white ml-2">\${error.message}</span>
-							</div>
-						\`,
-					)}
-				</div>
-			</div>\`;
-		},
-		selectTab(index) {
-			this.activeTab = index;
-		},
-		render() {
-			const tabs = [
-				{ key: "dashboard", label: "Dashboard", icon: "layout-dashboard" },
-				{ key: "tools", label: "Tools", icon: "wrench" },
-				{ key: "resources", label: "Resources", icon: "database" },
-				{ key: "prompts", label: "Prompts", icon: "terminal" },
-			];
-			const renderTabContent = (tab) => {
-				switch (tab.key) {
-					case "dashboard":
-						return html\`<mcp-dashboard></mcp-dashboard>\`;
-					case "tools":
-						return html\`<mcp-tools></mcp-tools>\`;
-					case "resources":
-						return html\`<mcp-resources></mcp-resources>\`;
-					case "prompts":
-						return html\`<mcp-prompts></mcp-prompts>\`;
-					default:
-						return html\`<div class="text-center p-8 text-gray-500">View not implemented: \${tab.key}</div>\`;
-				}
-			};
+
+		// --- Render Methods ---
+		renderServerCard(server) {
+			const isConnected = this.connectedServerId === server.id;
+			const isFavorited = this.favoriteServerIds.includes(server.id);
+
 			return html\`
-						<editor-textarea
-							content=\${this.content}
-							.language=\${this.language}
-							.onUpdate=\${this.onEditorUpdate.bind(this)}
-							class="flex-1"
-						></editor-textarea>
-						<uix-divider
-							vertical
-							resizable
-							style="--uix-divider-color: #3c3836;"
-						></uix-divider>
-						<div class="flex-1 h-full flex flex-col min-w-0">
-							\${
-								this.isServerConnected
-									? html\`<div class="flex-1 flex flex-col min-h-0">
-            <uix-tabs
-              style="--uix-tabs-font-size: 1rem; --uix-tabs-active-background-color: var(--colors-red-700); --uix-tabs-border-color: var(--colors-red-800); --uix-tabs-text: #ebdbb2; --uix-tabs-active-text: #ebdbb2;"
-              class="flex flex-col flex-grow" .activeTab=\${this.activeTab} .selectTab=\${this.selectTab.bind(this)}
-              .tabs=\${tabs.map((tab) => [html\`<uix-icon name=\${tab.icon} class="mr-2 w-5"></uix-icon> \${tab.label}\`, html\`<div class="p-4 flex-grow overflow-auto">\${renderTabContent(tab)}</div>\`])}
-            ></uix-tabs>
-          </div>\`
-									: html\`
-                                      <div class="flex-1 flex items-center justify-center bg-[#282828]">
-                                          <div class="text-center max-w-md p-4">
-                                              <uix-icon name="server-off" class="w-16 h-16 text-[#928374] mx-auto mb-4"></uix-icon>
-                                              <h3 class="text-lg font-semibold text-[#ebdbb2] mb-2">Server Not Connected</h3>
-                                              <p class="text-[#bdae93] mb-6">Edit your server code, then click Connect to run it.</p>
-																						<uix-button
-																							label="Connect"
-																							@click=\${this.connectToServer.bind(this)}
-																							size="small"
-																						></uix-button>
-																							
-                                          </div>
-                                      </div>
-                                  \`
-							}
-							<mcp-requests></mcp-requests>
-							\${
-								this.compilerErrors.length > 0
-									? html\`
-										<uix-divider resizable></uix-divider>
-										<div class="flex-shrink-0 h-50 overflow-auto">
-											\${this.renderErrorPanel()}
-										</div>
-								  \`
-									: ""
-							}
-						</div>
-			\`;
+                <div class="bg-[#3c3836] border-2 border-[#504945] rounded-lg p-4 flex flex-col gap-4 font-semibold transition-all duration-200 shadow-[4px_4px_0px_#1d2021] hover:shadow-[6px_6px_0px_#83a598] hover:border-[#83a598]">
+                    <div class="flex justify-between items-start">
+                         <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-md flex-shrink-0 flex items-center justify-center bg-[#282828] text-[#83a598]">
+                               \${html.unsafeHTML(server.icon)}
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-md text-[#ebdbb2]">\${server.name}</h3>
+                                \${isConnected ? html\`<span class="text-xs text-[#b8bb26] font-medium">Currently connected</span>\` : ""}
+                            </div>
+                        </div>
+                        <button @click=\${() => this.toggleFavorite(server)} class="p-1 rounded-full hover:bg-[#504945] transition-colors">
+                            \${starIcon(isFavorited)}
+                        </button>
+                    </div>
+
+                    <!-- Middle Section: Description -->
+                    <p class="text-sm text-[#bdae93] font-medium min-h-[2.5rem]">\${server.description}</p>
+                    
+                    <!-- Bottom Section: Tags and Connect Button -->
+                     <div class="flex flex-wrap items-center justify-between gap-2 pt-4 border-t-2 border-dashed border-[#504945]">
+                        <div class="flex flex-wrap gap-2">
+                            \${server.tags.map((tag) => html\`<span class="text-xs font-bold px-2 py-1 rounded bg-[#504945] text-[#ebdbb2]">\${tag.toUpperCase()}</span>\`)}
+                        </div>
+                        \${
+													isConnected
+														? html\`<uix-button label="Disconnect" @click=\${() => this.disconnectFromServer()} class="bg-[#fb4934] text-[#ebdbb2] font-bold" size="small"></uix-button>\`
+														: html\`<uix-button label="Connect" @click=\${() => this.connectToServer(server)} class="bg-[#458588] text-[#ebdbb2] font-bold" size="small"></uix-button>\`
+												}
+                    </div>
+                </div>
+            \`;
+		},
+
+		render() {
+			const lowerCaseQuery = this.searchQuery.toLowerCase();
+			const filteredServers = this.searchQuery
+				? this.availableServers.filter(
+						(s) =>
+							s.name.toLowerCase().includes(lowerCaseQuery) ||
+							s.description.toLowerCase().includes(lowerCaseQuery) ||
+							s.tags.some((t) => t.toLowerCase().includes(lowerCaseQuery)),
+					)
+				: this.availableServers;
+
+			const favoriteServers = filteredServers.filter((s) =>
+				this.favoriteServerIds.includes(s.id),
+			);
+			const otherServers = filteredServers.filter(
+				(s) => !this.favoriteServerIds.includes(s.id),
+			);
+
+			return html\`
+                <div class="w-full h-full flex flex-col space-y-6">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                        <div>
+                            <h1 class="font-bold text-3xl text-[#ebdbb2]">Servers</h1>
+                            <p class="text-[#bdae93]">Browse and connect to your available MCP test servers.</p>
+                        </div>
+                        <div class="relative">
+                            <input
+                                type="text"
+                                .value=\${this.searchQuery}
+                                @input=\${(e) => (this.searchQuery = e.target.value)}
+                                placeholder="Search servers..."
+                                class="w-full md:w-64 bg-[#504945] border-2 border-[#665c54] font-semibold text-[#ebdbb2] rounded-lg py-2 px-4 focus:outline-none focus:shadow-[2px_2px_0px_#1d2021] focus:border-[#83a598] transition"
+                            />
+                        </div>
+                    </div>
+                    \${
+											favoriteServers.length > 0
+												? html\`
+                        <div>
+                            <h2 class="font-semibold text-xl text-[#ebdbb2] mb-4 flex items-center gap-2">
+                                <uix-icon name="star" class="w-5 h-5 text-[#fabd2f]"></uix-icon>
+                                Favorites
+                            </h2>
+                            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                                \${favoriteServers.map((server) => this.renderServerCard(server))}
+                            </div>
+                        </div>
+                    \`
+												: ""
+										}
+                    <div>
+                         <h2 class="font-semibold text-xl text-[#ebdbb2] mb-4">\${favoriteServers.length > 0 ? "Available Servers" : ""}</h2>
+                         \${
+														otherServers.length > 0
+															? html\`
+                                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                                    \${otherServers.map((server) => this.renderServerCard(server))}
+                                </div>\`
+															: html\`
+                                <div class="text-center text-[#928374] p-8 bg-[#3c3836] border-2 border-[#504945] rounded-lg shadow-[4px_4px_0px_#1d2021]">
+                                    <h3 class="font-bold text-lg text-[#ebdbb2]">No Servers Found</h3>
+                                    \${this.searchQuery ? html\`<p>Your search for "\${this.searchQuery}" did not match any servers.</p>\` : ""}
+                                </div>
+                            \`
+													}
+                    </div>
+                </div>
+            \`;
 		},
 	};
 };
-`,mimeType:"application/javascript"},"/modules/apps/mcp/worker.js":{content:`let ts;
-let tsLibCache = {};
-async function loadCjsModule(url) {
-	try {
-		const response = await fetch(url);
-		if (!response.ok) {
-			throw new Error(\`HTTP error! status: \${response.status}\`);
-		}
-		const scriptText = await response.text();
-
-		// Prepare a fake CJS environment
-		const module = { exports: {} };
-		const exports = module.exports;
-
-		// Wrap the script text in a function and execute it
-		const scriptFunc = new Function("module", "exports", scriptText);
-		scriptFunc(module, exports);
-
-		// If the module uses \`module.exports = ...\`, it will be on module.exports.
-		// If it just uses \`exports.foo = ...\`, it will be on exports.
-		// We check \`module.exports\` first.
-		const exportedModule = module.exports;
-
-		// Sometimes the main export isn't \`default\`, we check if the object is empty.
-		if (Object.keys(exportedModule).length === 0) {
-			return exports;
-		}
-
-		return exportedModule;
-	} catch (error) {
-		console.error(\`Failed to load module from \${url}:\`, error);
-		throw error;
-	}
-}
-
-const loadTypeScript = async () => {
-	if (ts) return;
-	try {
-		const tsModule = await loadCjsModule(
-			"https://unpkg.com/typescript@latest/lib/typescript.js",
-		);
-		ts = tsModule;
-		self.ts = ts;
-		console.log({ ts }, self.ts);
-	} catch (error) {
-		console.error("Failed to load TypeScript:", error);
-	}
-};
-
-const loadTypeScriptLibs = async () => {
-	if (Object.keys(tsLibCache).length > 0) return;
-	const libsToFetch = [
-		"lib.es2020.d.ts",
-		"lib.es2018.d.ts",
-		"lib.es2019.d.ts",
-		"lib.es2019.string.d.ts",
-		"lib.es2019.array.d.ts",
-		"lib.es2019.object.d.ts",
-		"lib.es2020.bigint.d.ts",
-		"lib.es2020.date.d.ts",
-		"lib.es2020.number.d.ts",
-		"lib.es2020.promise.d.ts",
-		"lib.es2020.sharedmemory.d.ts",
-		"lib.es2020.string.d.ts",
-		"lib.es2020.symbol.wellknown.d.ts",
-		"lib.es2015.symbol.d.ts",
-		"lib.es2019.symbol.d.ts",
-		"lib.es2019.intl.d.ts",
-		"lib.es2015.iterable.d.ts",
-		"lib.es2018.intl.d.ts",
-		"lib.es2020.intl.d.ts",
-		"lib.es5.d.ts",
-		"lib.dom.d.ts",
-		"lib.es2017.d.ts",
-		"lib.es2018.asynciterable.d.ts",
-		"lib.es2018.asyncgenerator.d.ts",
-		"lib.es2018.promise.d.ts",
-		"lib.es2018.regexp.d.ts",
-		"lib.es2016.d.ts",
-		"lib.es2017.arraybuffer.d.ts",
-		"lib.es2017.date.d.ts",
-		"lib.es2017.intl.d.ts",
-		"lib.es2017.object.d.ts",
-		"lib.es2017.sharedmemory.d.ts",
-		"lib.es2017.string.d.ts",
-		"lib.es2017.typedarrays.d.ts",
-		"lib.es2015.d.ts",
-		"lib.es2016.array.include.d.ts",
-		"lib.es2016.intl.d.ts",
-		"lib.es2015.symbol.wellknown.d.ts",
-		"lib.es2015.core.d.ts",
-		"lib.es2015.collection.d.ts",
-		"lib.es2015.generator.d.ts",
-		"lib.es2015.promise.d.ts",
-		"lib.es2015.proxy.d.ts",
-		"lib.es2015.reflect.d.ts",
-		"lib.decorators.d.ts",
-		"lib.decorators.legacy.d.ts",
-	];
-
-	try {
-		const promises = libsToFetch.map((lib) =>
-			fetch(\`https://unpkg.com/typescript@latest/lib/\${lib}\`).then((res) => {
-				if (!res.ok) throw new Error(\`Failed to fetch \${lib}\`);
-				return res.text();
-			}),
-		);
-		const contents = await Promise.all(promises);
-		const newCache = {};
-		libsToFetch.forEach((lib, index) => {
-			newCache[lib] = contents[index];
-		});
-
-		return newCache;
-	} catch (e) {
-		console.error(
-			"Could not fetch TypeScript library definitions. Type checking will be less accurate.",
-			e,
-		);
-	}
-};
-
-self.onmessage = async (e) => {
-	const { type, payload } = e.data;
-	switch (type) {
-		case "init":
-			await loadTypeScript();
-			tsLibCache = await loadTypeScriptLibs();
-			break;
-		case "validate": {
-			if (!ts) return;
-			const validationErrors = validate(payload.code, payload.filePath);
-			self.postMessage({
-				type: "validationComplete",
-				payload: { errors: validationErrors },
-			});
-			break;
-		}
-		case "transpile": {
-			if (!ts) {
-				// Fallback if TS isn't loaded yet
-				self.postMessage({
-					type: "transpileComplete",
-					payload: {
-						transpiledCode: payload.code,
-						requestId: payload.requestId,
-					},
-				});
-				return;
-			}
-			const transpiledResult = transpile(payload.code);
-			self.postMessage({
-				type: "transpileComplete",
-				payload: {
-					transpiledCode: transpiledResult,
-					requestId: payload.requestId,
-				},
-			});
-			break;
-		}
-	}
-};
-
-const validate = (code, filePath) => {
-	try {
-		const defaultLibFileName = "lib.es2020.d.ts";
-		const compilerOptions = {
-			target: ts.ScriptTarget.ES2020,
-			module: ts.ModuleKind.CommonJS,
-			allowJs: true,
-			esModuleInterop: true,
-			noEmit: true,
-		};
-
-		const host = {
-			getSourceFile: (fileName, languageVersion) => {
-				const sourceText =
-					tsLibCache[fileName] || (fileName === filePath ? code : undefined);
-				return sourceText !== undefined
-					? ts.createSourceFile(fileName, sourceText, languageVersion)
-					: undefined;
-			},
-			writeFile: () => {},
-			getDefaultLibFileName: () => defaultLibFileName,
-			useCaseSensitiveFileNames: () => false,
-			getCanonicalFileName: (fileName) => fileName,
-			getCurrentDirectory: () => "/",
-			getNewLine: () => "\\n",
-			fileExists: (fileName) => fileName === filePath || !!tsLibCache[fileName],
-			readFile: (fileName) =>
-				fileName === filePath ? code : tsLibCache[fileName],
-		};
-
-		const program = ts.createProgram([filePath], compilerOptions, host);
-		const diagnostics = ts.getPreEmitDiagnostics(program);
-
-		return diagnostics.map((diagnostic) => {
-			const message = ts.flattenDiagnosticMessageText(
-				diagnostic.messageText,
-				"\\n",
-			);
-			if (diagnostic.file && diagnostic.start) {
-				const { line, character } = ts.getLineAndCharacterOfPosition(
-					diagnostic.file,
-					diagnostic.start,
-				);
-				return { line: line + 1, character: character + 1, message };
-			}
-			return { line: 0, character: 0, message };
-		});
-	} catch (error) {
-		console.error("Error during code validation in worker:", error);
-		return [
-			{
-				line: 0,
-				character: 0,
-				message: "An unexpected error occurred during validation.",
-			},
-		];
-	}
-};
-
-const transpile = (code) => {
-	try {
-		const jsResult = ts.transpileModule(code, {
-			compilerOptions: {
-				module: ts.ModuleKind.CommonJS,
-				target: ts.ScriptTarget.ES2020,
-			},
-		});
-		return jsResult.outputText;
-	} catch (error) {
-		console.error("TypeScript compilation failed in worker:", error);
-		return code;
-	}
-};
-`,mimeType:"application/javascript"},"/modules/uix/display/link.js":{content:`export default ({ T, html, Router }) => ({
+`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/display/link.js":{content:`export default ({ T, html, Router }) => ({
 	tag: "uix-link",
 	style: true,
 	properties: {
@@ -13135,367 +13654,39 @@ const transpile = (code) => {
     \`;
 	},
 });
-`,mimeType:"application/javascript"},"/modules/mvc/view/html/directive.js":{content:`/**
- * Creates a user-facing directive function from a Directive class. This
- * function has the same parameters as the directive's render() method.
- */
-export const directive =
-	(c) =>
-	(...values) => ({
-		// This property needs to remain unminified.
-		["_$litDirective$"]: c,
-		values,
-	});
-
-/**
- * Base class for creating custom directives. Users should extend this class,
- * implement \`render\` and/or \`update\`, and then pass their subclass to
- * \`directive\`.
- */
-export class Directive {
-	//@internal
-	__part;
-	//@internal
-	__attributeIndex;
-	//@internal
-	__directive;
-	//@internal
-	_$parent;
-
-	// These will only exist on the AsyncDirective subclass
-	//@internal
-	_$disconnectableChildren;
-	// This property needs to remain unminified.
-	//@internal
-	["_$notifyDirectiveConnectionChanged"];
-
-	constructor(_partInfo) {}
-
-	// See comment in Disconnectable interface for why this is a getter
-	get _$isConnected() {
-		return this._$parent._$isConnected;
-	}
-
-	/** @internal */
-	_$initialize(part, parent, attributeIndex) {
-		this.__part = part;
-		this._$parent = parent;
-		this.__attributeIndex = attributeIndex;
-	}
-	/** @internal */
-	_$resolve(part, props) {
-		return this.update(part, props);
-	}
-
-	render(...props) {
-		throw new Error("The \`render()\` method must be implemented.");
-	}
-
-	update(_part, props) {
-		return this.render(...props);
+`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/navigation/navbar.css":{content:`.uix-navbar {
+	--uix-navbar-text-color: var(--color-default-90);
+	--uix-navbar-hover-text-color: var(--color-surface-80);
+	--uix-navbar-border-radius: 0px;
+	--uix-navbar-border-color: var(--color-default-60);
+	--uix-navbar-border-size: 1px;
+	--uix-navbar-border-style: solid;
+	--uix-navbar-hover-background-color: var(--color-default-40);
+	--uix-container-position: var(--uix-navbar-position);
+	display: flex;
+	flex-direction: column;
+	&[docked] {
+		--uix-list-button-radius: 0;
+		border-bottom: 0;
+		position: fixed;
+		bottom: 0px;
+		background-color: var(--uix-navbar-background-color, var(--color-default-5));
+		> * {
+			border-right: 0;
+			border-bottom: 0;
+			&:first-child {
+				border-left: 0;
+			}
+		}
 	}
 }
-
-// A sentinel value that can never appear as a part value except when set by
-// live(). Used to force a dirty-check to fail and cause a re-render.
-const RESET_VALUE = {};
-
-/**
- * Sets the committed value of a ChildPart directly without triggering the
- * commit stage of the part.
- *
- * This is useful in cases where a directive needs to update the part such
- * that the next update detects a value change or not. When value is omitted,
- * the next update will be guaranteed to be detected as a change.
- *
- * @param part
- * @param value
- */
-const setCommittedValue = (part, value = RESET_VALUE) =>
-	(part._$committedValue = value);
-const nothing = Symbol.for("lit-nothing");
-class Keyed extends Directive {
-	key = nothing;
-	render(k, v) {
-		this.key = k;
-		return v;
-	}
-	update(part, [k, v]) {
-		if (k !== this.key) {
-			// Clear the part before returning a value. The one-arg form of
-			// setCommittedValue sets the value to a sentinel which forces a
-			// commit the next render.
-			setCommittedValue(part);
-			this.key = k;
-		}
-		return v;
+`,mimeType:"text/css",skipSW:!1},"/modules/uix/layout/list.css":{content:`.uix-list {
+	display: flex;
+	&[vertical] {
+		flex-direction: column;
 	}
 }
-
-export const keyed = directive(Keyed);
-
-export const ifDefined = (value) => value ?? nothing;
-`,mimeType:"application/javascript"},"/modules/apps/editor/views/textarea.js":{content:`const cm = {
-	core: () => import("https://esm.sh/@codemirror/state"),
-	view: () => import("https://esm.sh/@codemirror/view"),
-	commands: () => import("https://esm.sh/@codemirror/commands"),
-	language: () => import("https://esm.sh/@codemirror/language"),
-	theme: () => import("https://esm.sh/@fsegurai/codemirror-theme-gruvbox-dark"),
-	lang: {
-		typescript: () => import("https://esm.sh/@codemirror/lang-javascript"),
-		javascript: () => import("https://esm.sh/@codemirror/lang-javascript"),
-		css: () => import("https://esm.sh/@codemirror/lang-css"),
-		html: () => import("https://esm.sh/@codemirror/lang-html"),
-	},
-};
-
-export default ({ T }) => ({
-	tag: "textarea",
-	class: "flex flex-grow",
-	style: true,
-	properties: {
-		content: T.string(),
-		language: T.string(),
-		onUpdate: T.function(),
-	},
-
-	view: null,
-	isUpdatingFromOutside: false,
-
-	async connected() {
-		const parent = this;
-		if (!parent || this.view) return;
-
-		const [
-			{ EditorState },
-			{ EditorView, keymap, lineNumbers, highlightSpecialChars },
-			{ defaultKeymap, history, historyKeymap, indentWithTab },
-			{ indentUnit },
-			{ gruvboxDark }, // Import the new theme
-		] = await Promise.all([
-			cm.core(),
-			cm.view(),
-			cm.commands(),
-			cm.language(),
-			cm.theme(),
-		]);
-
-		const langExtension = [];
-		if (this.language && cm.lang[this.language]) {
-			const langModule = await cm.lang[this.language]();
-			const langFunc = langModule[this.language];
-			console.log({ langFunc, langModule });
-			if (typeof langFunc === "function") {
-				langExtension.push(langFunc());
-			} else {
-				console.warn(
-					\`CodeMirror language function for "\${this.language}" not found.\`,
-				);
-			}
-		}
-
-		const updateListener = EditorView.updateListener.of((update) => {
-			if (update.docChanged && this.onUpdate) {
-				const newContent = update.state.doc.toString();
-				this.isUpdatingFromOutside = true;
-				this.onUpdate(newContent);
-				queueMicrotask(() => {
-					this.isUpdatingFromOutside = false;
-				});
-			}
-		});
-
-		const customFontSize = EditorView.theme({
-			".cm-editor": {
-				fontSize: "12px",
-			},
-		});
-
-		const state = EditorState.create({
-			doc: this.content || "",
-			extensions: [
-				lineNumbers(),
-				highlightSpecialChars(),
-				history(),
-				keymap.of([...defaultKeymap, ...historyKeymap, indentWithTab]),
-				gruvboxDark, // Use the gruvbox dark theme
-				customFontSize,
-				EditorView.lineWrapping,
-				...langExtension,
-				updateListener,
-				indentUnit.of("  "),
-				EditorState.tabSize.of(2),
-			],
-		});
-
-		this.view = new EditorView({ state, parent });
-	},
-
-	updated(changedProperties) {
-		if (
-			this.view &&
-			Object.hasOwn(changedProperties, "content") &&
-			!this.isUpdatingFromOutside
-		) {
-			const currentDoc = this.view.state.doc.toString();
-			if (currentDoc !== this.content) {
-				this.view.dispatch({
-					changes: {
-						from: 0,
-						to: currentDoc.length,
-						insert: this.content || "",
-					},
-				});
-			}
-		}
-	},
-
-	disconnected() {
-		if (this.view) {
-			this.view.destroy();
-			this.view = null;
-		}
-	},
-
-	render() {
-		return null;
-	},
-});
-`,mimeType:"application/javascript"},"/modules/uix/layout/divider.js":{content:`let throttleTimeout = null;
-let lastEvent = null;
-
-export default ({ html, T }) => ({
-	tag: "uix-divider",
-	style: true,
-	properties: {
-		label: T.string(),
-		vertical: T.boolean(),
-		resizable: T.boolean({ defaultValue: false }),
-	},
-	firstUpdated() {
-		if (this.resizable) {
-			window.addEventListener("pointerdown", this.pointerDown.bind(this));
-		}
-	},
-
-	pointerDown(e) {
-		if (e.target !== this) return;
-		e.preventDefault();
-		this.setPointerCapture(e.pointerId);
-
-		this._startX = e.clientX;
-		this._startY = e.clientY;
-
-		this._prevElem = this.previousElementSibling;
-		this._nextElem = this.nextElementSibling;
-
-		this._prevElemStartWidth = this._prevElem ? this._prevElem.offsetWidth : 0;
-		this._nextElemStartWidth = this._nextElem ? this._nextElem.offsetWidth : 0;
-		this._prevElemStartHeight = this._prevElem
-			? this._prevElem.offsetHeight
-			: 0;
-		this._nextElemStartHeight = this._nextElem
-			? this._nextElem.offsetHeight
-			: 0;
-
-		window.addEventListener("pointermove", this.pointerMove.bind(this));
-		window.addEventListener("pointerup", this.pointerUp.bind(this));
-	},
-	pointerMove(e) {
-		lastEvent = e;
-		if (throttleTimeout) return;
-
-		throttleTimeout = setTimeout(() => {
-			throttleTimeout = null;
-			this.handleMouseMove(lastEvent);
-		}, 15);
-	},
-
-	handleMouseMove(e) {
-		if (!this._prevElem || !this._nextElem) return;
-
-		if (this.vertical) {
-			let dx = e.clientX - this._startX;
-			if (dx > 0) dx += 20;
-			const newPrevWidth = this._prevElemStartWidth + dx;
-			const newNextWidth = this._nextElemStartWidth - dx;
-
-			if (newPrevWidth > 0 && newNextWidth > 0) {
-				this._prevElem.style.flexBasis = \`\${newPrevWidth}px\`;
-				this._nextElem.style.flexBasis = \`\${newNextWidth}px\`;
-			}
-		} else {
-			const dy = e.clientY - this._startY;
-			const newPrevHeight = this._prevElemStartHeight + dy;
-			const newNextHeight = this._nextElemStartHeight - dy;
-
-			if (newPrevHeight > 0 && newNextHeight > 0) {
-				this._prevElem.style.flexBasis = \`\${newPrevHeight}px\`;
-				this._nextElem.style.flexBasis = \`\${newNextHeight}px\`;
-			}
-		}
-	},
-
-	pointerUp(e) {
-		this.releasePointerCapture(e.pointerId);
-		this._startX = null;
-		this._startY = null;
-
-		this._prevElem = null;
-		this._nextElem = null;
-
-		this._prevElemStartWidth = null;
-		this._nextElemStartWidth = null;
-		this._prevElemStartHeight = null;
-		this._nextElemStartHeight = null;
-		window.removeEventListener("pointermove", this.pointerMove.bind(this));
-		window.removeEventListener("pointerup", this.pointerUp.bind(this));
-	},
-
-	render() {
-		return !this.label ? null : html\`<span>\${this.label}</span>\`;
-	},
-});
-`,mimeType:"application/javascript"},"/modules/uix/display/icon.js":{content:`export default ({ T, html, $APP, Icons, theme }) => ({
-	tag: "uix-icon",
-	style: true,
-	properties: {
-		name: T.string(),
-		svg: T.string(),
-		solid: T.boolean(),
-	},
-
-	async getIcon(name) {
-		if (Icons.has(name)) this.svg = Icons.get(name);
-		else {
-			try {
-				const response = await fetch(
-					$APP.fs.getFilePath(
-						\`modules/icon-\${theme.font.icon.family}/\${theme.font.icon.family}/\${name}.svg\`,
-					),
-				);
-				if (response.ok) {
-					const svgElement = await response.text();
-					Icons.set(name, svgElement);
-					this.svg = svgElement;
-				} else {
-					console.error(\`Failed to fetch icon: \${name}\`);
-				}
-			} catch (error) {
-				console.error(\`Error fetching icon: \${name}\`, error);
-			}
-		}
-	},
-	willUpdate() {
-		if (this.name) {
-			this.getIcon(this.name);
-		}
-	},
-	render() {
-		return !this.svg ? null : html.unsafeHTML(this.svg);
-	},
-});
-`,mimeType:"application/javascript"},"/modules/apps/mcp/views/history.js":{content:`export default ({ html, AI, T }) => {
+`,mimeType:"text/css",skipSW:!1},"/modules/apps/mcp/views/history.js":{content:`export default ({ html, AI, T }) => {
 	$APP.define("mcp-history-view", {
 		properties: {
 			item: T.object(null),
@@ -13587,269 +13778,91 @@ export default ({ html, T }) => ({
 		},
 	};
 };
-`,mimeType:"application/javascript"},"/modules/apps/mcp/views/requests.js":{content:`export default ({ html, AI, T }) => {
-	return {
-		properties: {
-			pendingRequests: T.array([]),
-			isLoading: T.boolean(true),
-			isExpanded: T.boolean(false),
-			formValues: T.object({}),
-			requestUnsubscribe: T.object(null),
-		},
+`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/display/button.css":{content:`:where(.uix-button) {
+	border: var(--uix-button-borderSize, 0) solid var(--uix-button-borderColor);
+	border-radius: var(--uix-button-borderRadius, var(--radius-md));
+	box-shadow: var(--uix-button-shadow);
+	width: var(--uix-button-width);
+	min-width: fit-content;
+	background-color: var(--uix-button-backgroundColor, black);
+	color: var(--uix-button-textColor, var(--colors-default-100));
+	font-weight: var(--uix-button-fontWeight, 700);
+	display: flex;
+	text-align: center;
+	transition:
+		transform 0.2s ease-in-out,
+		opacity 0.2s ease-in-out,
+		background-color 0.2s ease-in-out;
+	&:hover {
+		opacity: var(--uix-button-hover-opacity, 0.4);
+	}
 
-		async connected() {
-			this.requestUnsubscribe = AI.onRequestChange(
-				this.loadAllPendingRequests.bind(this),
-			);
-			// Initial load
-			await this.loadAllPendingRequests();
-		},
+	&:active {
+		transform: scale(0.97);
+	}
 
-		disconnected() {
-			if (this.requestUnsubscribe) {
-				this.requestUnsubscribe();
-			}
-		},
+	> button,
+	> a,
+	> input {
+		width: max-content;
+		display: block;
+		border-radius: inherit;
+		cursor: var(--uix-button-cursor, pointer);
+		height: calc(var(--spacing) * 10);
+		line-height: calc(var(--spacing) * 5);
+		padding: var(
+			--uix-button-padding,
+			calc(var(--spacing) * 2.5) calc(var(--spacing) * 4)
+		);
+		word-break: keep-all;
+		flex-basis: 100%;
+	}
 
-		async loadAllPendingRequests() {
-			// Store the count before fetching to detect new requests.
-			const previousRequestCount = this.pendingRequests.length;
+	.uix-icon,
+	button,
+	input,
+	a {
+		cursor: pointer;
+	}
 
-			if (!AI.isInitialized || AI.listClients().length === 0) {
-				this.pendingRequests = [];
-				this.isLoading = false;
-				return;
-			}
+	&[bordered] {
+		--uix-button-border-size: 1px;
+		--uix-button-backgroundColor: transparent;
+		--uix-button-hoverBackgroundColor: var(--_variant-color-300);
+		--uix-button-borderColor: var(--_variant-color-400);
+		--uix-button-textColor: var(--_variant-color-700);
+	}
 
-			this.isLoading = true;
-			try {
-				const [samplings, elicitations] = await Promise.all([
-					AI.listSamplingRequests(),
-					AI.listElicitationRequests(),
-				]);
+	&[ghost] {
+		--uix-button-backgroundColor: transparent;
+		--uix-button-hoverBackgroundColor: var(--_variant-color-300);
+		--uix-button-borderSize: 0px;
+		--uix-button-textColor: var(--_variant-color-700);
+	}
 
-				// Tag each request with its type ('elicitation' or 'sampling').
-				const elicitationReqs = (elicitations.elicitationRequests || []).map(
-					(req) => ({ ...req, type: "elicitation" }),
-				);
-				const samplingReqs = (samplings.samplingRequests || []).map((req) => ({
-					...req,
-					type: "sampling",
-				}));
+	&[outline] {
+		--uix-button-backgroundColor: transparent;
+		--uix-button-hoverBackgroundColor: var(--_variant-color-300);
+		--uix-button-textColor: var(--_variant-color-800);
+		--uix-button-borderSize: 1px;
+		--uix-button-borderColor: var(--_variant-color-400);
+	}
 
-				// Combine into a single list.
-				this.pendingRequests = [...elicitationReqs, ...samplingReqs];
-
-				// Automatically expand if new requests have arrived.
-				if (this.pendingRequests.length > previousRequestCount) {
-					this.isExpanded = true;
-				}
-			} catch (error) {
-				console.error("Error loading pending requests:", error);
-				this.pendingRequests = [];
-			} finally {
-				this.isLoading = false;
-			}
-		},
-
-		toggleExpanded() {
-			this.isExpanded = !this.isExpanded;
-		},
-
-		// --- Event Handlers ---
-		// Sampling handlers
-		async handleSamplingResponse(request, action) {
-			try {
-				if (action === "approve") {
-					await AI.approveSamplingRequest({
-						id: request.id,
-						server: request.server,
-					});
-				} else {
-					await AI.rejectSamplingRequest({
-						id: request.id,
-						server: request.server,
-					});
-				}
-			} catch (e) {
-				console.error(\`Failed to \${action} sampling request:\`, e);
-			}
-		},
-
-		// Elicitation handlers
-		handleInput(requestId, fieldName, event, schema) {
-			const newValues = {
-				...(this.formValues?.[requestId] || {}),
-				[fieldName]:
-					schema.type === "boolean"
-						? !!event.target.checked
-						: event.target.value,
-			};
-			this.formValues = { ...this.formValues, [requestId]: newValues };
-		},
-
-		async handleElicitationSubmit(request) {
-			const response = this.formValues[request.id] || {};
-			try {
-				await AI.respondToElicitation({
-					id: request.id,
-					response,
-					server: request.server,
-				});
-				const newFormValues = { ...this.formValues };
-				delete newFormValues[request.id];
-				this.formValues = newFormValues;
-			} catch (e) {
-				console.error("Failed to respond to elicitation:", e);
-			}
-		},
-
-		async handleElicitationDecline(request) {
-			try {
-				await AI.respondToElicitation({
-					id: request.id,
-					response: {},
-					server: request.server,
-					action: "decline",
-				});
-				const newFormValues = { ...this.formValues };
-				delete newFormValues[request.id];
-				this.formValues = newFormValues;
-			} catch (e) {
-				console.error("Failed to decline elicitation:", e);
-			}
-		},
-
-		// --- Render Methods (Updated for unified list) ---
-		renderFormField(req, fieldName, schema) {
-			const value = this.formValues?.[req.id]?.[fieldName] || "";
-			return html\`
-                 <uix-input
-                     label=\${fieldName}
-                     value=\${value}
-                     type=\${schema.enum ? "select" : { boolean: "checkbox", enum: "select" }[schema.type] || "text"}
-                     .options=\${schema.enum}
-                     placeholder=\${schema.description}
-                     @input=\${(e) => this.handleInput(req.id, fieldName, e, schema)}
-                     class="font-mono text-sm w-full"
-                 ></uix-input>
-             \`;
-		},
-
-		renderSamplingRequest(req) {
-			return html\`
-                 <div class="bg-white border border-gray-200 rounded-lg shadow-sm mb-4">
-                     <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                         <div>
-                             <h5 class="font-semibold text-sm mb-2 text-gray-700">Request</h5>
-                             <pre class="text-xs whitespace-pre-wrap bg-gray-800 text-gray-200 p-3 rounded-lg font-mono overflow-auto max-h-48">\${JSON.stringify(req.request, null, 2)}</pre>
-                         </div>
-                         <div>
-                             <h5 class="font-semibold text-sm mb-2 text-gray-700">Response Preview</h5>
-                             <pre class="text-xs whitespace-pre-wrap bg-gray-100 text-gray-800 p-3 rounded-lg font-mono overflow-auto max-h-48">\${JSON.stringify(req.responseStub, null, 2)}</pre>
-                         </div>
-                     </div>
-                     <div class="flex justify-end gap-3 p-3 bg-gray-50 border-t border-gray-200 rounded-b-lg">
-                         <uix-button @click=\${() => this.handleSamplingResponse(req, "reject")} label="Reject" size="small" class="is-danger"></uix-button>
-                         <uix-button @click=\${() => this.handleSamplingResponse(req, "approve")} label="Approve" size="small" class="is-primary"></uix-button>
-                     </div>
-                 </div>
-             \`;
-		},
-
-		renderElicitationRequest(req) {
-			return html\`
-                 <div class="bg-white border border-gray-200 rounded-lg shadow-sm mb-4">
-                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
-                         <div class="pr-4 border-r border-gray-200">
-                             <h5 class="font-semibold text-sm mb-2 text-gray-700">Information Request</h5>
-                             <p class="text-sm text-gray-800 mb-4">\${req.requestText}</p>
-                             <h6 class="font-mono text-xs font-bold text-gray-600 mb-2">Schema</h6>
-                             <pre class="text-xs whitespace-pre-wrap bg-gray-800 text-gray-200 p-3 rounded-lg font-mono overflow-auto max-h-32">\${JSON.stringify(req.schema, null, 2)}</pre>
-                         </div>
-                         <div>
-                             <h5 class="font-semibold text-sm mb-3 text-gray-700">Response Form</h5>
-                             <div class="space-y-3">
-                                 \${Object.entries(req.schema.properties).map(
-																		([fieldName, fieldSchema]) =>
-																			this.renderFormField(
-																				req,
-																				fieldName,
-																				fieldSchema,
-																			),
-																	)}
-                             </div>
-                         </div>
-                     </div>
-                     <div class="flex justify-end gap-3 p-3 bg-gray-50 border-t border-gray-200 rounded-b-lg">
-                         <uix-button @click=\${() => (this.formValues[req.id] = {})} label="Reset" size="small"></uix-button>
-                         <uix-button @click=\${() => this.handleElicitationDecline(req)} label="Decline" size="small" class="is-danger"></uix-button>
-                         <uix-button @click=\${() => this.handleElicitationSubmit(req)} label="Submit" size="small" class="is-primary"></uix-button>
-                     </div>
-                 </div>
-             \`;
-		},
-
-		renderCollapsedBanner() {
-			return html\`
-                <div class="bg-amber-50 border-b-2 border-amber-400 px-4 py-2 flex items-center justify-between cursor-pointer hover:bg-amber-100 transition-colors" @click=\${this.toggleExpanded.bind(this)}>
-                    <div class="flex items-center space-x-3">
-                        <uix-icon name="bell" class="w-5 h-5 text-amber-600 animate-pulse"></uix-icon>
-                        <div>
-                            <!-- SIMPLIFIED: Display total count directly. -->
-                            <span class="font-semibold text-amber-900">
-                                \${this.pendingRequests.length} Pending Request\${this.pendingRequests.length !== 1 ? "s" : ""}
-                            </span>
-                        </div>
-                    </div>
-                    <uix-icon name="chevron-down" class="w-5 h-5 text-amber-600"></uix-icon>
-                </div>
-            \`;
-		},
-
-		renderExpandedPanel() {
-			return html\`
-                <div class="flex flex-col bg-white border-b-2 border-amber-400">
-                    <!-- Header -->
-                    <div class="bg-amber-50 px-4 py-2 flex items-center justify-between border-b border-amber-200">
-                        <div class="flex items-center space-x-3">
-                            <uix-icon name="bell" class="w-5 h-5 text-amber-600"></uix-icon>
-                            <span class="font-semibold text-amber-900">Pending Requests</span>
-                        </div>
-                        <uix-button @click=\${this.toggleExpanded} size="small" ghost>
-                            <uix-icon name="chevron-up" class="w-4 h-4"></uix-icon>
-                        </uix-button>
-                    </div>
-
-                    <!-- Content -->
-                    <div class="flex-1 overflow-auto p-4">
-                        \${
-													this.pendingRequests.length > 0
-														? this.pendingRequests.map((req) =>
-																// Conditionally render based on the request 'type'.
-																req.type === "sampling"
-																	? this.renderSamplingRequest(req)
-																	: this.renderElicitationRequest(req),
-															)
-														: html\`<div class="text-center text-gray-500 py-8">No pending requests</div>\`
-												}
-                    </div>
-                </div>
-            \`;
-		},
-
-		render() {
-			// SIMPLIFIED: Check the length of the unified pendingRequests array.
-			if (this.isLoading || this.pendingRequests.length === 0) {
-				return html\`\`;
-			}
-			return this.isExpanded
-				? this.renderExpandedPanel()
-				: this.renderCollapsedBanner();
-		},
-	};
-};
-`,mimeType:"application/javascript"},"/modules/uix/display/link.css":{content:`:where(.uix-link) {
+	&[float] {
+		background-color: black;
+		--uix-button-hoverBackgroundColor: var(--_variant-color-500);
+		--uix-button-textColor: var(--_variant-color-50);
+		--uix-button-borderSize: 0px;
+		--uix-button-borderRadius: 9999px;
+		--uix-button-width: var(--uix-button-height);
+		box-shadow: var(--shadow-md, 0 4px 6px -1px rgb(0 0 0 / 0.1));
+		--uix-button-padding: 0.5rem;
+	}
+	&[float]:hover {
+		box-shadow: var(--shadow-lg, 0 10px 15px -3px rgb(0 0 0 / 0.1));
+	}
+}
+`,mimeType:"text/css",skipSW:!1},"/modules/uix/display/link.css":{content:`:where(.uix-link) {
 	font-weight: var(--uix-link-font-weight, 600);
 	width: var(--uix-link-width, auto);
 	color: var(--uix-link-text-color, var(--colors-default-900));
@@ -14019,91 +14032,733 @@ export default ({ html, T }) => ({
 		}
 	}
 }
-`,mimeType:"text/css"},"/modules/uix/display/button.css":{content:`:where(.uix-button) {
-	border: var(--uix-button-borderSize, 0) solid var(--uix-button-borderColor);
-	border-radius: var(--uix-button-borderRadius, var(--radius-md));
-	box-shadow: var(--uix-button-shadow);
-	width: var(--uix-button-width);
-	min-width: fit-content;
-	background-color: var(--uix-button-backgroundColor, black);
-	color: var(--uix-button-textColor, var(--colors-default-100));
-	font-weight: var(--uix-button-fontWeight, 700);
-	display: flex;
-	text-align: center;
-	transition:
-		transform 0.2s ease-in-out,
-		opacity 0.2s ease-in-out,
-		background-color 0.2s ease-in-out;
-	&:hover {
-		opacity: var(--uix-button-hover-opacity, 0.4);
+`,mimeType:"text/css",skipSW:!1},"/modules/icon-lucide/lucide/book.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/bot.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2m16 0h2m-7-1v2m-6-2v2"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/search.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21l-4.3-4.3"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/layout-grid.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/server.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><path d="M6 6h.01M6 18h.01"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/zap.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/message-square-heart.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M14.8 7.5a1.84 1.84 0 0 0-2.6 0l-.2.3l-.3-.3a1.84 1.84 0 1 0-2.4 2.8L12 13l2.7-2.7c.9-.9.8-2.1.1-2.8"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/apps/mcp/views/chat.js":{content:`export default ({ $APP, html, AI, T }) => {
+	// In-memory store for conversations. In a real app, this would be persisted.
+	const conversations = new Map();
+	let currentConversationId = null;
+
+	// --- Helper SVG Icons ---
+	const SendIcon = () => html\`
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
+            <path d="m22 2-7 20-4-9-9-4Z"></path>
+            <path d="m22 2-11 11"></path>
+        </svg>
+    \`;
+
+	const TrashIcon = () => html\`
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+            <path d="M3 6h18"></path>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            <line x1="10" x2="10" y1="11" y2="17"></line>
+            <line x1="14" x2="14" y1="11" y2="17"></line>
+        </svg>
+    \`;
+
+	const PlusIcon = () => html\`
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+            <path d="M5 12h14"></path>
+            <path d="M12 5v14"></path>
+        </svg>
+    \`;
+
+	const SettingsIcon = () => html\`
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+    \`;
+
+	const ToolIcon = () => html\`
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+    \`;
+
+	// --- MCP Chat Message Component ---
+	$APP.define("mcp-chat-message", {
+		properties: {
+			message: T.object({}),
+			isUser: T.boolean(false),
+			isStreaming: T.boolean(false),
+		},
+
+		_formatTimestamp(timestamp) {
+			return new Date(timestamp).toLocaleTimeString([], {
+				hour: "2-digit",
+				minute: "2-digit",
+			});
+		},
+
+		_renderToolCall(toolCall) {
+			return html\`
+                <div class="bg-[#1d2021] border-l-4 border-[#504945] p-3 mt-2 rounded-md">
+                    <div class="font-mono text-[#83a598] font-semibold flex items-center gap-2">
+                        \${ToolIcon()}
+                        \${toolCall.name}
+                    </div>
+                    \${
+											toolCall.arguments
+												? html\`<pre class="text-sm text-[#bdae93] mt-2 whitespace-pre-wrap bg-[#282828] p-2 rounded">\${JSON.stringify(toolCall.arguments, null, 2)}</pre>\`
+												: ""
+										}
+                    \${
+											toolCall.result
+												? html\`
+                          <div class="mt-2 text-[#ebdbb2]">
+                              <div class="font-semibold text-sm text-[#928374]">Result:</div>
+                              <pre class="text-sm bg-[#282828] p-2 rounded mt-1 whitespace-pre-wrap">\${typeof toolCall.result === "string" ? toolCall.result : JSON.stringify(toolCall.result, null, 2)}</pre>
+                          </div>\`
+												: ""
+										}
+                </div>
+            \`;
+		},
+		render() {
+			const { message, isUser } = this;
+			const senderIcon = isUser
+				? html\`<div class="w-8 h-8 rounded-full bg-[#458588] flex-shrink-0 flex items-center justify-center font-bold text-[#ebdbb2]">Y</div>\`
+				: html\`<div class="w-8 h-8 rounded-full bg-[#3c3836] border border-[#504945] flex-shrink-0 flex items-center justify-center text-[#83a598]">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M12 8V4H8"></path><rect width="16" height="12" x="4" y="8" rx="2"></rect><path d="M2 14h2"></path><path d="M20 14h2"></path><path d="M15 13v2"></path><path d="M9 13v2"></path></svg>
+                </div>\`;
+
+			return html\`
+                <div class="flex items-start gap-4 my-6 \${isUser ? "justify-end" : "justify-start"}">
+                    \${!isUser ? senderIcon : ""}
+                    <div class="max-w-[75%]">
+                        <div class="flex items-baseline gap-2 mb-1 \${isUser ? "justify-end" : ""}">
+                            <span class="font-bold \${isUser ? "text-[#d5c4a1]" : "text-[#bdae93]"}">\${isUser ? "You" : "Assistant"}</span>
+                            \${message.timestamp ? html\`<span class="text-sm text-[#928374]">\${this._formatTimestamp(message.timestamp)}</span>\` : ""}
+                        </div>
+                        <div class="bg-[#3c3836] border border-[#504945] rounded-lg p-3 shadow-sm text-[#ebdbb2]">
+                            \${message.content ? html\`<div class="prose prose-sm max-w-none text-[#ebdbb2] whitespace-pre-wrap">\${message.content}</div>\` : ""}
+                            \${message.toolCalls?.length > 0 ? message.toolCalls.map((toolCall) => this._renderToolCall(toolCall)) : ""}
+                            \${this.isStreaming ? html\`<div class="inline-block w-2 h-4 bg-[#ebdbb2] animate-pulse ml-1"></div>\` : ""}
+                        </div>
+                    </div>
+                    \${isUser ? senderIcon : ""}
+                </div>
+            \`;
+		},
+	});
+
+	// --- MCP Chat Input Component ---
+	$APP.define("mcp-chat-input", {
+		properties: {
+			value: T.string(""),
+			isLoading: T.boolean(false),
+			onSend: T.function(),
+			availableTools: T.array([]),
+			selectedTools: T.array([]),
+			onToolToggle: T.function(),
+			availableModels: T.array([]),
+			selectedModel: T.string(""),
+			onModelChange: T.function(),
+			onSettingsClick: T.function(),
+		},
+
+		handleInput(event) {
+			this.value = event.target.value;
+			this.autoResize(event.target);
+		},
+
+		autoResize(textarea) {
+			textarea.style.height = "auto";
+			textarea.style.height = \`\${textarea.scrollHeight}px\`;
+		},
+
+		handleKeyPress(event) {
+			if (event.key === "Enter" && !event.shiftKey) {
+				event.preventDefault();
+				this.sendMessage();
+			}
+		},
+
+		sendMessage() {
+			if (!this.value.trim() || this.isLoading) return;
+			const message = this.value.trim();
+
+			if (this.onSend) {
+				this.onSend(message);
+			}
+
+			this.value = "";
+			setTimeout(() => {
+				const textarea = this.querySelector("textarea");
+				if (textarea) this.autoResize(textarea);
+			}, 0);
+		},
+
+		render() {
+			return html\`
+                <div class="px-6 pb-4">
+                    <div class="bg-[#3c3836] border border-[#504945] rounded-xl shadow-lg p-2">
+                        <div class="px-2 pb-2 flex justify-between items-center flex-wrap gap-2">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                \${this.availableTools.map(
+																	(tool) => html\`
+                                    <button 
+                                        @click=\${() => this.onToolToggle(tool.name)}
+                                        class="px-2 py-1 rounded-md text-sm font-medium transition-all flex items-center gap-1.5 \${this.selectedTools.includes(tool.name) ? "bg-[#83a598] text-[#1d2021]" : "bg-[#504945] text-[#ebdbb2] hover:bg-[#665c54]"}"
+                                        title=\${tool.description}
+                                    >
+                                        \${ToolIcon()}
+                                        \${tool.name}
+                                    </button>
+                                \`,
+																)}
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <select @change=\${(e) => this.onModelChange(e.target.value)} .value=\${this.selectedModel} class="bg-[#504945] border border-[#665c54] rounded-md px-2 text-sm focus:ring-[#83a598] focus:outline-none h-7">
+                                    \${this.availableModels.map((model) => html\`<option value=\${model.id}>\${model.name}</option>\`)}
+                                </select>
+                                <button @click=\${this.onSettingsClick} class="p-1.5 text-[#bdae93] hover:text-[#ebdbb2] hover:bg-[#504945] rounded-md">
+                                    \${SettingsIcon()}
+                                </button>
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <textarea
+                                .value=\${this.value}
+                                @input=\${this.handleInput.bind(this)}
+                                @keydown=\${this.handleKeyPress.bind(this)}
+                                ?disabled=\${this.isLoading}
+                                placeholder="Type your message..."
+                                rows="1"
+                                class="w-full bg-[#282828] p-4 pr-16 text-[#ebdbb2] placeholder-[#928374] resize-none focus:outline-none focus:ring-2 focus:ring-[#83a598] rounded-lg transition-all"
+                                style="max-height: 200px; overflow-y: auto;"
+                            ></textarea>
+                            <button
+                                @click=\${this.sendMessage.bind(this)}
+                                ?disabled=\${!this.value.trim() || this.isLoading}
+                                class="absolute right-3 bottom-2.5 p-2 rounded-full text-[#ebdbb2] transition-colors
+                                    \${
+																			!this.value.trim() || this.isLoading
+																				? "bg-[#504945] cursor-not-allowed"
+																				: "bg-[#458588] hover:bg-[#83a598]"
+																		}"
+                            >
+                                \${this.isLoading ? html\`<div class="w-5 h-5 border-2 border-t-transparent border-white rounded-full animate-spin"></div>\` : SendIcon()}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            \`;
+		},
+	});
+
+	// --- MCP Conversation List Component ---
+	$APP.define("mcp-conversation-list", {
+		properties: {
+			conversations: T.array([]),
+			currentId: T.any(null),
+			onSelect: T.function(),
+			onNew: T.function(),
+			onDelete: T.function(),
+		},
+
+		_getPreview(conversation) {
+			const lastMessage =
+				conversation.messages[conversation.messages.length - 1];
+			if (!lastMessage) return "New conversation";
+			const content = lastMessage.content || "No content";
+			return content.length > 35 ? \`\${content.substring(0, 35)}...\` : content;
+		},
+
+		_formatDate(timestamp) {
+			const date = new Date(timestamp);
+			const now = new Date();
+			if (date.toDateString() === now.toDateString()) {
+				return date.toLocaleTimeString([], {
+					hour: "2-digit",
+					minute: "2-digit",
+				});
+			}
+			return date.toLocaleDateString([], { month: "short", day: "numeric" });
+		},
+
+		render() {
+			return html\`
+                <div class="h-full flex flex-col bg-[#3c3836]">
+                    <div class="p-3 border-b border-[#504945]">
+                        <button @click=\${this.onNew} class="w-full flex items-center justify-center gap-2 p-2 rounded-lg bg-[#458588] text-[#ebdbb2] hover:bg-[#83a598] transition-colors font-semibold">
+                            \${PlusIcon()} New Chat
+                        </button>
+                    </div>
+                    <div class="flex-1 overflow-y-auto p-2">
+                        \${
+													this.conversations.length === 0
+														? html\`<div class="p-4 text-center text-[#928374]">No conversations yet</div>\`
+														: this.conversations.map(
+																(conv) => html\`
+                                    <div
+                                        @click=\${() => this.onSelect(conv.id)}
+                                        class="p-3 rounded-lg cursor-pointer transition-colors group relative \${this.currentId === conv.id ? "bg-[#504945]" : "hover:bg-[#504945]"}"
+                                    >
+                                        <div class="text-sm font-semibold text-[#ebdbb2] truncate">\${conv.title || "Untitled Chat"}</div>
+                                        <div class="flex justify-between items-center mt-1">
+                                            <div class="text-sm text-[#bdae93] truncate pr-10">\${this._getPreview(conv)}</div>
+                                            <span class="text-sm text-[#928374] flex-shrink-0">\${this._formatDate(conv.updatedAt || conv.createdAt)}</span>
+                                        </div>
+                                        <button 
+                                            @click=\${(e) => {
+																							e.stopPropagation();
+																							this.onDelete(conv.id);
+																						}}
+                                            class="absolute top-2 right-2 p-1 text-[#928374] hover:text-[#fb4934] rounded-full hover:bg-[#1d2021] opacity-0 group-hover:opacity-100 transition-opacity"
+                                            title="Delete conversation">
+                                            \${TrashIcon()}
+                                        </button>
+                                    </div>
+                                \`,
+															)
+												}
+                    </div>
+                </div>
+            \`;
+		},
+	});
+
+	// --- Main Application Component ---
+	return {
+		class: "w-full h-full bg-[#282828] text-[#ebdbb2] flex font-sans",
+		properties: {
+			currentConversation: T.object(null),
+			conversations: T.array([]),
+			isLoading: T.boolean(false),
+			error: T.string(""),
+			availableTools: T.array([]),
+			selectedTools: T.array([]),
+			availableModels: T.array([]),
+			selectedModel: T.string("qwen/qwen3-4b-2507"),
+			showSettingsModal: T.boolean(false),
+			modelSettings: T.object({ temperature: 0.5 }),
+		},
+
+		async initializeAI() {
+			try {
+				if (!AI.isInitialized) {
+					await AI.init({
+						// Example API Keys - replace with actual config management
+						googleApiKey: "",
+						openrouterApiKey: "",
+					});
+				}
+			} catch (error) {
+				console.error("Error initializing AI service:", error);
+				this.error = "Failed to initialize AI Service.";
+			}
+		},
+
+		async connected() {
+			await this.initializeAI();
+			this.loadConversations();
+			this.loadTools();
+			this.loadModels();
+			if (!currentConversationId && this.conversations.length > 0) {
+				this.selectConversation(this.conversations[0].id);
+			} else if (this.conversations.length === 0) {
+				this.createNewConversation();
+			}
+		},
+
+		async loadTools() {
+			try {
+				const { tools } = await AI.listTools();
+				this.availableTools = tools || [];
+			} catch (e) {
+				console.error("Couldn't load tools", e);
+				this.availableTools = [];
+			}
+		},
+
+		async loadModels() {
+			this.availableModels = [
+				{ id: "qwen/qwen3-4b-2507", name: "Qwen3 4b" },
+				{ id: "anthropic/claude-3.5-haiku", name: "Claude 3.5 Haiku" },
+				{ id: "google/gemini-1.5-pro-latest", name: "Gemini 1.5 Pro" },
+				{ id: "openai/gpt-4-turbo", name: "GPT-4 Turbo" },
+			];
+		},
+
+		toggleTool(toolName) {
+			if (this.selectedTools.includes(toolName)) {
+				this.selectedTools = this.selectedTools.filter((t) => t !== toolName);
+			} else {
+				this.selectedTools = [...this.selectedTools, toolName];
+			}
+		},
+
+		handleModelChange(modelId) {
+			this.selectedModel = modelId;
+			// Infer provider from model string
+			const provider = modelId.split("/")[0];
+			if (provider) {
+				this.modelSettings = { ...this.modelSettings, provider };
+			}
+		},
+
+		toggleSettingsModal() {
+			this.showSettingsModal = !this.showSettingsModal;
+			console.log("Settings modal toggled:", this.showSettingsModal);
+		},
+
+		loadConversations() {
+			this.conversations = Array.from(conversations.values()).sort(
+				(a, b) =>
+					new Date(b.updatedAt || b.createdAt) -
+					new Date(a.updatedAt || a.createdAt),
+			);
+		},
+
+		createNewConversation() {
+			const id = Date.now().toString();
+			const conversation = {
+				id,
+				title: "",
+				messages: [],
+				createdAt: new Date().toISOString(),
+				updatedAt: new Date().toISOString(),
+			};
+			conversations.set(id, conversation);
+			currentConversationId = id;
+			this.currentConversation = conversation;
+			this.loadConversations();
+		},
+
+		selectConversation(id) {
+			const conversation = conversations.get(id);
+			if (conversation) {
+				currentConversationId = id;
+				this.currentConversation = conversation;
+			}
+		},
+
+		deleteConversation(id) {
+			conversations.delete(id);
+			this.loadConversations();
+			if (currentConversationId === id) {
+				currentConversationId = null;
+				this.currentConversation = null;
+				if (this.conversations.length > 0) {
+					this.selectConversation(this.conversations[0].id);
+				} else {
+					this.createNewConversation();
+				}
+			}
+		},
+
+		updateConversationTitle(conversation) {
+			if (!conversation.title && conversation.messages.length > 0) {
+				const firstMessage = conversation.messages.find(
+					(m) => m.role === "user",
+				);
+				if (firstMessage?.content) {
+					conversation.title =
+						firstMessage.content.length > 50
+							? \`\${firstMessage.content.substring(0, 50)}...\`
+							: firstMessage.content;
+				}
+			}
+		},
+
+		async sendMessage(content) {
+			if (!this.currentConversation) {
+				this.createNewConversation();
+			}
+
+			const userMessage = {
+				role: "user",
+				content,
+				timestamp: new Date().toISOString(),
+			};
+			this.currentConversation.messages.push(userMessage);
+			this.currentConversation.updatedAt = new Date().toISOString();
+			this.updateConversationTitle(this.currentConversation);
+			conversations.set(this.currentConversation.id, this.currentConversation);
+			this.currentConversation = { ...this.currentConversation };
+			this.loadConversations();
+
+			this.isLoading = true;
+			this.error = "";
+
+			const assistantMessage = {
+				role: "assistant",
+				content: "",
+				timestamp: null,
+				toolCalls: [],
+			};
+			this.currentConversation.messages.push(assistantMessage);
+
+			try {
+				const history = this.currentConversation.messages
+					.slice(0, -1)
+					.map((m) => ({
+						role: m.role,
+						content: m.content,
+						toolCalls: m.toolCalls,
+					}));
+
+				const modelParts = this.selectedModel.split("/");
+				const provider = modelParts.length > 1 ? modelParts[0] : "openrouter";
+
+				const stream = AI.chat(history, {
+					stream: true,
+					enabledTools: this.selectedTools,
+					model: this.selectedModel,
+					provider: "local",
+					...this.modelSettings,
+				});
+				console.error({ stream });
+				for await (const chunk of stream) {
+					if (chunk.type === "content") {
+						assistantMessage.content = chunk.content;
+					} else if (chunk.type === "tool_calls_start") {
+						assistantMessage.toolCalls = chunk.toolCalls;
+					} else if (
+						chunk.type === "tool_result" ||
+						chunk.type === "tool_error"
+					) {
+						const toolCall = assistantMessage.toolCalls.find(
+							(tc) => tc.name.replace(/__/g, "/") === chunk.name,
+						);
+						if (toolCall) {
+							toolCall.result = chunk.result || { error: chunk.error };
+						}
+					}
+
+					this.currentConversation = { ...this.currentConversation };
+
+					this.scrollToBottom();
+				}
+			} catch (error) {
+				console.error("Error sending message:", error);
+				this.error = error.message || "Failed to send message";
+				assistantMessage.content = \`Error: \${this.error}\`;
+			} finally {
+				this.isLoading = false;
+				assistantMessage.timestamp = new Date().toISOString();
+				this.currentConversation.updatedAt = new Date().toISOString();
+				conversations.set(
+					this.currentConversation.id,
+					this.currentConversation,
+				);
+				this.currentConversation = { ...this.currentConversation };
+				this.loadConversations();
+			}
+		},
+
+		scrollToBottom() {
+			setTimeout(() => {
+				const chatContainer = this.querySelector(".chat-messages");
+				if (chatContainer) {
+					chatContainer.scrollTop = chatContainer.scrollHeight;
+				}
+			}, 0);
+		},
+		render() {
+			this.scrollToBottom();
+			return html\`
+                <div class="w-80 border-r border-[#504945] flex-shrink-0">
+                    <mcp-conversation-list
+                        .conversations=\${this.conversations}
+                        .currentId=\${this.currentConversation?.id}
+                        .onSelect=\${this.selectConversation.bind(this)}
+                        .onNew=\${this.createNewConversation.bind(this)}
+                        .onDelete=\${this.deleteConversation.bind(this)}
+                    ></mcp-conversation-list>
+                </div>
+
+                <div class="flex-1 flex flex-col bg-[#282828] h-full">
+                    \${
+											this.currentConversation
+												? html\`
+                                <div class="flex-1 overflow-y-auto chat-messages px-6">
+                                    \${this.error ? html\`<div class="bg-red-900/50 border border-[#fb4934] rounded-lg p-3 my-4 text-[#fabd2f]">\${this.error}</div>\` : ""}
+                                    \${this.currentConversation.messages.map(
+																			(message, index) => html\`
+                                            <mcp-chat-message
+                                                .message=\${{ ...message }}
+                                                .isUser=\${message.role === "user"}
+                                                .isStreaming=\${this.isLoading && index === this.currentConversation.messages.length - 1}
+                                            ></mcp-chat-message>
+                                        \`,
+																		)}
+                                </div>
+                                <mcp-chat-input
+                                    .isLoading=\${this.isLoading}
+                                    .onSend=\${this.sendMessage.bind(this)}
+                                    .availableTools=\${this.availableTools}
+                                    .selectedTools=\${this.selectedTools}
+                                    .onToolToggle=\${this.toggleTool.bind(this)}
+                                    .availableModels=\${this.availableModels}
+                                    .selectedModel=\${this.selectedModel}
+                                    .onModelChange=\${this.handleModelChange.bind(this)}
+                                    .onSettingsClick=\${this.toggleSettingsModal.bind(this)}
+                                ></mcp-chat-input>
+                            \`
+												: html\`
+                                <div class="flex-1 flex items-center justify-center">
+                                    <div class="text-center text-[#928374]">
+                                        <div class="text-6xl mb-4">\u{1F4AC}</div>
+                                        <h3 class="text-xl font-semibold text-[#ebdbb2] mb-2">Select a chat</h3>
+                                        <p>Or start a new conversation to begin.</p>
+                                    </div>
+                                </div>
+                            \`
+										}
+                </div>
+            \`;
+		},
+	};
+};
+`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/display/icon.js":{content:`export default ({ T, html, $APP, Icons, theme }) => ({
+	tag: "uix-icon",
+	style: true,
+	properties: {
+		name: T.string(),
+		svg: T.string(),
+		solid: T.boolean(),
+	},
+
+	async getIcon(name) {
+		if (Icons.has(name)) this.svg = Icons.get(name);
+		else {
+			try {
+				const response = await fetch(
+					$APP.fs.getFilePath(
+						\`modules/icon-\${theme.font.icon.family}/\${theme.font.icon.family}/\${name}.svg\`,
+					),
+				);
+				if (response.ok) {
+					const svgElement = await response.text();
+					Icons.set(name, svgElement);
+					this.svg = svgElement;
+				} else {
+					console.error(\`Failed to fetch icon: \${name}\`);
+				}
+			} catch (error) {
+				console.error(\`Error fetching icon: \${name}\`, error);
+			}
+		}
+	},
+	willUpdate() {
+		if (this.name) {
+			this.getIcon(this.name);
+		}
+	},
+	render() {
+		return !this.svg ? null : html.unsafeHTML(this.svg);
+	},
+});
+`,mimeType:"application/javascript",skipSW:!1},"/modules/mvc/view/html/directive.js":{content:`/**
+ * Creates a user-facing directive function from a Directive class. This
+ * function has the same parameters as the directive's render() method.
+ */
+export const directive =
+	(c) =>
+	(...values) => ({
+		// This property needs to remain unminified.
+		["_$litDirective$"]: c,
+		values,
+	});
+
+/**
+ * Base class for creating custom directives. Users should extend this class,
+ * implement \`render\` and/or \`update\`, and then pass their subclass to
+ * \`directive\`.
+ */
+export class Directive {
+	//@internal
+	__part;
+	//@internal
+	__attributeIndex;
+	//@internal
+	__directive;
+	//@internal
+	_$parent;
+
+	// These will only exist on the AsyncDirective subclass
+	//@internal
+	_$disconnectableChildren;
+	// This property needs to remain unminified.
+	//@internal
+	["_$notifyDirectiveConnectionChanged"];
+
+	constructor(_partInfo) {}
+
+	// See comment in Disconnectable interface for why this is a getter
+	get _$isConnected() {
+		return this._$parent._$isConnected;
 	}
 
-	&:active {
-		transform: scale(0.97);
+	/** @internal */
+	_$initialize(part, parent, attributeIndex) {
+		this.__part = part;
+		this._$parent = parent;
+		this.__attributeIndex = attributeIndex;
+	}
+	/** @internal */
+	_$resolve(part, props) {
+		return this.update(part, props);
 	}
 
-	> button,
-	> a,
-	> input {
-		width: max-content;
-		display: block;
-		border-radius: inherit;
-		cursor: var(--uix-button-cursor, pointer);
-		height: calc(var(--spacing) * 10);
-		line-height: calc(var(--spacing) * 5);
-		padding: var(
-			--uix-button-padding,
-			calc(var(--spacing) * 2.5) calc(var(--spacing) * 4)
-		);
-		word-break: keep-all;
-		flex-basis: 100%;
+	render(...props) {
+		throw new Error("The \`render()\` method must be implemented.");
 	}
 
-	.uix-icon,
-	button,
-	input,
-	a {
-		cursor: pointer;
-	}
-
-	&[bordered] {
-		--uix-button-border-size: 1px;
-		--uix-button-backgroundColor: transparent;
-		--uix-button-hoverBackgroundColor: var(--_variant-color-300);
-		--uix-button-borderColor: var(--_variant-color-400);
-		--uix-button-textColor: var(--_variant-color-700);
-	}
-
-	&[ghost] {
-		--uix-button-backgroundColor: transparent;
-		--uix-button-hoverBackgroundColor: var(--_variant-color-300);
-		--uix-button-borderSize: 0px;
-		--uix-button-textColor: var(--_variant-color-700);
-	}
-
-	&[outline] {
-		--uix-button-backgroundColor: transparent;
-		--uix-button-hoverBackgroundColor: var(--_variant-color-300);
-		--uix-button-textColor: var(--_variant-color-800);
-		--uix-button-borderSize: 1px;
-		--uix-button-borderColor: var(--_variant-color-400);
-	}
-
-	&[float] {
-		background-color: black;
-		--uix-button-hoverBackgroundColor: var(--_variant-color-500);
-		--uix-button-textColor: var(--_variant-color-50);
-		--uix-button-borderSize: 0px;
-		--uix-button-borderRadius: 9999px;
-		--uix-button-width: var(--uix-button-height);
-		box-shadow: var(--shadow-md, 0 4px 6px -1px rgb(0 0 0 / 0.1));
-		--uix-button-padding: 0.5rem;
-	}
-	&[float]:hover {
-		box-shadow: var(--shadow-lg, 0 10px 15px -3px rgb(0 0 0 / 0.1));
+	update(_part, props) {
+		return this.render(...props);
 	}
 }
-`,mimeType:"text/css"},"/modules/uix/form/input.css":{content:`:where(.uix-input) {
+
+// A sentinel value that can never appear as a part value except when set by
+// live(). Used to force a dirty-check to fail and cause a re-render.
+const RESET_VALUE = {};
+
+/**
+ * Sets the committed value of a ChildPart directly without triggering the
+ * commit stage of the part.
+ *
+ * This is useful in cases where a directive needs to update the part such
+ * that the next update detects a value change or not. When value is omitted,
+ * the next update will be guaranteed to be detected as a change.
+ *
+ * @param part
+ * @param value
+ */
+const setCommittedValue = (part, value = RESET_VALUE) =>
+	(part._$committedValue = value);
+const nothing = Symbol.for("lit-nothing");
+class Keyed extends Directive {
+	key = nothing;
+	render(k, v) {
+		this.key = k;
+		return v;
+	}
+	update(part, [k, v]) {
+		if (k !== this.key) {
+			// Clear the part before returning a value. The one-arg form of
+			// setCommittedValue sets the value to a sentinel which forces a
+			// commit the next render.
+			setCommittedValue(part);
+			this.key = k;
+		}
+		return v;
+	}
+}
+
+export const keyed = directive(Keyed);
+
+export const ifDefined = (value) => value ?? nothing;
+`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/display/icon.css":{content:`.uix-icon {
+	display: inline-block;
+	vertical-align: middle;
+	svg {
+		height: inherit;
+		width: inherit;
+	}
+}
+
+&[solid] {
+	stroke: currentColor;
+	fill: currentColor;
+}
+`,mimeType:"text/css",skipSW:!1},"/modules/uix/form/input.css":{content:`:where(.uix-input) {
 	--uix-input-background-color: var(--colors-surface-100);
 	--uix-input-border-color: var(--colors-gray-900);
 	--uix-input-text-color: var(--colors-gray-900);
@@ -14331,276 +14986,1958 @@ export default ({ html, T }) => ({
 		}
 	}
 }
-`,mimeType:"text/css"},"/modules/uix/layout/divider.css":{content:`.uix-divider {
-	--uix-divider-color: rgba(0, 0, 0, 0.05);
-	--uix-divider-size: 2px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	position: relative;
-	padding: 0;
-	width: 100%;
-	height: var(--uix-divider-size);
-	span {
-		padding: 0 0.75rem;
-		font-weight: bold;
-		font-size: var(--uix-divider-font-size, 1.5rem);
-	}
-
-	&[resizable] {
-		cursor: row-resize;
-		&[vertical] {
-			cursor: col-resize;
-		}
-	}
-	&::before,
-	&::after {
-		content: "";
-		flex-grow: 1;
-		height: var(--uix-divider-size);
-		background-color: var(--uix-divider-color);
-	}
-	&[label] {
-		padding: var(--uix-divider-padding, 1rem) 0;
-	}
-	&[label]::before,
-	&[label]::after {
-		flex-grow: 1;
-	}
-	&[vertical] {
-		flex-direction: column;
-		width: 1px;
-		height: 100%;
-		background-color: transparent;
-		&::before,
-		&::after {
-			width: 1px;
-			height: auto;
-		}
-		&[label] {
-			padding: 0 var(--uix-divider-padding, 1rem);
-		}
-	}
-}
-`,mimeType:"text/css"},"/modules/apps/editor/views/textarea.css":{content:`.cm-scroller {
-	overflow: auto !important;
-}
-
-.cm-editor {
-	width: 100%;
-}
-`,mimeType:"text/css"},"/modules/icon-lucide/lucide/layout-grid.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></g></svg>',mimeType:"image/svg+xml"},"/modules/icon-lucide/lucide/book.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/></svg>',mimeType:"image/svg+xml"},"/modules/icon-lucide/lucide/zap.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>',mimeType:"image/svg+xml"},"/modules/icon-lucide/lucide/server.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><path d="M6 6h.01M6 18h.01"/></g></svg>',mimeType:"image/svg+xml"},"/modules/icon-lucide/lucide/search.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21l-4.3-4.3"/></g></svg>',mimeType:"image/svg+xml"},"/modules/icon-lucide/lucide/message-square-heart.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M14.8 7.5a1.84 1.84 0 0 0-2.6 0l-.2.3l-.3-.3a1.84 1.84 0 1 0-2.4 2.8L12 13l2.7-2.7c.9-.9.8-2.1.1-2.8"/></g></svg>',mimeType:"image/svg+xml"},"/modules/icon-lucide/lucide/chevron-down.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 9l6 6l6-6"/></svg>',mimeType:"image/svg+xml"},"/modules/icon-lucide/lucide/server-off.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-5m-5 0L2.5 2.5C2 2 2 2.5 2 5v3a2 2 0 0 0 2 2zm12 7v-1a2 2 0 0 0-2-2h-1M4 14a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h16.5l1-.5l.5.5l-8-8zm2 4h.01M2 2l20 20"/></svg>',mimeType:"image/svg+xml"},"/modules/icon-lucide/lucide/chevron-right.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 18l6-6l-6-6"/></svg>',mimeType:"image/svg+xml"},"/modules/icon-lucide/lucide/triangle-alert.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21.73 18l-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3M12 9v4m0 4h.01"/></svg>',mimeType:"image/svg+xml"},"/modules/apps/mcp/views/servers.js":{content:`export default ({ html, AI, T }) => {
-	const starIcon = (isFilled = false) => html\`
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="\${isFilled ? "#fabd2f" : "none"}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="\${isFilled ? "text-[#fabd2f]" : "text-[#a89984]"}">
-            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-        </svg>
-    \`;
-
-	return {
-		tag: "mcp-servers",
-		class:
-			"w-full h-full bg-[#282828] text-[#ebdbb2] flex flex-col p-6 md:p-8 font-sans text-sm overflow-y-auto",
+`,mimeType:"text/css",skipSW:!1},"/modules/icon-lucide/lucide/code.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m16 18l6-6l-6-6M8 6l-6 6l6 6"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/folder.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/message-circle.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/cog.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12 20a8 8 0 1 0 0-16a8 8 0 0 0 0 16"/><path d="M12 14a2 2 0 1 0 0-4a2 2 0 0 0 0 4m0-12v2m0 18v-2m5 .66l-1-1.73m-5-8.66L7 3.34M20.66 17l-1.73-1M3.34 7l1.73 1M14 12h8M2 12h2m16.66-5l-1.73 1M3.34 17l1.73-1M17 3.34l-1 1.73m-5 8.66l-4 6.93"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/bot-message-square.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V2H8m0 16l-4 4V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2Zm-6-6h2m5-1v2m6-2v2m5-1h2"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/server-cog.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M4.5 10H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-.5m-15 4H4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2h-.5M6 6h.01M6 18h.01m9.69-4.6l-.9-.3m-5.6-2.2l-.9-.3m2.3 5.1l.3-.9m2.7.9l-.4-1m-2.4-5.4l-.4-1m-2.1 5.3l1-.4m5.4-2.4l1-.4m-2.3-2.1l-.3.9"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/sun.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/square-mouse-pointer.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12.034 12.681a.498.498 0 0 1 .647-.647l9 3.5a.5.5 0 0 1-.033.943l-3.444 1.068a1 1 0 0 0-.66.66l-1.067 3.443a.5.5 0 0 1-.943.033z"/><path d="M21 11V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/settings.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2"/><circle cx="12" cy="12" r="3"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/apps/mcp/views/inspector.js":{content:`export default ({ $APP, html, AI, T }) => {
+	$APP.define("mcp-inspector-sidebar", {
+		class: "w-80 bg-[#3c3836] border-r border-[#504945] flex flex-col shrink-0",
 		properties: {
-			searchQuery: T.string(""),
+			servers: T.array([]),
+			onConnect: T.function(),
+			onDisconnect: T.function(),
+			transportType: T.string(),
+			command: T.string(),
+			args: T.string(),
+			onInput: T.function(),
 		},
-		availableServers: [],
-		favoriteServerIds: [],
-		connectedServerId: null,
+
+		render() {
+			return html\`
+                <div class="p-4 border-b border-[#504945]">
+                    <h1 class="font-bold text-lg text-[#ebdbb2]">Inspector</h1>
+                </div>
+                <div class="flex-grow flex flex-col overflow-y-auto p-4 space-y-6">
+                    <div>
+                        <h2 class="font-semibold text-sm mb-3 text-[#ebdbb2]">Add Connection</h2>
+                        \${this._renderConnectionForm()}
+                    </div>
+
+                    \${
+											this.servers.length > 0
+												? html\`
+                              <div class="border-t border-[#504945] pt-4">
+                                  <h2 class="font-semibold text-sm mb-3 text-[#ebdbb2]">Active Connections</h2>
+                                  \${this._renderConnectedServersList()}
+                              </div>
+                          \`
+												: ""
+										}
+                </div>
+            \`;
+		},
+
+		_renderConnectionForm() {
+			return html\`
+                <div class="dark space-y-4">
+                    <uix-input type="select" .options=\${["JavaScript", "StreamableHTTP"]} label="Transport" value=\${this.transportType} @change=\${(e) => this.onInput("transportType", e.target.value)}></uix-input>
+                    <uix-input label="Command / URL" value=\${this.command} @input=\${(e) => this.onInput("command", e.target.value)}></uix-input>
+                    <uix-input label="Arguments" value=\${this.args} @input=\${(e) => this.onInput("args", e.target.value)}></uix-input>
+                </div>
+                <div class="mt-4">
+                    <uix-button @click=\${this.onConnect} label="Connect" class="bg-[#83a598] text-[#1d2021] w-full"></uix-button>
+                </div>
+            \`;
+		},
+
+		_renderConnectedServersList() {
+			return html\`
+                <div class="space-y-4">
+                    \${this.servers.map(
+											(server) => html\`
+                            <div class="text-xs space-y-2 text-[#ebdbb2] bg-[#282828] p-3 rounded-lg border border-[#504945]">
+                                <div class="flex justify-between items-center">
+                                    <span class="font-semibold text-[#bdae93]">Status:</span>
+                                    <span class="px-2 py-1 bg-[#b8bb26] text-[#282828] rounded-full font-medium text-xs">Connected</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="font-semibold text-[#bdae93]">Transport:</span>
+                                    <span>\${server.type}</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="font-semibold text-[#bdae93] mr-2">Endpoint:</span>
+                                    <span class="truncate font-mono text-right" title=\${server.command}>\${server.command}</span>
+                                </div>
+                                <div class="mt-2 pt-2 border-t border-[#504945]">
+                                    <uix-button @click=\${() => this.onDisconnect(server.alias)} label="Disconnect" class="bg-[#fb4934] text-[#ebdbb2] w-full h-8 text-xs"></uix-button>
+                                </div>
+                            </div>
+                        \`,
+										)}
+                </div>
+            \`;
+		},
+	});
+
+	$APP.define("mcp-tabs", {
+		class: "flex flex-col flex-grow",
+		properties: {
+			tabs: T.array([]),
+			activeTab: T.number(0),
+			selectedHistoryItem: T.object(null),
+			onDeselectHistoryItem: T.function(),
+		},
 
 		connected() {
-			this.availableServers = AI.listServers();
-			this.availableServers.map(
-				(server) =>
-					!console.log({
-						path: server.path,
-						skipSW: true,
-					}) &&
-					$APP.SW.request("SW:CACHE_FILE", {
-						path: server.path,
-						skipSW: true,
-					}),
-			);
-			this.favoriteServerIds = AI.getFavorites();
-			this.updateConnectionStatus();
+			this.tabs = [
+				{ key: "dashboard", label: "Dashboard", icon: "layout-dashboard" },
+				{ key: "resources", label: "Resources", icon: "database" },
+				{ key: "tools", label: "Tools", icon: "wrench" },
+				{ key: "prompts", label: "Prompts", icon: "terminal" },
+				{ key: "roots", label: "Roots", icon: "git-branch-plus" },
+				{ key: "auth", label: "Auth", icon: "key" },
+			];
+		},
 
-			this._updateFavorites = this.updateFavorites.bind(this);
-			this._updateConnectionStatus = this.updateConnectionStatus.bind(this);
+		selectTab(index) {
+			this.activeTab = index;
+		},
 
-			AI.events.on("servers:favoritesChanged", this._updateFavorites);
-			AI.events.on("connect", this._updateConnectionStatus);
-			AI.events.on("disconnect", this._updateConnectionStatus);
+		_renderTabView(tab) {
+			switch (tab.key) {
+				case "dashboard":
+					return html\`<mcp-dashboard .selectedHistoryItem=\${this.selectedHistoryItem} .onDeselectHistoryItem=\${this.onDeselectHistoryItem}></mcp-dashboard>\`;
+				case "resources":
+					return html\`<mcp-resources></mcp-resources>\`;
+				case "tools":
+					return html\`<mcp-tools></mcp-tools>\`;
+				case "prompts":
+					return html\`<mcp-prompts></mcp-prompts>\`;
+				case "roots":
+					return html\`<mcp-roots></mcp-roots>\`;
+				default:
+					return html\`<div class="text-center p-8 text-[#928374]">View not implemented: \${tab.key}</div>\`;
+			}
+		},
 
-			this.update();
+		render() {
+			return html\`
+                <uix-tabs
+                    class="flex flex-col flex-grow flex-1"
+                    style="--uix-tabs-font-size: 1rem; --uix-tabs-active-background-color: var(--colors-red-700); --uix-tabs-border-color: var(--colors-red-800); --uix-tabs-text: #ebdbb2; --uix-tabs-active-text: #ebdbb2;"
+                    .activeTab=\${this.activeTab}
+                    .selectTab=\${this.selectTab.bind(this)}
+                    .tabs=\${this.tabs.map((tab) => [
+											html\`<uix-icon name=\${tab.icon} class="mr-2"></uix-icon> \${tab.label}\`,
+											html\`<div class="p-6 bg-[#282828] flex-grow">\${this._renderTabView(tab)}</div>\`,
+										])}
+                >
+                </uix-tabs>
+            \`;
+		},
+	});
+
+	return {
+		tag: "mcp-inspector",
+		class: "w-full bg-[#282828] text-[#ebdbb2] flex font-sans text-sm",
+		properties: {
+			servers: T.array([]),
+			transportType: T.string({ sync: "local", defaultValue: "JavaScript" }),
+			command: T.string({
+				sync: "local",
+				defaultValue: "/templates/servers/basic.js",
+			}),
+			args: T.string({ sync: "local" }),
+			history: T.array([]),
+			historyUnsubscribe: T.any(null),
+			selectedHistoryId: T.any(null),
+		},
+
+		connected() {
+			this.initializeAI();
 		},
 
 		disconnected() {
-			AI.events.off("servers:favoritesChanged", this._updateFavorites);
-			AI.events.off("connect", this._updateConnectionStatus);
-			AI.events.off("disconnect", this._updateConnectionStatus);
-		},
-		updateFavorites(newFavoriteIds) {
-			this.favoriteServerIds = newFavoriteIds;
-			this.update();
+			if (this.historyUnsubscribe) this.historyUnsubscribe();
 		},
 
-		updateConnectionStatus() {
-			const clients = AI.listClients();
-			const devClient = clients.find((c) => c.alias === "dev_server");
-			let newConnectedServerId = null;
-			if (devClient && this.availableServers) {
-				const connectedServer = this.availableServers.find(
-					(s) => s.path === devClient.command,
-				);
-				if (connectedServer) newConnectedServerId = connectedServer.id;
-			}
-			if (this.connectedServerId !== newConnectedServerId) {
-				this.connectedServerId = newConnectedServerId;
-				this.update(); // Re-render when connection status changes
-			}
+		handleHistorySelect(item) {
+			this.selectedHistoryId = item ? item.id : null;
 		},
-		async connectToServer(server) {
+
+		getSelectedHistoryItem() {
+			if (!this.selectedHistoryId) return null;
+			return (
+				this.history.find((item) => item.id === this.selectedHistoryId) || null
+			);
+		},
+
+		handleSidebarInput(field, value) {
+			this[field] = value;
+		},
+
+		async initializeAI() {
 			try {
-				if (this.connectedServerId) {
-					await this.disconnectFromServer();
+				if (!AI.isInitialized) {
+					await AI.init({
+						geminiApiKey: "",
+						defaultRoots: [
+							{
+								uri: "file:///",
+								name: "Root Filesystem",
+								description: "Full filesystem access",
+							},
+							{
+								uri: "file:///home/user/",
+								name: "User Home",
+								description: "User home directory",
+							},
+							{
+								uri: "config://",
+								name: "Configuration",
+								description: "Application configuration",
+							},
+						],
+					});
 				}
-				const transportConfig = {
-					type: "JavaScript",
-					command: server.path,
-					args: [],
-				};
-				await AI.connect(transportConfig, { alias: "dev_server" });
-			} catch (e) {
-				console.error(\`Failed to connect to \${server.name}:\`, e);
+			} catch (error) {
+				console.error("Error initializing AI service:", error);
 			}
 		},
-		async disconnectFromServer() {
+
+		async connectToServer() {
+			if (!this.command) {
+				console.error("Connection command/URL cannot be empty.");
+				return;
+			}
+
 			try {
-				await AI.disconnect("dev_server");
+				const transportConfig = {
+					type: this.transportType,
+					command: this.command,
+					args: this.args ? this.args.split(" ") : [],
+				};
+
+				const alias = \`inspector_server_\${Date.now()}\`;
+
+				await AI.connect(transportConfig, { alias });
+
+				this.servers = [...this.servers, { alias, ...transportConfig }];
+
+				this.command = "";
+				this.args = "";
 			} catch (e) {
-				console.error("Failed to disconnect from server:", e);
+				console.error("Failed to connect:", e);
 			}
 		},
 
-		toggleFavorite(server) {
-			AI.toggleFavorite(server.id);
+		async disconnectFromServer(alias) {
+			try {
+				await AI.disconnect(alias);
+				this.servers = this.servers.filter((s) => s.alias !== alias);
+			} catch (e) {
+				console.error(\`Failed to disconnect \${alias}:\`, e);
+			}
 		},
 
-		// --- Render Methods ---
-		renderServerCard(server) {
-			const isConnected = this.connectedServerId === server.id;
-			const isFavorited = this.favoriteServerIds.includes(server.id);
+		render() {
+			const selectedHistoryItem = this.getSelectedHistoryItem();
+			return html\`
+                <mcp-inspector-sidebar
+                    .servers=\${this.servers}
+                    .onConnect=\${this.connectToServer.bind(this)}
+                    .onDisconnect=\${this.disconnectFromServer.bind(this)}
+                    .transportType=\${this.transportType}
+                    .command=\${this.command}
+                    .args=\${this.args}
+                    .onInput=\${this.handleSidebarInput.bind(this)}
+                ></mcp-inspector-sidebar>
+                <main class="flex-1 flex flex-col">
+                    \${
+											this.servers.length > 0
+												? html\`<mcp-tabs
+                              .selectedHistoryItem=\${selectedHistoryItem}
+                              .onDeselectHistoryItem=\${() => this.handleHistorySelect(null)}
+                          ></mcp-tabs>\`
+												: html\`
+                              <div
+                                  class="flex-grow flex items-center justify-center bg-[#282828]"
+                              >
+                                  <div class="text-center">
+                                      <h3
+                                          class="text-lg font-semibold text-[#ebdbb2]"
+                                      >
+                                          Not Connected
+                                      </h3>
+                                      <p class="text-[#bdae93] mt-1">
+                                          Please connect to a server using the
+                                          sidebar to begin.
+                                      </p>
+                                  </div>
+                              </div>
+                          \`
+										}
+                </main>
+            \`;
+		},
+	};
+};
+`,mimeType:"application/javascript",skipSW:!1},"/modules/icon-lucide/lucide/chevron-down.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 9l6 6l6-6"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/templates/servers/basic.js":{content:`import {
+	McpServer,
+	ResourceTemplate,
+} from "@modelcontextprotocol/sdk/server/mcp.js";
+import z from "zod";
+
+export default () => {
+	const server = new McpServer(
+		{
+			name: "example-server",
+			version: "0.1.0",
+		},
+		{
+			capabilities: {
+				tools: {},
+				resources: { subscribe: true },
+				logging: {},
+				prompts: {},
+				sampling: {},
+				elicitation: {},
+			},
+		},
+	);
+
+	// In-memory data storage
+	const dataStore = {
+		users: [
+			{ id: 1, name: "Alice", email: "alice@example.com", role: "admin" },
+			{ id: 2, name: "Bob", email: "bob@example.com", role: "user" },
+			{ id: 3, name: "Charlie", email: "charlie@example.com", role: "user" },
+		],
+		posts: [
+			{
+				id: 1,
+				title: "Welcome Post",
+				content: "Welcome to our platform!",
+				authorId: 1,
+			},
+			{
+				id: 2,
+				title: "Getting Started",
+				content: "Here's how to get started...",
+				authorId: 1,
+			},
+		],
+		settings: {
+			theme: "dark",
+			language: "en",
+			notifications: true,
+			maxUsers: 100,
+		},
+	};
+
+	const subscriptions = new Set();
+
+	server.registerTool(
+		"echo",
+		{
+			title: "Echo Tool",
+			description: "Echo back the input text with optional formatting",
+			inputSchema: {
+				text: z.string().describe("Text to echo back"),
+				uppercase: z.boolean().optional().describe("Convert to uppercase"),
+				repeat: z
+					.number()
+					.min(1)
+					.max(5)
+					.optional()
+					.default(1)
+					.describe("Number of times to repeat"),
+			},
+		},
+		async ({ text, uppercase = false, repeat = 1 }) => {
+			let result = uppercase ? text.toUpperCase() : text;
+			result = Array(repeat).fill(result).join(" | ");
+
+			return {
+				content: [
+					{
+						type: "text",
+						text: \`Echo: \${result}\`,
+					},
+				],
+			};
+		},
+	);
+
+	// Math calculator tool
+	server.registerTool(
+		"calculate",
+		{
+			title: "Calculator",
+			description: "Perform basic mathematical operations",
+			inputSchema: {
+				operation: z
+					.enum(["add", "subtract", "multiply", "divide", "power"])
+					.describe("Mathematical operation to perform"),
+				a: z.number().describe("First number"),
+				b: z.number().describe("Second number"),
+			},
+		},
+		async ({ operation, a, b }) => {
+			let result;
+
+			switch (operation) {
+				case "add":
+					result = a + b;
+					break;
+				case "subtract":
+					result = a - b;
+					break;
+				case "multiply":
+					result = a * b;
+					break;
+				case "divide":
+					if (b === 0) throw new Error("Division by zero is not allowed");
+					result = a / b;
+					break;
+				case "power":
+					result = a ** b;
+					break;
+			}
+
+			return {
+				content: [
+					{
+						type: "text",
+						text: \`\${a} \${operation} \${b} = \${result}\`,
+					},
+				],
+			};
+		},
+	);
+
+	// User management tool with elicitation
+	server.registerTool(
+		"manage_user",
+		{
+			title: "User Management",
+			description: "Create, update, or delete users",
+			inputSchema: {
+				action: z
+					.enum(["create", "update", "delete", "list"])
+					.describe("Action to perform"),
+				userId: z
+					.number()
+					.optional()
+					.describe("User ID (required for update/delete)"),
+				name: z.string().optional().describe("User name (required for create)"),
+				email: z
+					.string()
+					.email()
+					.optional()
+					.describe("User email (required for create)"),
+				role: z.enum(["admin", "user"]).optional().describe("User role"),
+			},
+		},
+		async ({ action, userId, name, email, role }) => {
+			switch (action) {
+				case "list": {
+					return {
+						content: [
+							{
+								type: "text",
+								text: \`Users:\\n\${dataStore.users.map((u) => \`\${u.id}: \${u.name} (\${u.email}) - \${u.role}\`).join("\\n")}\`,
+							},
+						],
+					};
+				}
+				case "create": {
+					if (!name || !email)
+						throw new Error("Name and email are required for creating a user");
+					const newUser = {
+						id: Math.max(...dataStore.users.map((u) => u.id)) + 1,
+						name,
+						email,
+						role: role || "user",
+					};
+					dataStore.users.push(newUser);
+
+					// Notify subscribers
+					if (subscriptions.has("data://users")) {
+						server.notifyResourceUpdated("data://users");
+					}
+
+					return {
+						content: [
+							{
+								type: "text",
+								text: \`Created user: \${newUser.name} (ID: \${newUser.id})\`,
+							},
+						],
+					};
+				}
+				case "update": {
+					if (!userId) throw new Error("User ID is required for updating");
+					const userIndex = dataStore.users.findIndex((u) => u.id === userId);
+					if (userIndex === -1)
+						throw new Error(\`User with ID \${userId} not found\`);
+
+					if (name) dataStore.users[userIndex].name = name;
+					if (email) dataStore.users[userIndex].email = email;
+					if (role) dataStore.users[userIndex].role = role;
+
+					// Notify subscribers
+					if (subscriptions.has("data://users")) {
+						server.notifyResourceUpdated("data://users");
+					}
+					if (subscriptions.has(\`data://users/\${userId}\`)) {
+						server.notifyResourceUpdated(\`data://users/\${userId}\`);
+					}
+
+					return {
+						content: [
+							{
+								type: "text",
+								text: \`Updated user: \${dataStore.users[userIndex].name}\`,
+							},
+						],
+					};
+				}
+				case "delete": {
+					if (!userId) throw new Error("User ID is required for deletion");
+					const deleteIndex = dataStore.users.findIndex((u) => u.id === userId);
+					if (deleteIndex === -1)
+						throw new Error(\`User with ID \${userId} not found\`);
+
+					const deletedUser = dataStore.users.splice(deleteIndex, 1)[0];
+
+					// Notify subscribers
+					if (subscriptions.has("data://users")) {
+						server.notifyResourceUpdated("data://users");
+					}
+
+					return {
+						content: [
+							{
+								type: "text",
+								text: \`Deleted user: \${deletedUser.name}\`,
+							},
+						],
+					};
+				}
+			}
+		},
+	);
+
+	// NEW: Delete user with confirmation using elicitation
+	server.registerTool(
+		"delete_user_with_confirmation",
+		{
+			title: "Delete User with Confirmation",
+			description: "Deletes a user after confirming with the user",
+			inputSchema: {
+				userId: z.number().describe("ID of the user to delete"),
+				force: z
+					.boolean()
+					.optional()
+					.describe("Skip confirmation if true (default: false)"),
+			},
+		},
+		async ({ userId, force = false }) => {
+			const userIndex = dataStore.users.findIndex((u) => u.id === userId);
+			if (userIndex === -1) {
+				throw new Error(\`User with ID \${userId} not found\`);
+			}
+
+			const user = dataStore.users[userIndex];
+
+			if (!force) {
+				const result = await server.server.elicitInput({
+					message: \`Are you sure you want to delete user "\${user.name}" (\${user.email})?\`,
+					requestedSchema: {
+						type: "object",
+						properties: {
+							confirm: {
+								type: "boolean",
+								title: "Confirm deletion",
+								description: \`Confirm deletion of user "\${user.name}"\`,
+							},
+							transferPosts: {
+								type: "boolean",
+								title: "Transfer posts",
+								description: "Transfer user's posts to another user",
+								default: false,
+							},
+							newAuthorId: {
+								type: "number",
+								title: "New author ID",
+								description:
+									"ID of user to transfer posts to (if transferring)",
+							},
+						},
+						required: ["confirm"],
+					},
+				});
+
+				if (result.action !== "accept" || !result.content?.confirm) {
+					return {
+						content: [
+							{
+								type: "text",
+								text: \`Deletion cancelled by user for \${user.name}\`,
+							},
+						],
+					};
+				}
+
+				if (result.content?.transferPosts && result.content?.newAuthorId) {
+					const newAuthor = dataStore.users.find(
+						(u) => u.id === result.content.newAuthorId,
+					);
+					if (newAuthor) {
+						dataStore.posts.forEach((post) => {
+							if (post.authorId === userId) {
+								post.authorId = result.content.newAuthorId;
+							}
+						});
+						await server.sendLoggingMessage({
+							level: "info",
+							data: \`Transferred posts from \${user.name} to \${newAuthor.name}\`,
+						});
+					}
+				}
+			}
+
+			// Delete the user
+			dataStore.users.splice(userIndex, 1);
+
+			// Notify subscribers
+			if (subscriptions.has("data://users")) {
+				server.notifyResourceUpdated("data://users");
+			}
+
+			return {
+				content: [
+					{
+						type: "text",
+						text: \`Successfully deleted user: \${user.name}\`,
+					},
+				],
+			};
+		},
+	);
+
+	// NEW: Generate post content using sampling
+	server.registerTool(
+		"generate_post",
+		{
+			title: "Generate Post Content",
+			description:
+				"Uses AI to generate a blog post with the specified parameters",
+			inputSchema: {
+				title: z.string().describe("Title of the post"),
+				authorId: z.number().describe("ID of the author"),
+				topic: z.string().optional().describe("Topic or theme for the post"),
+				style: z
+					.enum(["professional", "casual", "technical", "creative"])
+					.optional()
+					.default("professional")
+					.describe("Writing style for the post"),
+			},
+		},
+		async ({ title, authorId, topic, style = "professional" }) => {
+			const author = dataStore.users.find((u) => u.id === authorId);
+			if (!author) {
+				throw new Error(\`Author with ID \${authorId} not found\`);
+			}
+
+			let generationPrompt = \`Write a blog post with the title "\${title}"\`;
+			if (topic) {
+				generationPrompt += \` about \${topic}\`;
+			}
+			generationPrompt += \`. Use a \${style} writing style. Keep it concise (2-3 paragraphs).\`;
+
+			try {
+				const response = await server.server.createMessage({
+					messages: [
+						{
+							role: "user",
+							content: {
+								type: "text",
+								text: generationPrompt,
+							},
+						},
+					],
+					maxTokens: 500,
+					temperature: style === "creative" ? 0.8 : 0.3,
+				});
+
+				let generatedContent = "";
+				if (response.content.type === "text") {
+					generatedContent = response.content.text;
+				} else {
+					throw new Error("Failed to generate text content");
+				}
+
+				// Create the new post
+				const newPost = {
+					id: Math.max(...dataStore.posts.map((p) => p.id)) + 1,
+					title,
+					content: generatedContent,
+					authorId,
+				};
+
+				dataStore.posts.push(newPost);
+
+				// Notify subscribers
+				if (subscriptions.has("data://posts")) {
+					server.notifyResourceUpdated("data://posts");
+				}
+
+				await server.sendLoggingMessage({
+					level: "info",
+					data: \`Generated post "\${title}" for author \${author.name} in \${style} style\`,
+				});
+
+				return {
+					content: [
+						{
+							type: "text",
+							text: \`Successfully generated post "\${title}" (ID: \${newPost.id})\\n\\nContent preview:\\n\${generatedContent.substring(0, 200)}\${generatedContent.length > 200 ? "..." : ""}\`,
+						},
+					],
+				};
+			} catch (error) {
+				await server.sendLoggingMessage({
+					level: "error",
+					data: \`Failed to generate post: \${error.message}\`,
+				});
+
+				throw new Error(\`Post generation failed: \${error.message}\`);
+			}
+		},
+	);
+
+	// Slow operation with progress
+	server.registerTool(
+		"slow_task",
+		{
+			title: "Slow Task Simulator",
+			description: "Simulates a long-running task with progress updates",
+			inputSchema: {
+				taskName: z.string().describe("Name of the task to simulate"),
+				duration: z.number().min(1).max(10).describe("Duration in seconds"),
+			},
+		},
+		async ({ taskName, duration }, { progress }) => {
+			await server.sendLoggingMessage({
+				level: "info",
+				data: \`Starting task: \${taskName} (\${duration}s)\`,
+			});
+
+			const steps = duration * 2; // Update every 500ms
+			for (let i = 1; i <= steps; i++) {
+				await new Promise((resolve) => setTimeout(resolve, 500));
+				progress({ progress: i, total: steps });
+			}
+
+			await server.sendLoggingMessage({
+				level: "info",
+				data: \`Completed task: \${taskName}\`,
+			});
+
+			return {
+				content: [
+					{
+						type: "text",
+						text: \`Task "\${taskName}" completed successfully after \${duration} seconds!\`,
+					},
+				],
+			};
+		},
+	);
+
+	// ===== STATIC RESOURCES =====
+
+	// App configuration
+	server.registerResource(
+		"config",
+		"config://app",
+		{
+			title: "App Configuration",
+			description: "Application configuration settings",
+			mimeType: "application/json",
+		},
+		async (uri) => ({
+			contents: [
+				{
+					uri: uri.href,
+					mimeType: "application/json",
+					text: JSON.stringify(
+						{
+							name: "MCP Dev Server",
+							version: "1.0.0",
+							features: ["tools", "resources", "templates"],
+							status: "active",
+							...dataStore.settings,
+						},
+						null,
+						2,
+					),
+				},
+			],
+		}),
+	);
+
+	// Users list resource
+	server.registerResource(
+		"data_users",
+		"data://users",
+		{
+			title: "Users List",
+			description: "List of all users in the system",
+			mimeType: "application/json",
+		},
+		async (uri) => ({
+			contents: [
+				{
+					uri: uri.href,
+					mimeType: "application/json",
+					text: JSON.stringify(dataStore.users, null, 2),
+				},
+			],
+		}),
+	);
+
+	// Posts list resource
+	server.registerResource(
+		"data_posts",
+		"data://posts",
+		{
+			title: "Posts List",
+			description: "List of all posts in the system",
+			mimeType: "application/json",
+		},
+		async (uri) => ({
+			contents: [
+				{
+					uri: uri.href,
+					mimeType: "application/json",
+					text: JSON.stringify(dataStore.posts, null, 2),
+				},
+			],
+		}),
+	);
+
+	// ===== RESOURCE TEMPLATES =====
+
+	// Individual user resource template
+	server.registerResource(
+		"data_users_template",
+		new ResourceTemplate("data://users/{id}", {
+			list: undefined,
+		}),
+		{
+			title: "User Resource",
+			description: "Individual user data by ID",
+		},
+		async (uri, { id }) => {
+			const userId = Number.parseInt(id);
+			const user = dataStore.users.find((u) => u.id === userId);
+
+			if (!user) {
+				throw new Error(\`User with ID \${userId} not found\`);
+			}
+
+			// Include user's posts
+			const userPosts = dataStore.posts.filter((p) => p.authorId === userId);
+			const userData = {
+				...user,
+				posts: userPosts,
+			};
+
+			return {
+				contents: [
+					{
+						uri: uri.href,
+						mimeType: "application/json",
+						text: JSON.stringify(userData, null, 2),
+					},
+				],
+			};
+		},
+	);
+
+	// Individual post resource template
+	server.registerResource(
+		"data_posts_template",
+		new ResourceTemplate("data://posts/{id}", {
+			list: undefined,
+		}),
+		{
+			title: "Post Resource",
+			description: "Individual post data by ID",
+		},
+		async (uri, { id }) => {
+			const postId = Number.parseInt(id);
+			const post = dataStore.posts.find((p) => p.id === postId);
+
+			if (!post) {
+				throw new Error(\`Post with ID \${postId} not found\`);
+			}
+
+			// Include author information
+			const author = dataStore.users.find((u) => u.id === post.authorId);
+			const postData = {
+				...post,
+				author: author ? { name: author.name, email: author.email } : null,
+			};
+
+			return {
+				contents: [
+					{
+						uri: uri.href,
+						mimeType: "application/json",
+						text: JSON.stringify(postData, null, 2),
+					},
+				],
+			};
+		},
+	);
+
+	// Dynamic report template
+	server.registerResource(
+		"reports",
+		new ResourceTemplate("reports://{type}/{format}", {
+			list: undefined,
+		}),
+		{
+			title: "Dynamic Reports",
+			description: "Generate various reports in different formats",
+		},
+		async (uri, { type, format }) => {
+			let reportData;
+			let mimeType;
+
+			// Generate report based on type
+			switch (type) {
+				case "users":
+					reportData = {
+						title: "User Report",
+						generated: new Date().toISOString(),
+						summary: {
+							total: dataStore.users.length,
+							admins: dataStore.users.filter((u) => u.role === "admin").length,
+							users: dataStore.users.filter((u) => u.role === "user").length,
+						},
+						users: dataStore.users,
+					};
+					break;
+				case "posts":
+					reportData = {
+						title: "Posts Report",
+						generated: new Date().toISOString(),
+						summary: {
+							total: dataStore.posts.length,
+							byAuthor: dataStore.users.map((u) => ({
+								author: u.name,
+								count: dataStore.posts.filter((p) => p.authorId === u.id)
+									.length,
+							})),
+						},
+						posts: dataStore.posts,
+					};
+					break;
+				default:
+					throw new Error(\`Unknown report type: \${type}\`);
+			}
+
+			// Format the report
+			let content;
+			switch (format) {
+				case "json":
+					mimeType = "application/json";
+					content = JSON.stringify(reportData, null, 2);
+					break;
+				case "csv":
+					mimeType = "text/csv";
+					if (type === "users") {
+						content =
+							"ID,Name,Email,Role\\n" +
+							dataStore.users
+								.map((u) => \`\${u.id},\${u.name},\${u.email},\${u.role}\`)
+								.join("\\n");
+					} else {
+						content =
+							"ID,Title,Author ID\\n" +
+							dataStore.posts
+								.map((p) => \`\${p.id},\${p.title},\${p.authorId}\`)
+								.join("\\n");
+					}
+					break;
+				case "txt":
+					mimeType = "text/plain";
+					content = \`\${reportData.title}\\nGenerated: \${reportData.generated}\\n\\n\${JSON.stringify(reportData.summary, null, 2)}\`;
+					break;
+				default:
+					throw new Error(\`Unknown format: \${format}\`);
+			}
+
+			return {
+				contents: [
+					{
+						uri: uri.href,
+						mimeType,
+						text: content,
+					},
+				],
+			};
+		},
+	);
+
+	// ===== PROMPTS =====
+
+	server.registerPrompt(
+		"simple_greeting",
+		{
+			title: "Simple Greeting",
+			description: "A basic greeting prompt",
+		},
+		() => ({
+			messages: [
+				{
+					role: "user",
+					content: {
+						type: "text",
+						text: "Please greet the user in a friendly and professional manner.",
+					},
+				},
+			],
+		}),
+	);
+
+	server.registerPrompt(
+		"analyze_user_data",
+		{
+			title: "Analyze User Data",
+			description: "Analyze user data with specific parameters",
+			argsSchema: {
+				userId: z.number().describe("ID of the user to analyze"),
+				includeStats: z
+					.boolean()
+					.default(true)
+					.describe("Include statistical analysis"),
+			},
+		},
+		({ userId, includeStats }) => ({
+			messages: [
+				{
+					role: "user",
+					content: {
+						type: "text",
+						text: \`Please analyze the user data for user ID \${userId}.\${includeStats ? " Include detailed statistics and insights." : " Provide a basic summary only."}\`,
+					},
+				},
+				{
+					role: "user",
+					content: {
+						type: "resource",
+						uri: \`data://users/\${userId}\`,
+					},
+				},
+			],
+		}),
+	);
+
+	server.registerPrompt(
+		"summarize_post",
+		{
+			title: "Summarize Post",
+			description: "Generate a summary of a specific post",
+			argsSchema: {
+				postId: z.number().describe("ID of the post to summarize"),
+			},
+		},
+		({ postId }) => ({
+			messages: [
+				{
+					role: "user",
+					content: {
+						type: "text",
+						text: "Please provide a concise summary of the following post:",
+					},
+				},
+				{
+					role: "user",
+					content: {
+						type: "resource",
+						uri: \`data://posts/\${postId}\`,
+					},
+				},
+			],
+		}),
+	);
+
+	return server;
+};
+`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/navigation/tabs.js":{content:`export default ({ T, html }) => ({
+	tag: "uix-tabs",
+	style: true,
+	class: "overflow-auto",
+	properties: {
+		tabs: T.array(),
+		selectTab: T.function(),
+		removeTab: T.function(),
+		activeTab: T.number({ defaultValue: 0 }),
+		toggle: T.boolean(false),
+	},
+
+	async __selectTab(_tabId) {
+		const newActiveTab = this.toggle && this.activeTab === _tabId ? -1 : _tabId;
+
+		if (this.selectTab) {
+			await this.selectTab(newActiveTab);
+		}
+
+		this.activeTab = newActiveTab;
+	},
+
+	_removeTab(tabId, e) {
+		e.stopPropagation();
+		if (this.removeTab) {
+			this.removeTab(tabId);
+		}
+	},
+
+	render() {
+		if (!this.tabs || this.tabs.length === 0) {
+			return null;
+		}
+
+		return html\`
+            <div class="tab-headers" role="tablist">
+                \${this.tabs.map(
+									([name], tabId) => html\`
+                    <uix-link
+                        role="tab"
+                        @click=\${() => this.__selectTab(tabId)}
+                        .label=\${name}
+                        ?selected=\${tabId === this.activeTab}
+                        ?closable=\${!!this.closeTab}
+                        @close=\${(e) => this.__closeTab(e, tabId)}
+                        skipRoute
+                        padding=\${this.padding}
+                        text="center"
+												class="py-1 text-lg"
+                    >								
+									\${!this.removeTab ? null : html\`<uix-icon name="x" class="w-3 close" @click=\${((e) => this._removeTab(tabId, e)).bind(this)}></uix-icon>\`}
+									</uix-link>
+                \`,
+								)}
+            </div>
+
+            <div class="flex flex-1 overflow-auto" role="tabpanel">
+                \${this.tabs[this.activeTab] ? this.tabs[this.activeTab][1] : ""}
+            </div>
+        \`;
+	},
+});
+`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/navigation/tabs.css":{content:`.uix-tabs {
+	display: flex;
+	flex-direction: column;
+	flex-grow: 1;
+
+	.tab-headers {
+		display: flex;
+		flex-direction: row;
+		flex-shrink: 0;
+		background-color: var(--uix-tabs-background-color, #2a2a2a);
+		border-bottom: 2px solid var(--uix-tabs-border-color, #005a99);
+	}
+
+	.tab-headers > uix-link {
+		flex: 1;
+		text-align: center;
+		cursor: pointer;
+		line-height: var(--uix-tabs-line-height, 2rem);
+		font-size: var(--uix-tabs-font-size, 0.75rem);
+		border-radius: var(--uix-tabs-border-radius, 0);
+		color: var(--uix-tabs-text, #eee);
+		transition:
+			background-color 0.2s ease-in-out,
+			color 0.2s ease-in-out;
+		.close {
+			visibility: hidden;
+		}
+	}
+	.tab-headers > uix-link:hover {
+		background-color: var(--uix-tabs-active-background-color, #007acc);
+		a {
+			color: #fff;
+		}
+		.close {
+			visibility: visible;
+		}
+	}
+	.tab-headers > uix-link[selected] {
+		font-weight: var(--uix-tabs-font-weight, 600);
+		background-color: var(--uix-tabs-active-background-color, #007acc);
+		color: var(--uix-tabs-active-text, #fff);
+	}
+}
+`,mimeType:"text/css",skipSW:!1},"/modules/apps/mcp/views/dashboard.js":{content:`export default ({ html, T }) => ({
+	style: true,
+	properties: {
+		selectedHistoryItem: T.object(null),
+		onDeselectHistoryItem: T.function(),
+	},
+
+	_renderCard(title, content) {
+		return html\`
+                <uix-card class="flex flex-col min-h-[200px]">
+                    <h3 class="font-semibold mb-3">\${title}</h3>
+                    <div class="flex-grow overflow-y-auto pr-2">\${content}</div>
+                </uix-card>
+            \`;
+	},
+
+	render() {
+		return html\`
+              <div class="space-y-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <mcp-tools viewMode="flow" class="block h-60"></mcp-tools>
+        <mcp-prompts viewMode="flow" class="block h-60"></mcp-prompts>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <mcp-resources viewMode="flow" resourceType="resources" class="block h-60"></mcp-resources>
+        <mcp-resources viewMode="flow" resourceType="templates" class="block h-60"></mcp-resources>
+    </div>
+</div>
+
+            \`;
+	},
+});
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/mcp/views/dashboard.css":{content:`.mcp-dashboard {
+	.uix-card {
+		button {
+			color: #111;
+			cursor: pointer;
+		}
+	}
+}
+`,mimeType:"text/css",skipSW:!1},"/modules/apps/mcp/views/prompts.js":{content:`export default ({ html, AI, T }) => {
+	return {
+		tag: "mcp-prompts",
+		properties: {
+			prompts: T.array([]),
+			selectedPrompt: T.object(null),
+			promptArgs: T.object({}),
+			isExecuting: T.boolean(false),
+			isLoading: T.boolean(true),
+			viewMode: T.string({ defaultValue: "side-by-side" }),
+			promptResponse: T.any(null),
+		},
+		connected() {
+			this.loadPrompts();
+		},
+		async loadPrompts() {
+			this.isLoading = true;
+			try {
+				const servers = AI.listClients();
+				if (servers && servers.length > 0) {
+					const { prompts } = await AI.listPrompts({ servers });
+					console.log({ prompts });
+					this.prompts = prompts || [];
+				}
+			} catch (error) {
+				console.error("Error loading prompts:", error);
+				this.prompts = [];
+			} finally {
+				this.isLoading = false;
+			}
+		},
+		selectPrompt(prompt) {
+			this.selectedPrompt = prompt;
+			this.promptArgs = {};
+			this.promptResponse = null;
+		},
+		clearSelectedPrompt() {
+			this.selectedPrompt = null;
+			this.promptResponse = null;
+		},
+		handleArgInput(paramName, event) {
+			this.promptArgs = {
+				...this.promptArgs,
+				[paramName]: event.target.value,
+			};
+		},
+		async handleGetPrompt() {
+			if (!this.selectedPrompt) return;
+
+			this.isExecuting = true;
+			this.promptResponse = null;
+			try {
+				const { name } = this.selectedPrompt;
+				const args = this.promptArgs;
+
+				const response = await AI.getPrompt({ name, arguments: args });
+				this.promptResponse = response;
+			} catch (error) {
+				console.error("Error executing prompt:", error);
+				this.promptResponse = {
+					error: error.message || "An unknown error occurred.",
+				};
+			} finally {
+				this.isExecuting = false;
+			}
+		},
+
+		// Shared rendering methods
+		_renderPromptList(showBackButton = false) {
+			if (this.isLoading) {
+				return html\`<div class="flex items-center justify-center h-full"><p class="text-xs text-gray-500">Loading...</p></div>\`;
+			}
+			if (!this.prompts.length) {
+				return html\`<div class="flex items-center justify-center h-full"><p class="text-xs text-gray-500">No prompts found.</p></div>\`;
+			}
+			return html\`
+				<div class="flex-1 overflow-y-auto p-2">
+					<h3 class="font-semibold text-sm p-2 text-gray-800">Prompts</h3>
+					<ul>
+						\${this.prompts.map(
+							(prompt) => html\`
+								<li>
+									<button 
+										@click=\${() => this.selectPrompt(prompt)} 
+										class="w-full text-left p-2 rounded text-sm hover:bg-gray-100 \${
+											this.selectedPrompt?.name === prompt.name
+												? "bg-blue-50 font-semibold text-blue-700"
+												: ""
+										}"
+									>
+										<p class="font-mono text-xs">\${prompt.name}</p>
+										<p class="text-xs text-gray-500 truncate">\${prompt.description}</p>
+									</button>
+								</li>
+							\`,
+						)}
+					</ul>
+				</div>
+			\`;
+		},
+
+		_renderResponseView() {
+			if (!this.promptResponse) return "";
+
+			if (this.promptResponse.error) {
+				return html\`
+					<div class="mt-6 border-t pt-4">
+						<h4 class="font-semibold text-sm mb-3">Response</h4>
+						<div class="bg-red-50 text-red-700 rounded p-3 text-sm font-mono">
+							\${this.promptResponse.error}
+						</div>
+					</div>
+				\`;
+			}
 
 			return html\`
-                <div class="bg-[#3c3836] border-2 border-[#504945] rounded-lg p-4 flex flex-col gap-4 font-semibold transition-all duration-200 shadow-[4px_4px_0px_#1d2021] hover:shadow-[6px_6px_0px_#83a598] hover:border-[#83a598]">
-                    <!-- Top Section: Title and Favorite Button -->
-                    <div class="flex justify-between items-start">
-                         <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-md flex-shrink-0 flex items-center justify-center bg-[#282828] text-[#83a598]">
-                               \${html.unsafeHTML(server.icon)}
-                            </div>
-                            <div>
-                                <h3 class="font-bold text-md text-[#ebdbb2]">\${server.name}</h3>
-                                \${isConnected ? html\`<span class="text-xs text-[#b8bb26] font-medium">Currently connected</span>\` : ""}
-                            </div>
-                        </div>
-                        <button @click=\${() => this.toggleFavorite(server)} class="p-1 rounded-full hover:bg-[#504945] transition-colors">
-                            \${starIcon(isFavorited)}
-                        </button>
-                    </div>
+				<div class="mt-6 border-t pt-4">
+					<h4 class="font-semibold text-sm mb-3">Response</h4>
+					<div class="space-y-4">
+						\${this.promptResponse.messages.map(
+							(msg) => html\`
+								<div class="dark bg-gray-100  text-gray-800 rounded p-3">
+									<div class="text-xs font-bold uppercase text-gray-500 mb-1">\${msg.role}</div>
+									\${
+										msg.content.type === "text"
+											? html\`<p class="text-sm whitespace-pre-wrap font-mono">\${msg.content.text}</p>\`
+											: html\`<div class="text-sm font-mono">Resource: \${msg.content.uri}</div>\`
+									}
+								</div>
+							\`,
+						)}
+					</div>
+				</div>
+			\`;
+		},
 
-                    <!-- Middle Section: Description -->
-                    <p class="text-sm text-[#bdae93] font-medium min-h-[2.5rem]">\${server.description}</p>
+		_renderPromptExecutor(showBackButton = false) {
+			if (!this.selectedPrompt) {
+				return html\`<div class="text-center text-gray-500 h-full flex items-center justify-center">Select a prompt to view details.</div>\`;
+			}
+
+			return html\`
+				<div class="dark \${showBackButton ? "p-6 overflow-y-auto w-full" : ""}">
+					\${
+						showBackButton
+							? html\`
+						<button @click=\${this.clearSelectedPrompt.bind(this)} class="dark flex items-center text-sm text-blue-600 hover:underline mb-4">
+							<uix-icon name="arrow-left" class="w-4 h-4 mr-2"></uix-icon>
+							Back to list
+						</button>
+					\`
+							: ""
+					}
+					<h3 class="font-bold text-lg mb-2">\${this.selectedPrompt.name}</h3>
+					<p class="text-xs text-gray-200 mb-6">\${this.selectedPrompt.description}</p>
+					
+					\${
+						this.promptResponse
+							? this._renderResponseView()
+							: html\`<h4 class="font-semibold text-sm mb-3">Parameters</h4>
+					<div class="space-y-4">
+						\${
+							Array.isArray(this.selectedPrompt.arguments) &&
+							this.selectedPrompt.arguments.length
+								? this.selectedPrompt.arguments.map(
+										(arg) =>
+											!console.log(arg) &&
+											html\`
+											<uix-input
+												label=\${arg.name}
+                        type=\${arg.enum ? "select" : { boolean: "checkbox", enum: "select" }[arg.type] || "text"}
+												value=\${this.promptArgs[arg.name] || ""}
+												@input=\${(e) => this.handleArgInput(arg.name, e)}
+												placeholder=\${arg.description || arg.name}
+												class="font-mono text-xs"
+											></uix-input>
+										\`,
+									)
+								: html\`<p class="text-xs text-gray-300">This prompt has no parameters.</p>\`
+						}
+					</div>
+					<div class="mt-8 border-t pt-6">
+						<uix-button
+							label=\${this.isExecuting ? "Executing..." : "Get Prompt"}
+							class="is-primary"
+							@click=\${this.handleGetPrompt.bind(this)}
+							?disabled=\${this.isExecuting}
+						></uix-button>
+					</div>\`
+					}
+				</div>
+			\`;
+		},
+		_renderFlowView() {
+			if (this.selectedPrompt) {
+				return this._renderPromptExecutor(true);
+			}
+			return this._renderPromptList();
+		},
+
+		_renderSideBySideView() {
+			return html\`
+				<div class="w-1/3 flex flex-col border-r border-gray-200">
+					\${this._renderPromptList()}
+				</div>
+				<div class="w-2/3 p-6 overflow-y-auto">
+					\${this._renderPromptExecutor(false)}
+				</div>
+			\`;
+		},
+
+		render() {
+			return html\`
+				<uix-card class="bg-[#3c3836] h-full overflow-y-auto">
+					<div class="dark">
+						\${this.viewMode === "flow" ? this._renderFlowView() : this._renderSideBySideView()}
+					</div>
+				</uix-card>
+			\`;
+		},
+	};
+};
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/mcp/views/resources.js":{content:`export default ({ html, AI, T }) => {
+	return {
+		tag: "mcp-resources",
+		properties: {
+			resourceType: T.string(),
+			viewMode: T.string({ defaultValue: "side-by-side" }),
+			resources: T.array([]),
+			resourceTemplates: T.array([]),
+			isLoading: T.boolean(true),
+			selectedResource: T.object(null),
+			selectedTemplate: T.object(null),
+			resourceArgs: T.object({}),
+			isExecuting: T.boolean(false),
+			resourceResponse: T.any(null),
+		},
+		connected() {
+			this.loadData();
+		},
+		async loadData() {
+			this.isLoading = true;
+			try {
+				const servers = AI.listClients();
+				if (servers && servers.length > 0) {
+					const [{ resources }, { resourceTemplates }] = await Promise.all([
+						AI.listResources({ servers }),
+						AI.listResourceTemplates({ servers }),
+					]);
+					this.resources = resources || [];
+					this.resourceTemplates = resourceTemplates || [];
+				}
+			} catch (error) {
+				console.error("Error loading resources:", error);
+				this.resources = [];
+				this.resourceTemplates = [];
+			} finally {
+				this.isLoading = false;
+			}
+		},
+		async handleReadResource() {
+			const resource = this.selectedResource || this.selectedTemplate;
+			const isTemplate = !!this.selectedTemplate;
+			const uriTemplate = isTemplate ? resource.uriTemplate : resource.uri;
+
+			const uri = Object.entries(this.resourceArgs).reduce(
+				(acc, [key, value]) => acc.replace(\`{\${key}}\`, value),
+				uriTemplate,
+			);
+
+			this.isExecuting = true;
+			this.resourceResponse = null;
+			try {
+				const response = await AI.readResource({ uri });
+				this.resourceResponse = response;
+				console.log({ response });
+			} catch (e) {
+				console.error(\`Failed to read resource \${uri}:\`, e);
+				this.resourceResponse = {
+					error: e.message || "An unknown error occurred.",
+				};
+			} finally {
+				this.isExecuting = false;
+			}
+		},
+		selectResource(res) {
+			this.selectedResource = res;
+			this.selectedTemplate = null;
+			this.resourceArgs = {};
+			this.resourceResponse = null;
+		},
+		selectTemplate(template) {
+			this.selectedTemplate = template;
+			this.selectedResource = null;
+			this.resourceArgs = {};
+			this.resourceResponse = null;
+		},
+		deselectReaderView() {
+			this.selectedResource = null;
+			this.selectedTemplate = null;
+			this.resourceResponse = null;
+		},
+		handleResourceArgInput(paramName, event) {
+			this.resourceArgs = {
+				...this.resourceArgs,
+				[paramName]: event.target.value,
+			};
+		},
+		_extractUriParams(uri) {
+			const regex = /\\{(.+?)\\}/g;
+			return [...uri.matchAll(regex)].map((match) => match[1]);
+		},
+
+		_renderReaderContent() {
+			const resource = this.selectedResource || this.selectedTemplate;
+			if (!resource) return "";
+
+			const isTemplate = !!this.selectedTemplate;
+			const uri = isTemplate ? resource.uriTemplate : resource.uri;
+			const uriParams = isTemplate ? this._extractUriParams(uri) : [];
+
+			return html\`
+                <div>
+                    <h4 class="font-bold text-sm mb-1 dark font-mono">\${uri}</h4>
+                    <p class="text-xs text-gray-600 mb-4">\${resource.description || "No description provided."}</p>
                     
-                    <!-- Bottom Section: Tags and Connect Button -->
-                     <div class="flex flex-wrap items-center justify-between gap-2 pt-4 border-t-2 border-dashed border-[#504945]">
-                        <div class="flex flex-wrap gap-2">
-                            \${server.tags.map((tag) => html\`<span class="text-xs font-bold px-2 py-1 rounded bg-[#504945] text-[#ebdbb2]">\${tag.toUpperCase()}</span>\`)}
-                        </div>
+                    \${
+											!isTemplate
+												? null
+												: html\`<div class="space-y-3">
                         \${
-													isConnected
-														? html\`<uix-button label="Disconnect" @click=\${() => this.disconnectFromServer()} class="bg-[#fb4934] text-[#ebdbb2] font-bold" size="small"></uix-button>\`
-														: html\`<uix-button label="Connect" @click=\${() => this.connectToServer(server)} class="bg-[#458588] text-[#ebdbb2] font-bold" size="small"></uix-button>\`
+													uriParams.length > 0
+														? uriParams.map(
+																(paramName) => html\`
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">\${paramName}</label>
+                                            <uix-input
+                                                .value=\${this.resourceArgs[paramName] || ""}
+                                                @input=\${(e) => this.handleResourceArgInput(paramName, e)}
+                                                placeholder="Enter value for \${paramName}"
+                                                class="font-mono text-xs"
+                                            ></uix-input>
+                                        </div>
+                                    \`,
+															)
+														: html\`<p class="text-xs text-gray-500">This resource takes no parameters.</p>\`
 												}
+                    </div>\`
+										}
+                    <div class="mt-4 border-t pt-4">
+                        <uix-button
+                            label=\${this.isExecuting ? "Reading..." : "Read Resource"}
+                            class="is-primary w-full"
+                            @click=\${this.handleReadResource.bind(this)}
+                            ?disabled=\${this.isExecuting}
+                        ></uix-button>
                     </div>
+                </div>
+            \`;
+		},
+
+		_renderResponseView() {
+			if (!this.resourceResponse) return "";
+			return html\`
+                <div class="mt-6 border-t pt-4 dark">
+									<h4 class="font-semibold text-sm mb-3">Response</h4>
+                    \${
+											this.resourceResponse.error
+												? html\`<div class="bg-red-50 text-red-700 rounded p-3 text-sm font-mono">\${this.resourceResponse.error}</div>\`
+												: html\`<pre class="text-xs whitespace-pre-wrap bg-gray-800 text-gray-200 p-2 rounded-lg font-mono overflow-auto">\${this.resourceResponse?.contents?.[0]?.text}</pre>\`
+										}
+                </div>
+            \`;
+		},
+
+		_renderList() {
+			return html\`
+                <ul class="text-xs font-mono space-y-1">
+                    \${
+											this.resourceType === "resources" || !this.resourceType
+												? this.resources.map(
+														(
+															res,
+														) => html\`<li><button @click=\${() => this.selectResource(res)} class="w-full text-left p-2 rounded text-sm hover:bg-gray-100 \${this.selectedResource?.uri === res.uri ? "bg-blue-50 font-semibold text-blue-700" : ""}">
+                        <p class="font-mono text-sm flex items-center"><uix-icon name="file-text" class="w-4 h-4 mr-2 text-gray-500"></uix-icon>\${res.uri}</p>
+                    </button></li>\`,
+													)
+												: null
+										}
+                    \${
+											this.resourceType === "templates" || !this.resourceType
+												? this.resourceTemplates.map(
+														(
+															template,
+														) => html\`<li><button @click=\${() => this.selectTemplate(template)} class="w-full text-left p-2 rounded text-sm hover:bg-gray-100 \${this.selectedTemplate?.uriTemplate === template.uriTemplate ? "bg-blue-50 font-semibold text-blue-700" : ""}">
+                        <p class="font-mono text-sm flex items-center"><uix-icon name="file-code-2" class="w-4 h-4 mr-2 text-blue-600"></uix-icon>\${template.uriTemplate}</p>
+                    </button></li>\`,
+													)
+												: null
+										}
+                </ul>
+             \`;
+		},
+		_generateTitle() {
+			const titles = {
+				resources: "Resources",
+				templates: "Templates",
+			};
+			const title = titles[this.resourceType] || "Resources & Templates";
+			return html\`<h3 class="font-semibold text-sm p-2 text-gray-800">\${title}</h3>\`;
+		},
+		_renderFlowView() {
+			if (this.isLoading) {
+				return html\`<div class="flex items-center justify-center h-full"><p class="text-xs text-gray-500">Loading...</p></div>\`;
+			}
+			if (this.selectedResource || this.selectedTemplate) {
+				return html\`
+                    <div class="p-6 overflow-y-auto w-full">
+                        <button @click=\${() => this.deselectReaderView()} class="flex items-center text-sm text-blue-600 hover:underline mb-4">
+                            <uix-icon name="arrow-left" class="w-4 h-4 mr-2"></uix-icon>
+                            Back to list
+                        </button>
+                        \${this.resourceResponse ? this._renderResponseView() : this._renderReaderContent()}                        
+                    </div>
+                \`;
+			}
+			return html\`
+                <div class="flex-1 overflow-y-auto p-2">
+									\${this._generateTitle()}
+                  \${this._renderList()}
+                </div>
+            \`;
+		},
+
+		_renderSideBySideView() {
+			if (this.isLoading) {
+				return html\`<div class="flex items-center justify-center h-full"><p class="text-xs text-gray-500">Loading...</p></div>\`;
+			}
+			return html\`
+                <div class="w-1/3 flex flex-col border-r border-gray-200 p-2 overflow-y-auto">
+									\${this._generateTitle()}
+                    \${this._renderList()}
+                </div>
+                <div class="w-2/3 p-6 overflow-y-auto">
+                    \${
+											this.selectedResource || this.selectedTemplate
+												? html\`
+                            \${this._renderReaderContent()}
+                            \${this._renderResponseView()}
+                        \`
+												: html\`<div class="text-center text-gray-500 h-full flex items-center justify-center">Select an item to view details.</div>\`
+										}
                 </div>
             \`;
 		},
 
 		render() {
-			const lowerCaseQuery = this.searchQuery.toLowerCase();
-			const filteredServers = this.searchQuery
-				? this.availableServers.filter(
-						(s) =>
-							s.name.toLowerCase().includes(lowerCaseQuery) ||
-							s.description.toLowerCase().includes(lowerCaseQuery) ||
-							s.tags.some((t) => t.toLowerCase().includes(lowerCaseQuery)),
-					)
-				: this.availableServers;
-
-			const favoriteServers = filteredServers.filter((s) =>
-				this.favoriteServerIds.includes(s.id),
-			);
-			const otherServers = filteredServers.filter(
-				(s) => !this.favoriteServerIds.includes(s.id),
-			);
-
 			return html\`
-                <div class="w-full h-full flex flex-col space-y-6">
-                    <!-- Header -->
-                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        <div>
-                            <h1 class="font-bold text-3xl text-[#ebdbb2]">Servers</h1>
-                            <p class="text-[#bdae93]">Browse and connect to your available MCP test servers.</p>
-                        </div>
-                        <div class="relative">
-                            <input
-                                type="text"
-                                .value=\${this.searchQuery}
-                                @input=\${(e) => (this.searchQuery = e.target.value)}
-                                placeholder="Search servers..."
-                                class="w-full md:w-64 bg-[#504945] border-2 border-[#665c54] font-semibold text-[#ebdbb2] rounded-lg py-2 px-4 focus:outline-none focus:shadow-[2px_2px_0px_#1d2021] focus:border-[#83a598] transition"
-                            />
-                        </div>
-                    </div>
-
-                    <!-- Favorites Section -->
-                    \${
-											favoriteServers.length > 0
-												? html\`
-                        <div>
-                            <h2 class="font-semibold text-xl text-[#ebdbb2] mb-4 flex items-center gap-2">
-                                <uix-icon name="star" class="w-5 h-5 text-[#fabd2f]"></uix-icon>
-                                Favorites
-                            </h2>
-                            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                                \${favoriteServers.map((server) => this.renderServerCard(server))}
-                            </div>
-                        </div>
-                    \`
-												: ""
-										}
-
-                    <!-- Available Servers Section -->
-                    <div>
-                         <h2 class="font-semibold text-xl text-[#ebdbb2] mb-4">\${favoriteServers.length > 0 ? "Available Servers" : ""}</h2>
-                         \${
-														otherServers.length > 0
-															? html\`
-                                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                                    \${otherServers.map((server) => this.renderServerCard(server))}
-                                </div>\`
-															: html\`
-                                <div class="text-center text-[#928374] p-8 bg-[#3c3836] border-2 border-[#504945] rounded-lg shadow-[4px_4px_0px_#1d2021]">
-                                    <h3 class="font-bold text-lg text-[#ebdbb2]">No Servers Found</h3>
-                                    \${this.searchQuery ? html\`<p>Your search for "\${this.searchQuery}" did not match any servers.</p>\` : ""}
-                                </div>
-                            \`
-													}
-                    </div>
-                </div>
+                <uix-card class="h-full bg-[#3c3836] overflow-y-auto">
+									<div class="dark">\${this.viewMode === "flow" ? this._renderFlowView() : this._renderSideBySideView()}</div>
+								</uix-card>
             \`;
 		},
 	};
 };
-`,mimeType:"application/javascript"},"/style.css":{content:`@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_P-bnBeA.woff2) format("woff2");unicode-range:U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_G-bnBeA.woff2) format("woff2");unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_B-bnBeA.woff2) format("woff2");unicode-range:U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_N-bnBeA.woff2) format("woff2");unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_M-bnBeA.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_C-bk.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}@supports ((-webkit-hyphens: none) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color:rgb(from red r g b)))){*,:before,:after,::backdrop{--un-bg-opacity:100%;--un-text-opacity:100%;--un-translate-x:initial;--un-translate-y:initial;--un-translate-z:initial;--un-ease:initial;--un-border-opacity:100%;--un-space-x-reverse:initial;--un-space-y-reverse:initial;--un-ring-opacity:100%;--un-placeholder-opacity:100%}}@property --un-text-opacity{syntax:"<percentage>";inherits:false;initial-value:100%;}@property --un-border-opacity{syntax:"<percentage>";inherits:false;initial-value:100%;}@property --un-bg-opacity{syntax:"<percentage>";inherits:false;initial-value:100%;}@property --un-ring-opacity{syntax:"<percentage>";inherits:false;initial-value:100%;}@property --un-inset-ring-color{syntax:"*";inherits:false;}@property --un-inset-ring-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-inset-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-inset-shadow-color{syntax:"*";inherits:false;}@property --un-ring-color{syntax:"*";inherits:false;}@property --un-ring-inset{syntax:"*";inherits:false;}@property --un-ring-offset-color{syntax:"*";inherits:false;}@property --un-ring-offset-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-ring-offset-width{syntax:"<length>";inherits:false;initial-value:0px;}@property --un-ring-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-shadow-color{syntax:"*";inherits:false;}@property --un-translate-x{syntax:"*";inherits:false;initial-value:0;}@property --un-translate-y{syntax:"*";inherits:false;initial-value:0;}@property --un-translate-z{syntax:"*";inherits:false;initial-value:0;}@property --un-ease{syntax:"*";inherits:false;}@property --un-placeholder-opacity{syntax:"<percentage>";inherits:false;initial-value:100%;}@property --un-space-x-reverse{syntax:"*";inherits:false;initial-value:0;}@property --un-space-y-reverse{syntax:"*";inherits:false;initial-value:0;}:root,:host{--spacing: .25rem;--font-sans: "Manrope",ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";--font-serif: ui-serif,Georgia,Cambria,"Times New Roman",Times,serif;--font-mono: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;--font-family: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;--font-icon-family: lucide;--colors-black: #000;--colors-white: #fff;--colors-slate-50: oklch(98.4% .003 247.858);--colors-slate-100: oklch(96.8% .007 247.896);--colors-slate-200: oklch(92.9% .013 255.508);--colors-slate-300: oklch(86.9% .022 252.894);--colors-slate-400: oklch(70.4% .04 256.788);--colors-slate-500: oklch(55.4% .046 257.417);--colors-slate-600: oklch(44.6% .043 257.281);--colors-slate-700: oklch(37.2% .044 257.287);--colors-slate-800: oklch(27.9% .041 260.031);--colors-slate-900: oklch(20.8% .042 265.755);--colors-slate-950: oklch(12.9% .042 264.695);--colors-slate-DEFAULT: oklch(70.4% .04 256.788);--colors-gray-50: oklch(98.5% .002 247.839);--colors-gray-100: oklch(96.7% .003 264.542);--colors-gray-200: oklch(92.8% .006 264.531);--colors-gray-300: oklch(87.2% .01 258.338);--colors-gray-400: oklch(70.7% .022 261.325);--colors-gray-500: oklch(55.1% .027 264.364);--colors-gray-600: oklch(44.6% .03 256.802);--colors-gray-700: oklch(37.3% .034 259.733);--colors-gray-800: oklch(27.8% .033 256.848);--colors-gray-900: oklch(21% .034 264.665);--colors-gray-950: oklch(13% .028 261.692);--colors-gray-DEFAULT: oklch(70.7% .022 261.325);--colors-zinc-50: oklch(98.5% 0 0);--colors-zinc-100: oklch(96.7% .001 286.375);--colors-zinc-200: oklch(92% .004 286.32);--colors-zinc-300: oklch(87.1% .006 286.286);--colors-zinc-400: oklch(70.5% .015 286.067);--colors-zinc-500: oklch(55.2% .016 285.938);--colors-zinc-600: oklch(44.2% .017 285.786);--colors-zinc-700: oklch(37% .013 285.805);--colors-zinc-800: oklch(27.4% .006 286.033);--colors-zinc-900: oklch(21% .006 285.885);--colors-zinc-950: oklch(14.1% .005 285.823);--colors-zinc-DEFAULT: oklch(70.5% .015 286.067);--colors-neutral-50: oklch(98.5% 0 0);--colors-neutral-100: oklch(97% 0 0);--colors-neutral-200: oklch(92.2% 0 0);--colors-neutral-300: oklch(87% 0 0);--colors-neutral-400: oklch(70.8% 0 0);--colors-neutral-500: oklch(55.6% 0 0);--colors-neutral-600: oklch(43.9% 0 0);--colors-neutral-700: oklch(37.1% 0 0);--colors-neutral-800: oklch(26.9% 0 0);--colors-neutral-900: oklch(20.5% 0 0);--colors-neutral-950: oklch(14.5% 0 0);--colors-neutral-DEFAULT: oklch(70.8% 0 0);--colors-stone-50: oklch(98.5% .001 106.423);--colors-stone-100: oklch(97% .001 106.424);--colors-stone-200: oklch(92.3% .003 48.717);--colors-stone-300: oklch(86.9% .005 56.366);--colors-stone-400: oklch(70.9% .01 56.259);--colors-stone-500: oklch(55.3% .013 58.071);--colors-stone-600: oklch(44.4% .011 73.639);--colors-stone-700: oklch(37.4% .01 67.558);--colors-stone-800: oklch(26.8% .007 34.298);--colors-stone-900: oklch(21.6% .006 56.043);--colors-stone-950: oklch(14.7% .004 49.25);--colors-stone-DEFAULT: oklch(70.9% .01 56.259);--colors-red-50: oklch(97.1% .013 17.38);--colors-red-100: oklch(93.6% .032 17.717);--colors-red-200: oklch(88.5% .062 18.334);--colors-red-300: oklch(80.8% .114 19.571);--colors-red-400: oklch(70.4% .191 22.216);--colors-red-500: oklch(63.7% .237 25.331);--colors-red-600: oklch(57.7% .245 27.325);--colors-red-700: oklch(50.5% .213 27.518);--colors-red-800: oklch(44.4% .177 26.899);--colors-red-900: oklch(39.6% .141 25.723);--colors-red-950: oklch(25.8% .092 26.042);--colors-red-DEFAULT: oklch(70.4% .191 22.216);--colors-orange-50: oklch(98% .016 73.684);--colors-orange-100: oklch(95.4% .038 75.164);--colors-orange-200: oklch(90.1% .076 70.697);--colors-orange-300: oklch(83.7% .128 66.29);--colors-orange-400: oklch(75% .183 55.934);--colors-orange-500: oklch(70.5% .213 47.604);--colors-orange-600: oklch(64.6% .222 41.116);--colors-orange-700: oklch(55.3% .195 38.402);--colors-orange-800: oklch(47% .157 37.304);--colors-orange-900: oklch(40.8% .123 38.172);--colors-orange-950: oklch(26.6% .079 36.259);--colors-orange-DEFAULT: oklch(75% .183 55.934);--colors-amber-50: oklch(98.7% .022 95.277);--colors-amber-100: oklch(96.2% .059 95.617);--colors-amber-200: oklch(92.4% .12 95.746);--colors-amber-300: oklch(87.9% .169 91.605);--colors-amber-400: oklch(82.8% .189 84.429);--colors-amber-500: oklch(76.9% .188 70.08);--colors-amber-600: oklch(66.6% .179 58.318);--colors-amber-700: oklch(55.5% .163 48.998);--colors-amber-800: oklch(47.3% .137 46.201);--colors-amber-900: oklch(41.4% .112 45.904);--colors-amber-950: oklch(27.9% .077 45.635);--colors-amber-DEFAULT: oklch(82.8% .189 84.429);--colors-yellow-50: oklch(98.7% .026 102.212);--colors-yellow-100: oklch(97.3% .071 103.193);--colors-yellow-200: oklch(94.5% .129 101.54);--colors-yellow-300: oklch(90.5% .182 98.111);--colors-yellow-400: oklch(85.2% .199 91.936);--colors-yellow-500: oklch(79.5% .184 86.047);--colors-yellow-600: oklch(68.1% .162 75.834);--colors-yellow-700: oklch(55.4% .135 66.442);--colors-yellow-800: oklch(47.6% .114 61.907);--colors-yellow-900: oklch(42.1% .095 57.708);--colors-yellow-950: oklch(28.6% .066 53.813);--colors-yellow-DEFAULT: oklch(85.2% .199 91.936);--colors-lime-50: oklch(98.6% .031 120.757);--colors-lime-100: oklch(96.7% .067 122.328);--colors-lime-200: oklch(93.8% .127 124.321);--colors-lime-300: oklch(89.7% .196 126.665);--colors-lime-400: oklch(84.1% .238 128.85);--colors-lime-500: oklch(76.8% .233 130.85);--colors-lime-600: oklch(64.8% .2 131.684);--colors-lime-700: oklch(53.2% .157 131.589);--colors-lime-800: oklch(45.3% .124 130.933);--colors-lime-900: oklch(40.5% .101 131.063);--colors-lime-950: oklch(27.4% .072 132.109);--colors-lime-DEFAULT: oklch(84.1% .238 128.85);--colors-green-50: oklch(98.2% .018 155.826);--colors-green-100: oklch(96.2% .044 156.743);--colors-green-200: oklch(92.5% .084 155.995);--colors-green-300: oklch(87.1% .15 154.449);--colors-green-400: oklch(79.2% .209 151.711);--colors-green-500: oklch(72.3% .219 149.579);--colors-green-600: oklch(62.7% .194 149.214);--colors-green-700: oklch(52.7% .154 150.069);--colors-green-800: oklch(44.8% .119 151.328);--colors-green-900: oklch(39.3% .095 152.535);--colors-green-950: oklch(26.6% .065 152.934);--colors-green-DEFAULT: oklch(79.2% .209 151.711);--colors-emerald-50: oklch(97.9% .021 166.113);--colors-emerald-100: oklch(95% .052 163.051);--colors-emerald-200: oklch(90.5% .093 164.15);--colors-emerald-300: oklch(84.5% .143 164.978);--colors-emerald-400: oklch(76.5% .177 163.223);--colors-emerald-500: oklch(69.6% .17 162.48);--colors-emerald-600: oklch(59.6% .145 163.225);--colors-emerald-700: oklch(50.8% .118 165.612);--colors-emerald-800: oklch(43.2% .095 166.913);--colors-emerald-900: oklch(37.8% .077 168.94);--colors-emerald-950: oklch(26.2% .051 172.552);--colors-emerald-DEFAULT: oklch(76.5% .177 163.223);--colors-teal-50: oklch(98.4% .014 180.72);--colors-teal-100: oklch(95.3% .051 180.801);--colors-teal-200: oklch(91% .096 180.426);--colors-teal-300: oklch(85.5% .138 181.071);--colors-teal-400: oklch(77.7% .152 181.912);--colors-teal-500: oklch(70.4% .14 182.503);--colors-teal-600: oklch(60% .118 184.704);--colors-teal-700: oklch(51.1% .096 186.391);--colors-teal-800: oklch(43.7% .078 188.216);--colors-teal-900: oklch(38.6% .063 188.416);--colors-teal-950: oklch(27.7% .046 192.524);--colors-teal-DEFAULT: oklch(77.7% .152 181.912);--colors-cyan-50: oklch(98.4% .019 200.873);--colors-cyan-100: oklch(95.6% .045 203.388);--colors-cyan-200: oklch(91.7% .08 205.041);--colors-cyan-300: oklch(86.5% .127 207.078);--colors-cyan-400: oklch(78.9% .154 211.53);--colors-cyan-500: oklch(71.5% .143 215.221);--colors-cyan-600: oklch(60.9% .126 221.723);--colors-cyan-700: oklch(52% .105 223.128);--colors-cyan-800: oklch(45% .085 224.283);--colors-cyan-900: oklch(39.8% .07 227.392);--colors-cyan-950: oklch(30.2% .056 229.695);--colors-cyan-DEFAULT: oklch(78.9% .154 211.53);--colors-sky-50: oklch(97.7% .013 236.62);--colors-sky-100: oklch(95.1% .026 236.824);--colors-sky-200: oklch(90.1% .058 230.902);--colors-sky-300: oklch(82.8% .111 230.318);--colors-sky-400: oklch(74.6% .16 232.661);--colors-sky-500: oklch(68.5% .169 237.323);--colors-sky-600: oklch(58.8% .158 241.966);--colors-sky-700: oklch(50% .134 242.749);--colors-sky-800: oklch(44.3% .11 240.79);--colors-sky-900: oklch(39.1% .09 240.876);--colors-sky-950: oklch(29.3% .066 243.157);--colors-sky-DEFAULT: oklch(74.6% .16 232.661);--colors-blue-50: oklch(97% .014 254.604);--colors-blue-100: oklch(93.2% .032 255.585);--colors-blue-200: oklch(88.2% .059 254.128);--colors-blue-300: oklch(80.9% .105 251.813);--colors-blue-400: oklch(70.7% .165 254.624);--colors-blue-500: oklch(62.3% .214 259.815);--colors-blue-600: oklch(54.6% .245 262.881);--colors-blue-700: oklch(48.8% .243 264.376);--colors-blue-800: oklch(42.4% .199 265.638);--colors-blue-900: oklch(37.9% .146 265.522);--colors-blue-950: oklch(28.2% .091 267.935);--colors-blue-DEFAULT: oklch(70.7% .165 254.624);--colors-indigo-50: oklch(96.2% .018 272.314);--colors-indigo-100: oklch(93% .034 272.788);--colors-indigo-200: oklch(87% .065 274.039);--colors-indigo-300: oklch(78.5% .115 274.713);--colors-indigo-400: oklch(67.3% .182 276.935);--colors-indigo-500: oklch(58.5% .233 277.117);--colors-indigo-600: oklch(51.1% .262 276.966);--colors-indigo-700: oklch(45.7% .24 277.023);--colors-indigo-800: oklch(39.8% .195 277.366);--colors-indigo-900: oklch(35.9% .144 278.697);--colors-indigo-950: oklch(25.7% .09 281.288);--colors-indigo-DEFAULT: oklch(67.3% .182 276.935);--colors-violet-50: oklch(96.9% .016 293.756);--colors-violet-100: oklch(94.3% .029 294.588);--colors-violet-200: oklch(89.4% .057 293.283);--colors-violet-300: oklch(81.1% .111 293.571);--colors-violet-400: oklch(70.2% .183 293.541);--colors-violet-500: oklch(60.6% .25 292.717);--colors-violet-600: oklch(54.1% .281 293.009);--colors-violet-700: oklch(49.1% .27 292.581);--colors-violet-800: oklch(43.2% .232 292.759);--colors-violet-900: oklch(38% .189 293.745);--colors-violet-950: oklch(28.3% .141 291.089);--colors-violet-DEFAULT: oklch(70.2% .183 293.541);--colors-purple-50: oklch(97.7% .014 308.299);--colors-purple-100: oklch(94.6% .033 307.174);--colors-purple-200: oklch(90.2% .063 306.703);--colors-purple-300: oklch(82.7% .119 306.383);--colors-purple-400: oklch(71.4% .203 305.504);--colors-purple-500: oklch(62.7% .265 303.9);--colors-purple-600: oklch(55.8% .288 302.321);--colors-purple-700: oklch(49.6% .265 301.924);--colors-purple-800: oklch(43.8% .218 303.724);--colors-purple-900: oklch(38.1% .176 304.987);--colors-purple-950: oklch(29.1% .149 302.717);--colors-purple-DEFAULT: oklch(71.4% .203 305.504);--colors-fuchsia-50: oklch(97.7% .017 320.058);--colors-fuchsia-100: oklch(95.2% .037 318.852);--colors-fuchsia-200: oklch(90.3% .076 319.62);--colors-fuchsia-300: oklch(83.3% .145 321.434);--colors-fuchsia-400: oklch(74% .238 322.16);--colors-fuchsia-500: oklch(66.7% .295 322.15);--colors-fuchsia-600: oklch(59.1% .293 322.896);--colors-fuchsia-700: oklch(51.8% .253 323.949);--colors-fuchsia-800: oklch(45.2% .211 324.591);--colors-fuchsia-900: oklch(40.1% .17 325.612);--colors-fuchsia-950: oklch(29.3% .136 325.661);--colors-fuchsia-DEFAULT: oklch(74% .238 322.16);--colors-pink-50: oklch(97.1% .014 343.198);--colors-pink-100: oklch(94.8% .028 342.258);--colors-pink-200: oklch(89.9% .061 343.231);--colors-pink-300: oklch(82.3% .12 346.018);--colors-pink-400: oklch(71.8% .202 349.761);--colors-pink-500: oklch(65.6% .241 354.308);--colors-pink-600: oklch(59.2% .249 .584);--colors-pink-700: oklch(52.5% .223 3.958);--colors-pink-800: oklch(45.9% .187 3.815);--colors-pink-900: oklch(40.8% .153 2.432);--colors-pink-950: oklch(28.4% .109 3.907);--colors-pink-DEFAULT: oklch(71.8% .202 349.761);--colors-rose-50: oklch(96.9% .015 12.422);--colors-rose-100: oklch(94.1% .03 12.58);--colors-rose-200: oklch(89.2% .058 10.001);--colors-rose-300: oklch(81% .117 11.638);--colors-rose-400: oklch(71.2% .194 13.428);--colors-rose-500: oklch(64.5% .246 16.439);--colors-rose-600: oklch(58.6% .253 17.585);--colors-rose-700: oklch(51.4% .222 16.935);--colors-rose-800: oklch(45.5% .188 13.697);--colors-rose-900: oklch(41% .159 10.272);--colors-rose-950: oklch(27.1% .105 12.094);--colors-rose-DEFAULT: oklch(71.2% .194 13.428);--colors-light-50: oklch(99.4% 0 0);--colors-light-100: oklch(99.11% 0 0);--colors-light-200: oklch(98.51% 0 0);--colors-light-300: oklch(98.16% .0017 247.84);--colors-light-400: oklch(97.31% 0 0);--colors-light-500: oklch(96.12% 0 0);--colors-light-600: oklch(96.32% .0034 247.86);--colors-light-700: oklch(94.17% .0052 247.88);--colors-light-800: oklch(91.09% .007 247.9);--colors-light-900: oklch(90.72% .0051 228.82);--colors-light-950: oklch(89.23% .006 239.83);--colors-light-DEFAULT: oklch(97.31% 0 0);--colors-dark-50: oklch(40.91% 0 0);--colors-dark-100: oklch(35.62% 0 0);--colors-dark-200: oklch(31.71% 0 0);--colors-dark-300: oklch(29.72% 0 0);--colors-dark-400: oklch(25.2% 0 0);--colors-dark-500: oklch(23.93% 0 0);--colors-dark-600: oklch(22.73% .0038 286.09);--colors-dark-700: oklch(22.21% 0 0);--colors-dark-800: oklch(20.9% 0 0);--colors-dark-900: oklch(16.84% 0 0);--colors-dark-950: oklch(13.44% 0 0);--colors-dark-DEFAULT: oklch(25.2% 0 0);--colors-primary-50: hsl(198, 100%, 97%);--colors-primary-100: hsl(198, 100%, 92%);--colors-primary-200: hsl(198, 100%, 84%);--colors-primary-300: hsl(198, 100%, 75%);--colors-primary-400: hsl(198, 100%, 66%);--colors-primary-500: hsl(198, 100%, 55%);--colors-primary-600: hsl(198, 100%, 45%);--colors-primary-700: hsl(198, 100%, 35%);--colors-primary-800: hsl(198, 100%, 24%);--colors-primary-900: hsl(198, 100%, 15%);--colors-primary-DEFAULT: hsl(198, 100%, 55%);--colors-secondary-50: hsl(120, 100%, 97%);--colors-secondary-100: hsl(120, 100%, 92%);--colors-secondary-200: hsl(120, 100%, 84%);--colors-secondary-300: hsl(120, 100%, 75%);--colors-secondary-400: hsl(120, 100%, 66%);--colors-secondary-500: hsl(120, 100%, 55%);--colors-secondary-600: hsl(120, 100%, 45%);--colors-secondary-700: hsl(120, 100%, 35%);--colors-secondary-800: hsl(120, 100%, 24%);--colors-secondary-900: hsl(120, 100%, 15%);--colors-secondary-DEFAULT: hsl(120, 100%, 55%);--colors-tertiary-50: hsl(175, 100%, 97%);--colors-tertiary-100: hsl(175, 100%, 92%);--colors-tertiary-200: hsl(175, 100%, 84%);--colors-tertiary-300: hsl(175, 100%, 75%);--colors-tertiary-400: hsl(175, 100%, 66%);--colors-tertiary-500: hsl(175, 100%, 55%);--colors-tertiary-600: hsl(175, 100%, 45%);--colors-tertiary-700: hsl(175, 100%, 35%);--colors-tertiary-800: hsl(175, 100%, 24%);--colors-tertiary-900: hsl(175, 100%, 15%);--colors-tertiary-DEFAULT: hsl(175, 100%, 55%);--colors-success-50: hsl(149, 87%, 97%);--colors-success-100: hsl(149, 87%, 92%);--colors-success-200: hsl(149, 87%, 84%);--colors-success-300: hsl(149, 87%, 75%);--colors-success-400: hsl(149, 87%, 66%);--colors-success-500: hsl(149, 87%, 55%);--colors-success-600: hsl(149, 87%, 45%);--colors-success-700: hsl(149, 87%, 35%);--colors-success-800: hsl(149, 87%, 24%);--colors-success-900: hsl(149, 87%, 15%);--colors-success-DEFAULT: hsl(149, 87%, 55%);--colors-warning-50: hsl(32, 100%, 97%);--colors-warning-100: hsl(32, 100%, 92%);--colors-warning-200: hsl(32, 100%, 84%);--colors-warning-300: hsl(32, 100%, 75%);--colors-warning-400: hsl(32, 100%, 66%);--colors-warning-500: hsl(32, 100%, 55%);--colors-warning-600: hsl(32, 100%, 45%);--colors-warning-700: hsl(32, 100%, 35%);--colors-warning-800: hsl(32, 100%, 24%);--colors-warning-900: hsl(32, 100%, 15%);--colors-warning-DEFAULT: hsl(32, 100%, 55%);--colors-danger-50: hsl(345, 100%, 97%);--colors-danger-100: hsl(345, 100%, 92%);--colors-danger-200: hsl(345, 100%, 84%);--colors-danger-300: hsl(345, 100%, 75%);--colors-danger-400: hsl(345, 100%, 66%);--colors-danger-500: hsl(345, 100%, 55%);--colors-danger-600: hsl(345, 100%, 45%);--colors-danger-700: hsl(345, 100%, 35%);--colors-danger-800: hsl(345, 100%, 24%);--colors-danger-900: hsl(345, 100%, 15%);--colors-danger-DEFAULT: hsl(345, 100%, 55%);--colors-default-50: hsl(0, 0%, 97%);--colors-default-100: hsl(0, 0%, 92%);--colors-default-200: hsl(0, 0%, 84%);--colors-default-300: hsl(0, 0%, 75%);--colors-default-400: hsl(0, 0%, 66%);--colors-default-500: hsl(0, 0%, 55%);--colors-default-600: hsl(0, 0%, 45%);--colors-default-700: hsl(0, 0%, 35%);--colors-default-800: hsl(0, 0%, 24%);--colors-default-900: hsl(0, 0%, 15%);--colors-default-DEFAULT: hsl(0, 0%, 35%);--colors-surface-50: hsl(0, 0%, 97%);--colors-surface-100: hsl(0, 0%, 92%);--colors-surface-200: hsl(0, 0%, 84%);--colors-surface-300: hsl(0, 0%, 75%);--colors-surface-400: hsl(0, 0%, 66%);--colors-surface-500: hsl(0, 0%, 55%);--colors-surface-600: hsl(0, 0%, 45%);--colors-surface-700: hsl(0, 0%, 35%);--colors-surface-800: hsl(0, 0%, 24%);--colors-surface-900: hsl(0, 0%, 15%);--colors-surface-DEFAULT: hsl(0, 0%, 35%);--text-xs-fontSize: .75rem;--text-xs-lineHeight: 1rem;--text-sm-fontSize: .875rem;--text-sm-lineHeight: 1.25rem;--text-base-fontSize: 1rem;--text-base-lineHeight: 1.5rem;--text-lg-fontSize: 1.125rem;--text-lg-lineHeight: 1.75rem;--text-xl-fontSize: 1.25rem;--text-xl-lineHeight: 1.75rem;--text-2xl-fontSize: 1.5rem;--text-2xl-lineHeight: 2rem;--text-3xl-fontSize: 1.875rem;--text-3xl-lineHeight: 2.25rem;--text-4xl-fontSize: 2.25rem;--text-4xl-lineHeight: 2.5rem;--text-5xl-fontSize: 3rem;--text-5xl-lineHeight: 1;--text-6xl-fontSize: 3.75rem;--text-6xl-lineHeight: 1;--text-7xl-fontSize: 4.5rem;--text-7xl-lineHeight: 1;--text-8xl-fontSize: 6rem;--text-8xl-lineHeight: 1;--text-9xl-fontSize: 8rem;--text-9xl-lineHeight: 1;--text-color: var(--color-surface-100);--fontWeight-thin: 100;--fontWeight-extralight: 200;--fontWeight-light: 300;--fontWeight-normal: 400;--fontWeight-medium: 500;--fontWeight-semibold: 600;--fontWeight-bold: 700;--fontWeight-extrabold: 800;--fontWeight-black: 900;--tracking-tighter: -.05em;--tracking-tight: -.025em;--tracking-normal: 0em;--tracking-wide: .025em;--tracking-wider: .05em;--tracking-widest: .1em;--leading-none: 1;--leading-tight: 1.25;--leading-snug: 1.375;--leading-normal: 1.5;--leading-relaxed: 1.625;--leading-loose: 2;--textStrokeWidth-DEFAULT: 1.5rem;--textStrokeWidth-none: 0;--textStrokeWidth-sm: thin;--textStrokeWidth-md: medium;--textStrokeWidth-lg: thick;--radius-DEFAULT: .25rem;--radius-none: 0;--radius-xs: .125rem;--radius-sm: .25rem;--radius-md: .375rem;--radius-lg: .5rem;--radius-xl: .75rem;--radius-2xl: 1rem;--radius-3xl: 1.5rem;--radius-4xl: 2rem;--ease-linear: linear;--ease-in: cubic-bezier(.4, 0, 1, 1);--ease-out: cubic-bezier(0, 0, .2, 1);--ease-in-out: cubic-bezier(.4, 0, .2, 1);--ease-DEFAULT: cubic-bezier(.4, 0, .2, 1);--blur-DEFAULT: 8px;--blur-xs: 4px;--blur-sm: 8px;--blur-md: 12px;--blur-lg: 16px;--blur-xl: 24px;--blur-2xl: 40px;--blur-3xl: 64px;--perspective-dramatic: 100px;--perspective-near: 300px;--perspective-normal: 500px;--perspective-midrange: 800px;--perspective-distant: 1200px;--default-transition-duration: .15s;--default-transition-timingFunction: cubic-bezier(.4, 0, .2, 1);--default-font-family: var(--font-sans);--default-font-featureSettings: var(--font-sans--font-feature-settings);--default-font-variationSettings: var(--font-sans--font-variation-settings);--default-monoFont-family: var(--font-mono);--default-monoFont-featureSettings: var(--font-mono--font-feature-settings);--default-monoFont-variationSettings: var(--font-mono--font-variation-settings);--container-3xs: 16rem;--container-2xs: 18rem;--container-xs: 20rem;--container-sm: 24rem;--container-md: 28rem;--container-lg: 32rem;--container-xl: 36rem;--container-2xl: 42rem;--container-3xl: 48rem;--container-4xl: 56rem;--container-5xl: 64rem;--container-6xl: 72rem;--container-7xl: 80rem;--container-prose: 65ch;--background-color: var(--colors-primary-100);--boxShadow-md: 0 4px 6px -1px rgb(0 0 0 / .1), 0 2px 4px -2px rgb(0 0 0 / .1);--boxShadow-lg: 0 10px 15px -3px rgb(0 0 0 / .1), 0 4px 6px -4px rgb(0 0 0 / .1);--theme-font-family: "Manrope"}*,:after,:before,::backdrop,::file-selector-button{box-sizing:border-box;margin:0;padding:0;border:0 solid}html,:host{line-height:1.5;-webkit-text-size-adjust:100%;tab-size:4;font-family:var( --default-font-family, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" );font-feature-settings:var(--default-font-featureSettings, normal);font-variation-settings:var(--default-font-variationSettings, normal);-webkit-tap-highlight-color:transparent}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;-webkit-text-decoration:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,samp,pre{font-family:var( --default-monoFont-family, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace );font-feature-settings:var(--default-monoFont-featureSettings, normal);font-variation-settings:var(--default-monoFont-variationSettings, normal);font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}:-moz-focusring{outline:auto}progress{vertical-align:baseline}summary{display:list-item}ol,ul,menu{list-style:none}img,svg,video,canvas,audio,iframe,embed,object{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}button,input,select,optgroup,textarea,::file-selector-button{font:inherit;font-feature-settings:inherit;font-variation-settings:inherit;letter-spacing:inherit;color:inherit;border-radius:0;background-color:transparent;opacity:1}:where(select:is([multiple],[size])) optgroup{font-weight:bolder}:where(select:is([multiple],[size])) optgroup option{padding-inline-start:20px}::file-selector-button{margin-inline-end:4px}::placeholder{opacity:1}@supports (not (-webkit-appearance: -apple-pay-button)) or (contain-intrinsic-size: 1px){::placeholder{color:color-mix(in oklab,currentcolor 50%,transparent)}}textarea{resize:vertical}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-date-and-time-value{min-height:1lh;text-align:inherit}::-webkit-datetime-edit{display:inline-flex}::-webkit-datetime-edit-fields-wrapper{padding:0}::-webkit-datetime-edit,::-webkit-datetime-edit-year-field,::-webkit-datetime-edit-month-field,::-webkit-datetime-edit-day-field,::-webkit-datetime-edit-hour-field,::-webkit-datetime-edit-minute-field,::-webkit-datetime-edit-second-field,::-webkit-datetime-edit-millisecond-field,::-webkit-datetime-edit-meridiem-field{padding-block:0}:-moz-ui-invalid{box-shadow:none}button,input:where([type=button],[type=reset],[type=submit]),::file-selector-button{appearance:button}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[hidden]:where(:not([hidden=until-found])){display:none!important}.container{width:100%}@media (min-width: 40rem){.container{max-width:40rem}}@media (min-width: 48rem){.container{max-width:48rem}}@media (min-width: 64rem){.container{max-width:64rem}}@media (min-width: 80rem){.container{max-width:80rem}}@media (min-width: 96rem){.container{max-width:96rem}}.text-2xl{font-size:var(--text-2xl-fontSize);line-height:var(--un-leading, var(--text-2xl-lineHeight))}.text-3xl{font-size:var(--text-3xl-fontSize);line-height:var(--un-leading, var(--text-3xl-lineHeight))}.text-4xl{font-size:var(--text-4xl-fontSize);line-height:var(--un-leading, var(--text-4xl-lineHeight))}.text-5xl{font-size:var(--text-5xl-fontSize);line-height:var(--un-leading, var(--text-5xl-lineHeight))}.text-6xl{font-size:var(--text-6xl-fontSize);line-height:var(--un-leading, var(--text-6xl-lineHeight))}.text-lg{font-size:var(--text-lg-fontSize);line-height:var(--un-leading, var(--text-lg-lineHeight))}.text-sm{font-size:var(--text-sm-fontSize);line-height:var(--un-leading, var(--text-sm-lineHeight))}.text-xl{font-size:var(--text-xl-fontSize);line-height:var(--un-leading, var(--text-xl-lineHeight))}.text-xs{font-size:var(--text-xs-fontSize);line-height:var(--un-leading, var(--text-xs-lineHeight))}.text-\\[\\#1d2021\\]{color:color-mix(in oklab,#1d2021 var(--un-text-opacity),transparent)}.text-\\[\\#282828\\]{color:color-mix(in oklab,#282828 var(--un-text-opacity),transparent)}.text-\\[\\#83a598\\]{color:color-mix(in oklab,#83a598 var(--un-text-opacity),transparent)}.text-\\[\\#928374\\]{color:color-mix(in oklab,#928374 var(--un-text-opacity),transparent)}.text-\\[\\#a89984\\]{color:color-mix(in oklab,#a89984 var(--un-text-opacity),transparent)}.text-\\[\\#b8bb26\\]{color:color-mix(in oklab,#b8bb26 var(--un-text-opacity),transparent)}.text-\\[\\#bdae93\\]{color:color-mix(in oklab,#bdae93 var(--un-text-opacity),transparent)}.text-\\[\\#d5c4a1\\]{color:color-mix(in oklab,#d5c4a1 var(--un-text-opacity),transparent)}.text-\\[\\#ebdbb2\\]{color:color-mix(in oklab,#ebdbb2 var(--un-text-opacity),transparent)}.text-\\[\\#fabd2f\\]{color:color-mix(in oklab,#fabd2f var(--un-text-opacity),transparent)}.text-amber-600{color:color-mix(in srgb,var(--colors-amber-600) var(--un-text-opacity),transparent)}.text-amber-900{color:color-mix(in srgb,var(--colors-amber-900) var(--un-text-opacity),transparent)}.text-blue-100{color:color-mix(in srgb,var(--colors-blue-100) var(--un-text-opacity),transparent)}.text-blue-600{color:color-mix(in srgb,var(--colors-blue-600) var(--un-text-opacity),transparent)}.text-gray-200{color:color-mix(in srgb,var(--colors-gray-200) var(--un-text-opacity),transparent)}.text-gray-400{color:color-mix(in srgb,var(--colors-gray-400) var(--un-text-opacity),transparent)}.text-gray-500{color:color-mix(in srgb,var(--colors-gray-500) var(--un-text-opacity),transparent)}.text-gray-600{color:color-mix(in srgb,var(--colors-gray-600) var(--un-text-opacity),transparent)}.text-gray-700{color:color-mix(in srgb,var(--colors-gray-700) var(--un-text-opacity),transparent)}.text-gray-800{color:color-mix(in srgb,var(--colors-gray-800) var(--un-text-opacity),transparent)}.text-gray-900{color:color-mix(in srgb,var(--colors-gray-900) var(--un-text-opacity),transparent)}.text-green-400{color:color-mix(in srgb,var(--colors-green-400) var(--un-text-opacity),transparent)}.text-green-800{color:color-mix(in srgb,var(--colors-green-800) var(--un-text-opacity),transparent)}.text-red-100{color:color-mix(in srgb,var(--colors-red-100) var(--un-text-opacity),transparent)}.text-red-400{color:color-mix(in srgb,var(--colors-red-400) var(--un-text-opacity),transparent)}.text-red-700{color:color-mix(in srgb,var(--colors-red-700) var(--un-text-opacity),transparent)}.text-red-800{color:color-mix(in srgb,var(--colors-red-800) var(--un-text-opacity),transparent)}.text-white{color:color-mix(in srgb,var(--colors-white) var(--un-text-opacity),transparent)}.text-yellow-800{color:color-mix(in srgb,var(--colors-yellow-800) var(--un-text-opacity),transparent)}.hover\\:text-\\[\\#ebdbb2\\]:hover{color:color-mix(in oklab,#ebdbb2 var(--un-text-opacity),transparent)}.hover\\:text-\\[\\#fb4934\\]:hover{color:color-mix(in oklab,#fb4934 var(--un-text-opacity),transparent)}.tracking-wider{--un-tracking:var(--tracking-wider);letter-spacing:var(--tracking-wider)}.font-bold{--un-font-weight:var(--fontWeight-bold);font-weight:var(--fontWeight-bold)}.font-extrabold{--un-font-weight:var(--fontWeight-extrabold);font-weight:var(--fontWeight-extrabold)}.font-family{font-family:var(--font-family)}.font-medium{--un-font-weight:var(--fontWeight-medium);font-weight:var(--fontWeight-medium)}.font-mono{font-family:var(--font-mono)}.font-sans{font-family:var(--font-sans)}.font-semibold{--un-font-weight:var(--fontWeight-semibold);font-weight:var(--fontWeight-semibold)}.tab{-moz-tab-size:4;-o-tab-size:4;tab-size:4}.m\\[1\\]{margin:1}.m\\[W\\]{margin:W}.m16{margin:calc(var(--spacing) * 16)}.m21{margin:calc(var(--spacing) * 21)}.m22{margin:calc(var(--spacing) * 22)}.m6{margin:calc(var(--spacing) * 6)}.m9{margin:calc(var(--spacing) * 9)}.mx-auto{margin-inline:auto}.my-2{margin-block:calc(var(--spacing) * 2)}.my-4{margin-block:calc(var(--spacing) * 4)}.my-6{margin-block:calc(var(--spacing) * 6)}.mb-1{margin-bottom:calc(var(--spacing) * 1)}.mb-2{margin-bottom:calc(var(--spacing) * 2)}.mb-3{margin-bottom:calc(var(--spacing) * 3)}.mb-4{margin-bottom:calc(var(--spacing) * 4)}.mb-6{margin-bottom:calc(var(--spacing) * 6)}.ml-1{margin-left:calc(var(--spacing) * 1)}.ml-2{margin-left:calc(var(--spacing) * 2)}.ml-auto{margin-left:auto}.mr-2{margin-right:calc(var(--spacing) * 2)}.mr-3{margin-right:calc(var(--spacing) * 3)}.mt-1{margin-top:calc(var(--spacing) * 1)}.mt-2{margin-top:calc(var(--spacing) * 2)}.mt-4{margin-top:calc(var(--spacing) * 4)}.p-1{padding:calc(var(--spacing) * 1)}.p-1\\.5{padding:calc(var(--spacing) * 1.5)}.p-2{padding:calc(var(--spacing) * 2)}.p-3{padding:calc(var(--spacing) * 3)}.p-4{padding:calc(var(--spacing) * 4)}.p-6{padding:calc(var(--spacing) * 6)}.p-8{padding:calc(var(--spacing) * 8)}.px-2{padding-inline:calc(var(--spacing) * 2)}.px-4{padding-inline:calc(var(--spacing) * 4)}.px-6{padding-inline:calc(var(--spacing) * 6)}.py-0\\.5{padding-block:calc(var(--spacing) * .5)}.py-1{padding-block:calc(var(--spacing) * 1)}.py-2{padding-block:calc(var(--spacing) * 2)}.py-8{padding-block:calc(var(--spacing) * 8)}.pb-2{padding-bottom:calc(var(--spacing) * 2)}.pb-4{padding-bottom:calc(var(--spacing) * 4)}.pr-10{padding-right:calc(var(--spacing) * 10)}.pr-16{padding-right:calc(var(--spacing) * 16)}.pr-4{padding-right:calc(var(--spacing) * 4)}.pt-2{padding-top:calc(var(--spacing) * 2)}.pt-4{padding-top:calc(var(--spacing) * 4)}.text-center{text-align:center}.text-left{text-align:left}.text-right{text-align:right}.focus\\:outline-none:focus{--un-outline-style:none;outline-style:none}.b,.border{border-width:1px}.border-2{border-width:2px}.border-b{border-bottom-width:1px}.border-b-2{border-bottom-width:2px}.border-l-4{border-left-width:4px}.border-r{border-right-width:1px}.border-t{border-top-width:1px}.border-t-2{border-top-width:2px}.border-\\[\\#3c3836\\]{border-color:color-mix(in oklab,#3c3836 var(--un-border-opacity),transparent)}.border-\\[\\#504945\\]{border-color:color-mix(in oklab,#504945 var(--un-border-opacity),transparent)}.border-\\[\\#665c54\\]{border-color:color-mix(in oklab,#665c54 var(--un-border-opacity),transparent)}.border-\\[\\#fb4934\\]{border-color:color-mix(in oklab,#fb4934 var(--un-border-opacity),transparent)}.border-amber-200{border-color:color-mix(in srgb,var(--colors-amber-200) var(--un-border-opacity),transparent)}.border-amber-400{border-color:color-mix(in srgb,var(--colors-amber-400) var(--un-border-opacity),transparent)}.border-gray-200{border-color:color-mix(in srgb,var(--colors-gray-200) var(--un-border-opacity),transparent)}.border-gray-700{border-color:color-mix(in srgb,var(--colors-gray-700) var(--un-border-opacity),transparent)}.border-white{border-color:color-mix(in srgb,var(--colors-white) var(--un-border-opacity),transparent)}.hover\\:border-\\[\\#83a598\\]:hover{border-color:color-mix(in oklab,#83a598 var(--un-border-opacity),transparent)}.focus\\:border-\\[\\#83a598\\]:focus{border-color:color-mix(in oklab,#83a598 var(--un-border-opacity),transparent)}.border-t-transparent{border-top-color:transparent}.rounded{border-radius:var(--radius-DEFAULT)}.rounded-full{border-radius:calc(infinity * 1px)}.rounded-lg{border-radius:var(--radius-lg)}.rounded-md{border-radius:var(--radius-md)}.rounded-xl{border-radius:var(--radius-xl)}.rounded-b-lg{border-bottom-left-radius:var(--radius-lg);border-bottom-right-radius:var(--radius-lg)}.rounded-bl-none{border-bottom-left-radius:var(--radius-none)}.rounded-br-none{border-bottom-right-radius:var(--radius-none)}.border-dashed{--un-border-style:dashed;border-style:dashed}.bg-\\[\\#1d2021\\]{background-color:color-mix(in oklab,#1d2021 var(--un-bg-opacity),transparent)}.bg-\\[\\#282828\\]{background-color:color-mix(in oklab,#282828 var(--un-bg-opacity),transparent)}.bg-\\[\\#3c3836\\]{background-color:color-mix(in oklab,#3c3836 var(--un-bg-opacity),transparent)}.bg-\\[\\#458588\\]{background-color:color-mix(in oklab,#458588 var(--un-bg-opacity),transparent)}.bg-\\[\\#504945\\],.data-\\[active\\=true\\]\\:bg-\\[\\#504945\\][data-active=true]{background-color:color-mix(in oklab,#504945 var(--un-bg-opacity),transparent)}.bg-\\[\\#83a598\\]{background-color:color-mix(in oklab,#83a598 var(--un-bg-opacity),transparent)}.bg-\\[\\#b16286\\]{background-color:color-mix(in oklab,#b16286 var(--un-bg-opacity),transparent)}.bg-\\[\\#b8bb26\\]{background-color:color-mix(in oklab,#b8bb26 var(--un-bg-opacity),transparent)}.bg-\\[\\#ebdbb2\\]{background-color:color-mix(in oklab,#ebdbb2 var(--un-bg-opacity),transparent)}.bg-\\[\\#fb4934\\]{background-color:color-mix(in oklab,#fb4934 var(--un-bg-opacity),transparent)}.bg-amber-50{background-color:color-mix(in srgb,var(--colors-amber-50) var(--un-bg-opacity),transparent)}.bg-blue-600{background-color:color-mix(in srgb,var(--colors-blue-600) var(--un-bg-opacity),transparent)}.bg-gray-100{background-color:color-mix(in srgb,var(--colors-gray-100) var(--un-bg-opacity),transparent)}.bg-gray-200{background-color:color-mix(in srgb,var(--colors-gray-200) var(--un-bg-opacity),transparent)}.bg-gray-50{background-color:color-mix(in srgb,var(--colors-gray-50) var(--un-bg-opacity),transparent)}.bg-gray-600{background-color:color-mix(in srgb,var(--colors-gray-600) var(--un-bg-opacity),transparent)}.bg-gray-700{background-color:color-mix(in srgb,var(--colors-gray-700) var(--un-bg-opacity),transparent)}.bg-gray-800{background-color:color-mix(in srgb,var(--colors-gray-800) var(--un-bg-opacity),transparent)}.bg-gray-900{background-color:color-mix(in srgb,var(--colors-gray-900) var(--un-bg-opacity),transparent)}.bg-green-100{background-color:color-mix(in srgb,var(--colors-green-100) var(--un-bg-opacity),transparent)}.bg-red-100{background-color:color-mix(in srgb,var(--colors-red-100) var(--un-bg-opacity),transparent)}.bg-red-700{background-color:color-mix(in srgb,var(--colors-red-700) var(--un-bg-opacity),transparent)}.bg-red-900\\/50{background-color:color-mix(in srgb,var(--colors-red-900) 50%,transparent)}.bg-white{background-color:color-mix(in srgb,var(--colors-white) var(--un-bg-opacity),transparent)}.bg-yellow-100{background-color:color-mix(in srgb,var(--colors-yellow-100) var(--un-bg-opacity),transparent)}.hover\\:bg-\\[\\#1d2021\\]:hover{background-color:color-mix(in oklab,#1d2021 var(--un-bg-opacity),transparent)}.hover\\:bg-\\[\\#3c3836\\]:hover{background-color:color-mix(in oklab,#3c3836 var(--un-bg-opacity),transparent)}.hover\\:bg-\\[\\#504945\\]:hover{background-color:color-mix(in oklab,#504945 var(--un-bg-opacity),transparent)}.hover\\:bg-\\[\\#665c54\\]:hover{background-color:color-mix(in oklab,#665c54 var(--un-bg-opacity),transparent)}.hover\\:bg-\\[\\#83a598\\]:hover{background-color:color-mix(in oklab,#83a598 var(--un-bg-opacity),transparent)}.hover\\:bg-amber-100:hover{background-color:color-mix(in srgb,var(--colors-amber-100) var(--un-bg-opacity),transparent)}.hover\\:bg-gray-700:hover{background-color:color-mix(in srgb,var(--colors-gray-700) var(--un-bg-opacity),transparent)}.opacity-0{opacity:0%}.group:hover .group-hover\\:opacity-100{opacity:100%}.hover\\:underline:hover{text-decoration-line:underline}.flex{display:flex}.flex-1{flex:1 1 0%}.flex-shrink-0,.shrink-0{flex-shrink:0}.selection\\:shrink-selection *::selection,.selection\\:shrink-selection::selection{flex-shrink:1}.flex-grow{flex-grow:1}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.gap-1{gap:calc(var(--spacing) * 1)}.gap-1\\.5{gap:calc(var(--spacing) * 1.5)}.gap-2{gap:calc(var(--spacing) * 2)}.gap-3{gap:calc(var(--spacing) * 3)}.gap-4{gap:calc(var(--spacing) * 4)}.gap-6{gap:calc(var(--spacing) * 6)}.grid{display:grid}.grid-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))}.grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.h-12{height:calc(var(--spacing) * 12)}.h-15{height:calc(var(--spacing) * 15)}.h-16{height:calc(var(--spacing) * 16)}.h-3\\.5{height:calc(var(--spacing) * 3.5)}.h-4{height:calc(var(--spacing) * 4)}.h-5{height:calc(var(--spacing) * 5)}.h-50{height:calc(var(--spacing) * 50)}.h-7{height:calc(var(--spacing) * 7)}.h-8{height:calc(var(--spacing) * 8)}.h-full{height:100%}.h-screen{height:100vh}.max-h-32{max-height:calc(var(--spacing) * 32)}.max-h-48{max-height:calc(var(--spacing) * 48)}.max-w-\\[75\\%\\]{max-width:75%}.max-w-lg{max-width:var(--container-lg)}.max-w-md{max-width:var(--container-md)}.max-w-none{max-width:none}.min-h-\\[2\\.5rem\\]{min-height:2.5rem}.min-h-0{min-height:calc(var(--spacing) * 0)}.min-h-screen{min-height:100vh}.min-w-0{min-width:calc(var(--spacing) * 0)}.w-10{width:calc(var(--spacing) * 10)}.w-12{width:calc(var(--spacing) * 12)}.w-16{width:calc(var(--spacing) * 16)}.w-2{width:calc(var(--spacing) * 2)}.w-28{width:calc(var(--spacing) * 28)}.w-3\\.5{width:calc(var(--spacing) * 3.5)}.w-3xs{width:var(--container-3xs)}.w-4{width:calc(var(--spacing) * 4)}.w-5{width:calc(var(--spacing) * 5)}.w-64{width:calc(var(--spacing) * 64)}.w-8{width:calc(var(--spacing) * 8)}.w-80{width:calc(var(--spacing) * 80)}.w-full{width:100%}.w\\[M\\]{width:M}.inline{display:inline}.block{display:block}.inline-block{display:inline-block}.contents{display:contents}.hidden{display:none}.visible{visibility:visible}.cursor-pointer{cursor:pointer}.cursor-not-allowed{cursor:not-allowed}.resize-none{resize:none}.selection\\:select-all *::selection,.selection\\:select-all::selection{-webkit-user-select:all;user-select:all}.whitespace-pre-wrap{white-space:pre-wrap}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.text-ellipsis{text-overflow:ellipsis}.uppercase{text-transform:uppercase}.capitalize{text-transform:capitalize}.italic{font-style:italic}.antialiased{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.focus\\:ring-2:focus{--un-ring-shadow:var(--un-ring-inset,) 0 0 0 calc(2px + var(--un-ring-offset-width)) var(--un-ring-color, currentColor);box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.focus\\:ring-\\[\\#83a598\\]:focus{--un-ring-color:color-mix(in oklab, #83a598 var(--un-ring-opacity), transparent)}.shadow,.shadow-sm{--un-shadow:0 1px 3px 0 var(--un-shadow-color, rgb(0 0 0 / .1)),0 1px 2px -1px var(--un-shadow-color, rgb(0 0 0 / .1));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.shadow-\\[4px_4px_0px_\\#1d2021\\]{--un-shadow:4px 4px 0px var(--un-shadow-color, rgb(29 32 33));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.shadow-lg{--un-shadow:0 10px 15px -3px var(--un-shadow-color, rgb(0 0 0 / .1)),0 4px 6px -4px var(--un-shadow-color, rgb(0 0 0 / .1));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.shadow-md{--un-shadow:0 4px 6px -1px var(--un-shadow-color, rgb(0 0 0 / .1)),0 2px 4px -2px var(--un-shadow-color, rgb(0 0 0 / .1));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.shadow-xl{--un-shadow:0 20px 25px -5px var(--un-shadow-color, rgb(0 0 0 / .1)),0 8px 10px -6px var(--un-shadow-color, rgb(0 0 0 / .1));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.hover\\:shadow-\\[6px_6px_0px_\\#83a598\\]:hover{--un-shadow:6px 6px 0px var(--un-shadow-color, rgb(131 165 152));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.focus\\:shadow-\\[2px_2px_0px_\\#1d2021\\]:focus{--un-shadow:2px 2px 0px var(--un-shadow-color, rgb(29 32 33));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.translate-x-4{--un-translate-x:calc(var(--spacing) * 4);translate:var(--un-translate-x) var(--un-translate-y)}.transform{transform:var(--un-rotate-x) var(--un-rotate-y) var(--un-rotate-z) var(--un-skew-x) var(--un-skew-y)}.transition{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,--un-gradient-from,--un-gradient-via,--un-gradient-to,opacity,box-shadow,transform,translate,scale,rotate,filter,-webkit-backdrop-filter,backdrop-filter;transition-timing-function:var(--un-ease, var(--default-transition-timingFunction));transition-duration:var(--un-duration, var(--default-transition-duration))}.transition-all{transition-property:all;transition-timing-function:var(--un-ease, var(--default-transition-timingFunction));transition-duration:var(--un-duration, var(--default-transition-duration))}.transition-colors{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,--un-gradient-from,--un-gradient-via,--un-gradient-to;transition-timing-function:var(--un-ease, var(--default-transition-timingFunction));transition-duration:var(--un-duration, var(--default-transition-duration))}.transition-opacity{transition-property:opacity;transition-timing-function:var(--un-ease, var(--default-transition-timingFunction));transition-duration:var(--un-duration, var(--default-transition-duration))}.transition-transform{transition-property:transform,translate,scale,rotate;transition-timing-function:var(--un-ease, var(--default-transition-timingFunction));transition-duration:var(--un-duration, var(--default-transition-duration))}.duration-200{--un-duration:.2s;transition-duration:.2s}.ease-in-out{--un-ease:var(--ease-in-out);transition-timing-function:var(--ease-in-out)}.items-start{align-items:flex-start}.items-end{align-items:flex-end}.items-center{align-items:center}.items-baseline{align-items:baseline}.bottom-2\\.5{bottom:calc(var(--spacing) * 2.5)}.right-2{right:calc(var(--spacing) * 2)}.right-3{right:calc(var(--spacing) * 3)}.top-2{top:calc(var(--spacing) * 2)}.justify-start{justify-content:flex-start}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.absolute{position:absolute}.fixed{position:fixed}.relative{position:relative}.static{position:static}.overflow-auto{overflow:auto}.overflow-y-auto{overflow-y:auto}@keyframes pulse{0%,to{opacity:1}50%{opacity:.5}}@keyframes spin{0%{transform:rotate(0)}to{transform:rotate(360deg)}}.animate-pulse{animation:pulse 2s cubic-bezier(.4,0,.6,1) infinite}.animate-spin{animation:spin 1s linear infinite}.filter{filter:var(--un-blur,) var(--un-brightness,) var(--un-contrast,) var(--un-grayscale,) var(--un-hue-rotate,) var(--un-invert,) var(--un-saturate,) var(--un-sepia,) var(--un-drop-shadow,)}.placeholder-\\[\\#928374\\]::placeholder{color:color-mix(in oklab,#928374 var(--un-placeholder-opacity),transparent)}.table{display:table}.table-row{display:table-row}.space-x-2>:not(:last-child){--un-space-x-reverse:0;margin-inline-start:calc(calc(var(--spacing) * 2) * var(--un-space-x-reverse));margin-inline-end:calc(calc(var(--spacing) * 2) * calc(1 - var(--un-space-x-reverse)))}.space-x-3>:not(:last-child){--un-space-x-reverse:0;margin-inline-start:calc(calc(var(--spacing) * 3) * var(--un-space-x-reverse));margin-inline-end:calc(calc(var(--spacing) * 3) * calc(1 - var(--un-space-x-reverse)))}.space-y-1>:not(:last-child){--un-space-y-reverse:0;margin-block-start:calc(calc(var(--spacing) * 1) * var(--un-space-y-reverse));margin-block-end:calc(calc(var(--spacing) * 1) * calc(1 - var(--un-space-y-reverse)))}.space-y-2>:not(:last-child){--un-space-y-reverse:0;margin-block-start:calc(calc(var(--spacing) * 2) * var(--un-space-y-reverse));margin-block-end:calc(calc(var(--spacing) * 2) * calc(1 - var(--un-space-y-reverse)))}.space-y-3>:not(:last-child){--un-space-y-reverse:0;margin-block-start:calc(calc(var(--spacing) * 3) * var(--un-space-y-reverse));margin-block-end:calc(calc(var(--spacing) * 3) * calc(1 - var(--un-space-y-reverse)))}.space-y-4>:not(:last-child){--un-space-y-reverse:0;margin-block-start:calc(calc(var(--spacing) * 4) * var(--un-space-y-reverse));margin-block-end:calc(calc(var(--spacing) * 4) * calc(1 - var(--un-space-y-reverse)))}.space-y-6>:not(:last-child){--un-space-y-reverse:0;margin-block-start:calc(calc(var(--spacing) * 6) * var(--un-space-y-reverse));margin-block-end:calc(calc(var(--spacing) * 6) * calc(1 - var(--un-space-y-reverse)))}@supports (color: color-mix(in lab,red,red)){.text-amber-600{color:color-mix(in oklab,var(--colors-amber-600) var(--un-text-opacity),transparent)}.text-amber-900{color:color-mix(in oklab,var(--colors-amber-900) var(--un-text-opacity),transparent)}.text-blue-100{color:color-mix(in oklab,var(--colors-blue-100) var(--un-text-opacity),transparent)}.text-blue-600{color:color-mix(in oklab,var(--colors-blue-600) var(--un-text-opacity),transparent)}.text-gray-200{color:color-mix(in oklab,var(--colors-gray-200) var(--un-text-opacity),transparent)}.text-gray-400{color:color-mix(in oklab,var(--colors-gray-400) var(--un-text-opacity),transparent)}.text-gray-500{color:color-mix(in oklab,var(--colors-gray-500) var(--un-text-opacity),transparent)}.text-gray-600{color:color-mix(in oklab,var(--colors-gray-600) var(--un-text-opacity),transparent)}.text-gray-700{color:color-mix(in oklab,var(--colors-gray-700) var(--un-text-opacity),transparent)}.text-gray-800{color:color-mix(in oklab,var(--colors-gray-800) var(--un-text-opacity),transparent)}.text-gray-900{color:color-mix(in oklab,var(--colors-gray-900) var(--un-text-opacity),transparent)}.text-green-400{color:color-mix(in oklab,var(--colors-green-400) var(--un-text-opacity),transparent)}.text-green-800{color:color-mix(in oklab,var(--colors-green-800) var(--un-text-opacity),transparent)}.text-red-100{color:color-mix(in oklab,var(--colors-red-100) var(--un-text-opacity),transparent)}.text-red-400{color:color-mix(in oklab,var(--colors-red-400) var(--un-text-opacity),transparent)}.text-red-700{color:color-mix(in oklab,var(--colors-red-700) var(--un-text-opacity),transparent)}.text-red-800{color:color-mix(in oklab,var(--colors-red-800) var(--un-text-opacity),transparent)}.text-white{color:color-mix(in oklab,var(--colors-white) var(--un-text-opacity),transparent)}.text-yellow-800{color:color-mix(in oklab,var(--colors-yellow-800) var(--un-text-opacity),transparent)}.border-amber-200{border-color:color-mix(in oklab,var(--colors-amber-200) var(--un-border-opacity),transparent)}.border-amber-400{border-color:color-mix(in oklab,var(--colors-amber-400) var(--un-border-opacity),transparent)}.border-gray-200{border-color:color-mix(in oklab,var(--colors-gray-200) var(--un-border-opacity),transparent)}.border-gray-700{border-color:color-mix(in oklab,var(--colors-gray-700) var(--un-border-opacity),transparent)}.border-white{border-color:color-mix(in oklab,var(--colors-white) var(--un-border-opacity),transparent)}.bg-amber-50{background-color:color-mix(in oklab,var(--colors-amber-50) var(--un-bg-opacity),transparent)}.bg-blue-600{background-color:color-mix(in oklab,var(--colors-blue-600) var(--un-bg-opacity),transparent)}.bg-gray-100{background-color:color-mix(in oklab,var(--colors-gray-100) var(--un-bg-opacity),transparent)}.bg-gray-200{background-color:color-mix(in oklab,var(--colors-gray-200) var(--un-bg-opacity),transparent)}.bg-gray-50{background-color:color-mix(in oklab,var(--colors-gray-50) var(--un-bg-opacity),transparent)}.bg-gray-600{background-color:color-mix(in oklab,var(--colors-gray-600) var(--un-bg-opacity),transparent)}.bg-gray-700{background-color:color-mix(in oklab,var(--colors-gray-700) var(--un-bg-opacity),transparent)}.bg-gray-800{background-color:color-mix(in oklab,var(--colors-gray-800) var(--un-bg-opacity),transparent)}.bg-gray-900{background-color:color-mix(in oklab,var(--colors-gray-900) var(--un-bg-opacity),transparent)}.bg-green-100{background-color:color-mix(in oklab,var(--colors-green-100) var(--un-bg-opacity),transparent)}.bg-red-100{background-color:color-mix(in oklab,var(--colors-red-100) var(--un-bg-opacity),transparent)}.bg-red-700{background-color:color-mix(in oklab,var(--colors-red-700) var(--un-bg-opacity),transparent)}.bg-red-900\\/50{background-color:color-mix(in oklab,var(--colors-red-900) 50%,transparent)}.bg-white{background-color:color-mix(in oklab,var(--colors-white) var(--un-bg-opacity),transparent)}.bg-yellow-100{background-color:color-mix(in oklab,var(--colors-yellow-100) var(--un-bg-opacity),transparent)}.hover\\:bg-amber-100:hover{background-color:color-mix(in oklab,var(--colors-amber-100) var(--un-bg-opacity),transparent)}.hover\\:bg-gray-700:hover{background-color:color-mix(in oklab,var(--colors-gray-700) var(--un-bg-opacity),transparent)}}@media (min-width: 48rem){.md\\:p-8{padding:calc(var(--spacing) * 8)}.md\\:flex-row{flex-direction:row}.md\\:col-span-2{grid-column:span 2/span 2}.md\\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.md\\:w-64{width:calc(var(--spacing) * 64)}.md\\:items-center{align-items:center}.md\\:justify-between{justify-content:space-between}}@media (min-width: 64rem){.lg\\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}}@media (min-width: 80rem){.xl\\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}}body{font-family:var(--font-family)}html,body{font-family:var(--theme-font-family);background-color:var(--theme-background-color)!important;color:var(--text-color)!important;width:100%;min-height:100%;height:100%;padding:0;margin:0}body:not(.production) *:not(:defined){border:1px solid red}.dark{filter:invert(1) hue-rotate(180deg)}.dark img,.dark dialog,.dark video,.dark iframe{filter:invert(1) hue-rotate(180deg)}html{font-size:14px}@media (max-width: 768px){html{font-size:18px}}@media (max-width: 480px){html{font-size:20px}}textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;color:inherit;margin:0;padding:0}:root{box-sizing:border-box;-moz-text-size-adjust:none;-webkit-text-size-adjust:none;text-size-adjust:none;line-height:1.2;-webkit-font-smoothing:antialiased}*,*:before,*:after{box-sizing:border-box}*{margin:0}body{-webkit-font-smoothing:antialiased;font-family:var(--font-family)}button,textarea,select{background-color:inherit;border-width:0;color:inherit}img,picture,video,canvas,svg{display:block;max-width:100%}input,button,textarea,select{font:inherit}p,h1,h2,h3,h4,h5,h6{font-family:var(--font-family);overflow-wrap:break-word}dialog::backdrop{background-color:#000c}*::-webkit-scrollbar{width:8px;margin-right:10px}*::-webkit-scrollbar-track{background:transparent}*::-webkit-scrollbar-thumb{&:hover{scrollbar-color:rgba(154,153,150,.8) transparent}border-radius:10px;border:none}*::-webkit-scrollbar-button{background:transparent;color:transparent}*{scrollbar-width:thin;scrollbar-color:transparent transparent;&:hover{scrollbar-color:rgba(154,153,150,.8) transparent}}[full]{width:100%;height:100vh}[w-full]{width:100%}[grow]{flex-grow:1}[hide],.hide{display:none!important}[noscroll]{overflow:hidden}div [container]{display:flex}div [container][horizontal]{display:flex;flex-direction:col}:where(.uix-link){font-weight:var(--uix-link-font-weight, 600);width:var(--uix-link-width, auto);color:var(--uix-link-text-color, var(--colors-default-900));--uix-link-indent: 0;cursor:pointer;&[vertical]{margin:0 auto}a,button{width:inherit;cursor:pointer;padding:var(--uix-link-padding);&:hover{color:var(--uix-link-hover-color, var(--uix-link-text-color))}}.uix-text-icon__element{display:flex;align-items:center;gap:var(--uix-link-icon-gap, .5rem);&[reverse][vertical]{flex-direction:column-reverse}&:not([reverse])[vertical]{flex-direction:column}&[reverse]:not([vertical]){flex-direction:row-reverse}&:not([reverse]):not([vertical]){flex-direction:row}}transition:all .3s ease-in-out;&[indent]{>a,>button{padding-left:var(--uix-link-indent)}}&[active]:hover{color:var(--uix-link-hover-text-color, var(--colors-primary-400))}&[selectable][selected]{background-color:var(--colors-primary-400)}&:hover{[tooltip]{display:flex}}&[tooltip]{display:inline-block;&:hover{[tooltip]{visibility:visible}}[tooltip]{visibility:hidden;width:120px;background-color:#000;color:#fff;text-align:center;border-radius:6px;padding:5px 10px;margin-left:3px;position:absolute;z-index:1000000000;top:50%;left:100%;transform:translateY(-50%)}}&[position~=top] [tooltip]{bottom:100%;left:50%;transform:translate(-50%)}&[position~=bottom] [tooltip]{top:100%;left:50%;transform:translate(-50%)}&[position~=left] [tooltip]{top:50%;right:100%;transform:translateY(-50%)}&[tooltip],&[dropdown],&[context],&[float]{position:relative}&[dropdown],&[accordion]{flex-direction:column}[float],[dropdown],[accordion],[context]{display:none}&[floatopen]>a{display:none}&[floatopen] [float]{display:block;position:relative;bottom:0;right:0}&[context]{z-index:auto}[context][open]{display:flex;flex-direction:column}[dropdown],[context][open]{position:absolute;left:0;top:100%;width:100%;min-width:200px;z-index:1000;background-color:var(--colors-primary-100);box-shadow:0 8px 16px #0003;.uix-link:hover,input{background-color:var(--colors-primary-200)}>.uix-link{width:100%}}[context][open]{display:flex}&[selected]{[dropdown],[accordion]{display:flex;flex-direction:column}}}:where(.uix-button){border:var(--uix-button-borderSize, 0) solid var(--uix-button-borderColor);border-radius:var(--uix-button-borderRadius, var(--radius-md));box-shadow:var(--uix-button-shadow);width:var(--uix-button-width);min-width:fit-content;background-color:var(--uix-button-backgroundColor, black);color:var(--uix-button-textColor, var(--colors-default-100));font-weight:var(--uix-button-fontWeight, 700);display:flex;text-align:center;transition:transform .2s ease-in-out,opacity .2s ease-in-out,background-color .2s ease-in-out;&:hover{opacity:var(--uix-button-hover-opacity, .4)}&:active{transform:scale(.97)}>button,>a,>input{width:max-content;display:block;border-radius:inherit;cursor:var(--uix-button-cursor, pointer);height:calc(var(--spacing) * 10);line-height:calc(var(--spacing) * 5);padding:var( --uix-button-padding, calc(var(--spacing) * 2.5) calc(var(--spacing) * 4) );word-break:keep-all;flex-basis:100%}.uix-icon,button,input,a{cursor:pointer}&[bordered]{--uix-button-border-size: 1px;--uix-button-backgroundColor: transparent;--uix-button-hoverBackgroundColor: var(--_variant-color-300);--uix-button-borderColor: var(--_variant-color-400);--uix-button-textColor: var(--_variant-color-700)}&[ghost]{--uix-button-backgroundColor: transparent;--uix-button-hoverBackgroundColor: var(--_variant-color-300);--uix-button-borderSize: 0px;--uix-button-textColor: var(--_variant-color-700)}&[outline]{--uix-button-backgroundColor: transparent;--uix-button-hoverBackgroundColor: var(--_variant-color-300);--uix-button-textColor: var(--_variant-color-800);--uix-button-borderSize: 1px;--uix-button-borderColor: var(--_variant-color-400)}&[float]{background-color:#000;--uix-button-hoverBackgroundColor: var(--_variant-color-500);--uix-button-textColor: var(--_variant-color-50);--uix-button-borderSize: 0px;--uix-button-borderRadius: 9999px;--uix-button-width: var(--uix-button-height);box-shadow:var(--shadow-md, 0 4px 6px -1px rgb(0 0 0 / .1));--uix-button-padding: .5rem}&[float]:hover{box-shadow:var(--shadow-lg, 0 10px 15px -3px rgb(0 0 0 / .1))}}.uix-navbar{--uix-navbar-text-color: var(--color-default-90);--uix-navbar-hover-text-color: var(--color-surface-80);--uix-navbar-border-radius: 0px;--uix-navbar-border-color: var(--color-default-60);--uix-navbar-border-size: 1px;--uix-navbar-border-style: solid;--uix-navbar-hover-background-color: var(--color-default-40);--uix-container-position: var(--uix-navbar-position);display:flex;flex-direction:column;&[docked]{--uix-list-button-radius: 0;border-bottom:0;position:fixed;bottom:0;background-color:var(--uix-navbar-background-color, var(--color-default-5));>*{border-right:0;border-bottom:0;&:first-child{border-left:0}}}}.uix-list{display:flex;&[vertical]{flex-direction:column}}.uix-icon{display:inline-block;vertical-align:middle;svg{height:inherit;width:inherit}}&[solid]{stroke:currentColor;fill:currentColor}:where(.uix-input){--uix-input-background-color: var(--colors-surface-100);--uix-input-border-color: var(--colors-gray-900);--uix-input-text-color: var(--colors-gray-900);--uix-input-placeholder-color: var(--colors-default-500);--uix-input-border-radius: var(--border-radius-md);--uix-input-border-width: 2px;--uix-input-padding-x: calc(var(--spacing) * 4);--uix-input-padding-y: calc(var(--spacing) * 2.5);--uix-input-font-size: var(--font-size-base);--uix-input-height: 2.5rem;--uix-input-disabled-opacity: .6;--uix-input-label-font-size: var(--font-size-sm);--uix-input-label-font-weight: var(--font-weight-bold);--uix-input-label-color: var(--colors-default-700);--uix-input-checkbox-size: 1.5rem;--uix-input-checkbox-border-radius: var(--border-radius-sm);--uix-input-checkbox-checked-bg: var(--colors-primary-600);--uix-input-checkbox-check-color: var(--colors-surface-100);width:100%;display:flex;flex-direction:column;input,select,textarea{width:100%;height:var(--uix-input-height);border-radius:var(--uix-input-border-radius);border:var(--uix-input-border-width) solid var(--uix-input-border-color);font-size:var(--uix-input-font-size);background-color:var(--uix-input-background-color);color:var(--uix-input-text-color);transition:var(--uix-transition);outline:none;padding:var(--uix-input-padding-y) var(--uix-input-padding-x)}textarea{resize:vertical}&:has(textarea){height:auto}select{appearance:none;-webkit-appearance:none;cursor:pointer;font-weight:600;padding-block:0;option{font-weight:600;background-color:var(--uix-input-background-color);font-size:1.1rem;line-height:1.5rem;color:#333;padding:50px;border:2px solid red}}.select-container{position:relative;.select-arrow{position:absolute;right:calc(2 * var(--spacing))}}input::placeholder{color:transparent}label{font-weight:var(--uix-input-label-font-weight);color:var(--uix-input-label-color, var(--colors-gray-600));margin-bottom:var(--spacing);font-size:.9rem;padding:0 4px;transition:all .2s ease-in-out;pointer-events:none;&[required]:after{content:"*";color:var(--colors-danger-500);margin-left:2px}}input:not(:placeholder-shown)+label,textarea:not(:placeholder-shown)+label,&:focus-within label,&.has-value label{top:-2px;transform:translateY(0);font-size:var(--uix-input-label-font-size)}&:focus-within input,&:focus-within select,&:focus-within textarea{box-shadow:0 0 var(--uix-input-focus-ring-width, 5px) var(--uix-input-focus-ring-color, rgba(0, 0, 255, .5))}&[disabled]{cursor:not-allowed;opacity:var(--uix-input-disabled-opacity);& label{cursor:not-allowed}}.input-icon,.select-arrow{position:absolute;top:50%;right:var(--spacing);transform:translateY(-50%);pointer-events:none;color:var(--uix-input-label-color);transition:transform .2s ease-in-out}&:has(select:hover:active) .select-arrow{transform:translateY(-50%) rotate(180deg)}&:has(.input-icon:not(.select-arrow))>input{padding-right:calc(var(--uix-input-padding-x) + 1.75em)}&[type=checkbox],&[type=radio]{flex-direction:row;align-items:center;border:0;height:auto;width:auto;background-color:transparent;box-shadow:none;gap:.75rem;cursor:pointer;label{margin:0;line-height:1.5rem;position:static;transform:none;background-color:transparent;padding:0;cursor:pointer;font-weight:var(--font-weight-normal);order:2;pointer-events:auto}input{appearance:none;-webkit-appearance:none;width:var(--uix-input-checkbox-size);height:var(--uix-input-checkbox-size);margin:0;border:var(--uix-input-border-width) solid var(--uix-input-border-color);background-color:var(--uix-input-background-color);cursor:pointer;position:relative;transition:var(--uix-transition);padding:0;&:after{content:"";position:absolute;display:none;left:50%;top:50%}&:checked{background-color:var(--uix-input-checkbox-checked-bg);border-color:var(--uix-input-checkbox-checked-bg);&:after{display:block}}&:focus-visible{box-shadow:0 0 0 var(--uix-input-focus-ring-width) var(--uix-input-focus-ring-color);border-color:var(--uix-input-focus-ring-color)}}}&[type=checkbox] input:after{width:.375rem;height:.75rem;border:solid var(--uix-input-checkbox-check-color);border-width:0 2px 2px 0;transform:translate(-50%,-60%) rotate(45deg)}&[type=radio] input{border-radius:var(--border-radius-full);&:after{width:calc(var(--uix-input-checkbox-size) / 2);height:calc(var(--uix-input-checkbox-size) / 2);border-radius:var(--border-radius-full);background-color:var(--uix-input-checkbox-check-color);transform:translate(-50%,-50%)}}&[ghost]{&:focus-within select{box-shadow:none}.select-arrow{margin-left:5px;padding-left:5px}select{background:inherit;border:0}}}
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/mcp/views/tools.js":{content:`export default ({ html, AI, T }) => {
+	return {
+		tag: "mcp-tools",
+		properties: {
+			tools: T.array([]),
+			selectedTool: T.object(null),
+			toolArgs: T.object({}),
+			isExecuting: T.boolean(false),
+			isLoading: T.boolean(true),
+			viewMode: T.string({ defaultValue: "side-by-side" }), // 'side-by-side' or 'flow'
+			toolResponse: T.any(null),
+		},
+
+		connected() {
+			this.loadTools();
+		},
+
+		async loadTools() {
+			this.isLoading = true;
+			try {
+				const servers = AI.listClients();
+				if (servers && servers.length > 0) {
+					const { tools } = await AI.listTools({ servers });
+					this.tools = tools || [];
+				}
+			} catch (error) {
+				console.error("Error loading tools:", error);
+				this.tools = [];
+			} finally {
+				this.isLoading = false;
+			}
+		},
+
+		selectTool(tool) {
+			this.selectedTool = tool;
+			this.toolArgs = {};
+			this.toolResponse = null;
+		},
+
+		clearSelectedTool() {
+			this.selectedTool = null;
+			this.toolResponse = null;
+		},
+
+		handleArgInput(paramName, event, schema) {
+			this.toolArgs = {
+				...this.toolArgs,
+				[paramName]:
+					schema.type === "number"
+						? Number(event.target.value)
+						: schema.type === "boolean"
+							? !!event.target.checked
+							: event.target.value,
+			};
+		},
+
+		async handleExecuteTool() {
+			if (!this.selectedTool) return;
+
+			this.isExecuting = true;
+			this.toolResponse = null;
+			try {
+				const { name } = this.selectedTool;
+				const args = this.toolArgs;
+				const response = await AI.callTool(name, args);
+				this.toolResponse = response;
+			} catch (e) {
+				console.error(\`Failed to execute tool \${this.selectedTool.name}:\`, e);
+				this.toolResponse = {
+					error: e.message || "An unknown error occurred.",
+				};
+			} finally {
+				this.isExecuting = false;
+			}
+		},
+
+		// Rendering methods for 'flow' view
+		_renderFlowView() {
+			if (this.selectedTool) {
+				return this._renderToolExecutorFlow();
+			}
+			return this._renderToolListFlow();
+		},
+		_renderToolListFlow() {
+			if (this.isLoading) {
+				return html\`<div class="flex items-center justify-center h-full"><p class="text-xs text-gray-500">Loading...</p></div>\`;
+			}
+			if (!this.tools.length) {
+				return html\`<div class="flex items-center justify-center h-full"><p class="text-xs text-gray-500">No tools found.</p></div>\`;
+			}
+			return html\`
+                <div class="flex-1 overflow-y-auto p-2">
+                    <h3 class="font-semibold text-sm p-2 text-gray-800">Tools</h3>
+                    <ul>
+                        \${this.tools.map(
+													(tool) => html\`
+                                <li>
+                                    <button @click=\${() => this.selectTool(tool)} class="w-full text-left p-2 rounded text-sm hover:bg-gray-100">
+                                        <p class="font-mono text-sm">\${tool.name}</p>
+                                        <p class="text-xs text-gray-500 truncate">\${tool.description}</p>
+                                    </button>
+                                </li>
+                            \`,
+												)}
+                    </ul>
+                </div>
+            \`;
+		},
+
+		_renderToolExecutorFlow() {
+			const responseView = this.toolResponse
+				? html\`
+                <div class="mt-6 border-t pt-4 dark">
+									<h4 class="font-semibold text-sm mb-3">Response</h4>
+                    \${
+											this.toolResponse.error
+												? html\`<div class="bg-red-50 text-red-700 rounded p-3 text-sm font-mono">\${this.toolResponse.error}</div>\`
+												: html\`<pre class="text-xs whitespace-pre-wrap bg-gray-800 text-gray-200 p-2 rounded-lg font-mono overflow-auto">\${this.toolResponse?.content?.[0]?.text}</pre>\`
+										}
+                </div>
+            \`
+				: "";
+
+			return html\`
+                <div class="p-6 overflow-y-auto w-full">
+                     <button @click=\${this.clearSelectedTool.bind(this)} class="flex items-center text-sm text-blue-600 hover:underline mb-4">
+                        <uix-icon name="arrow-left" class="w-4 h-4 mr-2"></uix-icon>
+                        Back to list
+                    </button>
+                    \${this.toolResponse ? responseView : this._renderToolExecutorContent()}                    
+                </div>
+            \`;
+		},
+		_renderSideBySideView() {
+			const toolList = () => {
+				if (this.isLoading) {
+					return html\`<div class="flex items-center justify-center h-full"><p class="text-xs text-gray-500">Loading...</p></div>\`;
+				}
+				if (!this.tools.length) {
+					return html\`<div class="flex items-center justify-center h-full"><p class="text-xs text-gray-500">No tools found.</p></div>\`;
+				}
+				return html\`
+                    <div class="flex-1 overflow-y-auto p-2">
+                        <h3 class="font-semibold text-sm p-2 text-gray-800">Tools</h3>
+                        <ul>
+                            \${this.tools.map(
+															(tool) => html\`
+                                    <li>
+                                        <button @click=\${() => this.selectTool(tool)} class="w-full text-left p-2 rounded text-sm hover:bg-gray-100 \${this.selectedTool?.name === tool.name ? "bg-blue-50 font-semibold text-blue-700" : ""}">
+                                            <p class="font-mono text-xs">\${tool.name}</p>
+                                            <p class="text-xs text-gray-500 truncate">\${tool.description}</p>
+                                        </button>
+                                    </li>
+                                \`,
+														)}
+                        </ul>
+                    </div>
+                \`;
+			};
+
+			const toolExecutor = () => {
+				if (!this.selectedTool) {
+					return html\`<div class="text-center text-gray-500 h-full flex items-center justify-center">Select a tool to view details.</div>\`;
+				}
+				const responseView = this.toolResponse
+					? html\`
+                    <div class="mt-6 border-t pt-4">
+                        \${
+													this.toolResponse.error
+														? html\`<div class="bg-red-50 text-red-700 rounded p-3 text-sm font-mono">\${this.toolResponse.error}</div>\`
+														: html\`<pre class="text-xs whitespace-pre-wrap bg-gray-800 text-gray-200 p-2 rounded-lg font-mono overflow-auto">\${this.toolResponse?.contents?.[0]?.text}</pre>\`
+												}
+                    </div>
+                \`
+					: "";
+
+				return html\`
+                    <div>
+                        \${this._renderToolExecutorContent()}
+                        \${responseView}
+                    </div>
+                \`;
+			};
+
+			return html\`
+                <div class="w-1/3 flex flex-col border-r border-gray-200">
+                    \${toolList()}
+                </div>
+                <div class="w-2/3 p-6 overflow-y-auto">
+                    \${toolExecutor()}
+                </div>
+            \`;
+		},
+
+		_renderToolExecutorContent() {
+			if (!this.selectedTool) return "";
+			return html\`
+                <h3 class="font-bold text-lg mb-2  dark">\${this.selectedTool.name}</h3>
+                <p class="text-xs text-gray-600 mb-6">\${this.selectedTool.description}</p>
+                <h4 class="font-semibold text-sm mb-3 dark">Parameters</h4>
+                <div class="space-y-4">
+                    \${
+											this.selectedTool.inputSchema &&
+											Object.keys(this.selectedTool.inputSchema.properties)
+												.length > 0
+												? Object.entries(
+														this.selectedTool.inputSchema.properties,
+													).map(
+														([paramName, paramSchema]) =>
+															html\`<uix-input
+                                        label=\${paramName}
+                                        type=\${paramSchema.enum ? "select" : { boolean: "checkbox", enum: "select" }[paramSchema.type] || "text"}
+                                        .options=\${paramSchema.enum}
+                                        value=\${this.toolArgs[paramName] || ""}
+                                        @input=\${(e) => this.handleArgInput(paramName, e, paramSchema)}
+                                        placeholder=\${paramSchema.description || paramName}
+                                        class="font-mono text-xs"
+                                    ></uix-input>\`,
+													)
+												: html\`<p class="text-xs text-gray-500">This tool has no parameters.</p>\`
+										}
+                </div>
+                <div class="mt-8 border-t pt-6">
+                    <uix-button
+                        label=\${this.isExecuting ? "Executing..." : "Execute"}
+                        class="is-primary"
+                        @click=\${this.handleExecuteTool.bind(this)}
+                        ?disabled=\${this.isExecuting}
+                    ></uix-button>
+                </div>
+            \`;
+		},
+
+		render() {
+			return html\`<uix-card class="bg-[#3c3836] h-full overflow-y-auto pb-2">
+                    <div class="dark">\${this.viewMode === "flow" ? this._renderFlowView() : this._renderSideBySideView()}</div>
+								</uix-card>
+            \`;
+		},
+	};
+};
+`,mimeType:"application/javascript",skipSW:!1},"/modules/icon-lucide/lucide/layout-dashboard.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/wrench.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/key.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m15.5 7.5l2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4m2-2l-9.6 9.6"/><circle cx="7.5" cy="15.5" r="5.5"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/database.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/terminal.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m4 17l6-6l-6-6m8 14h8"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/git-branch-plus.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M6 3v12m12-6a3 3 0 1 0 0-6a3 3 0 0 0 0 6M6 21a3 3 0 1 0 0-6a3 3 0 0 0 0 6"/><path d="M15 6a9 9 0 0 0-9 9m12 0v6m3-3h-6"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/uix/display/card.js":{content:`export default {
+	tag: "uix-card",
+	style: true,
+};
+`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/display/card.css":{content:`:where(.uix-card) {
+	display: flex;
+	flex-direction: column;
+	padding: var(--uix-card-padding, 10px);
+	border-width: var(--uix-card-border-size);
+	border-radius: var(--uix-card-border-radius, var(--radius-md));
+	background-color: var(--uix-card-background-color, #fff);
+	border-color: var(--uix-card-border-color, transparent);
+	box-shadow: var(--uix-card-shadow, 0 4px 6px rgba(0, 0, 0, 0.1));
+	list-style-type: var(--uix-card-list-style-type);
+	color: var(--uix-card-text-color);
+
+	&[clickable],
+	&[clickable] * {
+		cursor: pointer;
+	}
+}
+`,mimeType:"text/css",skipSW:!1},"/modules/icon-lucide/lucide/file-text.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4M10 9H8m8 4H8m8 4H8"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/file-code-2.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v4"/><path d="M14 2v4a2 2 0 0 0 2 2h4M5 12l-3 3l3 3m4 0l3-3l-3-3"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/chevron-right.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 18l6-6l-6-6"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/style.css":{content:`@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_P-bnBeA.woff2) format("woff2");unicode-range:U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_G-bnBeA.woff2) format("woff2");unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_B-bnBeA.woff2) format("woff2");unicode-range:U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_N-bnBeA.woff2) format("woff2");unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_M-bnBeA.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_C-bk.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}@supports ((-webkit-hyphens: none) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color:rgb(from red r g b)))){*,:before,:after,::backdrop{--un-bg-opacity:100%;--un-text-opacity:100%;--un-translate-x:initial;--un-translate-y:initial;--un-translate-z:initial;--un-ease:initial;--un-border-opacity:100%;--un-space-x-reverse:initial;--un-space-y-reverse:initial;--un-ring-opacity:100%;--un-placeholder-opacity:100%}}@property --un-text-opacity{syntax:"<percentage>";inherits:false;initial-value:100%;}@property --un-border-opacity{syntax:"<percentage>";inherits:false;initial-value:100%;}@property --un-bg-opacity{syntax:"<percentage>";inherits:false;initial-value:100%;}@property --un-ring-opacity{syntax:"<percentage>";inherits:false;initial-value:100%;}@property --un-inset-ring-color{syntax:"*";inherits:false;}@property --un-inset-ring-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-inset-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-inset-shadow-color{syntax:"*";inherits:false;}@property --un-ring-color{syntax:"*";inherits:false;}@property --un-ring-inset{syntax:"*";inherits:false;}@property --un-ring-offset-color{syntax:"*";inherits:false;}@property --un-ring-offset-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-ring-offset-width{syntax:"<length>";inherits:false;initial-value:0px;}@property --un-ring-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-shadow-color{syntax:"*";inherits:false;}@property --un-translate-x{syntax:"*";inherits:false;initial-value:0;}@property --un-translate-y{syntax:"*";inherits:false;initial-value:0;}@property --un-translate-z{syntax:"*";inherits:false;initial-value:0;}@property --un-ease{syntax:"*";inherits:false;}@property --un-placeholder-opacity{syntax:"<percentage>";inherits:false;initial-value:100%;}@property --un-space-x-reverse{syntax:"*";inherits:false;initial-value:0;}@property --un-space-y-reverse{syntax:"*";inherits:false;initial-value:0;}:root,:host{--spacing: .25rem;--font-sans: "Manrope",ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";--font-serif: ui-serif,Georgia,Cambria,"Times New Roman",Times,serif;--font-mono: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;--font-family: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;--font-icon-family: lucide;--colors-black: #000;--colors-white: #fff;--colors-slate-50: oklch(98.4% .003 247.858);--colors-slate-100: oklch(96.8% .007 247.896);--colors-slate-200: oklch(92.9% .013 255.508);--colors-slate-300: oklch(86.9% .022 252.894);--colors-slate-400: oklch(70.4% .04 256.788);--colors-slate-500: oklch(55.4% .046 257.417);--colors-slate-600: oklch(44.6% .043 257.281);--colors-slate-700: oklch(37.2% .044 257.287);--colors-slate-800: oklch(27.9% .041 260.031);--colors-slate-900: oklch(20.8% .042 265.755);--colors-slate-950: oklch(12.9% .042 264.695);--colors-slate-DEFAULT: oklch(70.4% .04 256.788);--colors-gray-50: oklch(98.5% .002 247.839);--colors-gray-100: oklch(96.7% .003 264.542);--colors-gray-200: oklch(92.8% .006 264.531);--colors-gray-300: oklch(87.2% .01 258.338);--colors-gray-400: oklch(70.7% .022 261.325);--colors-gray-500: oklch(55.1% .027 264.364);--colors-gray-600: oklch(44.6% .03 256.802);--colors-gray-700: oklch(37.3% .034 259.733);--colors-gray-800: oklch(27.8% .033 256.848);--colors-gray-900: oklch(21% .034 264.665);--colors-gray-950: oklch(13% .028 261.692);--colors-gray-DEFAULT: oklch(70.7% .022 261.325);--colors-zinc-50: oklch(98.5% 0 0);--colors-zinc-100: oklch(96.7% .001 286.375);--colors-zinc-200: oklch(92% .004 286.32);--colors-zinc-300: oklch(87.1% .006 286.286);--colors-zinc-400: oklch(70.5% .015 286.067);--colors-zinc-500: oklch(55.2% .016 285.938);--colors-zinc-600: oklch(44.2% .017 285.786);--colors-zinc-700: oklch(37% .013 285.805);--colors-zinc-800: oklch(27.4% .006 286.033);--colors-zinc-900: oklch(21% .006 285.885);--colors-zinc-950: oklch(14.1% .005 285.823);--colors-zinc-DEFAULT: oklch(70.5% .015 286.067);--colors-neutral-50: oklch(98.5% 0 0);--colors-neutral-100: oklch(97% 0 0);--colors-neutral-200: oklch(92.2% 0 0);--colors-neutral-300: oklch(87% 0 0);--colors-neutral-400: oklch(70.8% 0 0);--colors-neutral-500: oklch(55.6% 0 0);--colors-neutral-600: oklch(43.9% 0 0);--colors-neutral-700: oklch(37.1% 0 0);--colors-neutral-800: oklch(26.9% 0 0);--colors-neutral-900: oklch(20.5% 0 0);--colors-neutral-950: oklch(14.5% 0 0);--colors-neutral-DEFAULT: oklch(70.8% 0 0);--colors-stone-50: oklch(98.5% .001 106.423);--colors-stone-100: oklch(97% .001 106.424);--colors-stone-200: oklch(92.3% .003 48.717);--colors-stone-300: oklch(86.9% .005 56.366);--colors-stone-400: oklch(70.9% .01 56.259);--colors-stone-500: oklch(55.3% .013 58.071);--colors-stone-600: oklch(44.4% .011 73.639);--colors-stone-700: oklch(37.4% .01 67.558);--colors-stone-800: oklch(26.8% .007 34.298);--colors-stone-900: oklch(21.6% .006 56.043);--colors-stone-950: oklch(14.7% .004 49.25);--colors-stone-DEFAULT: oklch(70.9% .01 56.259);--colors-red-50: oklch(97.1% .013 17.38);--colors-red-100: oklch(93.6% .032 17.717);--colors-red-200: oklch(88.5% .062 18.334);--colors-red-300: oklch(80.8% .114 19.571);--colors-red-400: oklch(70.4% .191 22.216);--colors-red-500: oklch(63.7% .237 25.331);--colors-red-600: oklch(57.7% .245 27.325);--colors-red-700: oklch(50.5% .213 27.518);--colors-red-800: oklch(44.4% .177 26.899);--colors-red-900: oklch(39.6% .141 25.723);--colors-red-950: oklch(25.8% .092 26.042);--colors-red-DEFAULT: oklch(70.4% .191 22.216);--colors-orange-50: oklch(98% .016 73.684);--colors-orange-100: oklch(95.4% .038 75.164);--colors-orange-200: oklch(90.1% .076 70.697);--colors-orange-300: oklch(83.7% .128 66.29);--colors-orange-400: oklch(75% .183 55.934);--colors-orange-500: oklch(70.5% .213 47.604);--colors-orange-600: oklch(64.6% .222 41.116);--colors-orange-700: oklch(55.3% .195 38.402);--colors-orange-800: oklch(47% .157 37.304);--colors-orange-900: oklch(40.8% .123 38.172);--colors-orange-950: oklch(26.6% .079 36.259);--colors-orange-DEFAULT: oklch(75% .183 55.934);--colors-amber-50: oklch(98.7% .022 95.277);--colors-amber-100: oklch(96.2% .059 95.617);--colors-amber-200: oklch(92.4% .12 95.746);--colors-amber-300: oklch(87.9% .169 91.605);--colors-amber-400: oklch(82.8% .189 84.429);--colors-amber-500: oklch(76.9% .188 70.08);--colors-amber-600: oklch(66.6% .179 58.318);--colors-amber-700: oklch(55.5% .163 48.998);--colors-amber-800: oklch(47.3% .137 46.201);--colors-amber-900: oklch(41.4% .112 45.904);--colors-amber-950: oklch(27.9% .077 45.635);--colors-amber-DEFAULT: oklch(82.8% .189 84.429);--colors-yellow-50: oklch(98.7% .026 102.212);--colors-yellow-100: oklch(97.3% .071 103.193);--colors-yellow-200: oklch(94.5% .129 101.54);--colors-yellow-300: oklch(90.5% .182 98.111);--colors-yellow-400: oklch(85.2% .199 91.936);--colors-yellow-500: oklch(79.5% .184 86.047);--colors-yellow-600: oklch(68.1% .162 75.834);--colors-yellow-700: oklch(55.4% .135 66.442);--colors-yellow-800: oklch(47.6% .114 61.907);--colors-yellow-900: oklch(42.1% .095 57.708);--colors-yellow-950: oklch(28.6% .066 53.813);--colors-yellow-DEFAULT: oklch(85.2% .199 91.936);--colors-lime-50: oklch(98.6% .031 120.757);--colors-lime-100: oklch(96.7% .067 122.328);--colors-lime-200: oklch(93.8% .127 124.321);--colors-lime-300: oklch(89.7% .196 126.665);--colors-lime-400: oklch(84.1% .238 128.85);--colors-lime-500: oklch(76.8% .233 130.85);--colors-lime-600: oklch(64.8% .2 131.684);--colors-lime-700: oklch(53.2% .157 131.589);--colors-lime-800: oklch(45.3% .124 130.933);--colors-lime-900: oklch(40.5% .101 131.063);--colors-lime-950: oklch(27.4% .072 132.109);--colors-lime-DEFAULT: oklch(84.1% .238 128.85);--colors-green-50: oklch(98.2% .018 155.826);--colors-green-100: oklch(96.2% .044 156.743);--colors-green-200: oklch(92.5% .084 155.995);--colors-green-300: oklch(87.1% .15 154.449);--colors-green-400: oklch(79.2% .209 151.711);--colors-green-500: oklch(72.3% .219 149.579);--colors-green-600: oklch(62.7% .194 149.214);--colors-green-700: oklch(52.7% .154 150.069);--colors-green-800: oklch(44.8% .119 151.328);--colors-green-900: oklch(39.3% .095 152.535);--colors-green-950: oklch(26.6% .065 152.934);--colors-green-DEFAULT: oklch(79.2% .209 151.711);--colors-emerald-50: oklch(97.9% .021 166.113);--colors-emerald-100: oklch(95% .052 163.051);--colors-emerald-200: oklch(90.5% .093 164.15);--colors-emerald-300: oklch(84.5% .143 164.978);--colors-emerald-400: oklch(76.5% .177 163.223);--colors-emerald-500: oklch(69.6% .17 162.48);--colors-emerald-600: oklch(59.6% .145 163.225);--colors-emerald-700: oklch(50.8% .118 165.612);--colors-emerald-800: oklch(43.2% .095 166.913);--colors-emerald-900: oklch(37.8% .077 168.94);--colors-emerald-950: oklch(26.2% .051 172.552);--colors-emerald-DEFAULT: oklch(76.5% .177 163.223);--colors-teal-50: oklch(98.4% .014 180.72);--colors-teal-100: oklch(95.3% .051 180.801);--colors-teal-200: oklch(91% .096 180.426);--colors-teal-300: oklch(85.5% .138 181.071);--colors-teal-400: oklch(77.7% .152 181.912);--colors-teal-500: oklch(70.4% .14 182.503);--colors-teal-600: oklch(60% .118 184.704);--colors-teal-700: oklch(51.1% .096 186.391);--colors-teal-800: oklch(43.7% .078 188.216);--colors-teal-900: oklch(38.6% .063 188.416);--colors-teal-950: oklch(27.7% .046 192.524);--colors-teal-DEFAULT: oklch(77.7% .152 181.912);--colors-cyan-50: oklch(98.4% .019 200.873);--colors-cyan-100: oklch(95.6% .045 203.388);--colors-cyan-200: oklch(91.7% .08 205.041);--colors-cyan-300: oklch(86.5% .127 207.078);--colors-cyan-400: oklch(78.9% .154 211.53);--colors-cyan-500: oklch(71.5% .143 215.221);--colors-cyan-600: oklch(60.9% .126 221.723);--colors-cyan-700: oklch(52% .105 223.128);--colors-cyan-800: oklch(45% .085 224.283);--colors-cyan-900: oklch(39.8% .07 227.392);--colors-cyan-950: oklch(30.2% .056 229.695);--colors-cyan-DEFAULT: oklch(78.9% .154 211.53);--colors-sky-50: oklch(97.7% .013 236.62);--colors-sky-100: oklch(95.1% .026 236.824);--colors-sky-200: oklch(90.1% .058 230.902);--colors-sky-300: oklch(82.8% .111 230.318);--colors-sky-400: oklch(74.6% .16 232.661);--colors-sky-500: oklch(68.5% .169 237.323);--colors-sky-600: oklch(58.8% .158 241.966);--colors-sky-700: oklch(50% .134 242.749);--colors-sky-800: oklch(44.3% .11 240.79);--colors-sky-900: oklch(39.1% .09 240.876);--colors-sky-950: oklch(29.3% .066 243.157);--colors-sky-DEFAULT: oklch(74.6% .16 232.661);--colors-blue-50: oklch(97% .014 254.604);--colors-blue-100: oklch(93.2% .032 255.585);--colors-blue-200: oklch(88.2% .059 254.128);--colors-blue-300: oklch(80.9% .105 251.813);--colors-blue-400: oklch(70.7% .165 254.624);--colors-blue-500: oklch(62.3% .214 259.815);--colors-blue-600: oklch(54.6% .245 262.881);--colors-blue-700: oklch(48.8% .243 264.376);--colors-blue-800: oklch(42.4% .199 265.638);--colors-blue-900: oklch(37.9% .146 265.522);--colors-blue-950: oklch(28.2% .091 267.935);--colors-blue-DEFAULT: oklch(70.7% .165 254.624);--colors-indigo-50: oklch(96.2% .018 272.314);--colors-indigo-100: oklch(93% .034 272.788);--colors-indigo-200: oklch(87% .065 274.039);--colors-indigo-300: oklch(78.5% .115 274.713);--colors-indigo-400: oklch(67.3% .182 276.935);--colors-indigo-500: oklch(58.5% .233 277.117);--colors-indigo-600: oklch(51.1% .262 276.966);--colors-indigo-700: oklch(45.7% .24 277.023);--colors-indigo-800: oklch(39.8% .195 277.366);--colors-indigo-900: oklch(35.9% .144 278.697);--colors-indigo-950: oklch(25.7% .09 281.288);--colors-indigo-DEFAULT: oklch(67.3% .182 276.935);--colors-violet-50: oklch(96.9% .016 293.756);--colors-violet-100: oklch(94.3% .029 294.588);--colors-violet-200: oklch(89.4% .057 293.283);--colors-violet-300: oklch(81.1% .111 293.571);--colors-violet-400: oklch(70.2% .183 293.541);--colors-violet-500: oklch(60.6% .25 292.717);--colors-violet-600: oklch(54.1% .281 293.009);--colors-violet-700: oklch(49.1% .27 292.581);--colors-violet-800: oklch(43.2% .232 292.759);--colors-violet-900: oklch(38% .189 293.745);--colors-violet-950: oklch(28.3% .141 291.089);--colors-violet-DEFAULT: oklch(70.2% .183 293.541);--colors-purple-50: oklch(97.7% .014 308.299);--colors-purple-100: oklch(94.6% .033 307.174);--colors-purple-200: oklch(90.2% .063 306.703);--colors-purple-300: oklch(82.7% .119 306.383);--colors-purple-400: oklch(71.4% .203 305.504);--colors-purple-500: oklch(62.7% .265 303.9);--colors-purple-600: oklch(55.8% .288 302.321);--colors-purple-700: oklch(49.6% .265 301.924);--colors-purple-800: oklch(43.8% .218 303.724);--colors-purple-900: oklch(38.1% .176 304.987);--colors-purple-950: oklch(29.1% .149 302.717);--colors-purple-DEFAULT: oklch(71.4% .203 305.504);--colors-fuchsia-50: oklch(97.7% .017 320.058);--colors-fuchsia-100: oklch(95.2% .037 318.852);--colors-fuchsia-200: oklch(90.3% .076 319.62);--colors-fuchsia-300: oklch(83.3% .145 321.434);--colors-fuchsia-400: oklch(74% .238 322.16);--colors-fuchsia-500: oklch(66.7% .295 322.15);--colors-fuchsia-600: oklch(59.1% .293 322.896);--colors-fuchsia-700: oklch(51.8% .253 323.949);--colors-fuchsia-800: oklch(45.2% .211 324.591);--colors-fuchsia-900: oklch(40.1% .17 325.612);--colors-fuchsia-950: oklch(29.3% .136 325.661);--colors-fuchsia-DEFAULT: oklch(74% .238 322.16);--colors-pink-50: oklch(97.1% .014 343.198);--colors-pink-100: oklch(94.8% .028 342.258);--colors-pink-200: oklch(89.9% .061 343.231);--colors-pink-300: oklch(82.3% .12 346.018);--colors-pink-400: oklch(71.8% .202 349.761);--colors-pink-500: oklch(65.6% .241 354.308);--colors-pink-600: oklch(59.2% .249 .584);--colors-pink-700: oklch(52.5% .223 3.958);--colors-pink-800: oklch(45.9% .187 3.815);--colors-pink-900: oklch(40.8% .153 2.432);--colors-pink-950: oklch(28.4% .109 3.907);--colors-pink-DEFAULT: oklch(71.8% .202 349.761);--colors-rose-50: oklch(96.9% .015 12.422);--colors-rose-100: oklch(94.1% .03 12.58);--colors-rose-200: oklch(89.2% .058 10.001);--colors-rose-300: oklch(81% .117 11.638);--colors-rose-400: oklch(71.2% .194 13.428);--colors-rose-500: oklch(64.5% .246 16.439);--colors-rose-600: oklch(58.6% .253 17.585);--colors-rose-700: oklch(51.4% .222 16.935);--colors-rose-800: oklch(45.5% .188 13.697);--colors-rose-900: oklch(41% .159 10.272);--colors-rose-950: oklch(27.1% .105 12.094);--colors-rose-DEFAULT: oklch(71.2% .194 13.428);--colors-light-50: oklch(99.4% 0 0);--colors-light-100: oklch(99.11% 0 0);--colors-light-200: oklch(98.51% 0 0);--colors-light-300: oklch(98.16% .0017 247.84);--colors-light-400: oklch(97.31% 0 0);--colors-light-500: oklch(96.12% 0 0);--colors-light-600: oklch(96.32% .0034 247.86);--colors-light-700: oklch(94.17% .0052 247.88);--colors-light-800: oklch(91.09% .007 247.9);--colors-light-900: oklch(90.72% .0051 228.82);--colors-light-950: oklch(89.23% .006 239.83);--colors-light-DEFAULT: oklch(97.31% 0 0);--colors-dark-50: oklch(40.91% 0 0);--colors-dark-100: oklch(35.62% 0 0);--colors-dark-200: oklch(31.71% 0 0);--colors-dark-300: oklch(29.72% 0 0);--colors-dark-400: oklch(25.2% 0 0);--colors-dark-500: oklch(23.93% 0 0);--colors-dark-600: oklch(22.73% .0038 286.09);--colors-dark-700: oklch(22.21% 0 0);--colors-dark-800: oklch(20.9% 0 0);--colors-dark-900: oklch(16.84% 0 0);--colors-dark-950: oklch(13.44% 0 0);--colors-dark-DEFAULT: oklch(25.2% 0 0);--colors-primary-50: hsl(198, 100%, 97%);--colors-primary-100: hsl(198, 100%, 92%);--colors-primary-200: hsl(198, 100%, 84%);--colors-primary-300: hsl(198, 100%, 75%);--colors-primary-400: hsl(198, 100%, 66%);--colors-primary-500: hsl(198, 100%, 55%);--colors-primary-600: hsl(198, 100%, 45%);--colors-primary-700: hsl(198, 100%, 35%);--colors-primary-800: hsl(198, 100%, 24%);--colors-primary-900: hsl(198, 100%, 15%);--colors-primary-DEFAULT: hsl(198, 100%, 55%);--colors-secondary-50: hsl(120, 100%, 97%);--colors-secondary-100: hsl(120, 100%, 92%);--colors-secondary-200: hsl(120, 100%, 84%);--colors-secondary-300: hsl(120, 100%, 75%);--colors-secondary-400: hsl(120, 100%, 66%);--colors-secondary-500: hsl(120, 100%, 55%);--colors-secondary-600: hsl(120, 100%, 45%);--colors-secondary-700: hsl(120, 100%, 35%);--colors-secondary-800: hsl(120, 100%, 24%);--colors-secondary-900: hsl(120, 100%, 15%);--colors-secondary-DEFAULT: hsl(120, 100%, 55%);--colors-tertiary-50: hsl(175, 100%, 97%);--colors-tertiary-100: hsl(175, 100%, 92%);--colors-tertiary-200: hsl(175, 100%, 84%);--colors-tertiary-300: hsl(175, 100%, 75%);--colors-tertiary-400: hsl(175, 100%, 66%);--colors-tertiary-500: hsl(175, 100%, 55%);--colors-tertiary-600: hsl(175, 100%, 45%);--colors-tertiary-700: hsl(175, 100%, 35%);--colors-tertiary-800: hsl(175, 100%, 24%);--colors-tertiary-900: hsl(175, 100%, 15%);--colors-tertiary-DEFAULT: hsl(175, 100%, 55%);--colors-success-50: hsl(149, 87%, 97%);--colors-success-100: hsl(149, 87%, 92%);--colors-success-200: hsl(149, 87%, 84%);--colors-success-300: hsl(149, 87%, 75%);--colors-success-400: hsl(149, 87%, 66%);--colors-success-500: hsl(149, 87%, 55%);--colors-success-600: hsl(149, 87%, 45%);--colors-success-700: hsl(149, 87%, 35%);--colors-success-800: hsl(149, 87%, 24%);--colors-success-900: hsl(149, 87%, 15%);--colors-success-DEFAULT: hsl(149, 87%, 55%);--colors-warning-50: hsl(32, 100%, 97%);--colors-warning-100: hsl(32, 100%, 92%);--colors-warning-200: hsl(32, 100%, 84%);--colors-warning-300: hsl(32, 100%, 75%);--colors-warning-400: hsl(32, 100%, 66%);--colors-warning-500: hsl(32, 100%, 55%);--colors-warning-600: hsl(32, 100%, 45%);--colors-warning-700: hsl(32, 100%, 35%);--colors-warning-800: hsl(32, 100%, 24%);--colors-warning-900: hsl(32, 100%, 15%);--colors-warning-DEFAULT: hsl(32, 100%, 55%);--colors-danger-50: hsl(345, 100%, 97%);--colors-danger-100: hsl(345, 100%, 92%);--colors-danger-200: hsl(345, 100%, 84%);--colors-danger-300: hsl(345, 100%, 75%);--colors-danger-400: hsl(345, 100%, 66%);--colors-danger-500: hsl(345, 100%, 55%);--colors-danger-600: hsl(345, 100%, 45%);--colors-danger-700: hsl(345, 100%, 35%);--colors-danger-800: hsl(345, 100%, 24%);--colors-danger-900: hsl(345, 100%, 15%);--colors-danger-DEFAULT: hsl(345, 100%, 55%);--colors-default-50: hsl(0, 0%, 97%);--colors-default-100: hsl(0, 0%, 92%);--colors-default-200: hsl(0, 0%, 84%);--colors-default-300: hsl(0, 0%, 75%);--colors-default-400: hsl(0, 0%, 66%);--colors-default-500: hsl(0, 0%, 55%);--colors-default-600: hsl(0, 0%, 45%);--colors-default-700: hsl(0, 0%, 35%);--colors-default-800: hsl(0, 0%, 24%);--colors-default-900: hsl(0, 0%, 15%);--colors-default-DEFAULT: hsl(0, 0%, 35%);--colors-surface-50: hsl(0, 0%, 97%);--colors-surface-100: hsl(0, 0%, 92%);--colors-surface-200: hsl(0, 0%, 84%);--colors-surface-300: hsl(0, 0%, 75%);--colors-surface-400: hsl(0, 0%, 66%);--colors-surface-500: hsl(0, 0%, 55%);--colors-surface-600: hsl(0, 0%, 45%);--colors-surface-700: hsl(0, 0%, 35%);--colors-surface-800: hsl(0, 0%, 24%);--colors-surface-900: hsl(0, 0%, 15%);--colors-surface-DEFAULT: hsl(0, 0%, 35%);--text-xs-fontSize: .75rem;--text-xs-lineHeight: 1rem;--text-sm-fontSize: .875rem;--text-sm-lineHeight: 1.25rem;--text-base-fontSize: 1rem;--text-base-lineHeight: 1.5rem;--text-lg-fontSize: 1.125rem;--text-lg-lineHeight: 1.75rem;--text-xl-fontSize: 1.25rem;--text-xl-lineHeight: 1.75rem;--text-2xl-fontSize: 1.5rem;--text-2xl-lineHeight: 2rem;--text-3xl-fontSize: 1.875rem;--text-3xl-lineHeight: 2.25rem;--text-4xl-fontSize: 2.25rem;--text-4xl-lineHeight: 2.5rem;--text-5xl-fontSize: 3rem;--text-5xl-lineHeight: 1;--text-6xl-fontSize: 3.75rem;--text-6xl-lineHeight: 1;--text-7xl-fontSize: 4.5rem;--text-7xl-lineHeight: 1;--text-8xl-fontSize: 6rem;--text-8xl-lineHeight: 1;--text-9xl-fontSize: 8rem;--text-9xl-lineHeight: 1;--text-color: var(--color-surface-100);--fontWeight-thin: 100;--fontWeight-extralight: 200;--fontWeight-light: 300;--fontWeight-normal: 400;--fontWeight-medium: 500;--fontWeight-semibold: 600;--fontWeight-bold: 700;--fontWeight-extrabold: 800;--fontWeight-black: 900;--tracking-tighter: -.05em;--tracking-tight: -.025em;--tracking-normal: 0em;--tracking-wide: .025em;--tracking-wider: .05em;--tracking-widest: .1em;--leading-none: 1;--leading-tight: 1.25;--leading-snug: 1.375;--leading-normal: 1.5;--leading-relaxed: 1.625;--leading-loose: 2;--textStrokeWidth-DEFAULT: 1.5rem;--textStrokeWidth-none: 0;--textStrokeWidth-sm: thin;--textStrokeWidth-md: medium;--textStrokeWidth-lg: thick;--radius-DEFAULT: .25rem;--radius-none: 0;--radius-xs: .125rem;--radius-sm: .25rem;--radius-md: .375rem;--radius-lg: .5rem;--radius-xl: .75rem;--radius-2xl: 1rem;--radius-3xl: 1.5rem;--radius-4xl: 2rem;--ease-linear: linear;--ease-in: cubic-bezier(.4, 0, 1, 1);--ease-out: cubic-bezier(0, 0, .2, 1);--ease-in-out: cubic-bezier(.4, 0, .2, 1);--ease-DEFAULT: cubic-bezier(.4, 0, .2, 1);--blur-DEFAULT: 8px;--blur-xs: 4px;--blur-sm: 8px;--blur-md: 12px;--blur-lg: 16px;--blur-xl: 24px;--blur-2xl: 40px;--blur-3xl: 64px;--perspective-dramatic: 100px;--perspective-near: 300px;--perspective-normal: 500px;--perspective-midrange: 800px;--perspective-distant: 1200px;--default-transition-duration: .15s;--default-transition-timingFunction: cubic-bezier(.4, 0, .2, 1);--default-font-family: var(--font-sans);--default-font-featureSettings: var(--font-sans--font-feature-settings);--default-font-variationSettings: var(--font-sans--font-variation-settings);--default-monoFont-family: var(--font-mono);--default-monoFont-featureSettings: var(--font-mono--font-feature-settings);--default-monoFont-variationSettings: var(--font-mono--font-variation-settings);--container-3xs: 16rem;--container-2xs: 18rem;--container-xs: 20rem;--container-sm: 24rem;--container-md: 28rem;--container-lg: 32rem;--container-xl: 36rem;--container-2xl: 42rem;--container-3xl: 48rem;--container-4xl: 56rem;--container-5xl: 64rem;--container-6xl: 72rem;--container-7xl: 80rem;--container-prose: 65ch;--background-color: var(--colors-primary-100);--boxShadow-md: 0 4px 6px -1px rgb(0 0 0 / .1), 0 2px 4px -2px rgb(0 0 0 / .1);--boxShadow-lg: 0 10px 15px -3px rgb(0 0 0 / .1), 0 4px 6px -4px rgb(0 0 0 / .1);--theme-font-family: "Manrope"}*,:after,:before,::backdrop,::file-selector-button{box-sizing:border-box;margin:0;padding:0;border:0 solid}html,:host{line-height:1.5;-webkit-text-size-adjust:100%;tab-size:4;font-family:var( --default-font-family, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" );font-feature-settings:var(--default-font-featureSettings, normal);font-variation-settings:var(--default-font-variationSettings, normal);-webkit-tap-highlight-color:transparent}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;-webkit-text-decoration:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,samp,pre{font-family:var( --default-monoFont-family, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace );font-feature-settings:var(--default-monoFont-featureSettings, normal);font-variation-settings:var(--default-monoFont-variationSettings, normal);font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}:-moz-focusring{outline:auto}progress{vertical-align:baseline}summary{display:list-item}ol,ul,menu{list-style:none}img,svg,video,canvas,audio,iframe,embed,object{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}button,input,select,optgroup,textarea,::file-selector-button{font:inherit;font-feature-settings:inherit;font-variation-settings:inherit;letter-spacing:inherit;color:inherit;border-radius:0;background-color:transparent;opacity:1}:where(select:is([multiple],[size])) optgroup{font-weight:bolder}:where(select:is([multiple],[size])) optgroup option{padding-inline-start:20px}::file-selector-button{margin-inline-end:4px}::placeholder{opacity:1}@supports (not (-webkit-appearance: -apple-pay-button)) or (contain-intrinsic-size: 1px){::placeholder{color:color-mix(in oklab,currentcolor 50%,transparent)}}textarea{resize:vertical}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-date-and-time-value{min-height:1lh;text-align:inherit}::-webkit-datetime-edit{display:inline-flex}::-webkit-datetime-edit-fields-wrapper{padding:0}::-webkit-datetime-edit,::-webkit-datetime-edit-year-field,::-webkit-datetime-edit-month-field,::-webkit-datetime-edit-day-field,::-webkit-datetime-edit-hour-field,::-webkit-datetime-edit-minute-field,::-webkit-datetime-edit-second-field,::-webkit-datetime-edit-millisecond-field,::-webkit-datetime-edit-meridiem-field{padding-block:0}:-moz-ui-invalid{box-shadow:none}button,input:where([type=button],[type=reset],[type=submit]),::file-selector-button{appearance:button}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[hidden]:where(:not([hidden=until-found])){display:none!important}.container{width:100%}@media (min-width: 40rem){.container{max-width:40rem}}@media (min-width: 48rem){.container{max-width:48rem}}@media (min-width: 64rem){.container{max-width:64rem}}@media (min-width: 80rem){.container{max-width:80rem}}@media (min-width: 96rem){.container{max-width:96rem}}.text-2xl{font-size:var(--text-2xl-fontSize);line-height:var(--un-leading, var(--text-2xl-lineHeight))}.text-3xl{font-size:var(--text-3xl-fontSize);line-height:var(--un-leading, var(--text-3xl-lineHeight))}.text-4xl{font-size:var(--text-4xl-fontSize);line-height:var(--un-leading, var(--text-4xl-lineHeight))}.text-5xl{font-size:var(--text-5xl-fontSize);line-height:var(--un-leading, var(--text-5xl-lineHeight))}.text-6xl{font-size:var(--text-6xl-fontSize);line-height:var(--un-leading, var(--text-6xl-lineHeight))}.text-lg{font-size:var(--text-lg-fontSize);line-height:var(--un-leading, var(--text-lg-lineHeight))}.text-sm{font-size:var(--text-sm-fontSize);line-height:var(--un-leading, var(--text-sm-lineHeight))}.text-xl{font-size:var(--text-xl-fontSize);line-height:var(--un-leading, var(--text-xl-lineHeight))}.text-xs{font-size:var(--text-xs-fontSize);line-height:var(--un-leading, var(--text-xs-lineHeight))}.text-\\[\\#1d2021\\]{color:color-mix(in oklab,#1d2021 var(--un-text-opacity),transparent)}.text-\\[\\#282828\\]{color:color-mix(in oklab,#282828 var(--un-text-opacity),transparent)}.text-\\[\\#83a598\\]{color:color-mix(in oklab,#83a598 var(--un-text-opacity),transparent)}.text-\\[\\#928374\\]{color:color-mix(in oklab,#928374 var(--un-text-opacity),transparent)}.text-\\[\\#a89984\\]{color:color-mix(in oklab,#a89984 var(--un-text-opacity),transparent)}.text-\\[\\#b8bb26\\]{color:color-mix(in oklab,#b8bb26 var(--un-text-opacity),transparent)}.text-\\[\\#bdae93\\]{color:color-mix(in oklab,#bdae93 var(--un-text-opacity),transparent)}.text-\\[\\#d5c4a1\\]{color:color-mix(in oklab,#d5c4a1 var(--un-text-opacity),transparent)}.text-\\[\\#ebdbb2\\]{color:color-mix(in oklab,#ebdbb2 var(--un-text-opacity),transparent)}.text-\\[\\#fabd2f\\]{color:color-mix(in oklab,#fabd2f var(--un-text-opacity),transparent)}.text-amber-600{color:color-mix(in srgb,var(--colors-amber-600) var(--un-text-opacity),transparent)}.text-amber-900{color:color-mix(in srgb,var(--colors-amber-900) var(--un-text-opacity),transparent)}.text-blue-100{color:color-mix(in srgb,var(--colors-blue-100) var(--un-text-opacity),transparent)}.text-blue-600{color:color-mix(in srgb,var(--colors-blue-600) var(--un-text-opacity),transparent)}.text-gray-200{color:color-mix(in srgb,var(--colors-gray-200) var(--un-text-opacity),transparent)}.text-gray-400{color:color-mix(in srgb,var(--colors-gray-400) var(--un-text-opacity),transparent)}.text-gray-500{color:color-mix(in srgb,var(--colors-gray-500) var(--un-text-opacity),transparent)}.text-gray-600{color:color-mix(in srgb,var(--colors-gray-600) var(--un-text-opacity),transparent)}.text-gray-700{color:color-mix(in srgb,var(--colors-gray-700) var(--un-text-opacity),transparent)}.text-gray-800{color:color-mix(in srgb,var(--colors-gray-800) var(--un-text-opacity),transparent)}.text-gray-900{color:color-mix(in srgb,var(--colors-gray-900) var(--un-text-opacity),transparent)}.text-green-400{color:color-mix(in srgb,var(--colors-green-400) var(--un-text-opacity),transparent)}.text-green-800{color:color-mix(in srgb,var(--colors-green-800) var(--un-text-opacity),transparent)}.text-red-100{color:color-mix(in srgb,var(--colors-red-100) var(--un-text-opacity),transparent)}.text-red-400{color:color-mix(in srgb,var(--colors-red-400) var(--un-text-opacity),transparent)}.text-red-700{color:color-mix(in srgb,var(--colors-red-700) var(--un-text-opacity),transparent)}.text-red-800{color:color-mix(in srgb,var(--colors-red-800) var(--un-text-opacity),transparent)}.text-white{color:color-mix(in srgb,var(--colors-white) var(--un-text-opacity),transparent)}.text-yellow-800{color:color-mix(in srgb,var(--colors-yellow-800) var(--un-text-opacity),transparent)}.hover\\:text-\\[\\#ebdbb2\\]:hover{color:color-mix(in oklab,#ebdbb2 var(--un-text-opacity),transparent)}.hover\\:text-\\[\\#fb4934\\]:hover{color:color-mix(in oklab,#fb4934 var(--un-text-opacity),transparent)}.tracking-wider{--un-tracking:var(--tracking-wider);letter-spacing:var(--tracking-wider)}.font-bold{--un-font-weight:var(--fontWeight-bold);font-weight:var(--fontWeight-bold)}.font-extrabold{--un-font-weight:var(--fontWeight-extrabold);font-weight:var(--fontWeight-extrabold)}.font-family{font-family:var(--font-family)}.font-medium{--un-font-weight:var(--fontWeight-medium);font-weight:var(--fontWeight-medium)}.font-mono{font-family:var(--font-mono)}.font-sans{font-family:var(--font-sans)}.font-semibold{--un-font-weight:var(--fontWeight-semibold);font-weight:var(--fontWeight-semibold)}.tab{-moz-tab-size:4;-o-tab-size:4;tab-size:4}.m\\[1\\]{margin:1}.m\\[W\\]{margin:W}.m16{margin:calc(var(--spacing) * 16)}.m21{margin:calc(var(--spacing) * 21)}.m21\\.73{margin:calc(var(--spacing) * 21.73)}.m22{margin:calc(var(--spacing) * 22)}.m6{margin:calc(var(--spacing) * 6)}.m9{margin:calc(var(--spacing) * 9)}.mx-auto{margin-inline:auto}.my-2{margin-block:calc(var(--spacing) * 2)}.my-4{margin-block:calc(var(--spacing) * 4)}.my-6{margin-block:calc(var(--spacing) * 6)}.mb-1{margin-bottom:calc(var(--spacing) * 1)}.mb-2{margin-bottom:calc(var(--spacing) * 2)}.mb-3{margin-bottom:calc(var(--spacing) * 3)}.mb-4{margin-bottom:calc(var(--spacing) * 4)}.mb-6{margin-bottom:calc(var(--spacing) * 6)}.ml-1{margin-left:calc(var(--spacing) * 1)}.ml-2{margin-left:calc(var(--spacing) * 2)}.ml-auto{margin-left:auto}.mr-2{margin-right:calc(var(--spacing) * 2)}.mr-3{margin-right:calc(var(--spacing) * 3)}.mt-1{margin-top:calc(var(--spacing) * 1)}.mt-2{margin-top:calc(var(--spacing) * 2)}.mt-4{margin-top:calc(var(--spacing) * 4)}.p-1{padding:calc(var(--spacing) * 1)}.p-1\\.5{padding:calc(var(--spacing) * 1.5)}.p-2{padding:calc(var(--spacing) * 2)}.p-3{padding:calc(var(--spacing) * 3)}.p-4{padding:calc(var(--spacing) * 4)}.p-6{padding:calc(var(--spacing) * 6)}.p-8{padding:calc(var(--spacing) * 8)}.px-2{padding-inline:calc(var(--spacing) * 2)}.px-4{padding-inline:calc(var(--spacing) * 4)}.px-6{padding-inline:calc(var(--spacing) * 6)}.py-0\\.5{padding-block:calc(var(--spacing) * .5)}.py-1{padding-block:calc(var(--spacing) * 1)}.py-2{padding-block:calc(var(--spacing) * 2)}.py-8{padding-block:calc(var(--spacing) * 8)}.pb-2{padding-bottom:calc(var(--spacing) * 2)}.pb-4{padding-bottom:calc(var(--spacing) * 4)}.pr-10{padding-right:calc(var(--spacing) * 10)}.pr-16{padding-right:calc(var(--spacing) * 16)}.pr-4{padding-right:calc(var(--spacing) * 4)}.pt-2{padding-top:calc(var(--spacing) * 2)}.pt-4{padding-top:calc(var(--spacing) * 4)}.text-center{text-align:center}.text-left{text-align:left}.text-right{text-align:right}.focus\\:outline-none:focus{--un-outline-style:none;outline-style:none}.b,.border{border-width:1px}.border-2{border-width:2px}.border-b{border-bottom-width:1px}.border-b-2{border-bottom-width:2px}.border-l-4{border-left-width:4px}.border-r{border-right-width:1px}.border-t{border-top-width:1px}.border-t-2{border-top-width:2px}.border-\\[\\#3c3836\\]{border-color:color-mix(in oklab,#3c3836 var(--un-border-opacity),transparent)}.border-\\[\\#504945\\]{border-color:color-mix(in oklab,#504945 var(--un-border-opacity),transparent)}.border-\\[\\#665c54\\]{border-color:color-mix(in oklab,#665c54 var(--un-border-opacity),transparent)}.border-\\[\\#fb4934\\]{border-color:color-mix(in oklab,#fb4934 var(--un-border-opacity),transparent)}.border-amber-200{border-color:color-mix(in srgb,var(--colors-amber-200) var(--un-border-opacity),transparent)}.border-amber-400{border-color:color-mix(in srgb,var(--colors-amber-400) var(--un-border-opacity),transparent)}.border-gray-200{border-color:color-mix(in srgb,var(--colors-gray-200) var(--un-border-opacity),transparent)}.border-gray-700{border-color:color-mix(in srgb,var(--colors-gray-700) var(--un-border-opacity),transparent)}.border-white{border-color:color-mix(in srgb,var(--colors-white) var(--un-border-opacity),transparent)}.hover\\:border-\\[\\#83a598\\]:hover{border-color:color-mix(in oklab,#83a598 var(--un-border-opacity),transparent)}.focus\\:border-\\[\\#83a598\\]:focus{border-color:color-mix(in oklab,#83a598 var(--un-border-opacity),transparent)}.border-t-transparent{border-top-color:transparent}.rounded{border-radius:var(--radius-DEFAULT)}.rounded-full{border-radius:calc(infinity * 1px)}.rounded-lg{border-radius:var(--radius-lg)}.rounded-md{border-radius:var(--radius-md)}.rounded-xl{border-radius:var(--radius-xl)}.rounded-b-lg{border-bottom-left-radius:var(--radius-lg);border-bottom-right-radius:var(--radius-lg)}.rounded-bl-none{border-bottom-left-radius:var(--radius-none)}.rounded-br-none{border-bottom-right-radius:var(--radius-none)}.border-dashed{--un-border-style:dashed;border-style:dashed}.bg-\\[\\#1d2021\\]{background-color:color-mix(in oklab,#1d2021 var(--un-bg-opacity),transparent)}.bg-\\[\\#282828\\]{background-color:color-mix(in oklab,#282828 var(--un-bg-opacity),transparent)}.bg-\\[\\#3c3836\\]{background-color:color-mix(in oklab,#3c3836 var(--un-bg-opacity),transparent)}.bg-\\[\\#458588\\]{background-color:color-mix(in oklab,#458588 var(--un-bg-opacity),transparent)}.bg-\\[\\#504945\\],.data-\\[active\\=true\\]\\:bg-\\[\\#504945\\][data-active=true]{background-color:color-mix(in oklab,#504945 var(--un-bg-opacity),transparent)}.bg-\\[\\#83a598\\]{background-color:color-mix(in oklab,#83a598 var(--un-bg-opacity),transparent)}.bg-\\[\\#b16286\\]{background-color:color-mix(in oklab,#b16286 var(--un-bg-opacity),transparent)}.bg-\\[\\#b8bb26\\]{background-color:color-mix(in oklab,#b8bb26 var(--un-bg-opacity),transparent)}.bg-\\[\\#ebdbb2\\]{background-color:color-mix(in oklab,#ebdbb2 var(--un-bg-opacity),transparent)}.bg-\\[\\#fb4934\\]{background-color:color-mix(in oklab,#fb4934 var(--un-bg-opacity),transparent)}.bg-amber-50{background-color:color-mix(in srgb,var(--colors-amber-50) var(--un-bg-opacity),transparent)}.bg-blue-600{background-color:color-mix(in srgb,var(--colors-blue-600) var(--un-bg-opacity),transparent)}.bg-gray-100{background-color:color-mix(in srgb,var(--colors-gray-100) var(--un-bg-opacity),transparent)}.bg-gray-200{background-color:color-mix(in srgb,var(--colors-gray-200) var(--un-bg-opacity),transparent)}.bg-gray-50{background-color:color-mix(in srgb,var(--colors-gray-50) var(--un-bg-opacity),transparent)}.bg-gray-600{background-color:color-mix(in srgb,var(--colors-gray-600) var(--un-bg-opacity),transparent)}.bg-gray-700{background-color:color-mix(in srgb,var(--colors-gray-700) var(--un-bg-opacity),transparent)}.bg-gray-800{background-color:color-mix(in srgb,var(--colors-gray-800) var(--un-bg-opacity),transparent)}.bg-gray-900{background-color:color-mix(in srgb,var(--colors-gray-900) var(--un-bg-opacity),transparent)}.bg-green-100{background-color:color-mix(in srgb,var(--colors-green-100) var(--un-bg-opacity),transparent)}.bg-red-100{background-color:color-mix(in srgb,var(--colors-red-100) var(--un-bg-opacity),transparent)}.bg-red-700{background-color:color-mix(in srgb,var(--colors-red-700) var(--un-bg-opacity),transparent)}.bg-red-900\\/50{background-color:color-mix(in srgb,var(--colors-red-900) 50%,transparent)}.bg-white{background-color:color-mix(in srgb,var(--colors-white) var(--un-bg-opacity),transparent)}.bg-yellow-100{background-color:color-mix(in srgb,var(--colors-yellow-100) var(--un-bg-opacity),transparent)}.hover\\:bg-\\[\\#1d2021\\]:hover{background-color:color-mix(in oklab,#1d2021 var(--un-bg-opacity),transparent)}.hover\\:bg-\\[\\#3c3836\\]:hover{background-color:color-mix(in oklab,#3c3836 var(--un-bg-opacity),transparent)}.hover\\:bg-\\[\\#504945\\]:hover{background-color:color-mix(in oklab,#504945 var(--un-bg-opacity),transparent)}.hover\\:bg-\\[\\#665c54\\]:hover{background-color:color-mix(in oklab,#665c54 var(--un-bg-opacity),transparent)}.hover\\:bg-\\[\\#83a598\\]:hover{background-color:color-mix(in oklab,#83a598 var(--un-bg-opacity),transparent)}.hover\\:bg-amber-100:hover{background-color:color-mix(in srgb,var(--colors-amber-100) var(--un-bg-opacity),transparent)}.hover\\:bg-gray-700:hover{background-color:color-mix(in srgb,var(--colors-gray-700) var(--un-bg-opacity),transparent)}.opacity-0{opacity:0%}.group:hover .group-hover\\:opacity-100{opacity:100%}.hover\\:underline:hover{text-decoration-line:underline}.flex{display:flex}.flex-1{flex:1 1 0%}.flex-shrink-0,.shrink-0{flex-shrink:0}.selection\\:shrink-selection *::selection,.selection\\:shrink-selection::selection{flex-shrink:1}.flex-grow{flex-grow:1}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.gap-1{gap:calc(var(--spacing) * 1)}.gap-1\\.5{gap:calc(var(--spacing) * 1.5)}.gap-2{gap:calc(var(--spacing) * 2)}.gap-3{gap:calc(var(--spacing) * 3)}.gap-4{gap:calc(var(--spacing) * 4)}.gap-6{gap:calc(var(--spacing) * 6)}.grid{display:grid}.grid-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))}.grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.h-12{height:calc(var(--spacing) * 12)}.h-15{height:calc(var(--spacing) * 15)}.h-16{height:calc(var(--spacing) * 16)}.h-3\\.5{height:calc(var(--spacing) * 3.5)}.h-4{height:calc(var(--spacing) * 4)}.h-5{height:calc(var(--spacing) * 5)}.h-50{height:calc(var(--spacing) * 50)}.h-7{height:calc(var(--spacing) * 7)}.h-8{height:calc(var(--spacing) * 8)}.h-full{height:100%}.h-screen{height:100vh}.max-h-32{max-height:calc(var(--spacing) * 32)}.max-h-48{max-height:calc(var(--spacing) * 48)}.max-w-\\[75\\%\\]{max-width:75%}.max-w-lg{max-width:var(--container-lg)}.max-w-md{max-width:var(--container-md)}.max-w-none{max-width:none}.min-h-\\[2\\.5rem\\]{min-height:2.5rem}.min-h-0{min-height:calc(var(--spacing) * 0)}.min-h-screen{min-height:100vh}.min-w-0{min-width:calc(var(--spacing) * 0)}.w-10{width:calc(var(--spacing) * 10)}.w-12{width:calc(var(--spacing) * 12)}.w-16{width:calc(var(--spacing) * 16)}.w-2{width:calc(var(--spacing) * 2)}.w-28{width:calc(var(--spacing) * 28)}.w-3\\.5{width:calc(var(--spacing) * 3.5)}.w-3xs{width:var(--container-3xs)}.w-4{width:calc(var(--spacing) * 4)}.w-5{width:calc(var(--spacing) * 5)}.w-64{width:calc(var(--spacing) * 64)}.w-8{width:calc(var(--spacing) * 8)}.w-80{width:calc(var(--spacing) * 80)}.w-full{width:100%}.w\\[M\\]{width:M}.inline{display:inline}.block{display:block}.inline-block{display:inline-block}.contents{display:contents}.hidden{display:none}.visible{visibility:visible}.cursor-pointer{cursor:pointer}.cursor-not-allowed{cursor:not-allowed}.resize-none{resize:none}.selection\\:select-all *::selection,.selection\\:select-all::selection{-webkit-user-select:all;user-select:all}.whitespace-pre-wrap{white-space:pre-wrap}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.text-ellipsis{text-overflow:ellipsis}.uppercase{text-transform:uppercase}.capitalize{text-transform:capitalize}.italic{font-style:italic}.antialiased{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.focus\\:ring-2:focus{--un-ring-shadow:var(--un-ring-inset,) 0 0 0 calc(2px + var(--un-ring-offset-width)) var(--un-ring-color, currentColor);box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.focus\\:ring-\\[\\#83a598\\]:focus{--un-ring-color:color-mix(in oklab, #83a598 var(--un-ring-opacity), transparent)}.shadow,.shadow-sm{--un-shadow:0 1px 3px 0 var(--un-shadow-color, rgb(0 0 0 / .1)),0 1px 2px -1px var(--un-shadow-color, rgb(0 0 0 / .1));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.shadow-\\[4px_4px_0px_\\#1d2021\\]{--un-shadow:4px 4px 0px var(--un-shadow-color, rgb(29 32 33));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.shadow-lg{--un-shadow:0 10px 15px -3px var(--un-shadow-color, rgb(0 0 0 / .1)),0 4px 6px -4px var(--un-shadow-color, rgb(0 0 0 / .1));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.shadow-md{--un-shadow:0 4px 6px -1px var(--un-shadow-color, rgb(0 0 0 / .1)),0 2px 4px -2px var(--un-shadow-color, rgb(0 0 0 / .1));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.shadow-xl{--un-shadow:0 20px 25px -5px var(--un-shadow-color, rgb(0 0 0 / .1)),0 8px 10px -6px var(--un-shadow-color, rgb(0 0 0 / .1));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.hover\\:shadow-\\[6px_6px_0px_\\#83a598\\]:hover{--un-shadow:6px 6px 0px var(--un-shadow-color, rgb(131 165 152));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.focus\\:shadow-\\[2px_2px_0px_\\#1d2021\\]:focus{--un-shadow:2px 2px 0px var(--un-shadow-color, rgb(29 32 33));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.translate-x-4{--un-translate-x:calc(var(--spacing) * 4);translate:var(--un-translate-x) var(--un-translate-y)}.transform{transform:var(--un-rotate-x) var(--un-rotate-y) var(--un-rotate-z) var(--un-skew-x) var(--un-skew-y)}.transition{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,--un-gradient-from,--un-gradient-via,--un-gradient-to,opacity,box-shadow,transform,translate,scale,rotate,filter,-webkit-backdrop-filter,backdrop-filter;transition-timing-function:var(--un-ease, var(--default-transition-timingFunction));transition-duration:var(--un-duration, var(--default-transition-duration))}.transition-all{transition-property:all;transition-timing-function:var(--un-ease, var(--default-transition-timingFunction));transition-duration:var(--un-duration, var(--default-transition-duration))}.transition-colors{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,--un-gradient-from,--un-gradient-via,--un-gradient-to;transition-timing-function:var(--un-ease, var(--default-transition-timingFunction));transition-duration:var(--un-duration, var(--default-transition-duration))}.transition-opacity{transition-property:opacity;transition-timing-function:var(--un-ease, var(--default-transition-timingFunction));transition-duration:var(--un-duration, var(--default-transition-duration))}.transition-transform{transition-property:transform,translate,scale,rotate;transition-timing-function:var(--un-ease, var(--default-transition-timingFunction));transition-duration:var(--un-duration, var(--default-transition-duration))}.duration-200{--un-duration:.2s;transition-duration:.2s}.ease-in-out{--un-ease:var(--ease-in-out);transition-timing-function:var(--ease-in-out)}.items-start{align-items:flex-start}.items-end{align-items:flex-end}.items-center{align-items:center}.items-baseline{align-items:baseline}.bottom-2\\.5{bottom:calc(var(--spacing) * 2.5)}.right-2{right:calc(var(--spacing) * 2)}.right-3{right:calc(var(--spacing) * 3)}.top-2{top:calc(var(--spacing) * 2)}.justify-start{justify-content:flex-start}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.absolute{position:absolute}.fixed{position:fixed}.relative{position:relative}.static{position:static}.overflow-auto{overflow:auto}.overflow-y-auto{overflow-y:auto}@keyframes pulse{0%,to{opacity:1}50%{opacity:.5}}@keyframes spin{0%{transform:rotate(0)}to{transform:rotate(360deg)}}.animate-pulse{animation:pulse 2s cubic-bezier(.4,0,.6,1) infinite}.animate-spin{animation:spin 1s linear infinite}.filter{filter:var(--un-blur,) var(--un-brightness,) var(--un-contrast,) var(--un-grayscale,) var(--un-hue-rotate,) var(--un-invert,) var(--un-saturate,) var(--un-sepia,) var(--un-drop-shadow,)}.placeholder-\\[\\#928374\\]::placeholder{color:color-mix(in oklab,#928374 var(--un-placeholder-opacity),transparent)}.table{display:table}.table-row{display:table-row}.space-x-2>:not(:last-child){--un-space-x-reverse:0;margin-inline-start:calc(calc(var(--spacing) * 2) * var(--un-space-x-reverse));margin-inline-end:calc(calc(var(--spacing) * 2) * calc(1 - var(--un-space-x-reverse)))}.space-x-3>:not(:last-child){--un-space-x-reverse:0;margin-inline-start:calc(calc(var(--spacing) * 3) * var(--un-space-x-reverse));margin-inline-end:calc(calc(var(--spacing) * 3) * calc(1 - var(--un-space-x-reverse)))}.space-y-1>:not(:last-child){--un-space-y-reverse:0;margin-block-start:calc(calc(var(--spacing) * 1) * var(--un-space-y-reverse));margin-block-end:calc(calc(var(--spacing) * 1) * calc(1 - var(--un-space-y-reverse)))}.space-y-2>:not(:last-child){--un-space-y-reverse:0;margin-block-start:calc(calc(var(--spacing) * 2) * var(--un-space-y-reverse));margin-block-end:calc(calc(var(--spacing) * 2) * calc(1 - var(--un-space-y-reverse)))}.space-y-3>:not(:last-child){--un-space-y-reverse:0;margin-block-start:calc(calc(var(--spacing) * 3) * var(--un-space-y-reverse));margin-block-end:calc(calc(var(--spacing) * 3) * calc(1 - var(--un-space-y-reverse)))}.space-y-4>:not(:last-child){--un-space-y-reverse:0;margin-block-start:calc(calc(var(--spacing) * 4) * var(--un-space-y-reverse));margin-block-end:calc(calc(var(--spacing) * 4) * calc(1 - var(--un-space-y-reverse)))}.space-y-6>:not(:last-child){--un-space-y-reverse:0;margin-block-start:calc(calc(var(--spacing) * 6) * var(--un-space-y-reverse));margin-block-end:calc(calc(var(--spacing) * 6) * calc(1 - var(--un-space-y-reverse)))}@supports (color: color-mix(in lab,red,red)){.text-amber-600{color:color-mix(in oklab,var(--colors-amber-600) var(--un-text-opacity),transparent)}.text-amber-900{color:color-mix(in oklab,var(--colors-amber-900) var(--un-text-opacity),transparent)}.text-blue-100{color:color-mix(in oklab,var(--colors-blue-100) var(--un-text-opacity),transparent)}.text-blue-600{color:color-mix(in oklab,var(--colors-blue-600) var(--un-text-opacity),transparent)}.text-gray-200{color:color-mix(in oklab,var(--colors-gray-200) var(--un-text-opacity),transparent)}.text-gray-400{color:color-mix(in oklab,var(--colors-gray-400) var(--un-text-opacity),transparent)}.text-gray-500{color:color-mix(in oklab,var(--colors-gray-500) var(--un-text-opacity),transparent)}.text-gray-600{color:color-mix(in oklab,var(--colors-gray-600) var(--un-text-opacity),transparent)}.text-gray-700{color:color-mix(in oklab,var(--colors-gray-700) var(--un-text-opacity),transparent)}.text-gray-800{color:color-mix(in oklab,var(--colors-gray-800) var(--un-text-opacity),transparent)}.text-gray-900{color:color-mix(in oklab,var(--colors-gray-900) var(--un-text-opacity),transparent)}.text-green-400{color:color-mix(in oklab,var(--colors-green-400) var(--un-text-opacity),transparent)}.text-green-800{color:color-mix(in oklab,var(--colors-green-800) var(--un-text-opacity),transparent)}.text-red-100{color:color-mix(in oklab,var(--colors-red-100) var(--un-text-opacity),transparent)}.text-red-400{color:color-mix(in oklab,var(--colors-red-400) var(--un-text-opacity),transparent)}.text-red-700{color:color-mix(in oklab,var(--colors-red-700) var(--un-text-opacity),transparent)}.text-red-800{color:color-mix(in oklab,var(--colors-red-800) var(--un-text-opacity),transparent)}.text-white{color:color-mix(in oklab,var(--colors-white) var(--un-text-opacity),transparent)}.text-yellow-800{color:color-mix(in oklab,var(--colors-yellow-800) var(--un-text-opacity),transparent)}.border-amber-200{border-color:color-mix(in oklab,var(--colors-amber-200) var(--un-border-opacity),transparent)}.border-amber-400{border-color:color-mix(in oklab,var(--colors-amber-400) var(--un-border-opacity),transparent)}.border-gray-200{border-color:color-mix(in oklab,var(--colors-gray-200) var(--un-border-opacity),transparent)}.border-gray-700{border-color:color-mix(in oklab,var(--colors-gray-700) var(--un-border-opacity),transparent)}.border-white{border-color:color-mix(in oklab,var(--colors-white) var(--un-border-opacity),transparent)}.bg-amber-50{background-color:color-mix(in oklab,var(--colors-amber-50) var(--un-bg-opacity),transparent)}.bg-blue-600{background-color:color-mix(in oklab,var(--colors-blue-600) var(--un-bg-opacity),transparent)}.bg-gray-100{background-color:color-mix(in oklab,var(--colors-gray-100) var(--un-bg-opacity),transparent)}.bg-gray-200{background-color:color-mix(in oklab,var(--colors-gray-200) var(--un-bg-opacity),transparent)}.bg-gray-50{background-color:color-mix(in oklab,var(--colors-gray-50) var(--un-bg-opacity),transparent)}.bg-gray-600{background-color:color-mix(in oklab,var(--colors-gray-600) var(--un-bg-opacity),transparent)}.bg-gray-700{background-color:color-mix(in oklab,var(--colors-gray-700) var(--un-bg-opacity),transparent)}.bg-gray-800{background-color:color-mix(in oklab,var(--colors-gray-800) var(--un-bg-opacity),transparent)}.bg-gray-900{background-color:color-mix(in oklab,var(--colors-gray-900) var(--un-bg-opacity),transparent)}.bg-green-100{background-color:color-mix(in oklab,var(--colors-green-100) var(--un-bg-opacity),transparent)}.bg-red-100{background-color:color-mix(in oklab,var(--colors-red-100) var(--un-bg-opacity),transparent)}.bg-red-700{background-color:color-mix(in oklab,var(--colors-red-700) var(--un-bg-opacity),transparent)}.bg-red-900\\/50{background-color:color-mix(in oklab,var(--colors-red-900) 50%,transparent)}.bg-white{background-color:color-mix(in oklab,var(--colors-white) var(--un-bg-opacity),transparent)}.bg-yellow-100{background-color:color-mix(in oklab,var(--colors-yellow-100) var(--un-bg-opacity),transparent)}.hover\\:bg-amber-100:hover{background-color:color-mix(in oklab,var(--colors-amber-100) var(--un-bg-opacity),transparent)}.hover\\:bg-gray-700:hover{background-color:color-mix(in oklab,var(--colors-gray-700) var(--un-bg-opacity),transparent)}}@media (min-width: 48rem){.md\\:p-8{padding:calc(var(--spacing) * 8)}.md\\:flex-row{flex-direction:row}.md\\:col-span-2{grid-column:span 2/span 2}.md\\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.md\\:w-64{width:calc(var(--spacing) * 64)}.md\\:items-center{align-items:center}.md\\:justify-between{justify-content:space-between}}@media (min-width: 64rem){.lg\\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}}@media (min-width: 80rem){.xl\\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}}body{font-family:var(--font-family)}html,body{font-family:var(--theme-font-family);background-color:var(--theme-background-color)!important;color:var(--text-color)!important;width:100%;min-height:100%;height:100%;padding:0;margin:0}body:not(.production) *:not(:defined){border:1px solid red}.dark{filter:invert(1) hue-rotate(180deg)}.dark img,.dark dialog,.dark video,.dark iframe{filter:invert(1) hue-rotate(180deg)}html{font-size:14px}@media (max-width: 768px){html{font-size:18px}}@media (max-width: 480px){html{font-size:20px}}textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;color:inherit;margin:0;padding:0}:root{box-sizing:border-box;-moz-text-size-adjust:none;-webkit-text-size-adjust:none;text-size-adjust:none;line-height:1.2;-webkit-font-smoothing:antialiased}*,*:before,*:after{box-sizing:border-box}*{margin:0}body{-webkit-font-smoothing:antialiased;font-family:var(--font-family)}button,textarea,select{background-color:inherit;border-width:0;color:inherit}img,picture,video,canvas,svg{display:block;max-width:100%}input,button,textarea,select{font:inherit}p,h1,h2,h3,h4,h5,h6{font-family:var(--font-family);overflow-wrap:break-word}dialog::backdrop{background-color:#000c}*::-webkit-scrollbar{width:8px;margin-right:10px}*::-webkit-scrollbar-track{background:transparent}*::-webkit-scrollbar-thumb{&:hover{scrollbar-color:rgba(154,153,150,.8) transparent}border-radius:10px;border:none}*::-webkit-scrollbar-button{background:transparent;color:transparent}*{scrollbar-width:thin;scrollbar-color:transparent transparent;&:hover{scrollbar-color:rgba(154,153,150,.8) transparent}}[full]{width:100%;height:100vh}[w-full]{width:100%}[grow]{flex-grow:1}[hide],.hide{display:none!important}[noscroll]{overflow:hidden}div [container]{display:flex}div [container][horizontal]{display:flex;flex-direction:col}:where(.uix-link){font-weight:var(--uix-link-font-weight, 600);width:var(--uix-link-width, auto);color:var(--uix-link-text-color, var(--colors-default-900));--uix-link-indent: 0;cursor:pointer;&[vertical]{margin:0 auto}a,button{width:inherit;cursor:pointer;padding:var(--uix-link-padding);&:hover{color:var(--uix-link-hover-color, var(--uix-link-text-color))}}.uix-text-icon__element{display:flex;align-items:center;gap:var(--uix-link-icon-gap, .5rem);&[reverse][vertical]{flex-direction:column-reverse}&:not([reverse])[vertical]{flex-direction:column}&[reverse]:not([vertical]){flex-direction:row-reverse}&:not([reverse]):not([vertical]){flex-direction:row}}transition:all .3s ease-in-out;&[indent]{>a,>button{padding-left:var(--uix-link-indent)}}&[active]:hover{color:var(--uix-link-hover-text-color, var(--colors-primary-400))}&[selectable][selected]{background-color:var(--colors-primary-400)}&:hover{[tooltip]{display:flex}}&[tooltip]{display:inline-block;&:hover{[tooltip]{visibility:visible}}[tooltip]{visibility:hidden;width:120px;background-color:#000;color:#fff;text-align:center;border-radius:6px;padding:5px 10px;margin-left:3px;position:absolute;z-index:1000000000;top:50%;left:100%;transform:translateY(-50%)}}&[position~=top] [tooltip]{bottom:100%;left:50%;transform:translate(-50%)}&[position~=bottom] [tooltip]{top:100%;left:50%;transform:translate(-50%)}&[position~=left] [tooltip]{top:50%;right:100%;transform:translateY(-50%)}&[tooltip],&[dropdown],&[context],&[float]{position:relative}&[dropdown],&[accordion]{flex-direction:column}[float],[dropdown],[accordion],[context]{display:none}&[floatopen]>a{display:none}&[floatopen] [float]{display:block;position:relative;bottom:0;right:0}&[context]{z-index:auto}[context][open]{display:flex;flex-direction:column}[dropdown],[context][open]{position:absolute;left:0;top:100%;width:100%;min-width:200px;z-index:1000;background-color:var(--colors-primary-100);box-shadow:0 8px 16px #0003;.uix-link:hover,input{background-color:var(--colors-primary-200)}>.uix-link{width:100%}}[context][open]{display:flex}&[selected]{[dropdown],[accordion]{display:flex;flex-direction:column}}}:where(.uix-button){border:var(--uix-button-borderSize, 0) solid var(--uix-button-borderColor);border-radius:var(--uix-button-borderRadius, var(--radius-md));box-shadow:var(--uix-button-shadow);width:var(--uix-button-width);min-width:fit-content;background-color:var(--uix-button-backgroundColor, black);color:var(--uix-button-textColor, var(--colors-default-100));font-weight:var(--uix-button-fontWeight, 700);display:flex;text-align:center;transition:transform .2s ease-in-out,opacity .2s ease-in-out,background-color .2s ease-in-out;&:hover{opacity:var(--uix-button-hover-opacity, .4)}&:active{transform:scale(.97)}>button,>a,>input{width:max-content;display:block;border-radius:inherit;cursor:var(--uix-button-cursor, pointer);height:calc(var(--spacing) * 10);line-height:calc(var(--spacing) * 5);padding:var( --uix-button-padding, calc(var(--spacing) * 2.5) calc(var(--spacing) * 4) );word-break:keep-all;flex-basis:100%}.uix-icon,button,input,a{cursor:pointer}&[bordered]{--uix-button-border-size: 1px;--uix-button-backgroundColor: transparent;--uix-button-hoverBackgroundColor: var(--_variant-color-300);--uix-button-borderColor: var(--_variant-color-400);--uix-button-textColor: var(--_variant-color-700)}&[ghost]{--uix-button-backgroundColor: transparent;--uix-button-hoverBackgroundColor: var(--_variant-color-300);--uix-button-borderSize: 0px;--uix-button-textColor: var(--_variant-color-700)}&[outline]{--uix-button-backgroundColor: transparent;--uix-button-hoverBackgroundColor: var(--_variant-color-300);--uix-button-textColor: var(--_variant-color-800);--uix-button-borderSize: 1px;--uix-button-borderColor: var(--_variant-color-400)}&[float]{background-color:#000;--uix-button-hoverBackgroundColor: var(--_variant-color-500);--uix-button-textColor: var(--_variant-color-50);--uix-button-borderSize: 0px;--uix-button-borderRadius: 9999px;--uix-button-width: var(--uix-button-height);box-shadow:var(--shadow-md, 0 4px 6px -1px rgb(0 0 0 / .1));--uix-button-padding: .5rem}&[float]:hover{box-shadow:var(--shadow-lg, 0 10px 15px -3px rgb(0 0 0 / .1))}}.uix-list{display:flex;&[vertical]{flex-direction:column}}.uix-navbar{--uix-navbar-text-color: var(--color-default-90);--uix-navbar-hover-text-color: var(--color-surface-80);--uix-navbar-border-radius: 0px;--uix-navbar-border-color: var(--color-default-60);--uix-navbar-border-size: 1px;--uix-navbar-border-style: solid;--uix-navbar-hover-background-color: var(--color-default-40);--uix-container-position: var(--uix-navbar-position);display:flex;flex-direction:column;&[docked]{--uix-list-button-radius: 0;border-bottom:0;position:fixed;bottom:0;background-color:var(--uix-navbar-background-color, var(--color-default-5));>*{border-right:0;border-bottom:0;&:first-child{border-left:0}}}}.uix-icon{display:inline-block;vertical-align:middle;svg{height:inherit;width:inherit}}&[solid]{stroke:currentColor;fill:currentColor}:where(.uix-input){--uix-input-background-color: var(--colors-surface-100);--uix-input-border-color: var(--colors-gray-900);--uix-input-text-color: var(--colors-gray-900);--uix-input-placeholder-color: var(--colors-default-500);--uix-input-border-radius: var(--border-radius-md);--uix-input-border-width: 2px;--uix-input-padding-x: calc(var(--spacing) * 4);--uix-input-padding-y: calc(var(--spacing) * 2.5);--uix-input-font-size: var(--font-size-base);--uix-input-height: 2.5rem;--uix-input-disabled-opacity: .6;--uix-input-label-font-size: var(--font-size-sm);--uix-input-label-font-weight: var(--font-weight-bold);--uix-input-label-color: var(--colors-default-700);--uix-input-checkbox-size: 1.5rem;--uix-input-checkbox-border-radius: var(--border-radius-sm);--uix-input-checkbox-checked-bg: var(--colors-primary-600);--uix-input-checkbox-check-color: var(--colors-surface-100);width:100%;display:flex;flex-direction:column;input,select,textarea{width:100%;height:var(--uix-input-height);border-radius:var(--uix-input-border-radius);border:var(--uix-input-border-width) solid var(--uix-input-border-color);font-size:var(--uix-input-font-size);background-color:var(--uix-input-background-color);color:var(--uix-input-text-color);transition:var(--uix-transition);outline:none;padding:var(--uix-input-padding-y) var(--uix-input-padding-x)}textarea{resize:vertical}&:has(textarea){height:auto}select{appearance:none;-webkit-appearance:none;cursor:pointer;font-weight:600;padding-block:0;option{font-weight:600;background-color:var(--uix-input-background-color);font-size:1.1rem;line-height:1.5rem;color:#333;padding:50px;border:2px solid red}}.select-container{position:relative;.select-arrow{position:absolute;right:calc(2 * var(--spacing))}}input::placeholder{color:transparent}label{font-weight:var(--uix-input-label-font-weight);color:var(--uix-input-label-color, var(--colors-gray-600));margin-bottom:var(--spacing);font-size:.9rem;padding:0 4px;transition:all .2s ease-in-out;pointer-events:none;&[required]:after{content:"*";color:var(--colors-danger-500);margin-left:2px}}input:not(:placeholder-shown)+label,textarea:not(:placeholder-shown)+label,&:focus-within label,&.has-value label{top:-2px;transform:translateY(0);font-size:var(--uix-input-label-font-size)}&:focus-within input,&:focus-within select,&:focus-within textarea{box-shadow:0 0 var(--uix-input-focus-ring-width, 5px) var(--uix-input-focus-ring-color, rgba(0, 0, 255, .5))}&[disabled]{cursor:not-allowed;opacity:var(--uix-input-disabled-opacity);& label{cursor:not-allowed}}.input-icon,.select-arrow{position:absolute;top:50%;right:var(--spacing);transform:translateY(-50%);pointer-events:none;color:var(--uix-input-label-color);transition:transform .2s ease-in-out}&:has(select:hover:active) .select-arrow{transform:translateY(-50%) rotate(180deg)}&:has(.input-icon:not(.select-arrow))>input{padding-right:calc(var(--uix-input-padding-x) + 1.75em)}&[type=checkbox],&[type=radio]{flex-direction:row;align-items:center;border:0;height:auto;width:auto;background-color:transparent;box-shadow:none;gap:.75rem;cursor:pointer;label{margin:0;line-height:1.5rem;position:static;transform:none;background-color:transparent;padding:0;cursor:pointer;font-weight:var(--font-weight-normal);order:2;pointer-events:auto}input{appearance:none;-webkit-appearance:none;width:var(--uix-input-checkbox-size);height:var(--uix-input-checkbox-size);margin:0;border:var(--uix-input-border-width) solid var(--uix-input-border-color);background-color:var(--uix-input-background-color);cursor:pointer;position:relative;transition:var(--uix-transition);padding:0;&:after{content:"";position:absolute;display:none;left:50%;top:50%}&:checked{background-color:var(--uix-input-checkbox-checked-bg);border-color:var(--uix-input-checkbox-checked-bg);&:after{display:block}}&:focus-visible{box-shadow:0 0 0 var(--uix-input-focus-ring-width) var(--uix-input-focus-ring-color);border-color:var(--uix-input-focus-ring-color)}}}&[type=checkbox] input:after{width:.375rem;height:.75rem;border:solid var(--uix-input-checkbox-check-color);border-width:0 2px 2px 0;transform:translate(-50%,-60%) rotate(45deg)}&[type=radio] input{border-radius:var(--border-radius-full);&:after{width:calc(var(--uix-input-checkbox-size) / 2);height:calc(var(--uix-input-checkbox-size) / 2);border-radius:var(--border-radius-full);background-color:var(--uix-input-checkbox-check-color);transform:translate(-50%,-50%)}}&[ghost]{&:focus-within select{box-shadow:none}.select-arrow{margin-left:5px;padding-left:5px}select{background:inherit;border:0}}}
 `,metaType:"text/css"}};self.addEventListener("install",t=>t.waitUntil(self.skipWaiting())),self.addEventListener("activate",t=>t.waitUntil(self.clients.claim())),self.addEventListener("fetch",t=>{const e=new URL(t.request.url),n=FILE_BUNDLE[e.pathname];n&&t.respondWith(new Response(n.content,{headers:{"Content-Type":n.metaType||"application/javascript"}}))});
