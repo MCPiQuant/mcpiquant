@@ -1,615 +1,4 @@
-const FILE_BUNDLE={"/modules/apps/ide/views/ui.js":{content:`export default ({ T, html, IDE }) => ({
-	tag: "ide-ui",
-	class: "h-screen",
-	properties: {
-		previewContent: T.string({ sync: "local" }),
-	},
-	connected() {
-		IDE.attachGlobalKeybindings();
-		this.classList.add("flex", "flex-col", "flex-grow");
-	},
-	disconnected() {
-		IDE.detachGlobalKeybindings();
-	},
-
-	render() {
-		const menuItems = IDE ? IDE.getMenuItems() : [];
-		return html\`
-      <div class="h-10 flex-shrink-0">
-        <editor-menu .items=\${menuItems}></editor-menu>
-      </div>
-      <div class="flex flex-grow  overflow-hidden">
-        <div class="p-2 w-[250px] flex-shrink-0 border-r  overflow-auto">      
-					<sw-explorer system></sw-explorer> 
-					<sw-explorer></sw-explorer> 
-        </div>
-        <div class="flex flex-grow">
-          <editor-tabs></editor-tabs>
-          <uix-divider resizable vertical class="border-l cursor-col-resize"></uix-divider>
-          <div class="flex-shrink-0 w-[500px] flex flex-col">
-            <ide-preview class="flex flex-col flex-1 overflow-auto"
-              language="javascript" 
-              content=\${this.previewContent}
-              ></ide-preview>
-              <uix-divider resizable class="border-t cursor-row-resize"></uix-divider>
-            <ide-console class="flex flex-col flex-1"></ide-console>
-          </div>
-        </div>
-      </div>        
-    \`;
-	},
-});
-`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/editor/views/menu.js":{content:`export default ({ T, html }) => ({
-	tag: "editor-menu",
-
-	properties: {
-		items: T.array(),
-	},
-
-	keepEditorFocus() {
-		const activePanel = window.$("editor-textarea");
-		if (activePanel) activePanel.q("textarea").focus();
-	},
-
-	render() {
-		return html\`
-			<uix-list 
-				skipClick 
-				horizontal 
-				padding="md" 
-				width="md" 
-				class="gap-4 items-center p-2"
-				@click=\${this.keepEditorFocus.bind(this)}
-			>
-				\${(this.items || []).map(
-					(item) => html\`
-						<uix-link label=\${item.label}
-							.dropdown=\${item.items.map(
-								([label, action]) => html\`
-									<uix-link 
-										leading="md"
-										indent=1
-										label=\${label}
-										@click=\${() => $APP.IDE.executeCommand(action)}
-									></uix-link>
-								\`,
-							)}
-						></uix-link>
-					\`,
-				)}
-			</uix-list>
-		\`;
-	},
-});
-`,mimeType:"application/javascript",skipSW:!1},"/modules/sw/explorer.js":{content:`export default ({ T, html, $APP }) => ({
-	tag: "sw-explorer",
-
-	properties: {
-		system: T.boolean(),
-		files: T.array(),
-		openFolders: T.array([]),
-		selectedFiles: T.array(),
-		transformFiles: T.function(),
-	},
-
-	async connected() {
-		try {
-			const files = await $APP.SW.request("FS:LIST_FILES", {
-				namespace: "http://localhost:1313",
-				withContent: true,
-				system: this.system,
-			});
-			if (!Array.isArray(files)) {
-				console.error("FS:LIST_FILES did not return a valid array.", files);
-				this.files = [];
-				return;
-			}
-
-			this.files = this.transformFiles ? this.transformFiles(files) : files;
-		} catch (error) {
-			console.error("Failed to fetch and process file list:", error);
-			this.files = [];
-		}
-	},
-	openFile() {},
-	render() {
-		console.log(this.system);
-		return !this.files || this.files.length === 0
-			? html\`<div class="p-4 text-sm text-gray-500">Loading project files...</div>\`
-			: html\`      
-    <editor-explorer
-        .files=\${this.files}
-        .openFolders=\${this.openFolders}
-				.openFile=\${this.openFile.bind(this)}
-        .selectedFiles=\${this.selectedFiles}
-				type=\${this.system ? "system" : "project"}
-    ></editor-explorer>
-    \`;
-	},
-});
-`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/editor/views/tabs.js":{content:`const newTab = { name: "New Tab", content: "" };
-
-export default ({ T, html }) => ({
-	tag: "editor-tabs",
-	class: "flex flex-grow",
-	properties: {
-		tabs: T.array({
-			defaultValue: [newTab],
-			sync: "local",
-		}),
-		activeTab: T.number({ sync: "local" }),
-	},
-	selectTab(index) {
-		this.activeTab = index;
-	},
-	closeTab(index) {
-		this.tabs.splice(index, 1);
-		const newTabs = [...this.tabs];
-		if (this.activeTab === index) {
-			this.activeTab = this.tabs.length - 1;
-		} else if (this.activeTab > index) {
-			this.activeTab = this.activeTab - 1;
-		}
-		this.tabs = newTabs.length === 0 ? [newTab] : newTabs;
-	},
-	addTab(tab) {
-		const foundIndex = this.tabs.findIndex((t) => t.path === tab.path);
-		if (foundIndex > -1) {
-			this.activeTab = foundIndex;
-		} else {
-			this.tabs = this.tabs[0] === newTab ? [tab] : [...this.tabs, tab];
-			this.activeTab = this.tabs.length - 1;
-		}
-	},
-	onUpdate(content) {
-		const newTabs = [...this.tabs];
-		if (newTabs[this.activeTab]) {
-			newTabs[this.activeTab] = { ...newTabs[this.activeTab], content };
-			this.tabs = newTabs;
-		}
-	},
-
-	render() {
-		return html\`
-      <uix-tabs
-        class="flex flex-col flex-grow"
-        .activeTab=\${this.activeTab}
-        .selectTab=\${this.selectTab.bind(this)}
-        .removeTab=\${this.closeTab.bind(this)}
-        .tabs=\${this.tabs.map((tab) => [
-					tab.name,
-					html\`
-            <editor-textarea
-              content=\${tab.content}
-              language=\${tab.language}
-							.onUpdate=\${this.onUpdate.bind(this)}
-            ></editor-textarea>
-          \`,
-				])}
-      ></uix-tabs>
-    \`;
-	},
-});
-`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/ide/views/preview.js":{content:`const SANDBOX_URL = "http://localhost:1313";
-const PREVIEW_URL = \`\${SANDBOX_URL}/index.html\`;
-
-export default ({ html, T }) => ({
-	tag: "ide-preview",
-
-	properties: {
-		content: T.string(),
-		url: T.string(),
-		language: T.string(),
-		load: T.function(),
-		minimized: T.boolean(),
-		detached: T.boolean(),
-		iframeTitle: T.string("preview"),
-		iframe: T.object(),
-	},
-
-	minimize() {
-		this.minimized = !this.minimized;
-	},
-
-	handleDetach() {
-		this.detached = !this.detached;
-	},
-
-	handleOpenInNewTab() {
-		const urlToOpen = this.url || PREVIEW_URL;
-		window.open(urlToOpen, "_blank");
-	},
-
-	/**
-	 * Implements a smooth reload. It loads a new iframe in the background
-	 * and swaps it with the current one only when the new one is fully loaded.
-	 */
-	reload() {
-		const container = this.querySelector(".iframe-container");
-		if (!container || !this.iframe) {
-			console.warn("Iframe or container not found for reload.");
-			return;
-		}
-
-		const oldIframe = this.iframe;
-
-		// 1. Create a new iframe, initially hidden
-		const newIframe = document.createElement("iframe");
-		newIframe.className = "w-full h-full border-0";
-		newIframe.style.visibility = "hidden"; // Use visibility to ensure it loads properly
-		newIframe.src = PREVIEW_URL;
-
-		// 2. Define the onload behavior for the new iframe
-		newIframe.onload = (event) => {
-			// A. Run the standard load handler to update the title and component reference
-			this.handleIframeLoad(event);
-
-			// B. Make the new iframe visible
-			newIframe.style.visibility = "visible";
-
-			// C. Remove the old iframe from the DOM
-			if (oldIframe && oldIframe.parentNode === container) {
-				container.removeChild(oldIframe);
-			}
-		};
-
-		// 3. Append the new iframe to the container to start loading
-		container.appendChild(newIframe);
-	},
-
-	handleIframeLoad(event) {
-		const iframe = event.target;
-		// Update the component's reference to the currently active iframe
-		this.iframe = iframe;
-
-		try {
-			const title = iframe.contentWindow.document.title;
-			if (title) {
-				this.iframeTitle = title;
-			} else {
-				this.iframeTitle = this.url ? new URL(this.url).hostname : "preview";
-			}
-		} catch (error) {
-			console.warn("Could not access iframe title due to cross-origin policy.");
-			this.iframeTitle = this.url ? new URL(this.url).hostname : "preview";
-		}
-	},
-
-	render() {
-		return html\`
-            <div class="flex flex-col h-full bg-gray-100 p-4">
-                <div class="flex flex-col flex-grow shadow-lg rounded-lg overflow-hidden border border-gray-200">
-                    <!-- Browser Top Bar -->
-                    <div class="flex items-center h-10 bg-gray-200 border-b border-gray-300 px-4 gap-2 flex-shrink-0">
-                        <!-- Traffic Light Buttons -->
-                        <div class="flex gap-2">
-                            <div class="w-3 h-3 bg-red-500 rounded-full"></div>
-                            <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                            <div class="w-3 h-3 bg-green-500 rounded-full"></div>
-                        </div>                       
-                        <div class="flex-grow flex items-center justify-center">
-                            <div class="bg-white rounded-full px-4 py-1 text-sm text-gray-600 w-full max-w-md text-center truncate">
-                                \${this.iframeTitle}
-                            </div>
-                        </div>
-												<!-- Action Buttons -->
-                        <div class="flex items-center">
-                             <button @click=\${this.reload.bind(this)} title="Reload Preview" class="p-1 rounded-full hover:bg-gray-300 transition-colors">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-700" viewBox="0 0 20 20" fill="currentColor">
-                                    <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.899 2.186l-1.32.771a5.002 5.002 0 00-8.58-1.897V4a1 1 0 112 0v2a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1zm12 14a1 1 0 01-1-1v-2.101a7.002 7.002 0 01-11.899-2.186l1.32-.771a5.002 5.002 0 008.58 1.897V16a1 1 0 11-2 0v-2a1 1 0 011-1h4a1 1 0 011 1v2a1 1 0 01-1 1z" clip-rule="evenodd" />
-                                </svg>
-                             </button>
-                        </div>
-                    </div>
-                    <div class="iframe-container flex-1 bg-white dark:bg-black \${this.minimized ? "hidden" : "flex"} relative">
-                        <iframe class="w-full h-full border-0" src=\${PREVIEW_URL} @load=\${this.handleIframeLoad.bind(this)}></iframe>
-                    </div>
-                </div>
-            </div>
-        \`;
-	},
-});
-`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/ide/views/console.js":{content:`export const locals = {
-	createCoreCommands: "/modules/apps/ide/commands/base.js",
-	createFileSystemCommands: "/modules/apps/ide/commands/filesystem.js",
-};
-
-export default (
-	{ html, T },
-	{ createFileSystemCommands, createCoreCommands },
-) => {
-	const CommandsManager = (console) => {
-		let _commands = {};
-
-		const add = (newCommands) => {
-			if (!newCommands) return;
-			_commands = { ..._commands, ...newCommands({ console }) };
-		};
-
-		return {
-			get all() {
-				return _commands;
-			},
-			get(name) {
-				return _commands[name.toLowerCase()];
-			},
-			add,
-		};
-	};
-
-	return {
-		tag: "ide-console",
-		class: "overflow-hidden",
-		properties: {
-			history: T.array({ defaultValue: [] }),
-			currentCommand: T.string(""),
-			prompt: T.string("$ "),
-			minimized: T.boolean(false),
-			cursorPosition: T.number(0),
-			commands: T.object(),
-			commandHistory: T.array([]),
-			historyIndex: T.number(-1),
-			currentDir: T.string("/").sync("local"),
-		},
-
-		connected() {
-			this.commands = CommandsManager(this);
-			this.commands.add(createCoreCommands);
-			this.commands.add(createFileSystemCommands);
-
-			window.addEventListener(
-				"IDE:ConsoleOutput",
-				this.handleConsoleOutput.bind(this),
-			);
-
-			if (!this.history || this.history.length === 0) {
-				this.history = [
-					{ type: "system", message: "IDE Console v1.0" },
-					{ type: "system", message: "Type 'help' for available commands" },
-				];
-			}
-		},
-
-		disconnected() {
-			window.removeEventListener("IDE:ConsoleOutput", this.handleConsoleOutput);
-		},
-
-		handleConsoleOutput(event) {
-			const { message, type = "output" } = event.detail;
-			this.addToHistory(type, message);
-		},
-
-		addToHistory(type, message, error) {
-			this.history = [...(this.history || []), { type, message }];
-			if (error) console.error(error);
-			this.scrollToBottom();
-		},
-
-		scrollToBottom() {
-			requestAnimationFrame(() => {
-				const outputElement = this.q(".console-output");
-				if (outputElement) {
-					outputElement.scrollTop = outputElement.scrollHeight;
-				}
-			});
-		},
-
-		resolvePath(targetPath) {
-			if (!targetPath) return this.currentDir;
-			let newPath;
-			if (targetPath.startsWith("/")) {
-				newPath = targetPath;
-			} else {
-				const currentParts = this.currentDir.split("/").filter(Boolean);
-				const targetParts = targetPath.split("/");
-				for (const part of targetParts) {
-					if (part === "..") {
-						if (currentParts.length > 0) {
-							currentParts.pop();
-						}
-					} else if (part !== "." && part !== "") {
-						currentParts.push(part);
-					}
-				}
-				newPath = "/" + currentParts.join("/");
-			}
-
-			if (newPath.length > 1 && newPath.endsWith("/")) {
-				newPath = newPath.slice(0, -1);
-			}
-			return newPath || "/";
-		},
-
-		executeCommand() {
-			const command = this.currentCommand.trim();
-			if (!command) return;
-			this.addToHistory("command", \`\${this.prompt}\${command}\`);
-			this.commandHistory = [...this.commandHistory, command];
-			this.historyIndex = -1;
-			this.processCommand(command);
-			this.currentCommand = "";
-			this.cursorPosition = 0;
-		},
-
-		async processCommand(command) {
-			const [cmd, ...args] = command.split(" ");
-			try {
-				const commandHandler = this.commands.get(cmd);
-				if (commandHandler) {
-					await commandHandler.execute.call(this, args);
-				} else {
-					this.addToHistory("error", \`Command not found: \${cmd}\`);
-				}
-			} catch (error) {
-				console.error(error);
-				this.addToHistory("output", error.toString());
-			}
-		},
-
-		handleKeyDown(event) {
-			event.stopPropagation();
-			switch (event.key) {
-				case "Enter":
-					event.preventDefault();
-					this.executeCommand();
-					break;
-				case "ArrowUp":
-					event.preventDefault();
-					this.navigateHistory(-1);
-					break;
-				case "ArrowDown":
-					event.preventDefault();
-					this.navigateHistory(1);
-					break;
-				case "Tab":
-					event.preventDefault();
-					this.handleAutocomplete();
-					break;
-				case "c":
-					if (event.ctrlKey) {
-						event.preventDefault();
-						this.addToHistory(
-							"command",
-							\`\${this.prompt}\${this.currentCommand} ^C\`,
-						);
-						this.currentCommand = "";
-						this.cursorPosition = 0;
-					}
-					break;
-				case "l":
-					if (event.ctrlKey) {
-						event.preventDefault();
-						this.history = [];
-					}
-					break;
-			}
-		},
-
-		navigateHistory(direction) {
-			if (this.commandHistory.length === 0) return;
-			const newIndex = this.historyIndex + direction;
-			if (newIndex >= -1 && newIndex < this.commandHistory.length) {
-				this.historyIndex = newIndex;
-				this.currentCommand =
-					newIndex === -1 ? "" : this.commandHistory[newIndex];
-				this.cursorPosition = this.currentCommand.length;
-				setTimeout(() => {
-					const input = this.q(".console-input");
-					if (input) {
-						input.focus();
-						input.setSelectionRange(this.cursorPosition, this.cursorPosition);
-					}
-				}, 0);
-			}
-		},
-
-		async handleAutocomplete() {
-			const [cmd, ...args] = this.currentCommand.trim().split(" ");
-			const commandHandler = this.commands.get(cmd);
-
-			if (commandHandler?.autocomplete && this.currentCommand.includes(" ")) {
-				await commandHandler.autocomplete(args);
-			} else {
-				const commandNames = Object.keys(this.commands.all);
-				const matches = commandNames.filter((c) => c.startsWith(cmd));
-				if (matches.length === 1) {
-					this.currentCommand = \`\${matches[0]} \`;
-					this.cursorPosition = this.currentCommand.length;
-				} else if (matches.length > 1) {
-					this.addToHistory("command", \`\${this.prompt}\${this.currentCommand}\`);
-					this.addToHistory("system", matches.join("  "));
-				}
-			}
-		},
-
-		handleInput(event) {
-			this.currentCommand = event.target.value;
-			this.cursorPosition = event.target.selectionStart;
-		},
-		minimize() {
-			this.minimized = !this.minimized;
-		},
-		render() {
-			const renderHistoryItem = (item) => {
-				const typeClass =
-					item.type === "error"
-						? "text-red-500"
-						: item.type === "command"
-							? "text-gray-400"
-							: "text-white";
-				return html\`<div class=\${typeClass}>\${item.message}</div>\`;
-			};
-			return html\`
-            <div class="flex flex-col w-full p-2 gap-2">
-                <uix-link
-                    @click=\${this.minimize.bind(this)}
-                    icon=\${this.minimized ? "maximize-2" : "minus"}
-                ></uix-link>
-            </div>
-
-            <div
-                class="bg-[#1e1e1e] h-[30vh] flex flex-col p-4 grow flex-1 \${
-									this.minimized ? "hidden" : ""
-								}"
-            >
-                <div
-                    class="console-output flex flex-col flex-1 overflow-y-auto font-mono p-1 whitespace-pre-wrap"
-                >
-                    \${this.history.map((item) => renderHistoryItem(item))}
-                </div>
-
-                <div class="flex p-1 border-t border-gray-700">
-                    <span class="text-green-500 font-mono pr-2">\${this.prompt}</span>
-                    <input
-                        class="console-input flex-1 bg-transparent border-none outline-none text-white font-mono"
-                        type="text"
-                        .value=\${this.currentCommand}
-                        @input=\${this.handleInput.bind(this)}
-                        @keydown=\${this.handleKeyDown.bind(this)}
-                        autofocus
-                    />
-                </div>
-            </div>
-        \`;
-		},
-	};
-};
-`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/ide/commands/base.js":{content:`export default () =>
-	({ host }) => ({
-		clear: {
-			description: "Clear the console",
-			usage: "clear",
-			execute: async () => {
-				host.history = [];
-			},
-		},
-		help: {
-			description: "Show this help",
-			usage: "help",
-			execute: async () => {
-				host.addToHistory("system", "Available commands:");
-				for (const cmd in host.commands.all) {
-					const { usage, description } = host.commands.all[cmd];
-					host.addToHistory("system", \`  \${usage.padEnd(20)} - \${description}\`);
-				}
-			},
-		},
-		echo: {
-			description: "Print text to console",
-			usage: "echo [text]",
-			execute: async (args) => {
-				host.addToHistory("output", args.join(" "));
-			},
-		},
-		pwd: {
-			description: "Print working directory",
-			usage: "pwd",
-			execute: async () => {
-				host.addToHistory("output", host.currentDir);
-			},
-		},
-	});
-`,mimeType:"application/javascript",skipSW:!1},"/index.html":{content:`<!DOCTYPE html>
+const FILE_BUNDLE={"/modules/icon-lucide/lucide/circle.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/index.html":{content:`<!DOCTYPE html>
 <html lang="en">
 <head>
   <script type="importmap">
@@ -696,394 +85,236 @@ export default (
   <app-container></app-container>
 </body>
 </html>
-`,mimeType:"text/html",skipSW:!1},"/modules/apps/ide/commands/filesystem.js":{content:`export default ({ IDE }) =>
-	({ console }) => {
-		const fileAutocomplete = async (console, options, args) => {
-			const { dirsOnly = false, filesOnly = false } = options;
-			const currentArg = args.length > 0 ? args[args.length - 1] : "";
-
-			let dirToList = console.currentDir;
-			let prefix = "";
-
-			const lastSlashIndex = currentArg.lastIndexOf("/");
-			if (lastSlashIndex !== -1) {
-				const pathPart = currentArg.substring(0, lastSlashIndex + 1);
-				dirToList = console.resolvePath(pathPart);
-				prefix = currentArg.substring(lastSlashIndex + 1);
-			} else {
-				prefix = currentArg;
-			}
-
+`,mimeType:"text/html",skipSW:!1},"/views/templates/app.js":{content:`export default ({ html, AI, T }) => {
+	return {
+		style: true,
+		class: "w-full h-screen bg-[#282828] text-[#ebdbb2] flex font-sans text-sm",
+		properties: {
+			currentRoute: T.object({ sync: "ram" }),
+			isServerConnected: T.boolean({ sync: "local" }),
+		},
+		async connected() {
+			await this.initializeAI();
+		},
+		async initializeAI() {
 			try {
-				const allFiles = await IDE.listFiles(dirToList);
-				let filteredFiles = allFiles;
-
-				if (dirsOnly) filteredFiles = allFiles.filter((f) => f.isDirectory);
-				if (filesOnly) filteredFiles = allFiles.filter((f) => !f.isDirectory);
-
-				const matches = filteredFiles.filter((f) => f.name.startsWith(prefix));
-
-				if (matches.length === 1) {
-					const match = matches[0];
-					const baseCommand = console.currentCommand.substring(
-						0,
-						console.currentCommand.lastIndexOf(currentArg),
-					);
-					const completedPath = match.isDirectory
-						? \`\${match.name}/\`
-						: \`\${match.name} \`;
-					console.currentCommand = \`\${baseCommand}\${currentArg.substring(0, lastSlashIndex + 1)}\${completedPath}\`;
-					console.cursorPosition = console.currentCommand.length;
-				} else if (matches.length > 1) {
-					const names = matches.map((f) =>
-						f.isDirectory ? \`\${f.name}/\` : f.name,
-					);
-					console.addToHistory(
-						"command",
-						\`\${console.prompt}\${console.currentCommand}\`,
-					);
-					console.addToHistory("system", names.join("  "));
+				if (!AI.isInitialized) {
+					await AI.init({
+						geminiApiKey: "",
+						localAIEndpoint: "http://localhost:1234/v1/chat/completions",
+						openrouterApiKey:
+							"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",
+						defaultRoots: [
+							{
+								uri: "file:///",
+								name: "Root Filesystem",
+								description: "Full filesystem access",
+							},
+						],
+					});
 				}
-			} catch (e) {}
-		};
-
-		return {
-			cd: {
-				description: "Change directory",
-				usage: "cd [path]",
-				execute: async (args) => {
-					const targetDir = args[0] || "/";
-					const newPath = console.resolvePath(targetDir);
-					const dirExists = await $APP.SW.request("FS:DIR_EXISTS", {
-						path: newPath,
-					});
-					if (dirExists) {
-						console.currentDir = newPath;
-					} else {
-						console.addToHistory(
-							"error",
-							\`cd: no such file or directory: \${targetDir}\`,
-						);
-					}
-				},
-				autocomplete: (args) =>
-					fileAutocomplete(console, { dirsOnly: true }, args),
-			},
-			cat: {
-				description: "Display file content",
-				usage: "cat [file]",
-				execute: async (args) => {
-					if (!args[0]) {
-						console.addToHistory("error", "cat: usage: cat [file]");
-						return;
-					}
-					const path = console.resolvePath(args[0]);
-					const fileExists = await $APP.SW.request("FS:FILE_EXISTS", { path });
-					if (!fileExists) {
-						console.addToHistory(
-							"error",
-							\`cat: \${args[0]}: No such file or directory\`,
-						);
-						return;
-					}
-					try {
-						const { content } = await $APP.SW.request("FS:READ_FILE", { path });
-						console.addToHistory("output", content);
-					} catch (error) {
-						console.addToHistory(
-							"error",
-							\`cat: error reading file \${args[0]}\`,
-							error,
-						);
-					}
-				},
-				autocomplete: (args) =>
-					fileAutocomplete(console, { filesOnly: true }, args),
-			},
-			mkdir: {
-				description: "Create a directory",
-				usage: "mkdir [directory]",
-				execute: async (args) => {
-					if (!args[0]) {
-						console.addToHistory("error", "mkdir: usage: mkdir [directory]");
-						return;
-					}
-					const path = console.resolvePath(args[0]);
-					const exists = await $APP.SW.request("FS:DIR_EXISTS", { path });
-					if (exists) {
-						console.addToHistory(
-							"error",
-							\`mkdir: cannot create directory \u2018\${args[0]}\u2019: File exists\`,
-						);
-						return;
-					}
-					await $APP.SW.request("FS:WRITE_FILE", {
-						path: \`\${path}/.dir-placeholder\`,
-						content: "",
-					});
-				},
-			},
-			touch: {
-				description: "Create an empty file",
-				usage: "touch [file]",
-				execute: async (args) => {
-					if (!args[0]) {
-						console.addToHistory("error", "touch: usage: touch [file]");
-						return;
-					}
-					const path = console.resolvePath(args[0]);
-					const exists = await $APP.SW.request("FS:FILE_EXISTS", { path });
-					if (!exists) {
-						await $APP.SW.request("FS:WRITE_FILE", { path, content: "" });
-					}
-				},
-			},
-			rm: {
-				description: "Remove a file or directory",
-				usage: "rm [file/dir]",
-				execute: async (args) => {
-					if (!args[0]) {
-						console.addToHistory("error", "rm: usage: rm [file-or-directory]");
-						return;
-					}
-					const path = console.resolvePath(args[0]);
-					const isFile = await $APP.SW.request("FS:FILE_EXISTS", { path });
-					const isDir = await $APP.SW.request("FS:DIR_EXISTS", { path });
-
-					if (!isFile && !isDir) {
-						console.addToHistory(
-							"error",
-							\`rm: cannot remove '\${args[0]}': No such file or directory\`,
-						);
-						return;
-					}
-
-					try {
-						if (isDir) {
-							await $APP.SW.request("FS:DELETE_DIRECTORY", { path });
-						} else {
-							await $APP.SW.request("FS:DELETE_FILE", { path });
-						}
-					} catch (e) {
-						console.addToHistory("error", \`rm: error removing '\${args[0]}'\`, e);
-					}
-				},
-				autocomplete: (args) => fileAutocomplete(console, {}, args),
-			},
-			ls: {
-				description: "List files",
-				usage: "ls [path]",
-				execute: async (args) => {
-					try {
-						const files = await IDE.listFiles(console.resolvePath(args[0]));
-						if (files?.length) {
-							const fileNames = files
-								.map((file) => (file.isDirectory ? \`\${file.name}/\` : file.name))
-								.join("  ");
-							console.addToHistory("output", fileNames);
-						} else {
-							console.addToHistory("output", "");
-						}
-					} catch (e) {
-						console.addToHistory("error", "Failed to list files", e);
-					}
-				},
-				autocomplete: (args) =>
-					fileAutocomplete(console, { dirsOnly: true }, args),
-			},
-		};
+				this.isServerConnected = AI.listClients().length > 0;
+			} catch (error) {
+				console.error("Error initializing AI service:", error);
+				this.isServerConnected = false;
+			}
+		},
+		render() {
+			return html\`
+				<mcp-sidebar></mcp-sidebar>
+				<div class="flex-1 h-full flex flex-col min-w-0">
+					<div
+						class="h-15 bg-[#3c3836] border-b border-[#504945] p-2 flex items-center justify-between"
+					>
+					
+					</div>
+					<div class="flex-1 overflow-auto flex">
+            \${this.component}
+					</div>
+				</div>
+			\`;
+		},
 	};
-`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/editor/views/explorer.js":{content:`const directoryContextMenu = {
-	"file:new-file": "New File...",
-	"file:new-folder": "New Folder...",
-	"file:open-folder": "Open Folder...",
-	"file:delete-folder": "Delete Folder",
-	"file:rename": "Rename",
-	"file:move": "Move",
 };
-
-const fileContextMenu = {
-	"file:open-file": "Open File...",
-	"file:save": "Save",
-	"file:save-as": "Save As...",
-	"file:delete-file": "Delete File",
-	"file:rename": "Rename",
-	"file:move": "Move",
-};
-
-export default ({ T, html, IDE }) => ({
-	tag: "editor-explorer",
-	class: "overflow-auto",
+`,mimeType:"application/javascript",skipSW:!1},"/views/templates/app.css":{content:`.app-template {
+	.uix-card {
+		button {
+			color: #111;
+			cursor: pointer;
+		}
+	}
+}
+`,mimeType:"text/css",skipSW:!1},"/modules/apps/mcp/views/sidebar.js":{content:`export default ({ html, T }) => ({
+	class:
+		"w-64 bg-[#3c3836] text-[#ebdbb2] flex flex-col h-screen shrink-0 border-r border-[#504945]",
 	properties: {
-		// NEW: Determines the type of files to display ('project' or 'system')
-		type: T.string("project"),
-		files: T.array(),
-		selectFile: T.function(),
-		selectedFiles: T.array({ sync: "ram" }),
-		openFolders: T.array([]),
-		hasProject: T.boolean(),
-		previewContent: T.string({ sync: "local" }),
+		currentRoute: T.object({ sync: "ram" }),
+		onSelectHistory: T.function(),
+		isDarkMode: T.boolean({ defaultValue: true, sync: "local" }),
 	},
 
-	// NEW: Load initial files when the component is initialized
-	async onInit() {
-		if (!this.files?.length) {
-			const listFn =
-				this.type === "system" ? IDE.listSystemFiles : IDE.listFiles;
-			this.files = await listFn("/");
-		}
+	_renderLink(link) {
+		const isActive = this.currentRoute.name === link.key;
+		return html\`
+            <uix-link href=\${link.key}
+          icon=\${link.icon}
+          label=\${link.label}
+          data-active=\${isActive}
+          class="
+            relative flex items-center text-sm font-bold p-2 rounded-md transition-colors w-full
+            text-[#ebdbb2] hover:bg-[#504945]
+            data-[active=true]:bg-[#504945] data-[active=true]:text-white
+          ">
+                \${
+									link.isComingSoon
+										? html\`<span class="ml-auto bg-[#b16286] text-xs font-bold text-[#ebdbb2] px-2 py-0.5 rounded-full absolute right-3">soon</span>\`
+										: ""
+								}
+            </uix-link>
+        \`;
 	},
-
-	_selectFile(item = {}) {
-		if (item.isDirectory) {
-			this.openFolders = this.openFolders.includes(item.path)
-				? this.openFolders.filter((path) => path !== item.path)
-				: [...this.openFolders, item.path];
-			this.listFiles(item);
-		} else {
-			this.openFile(item.path);
-		}
-	},
-
-	async listFiles(item) {
-		// UPDATED: Use the correct list function based on type
-		const listFn = this.type === "system" ? IDE.listSystemFiles : IDE.listFiles;
-		const files = await listFn(item.path);
-		item.files = files;
-		this.files = [...this.files];
-	},
-
-	openFile(path) {
-		const isSystem = this.type === "system";
-		IDE.openFile(path, isSystem);
-	},
-
-	onSelectedChanged(selectedIds) {
-		this.selectedFiles = (this.files || []).filter((_, id) =>
-			selectedIds.includes(id),
-		);
+	toggleDarkMode() {
+		document.body.classList.toggle("dark", this.isDarkMode);
+		this.isDarkMode = !this.isDarkMode;
 	},
 
 	render() {
-		return html\`
-      <uix-list
-        vertical
-        class="gap-2 p-1"
-        itemId="[explorerItem]"
-        selectable
-        multipleWithCtrl
-        multipleWithShift
-        .onSelectedChanged=\${this.onSelectedChanged.bind(this)}
-      >
-        \${(this.files || []).map(
-					(item) => html\`
-          <uix-link
-            gap="xs"
-            width="full"
-            text="left"
-            selectable
-            explorerItem
-            @click=\${(e) => (this.selectFile ? this.selectFile(item, e) : this._selectFile(item, e))}
-            style="--uix-link-text-color: var(--color-default-95);"
-            .context=\${Object.entries(
-							item.isDirectory ? directoryContextMenu : fileContextMenu,
-						).map(
-							([action, label]) => html\`
-              <uix-link
-                label=\${label}
-                leading="md"
-                padding="lg"
-                size="sm"
-                @click=\${() =>
-									IDE.executeCommand(action, {
-										// UPDATED: Pass context, including the system flag, to commands
-										directory: item.isDirectory ? item.path : item.directory,
-										path: item.path,
-										system: this.type === "system",
-									})}
-              ></uix-link>
-            \`,
-						)}
-            ghost
-            indent=\${item.path.split("/").length - 1}
-            icon=\${
-							item.isDirectory
-								? this.openFolders.includes(item.path)
-									? item.iconOpen || "folder-open"
-									: item.icon || "folder"
-								: "file"
-						}
-            label=\${item.name}
-          ></uix-link>
+		const mainLinks = [
+			{ key: "dev", label: "Develop", icon: "code" },
+			{ key: "chat", label: "Chat", icon: "message-circle" },
+			{ key: "inspector", label: "Inspector", icon: "search" },
+			{ key: "servers", label: "Servers", icon: "server" },
+			{ key: "agents", label: "Agents", icon: "bot", isComingSoon: true },
+			{ key: "apps", label: "Apps", icon: "layout-grid", isComingSoon: true },
+			{ key: "learn", label: "Learn", icon: "book", isComingSoon: true },
+			{
+				key: "Clients",
+				label: "Clients",
+				icon: "computer",
+				isComingSoon: true,
+			},
+			{
+				key: "vibecoding",
+				label: "Vibecoding",
+				icon: "zap",
+				isComingSoon: true,
+			},
+		];
 
-          \${
-						item.files &&
-						item.isDirectory &&
-						this.openFolders.includes(item.path)
-							? html\`
-                <editor-explorer
-                  isSubDirectory
-                  type=\${this.type}
-                  .files=\${item.files}
-                  .openFolders=\${this.openFolders}
-                  .selectedFiles=\${this.selectedFiles}
-                  .selectFile=\${this.selectFile}
-                ></editor-explorer>
-              \`
-							: ""
-					}
-        \`,
-				)}
-      </uix-list>
-    \`;
+		return html\`<div class="h-15 p-4 border-b border-[#504945] flex items-center space-x-2 shrink-0">
+            <h2 class="text-xl font-semibold text-[#ebdbb2]"><a href="/">\u{1F336}\uFE0F MCPiQuant</a></h2>
+        </div>
+        <div class="flex-grow flex flex-col min-h-0">
+            <nav class="p-2 space-y-1 shrink-0">
+                \${mainLinks.map((link) => this._renderLink(link))}
+            </nav>
+            <div class="flex-grow flex flex-col border-t border-[#504945] min-h-0">
+                <h3 class="p-2 text-xs font-semibold text-[#928374] uppercase tracking-wider shrink-0">History</h3>
+                <div class="flex-1 overflow-y-auto">
+                    <mcp-history .onSelect=\${this.onSelectHistory} listOnly></mcp-history>
+                </div>
+            </div>
+            <div class="p-2 border-t border-[#504945] shrink-0">
+                \${this._renderLink({
+									key: "settings",
+									label: "Settings",
+									icon: "settings",
+								})}
+                \${this._renderLink({
+									key: "feedback",
+									label: "Feedback",
+									icon: "message-square-heart",
+								})}
+                <button @click=\${this.toggleDarkMode.bind(this)} class="w-full flex items-center p-2 rounded-md hover:bg-[#504945] text-left text-sm">
+                    <uix-icon name=\${
+											this.isDarkMode ? "sun" : "moon"
+										} class="w-5 h-5 mr-3 shrink-0"></uix-icon>
+                    <span>\${this.isDarkMode ? "Light Mode" : "Dark Mode"}</span>
+                    <div class="ml-auto w-10 h-5 \${
+											this.isDarkMode ? "bg-red-700" : "bg-gray-600"
+										} rounded-full flex items-center p-1 transition-colors">
+                        <div class="w-4 h-4 bg-white rounded-full transform transition-transform \${
+													this.isDarkMode ? "translate-x-4" : ""
+												}"></div>
+                    </div>
+                </button>
+            </div>
+        </div>
+      \`;
 	},
 });
-`,mimeType:"application/javascript",skipSW:!1},"/modules/icon-lucide/lucide/x.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 6L6 18M6 6l12 12"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/file.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/apps/mcp/views/dev.js":{content:`export default ({ $APP, html, AI, T }) => {
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/mcp/views/dev.js":{content:`export default ({ $APP, html, AI, T }) => {
 	return {
 		tag: "mcp-dev",
 		class: "w-full bg-[#282828] text-[#ebdbb2] flex font-sans text-sm",
 		properties: {
+			// Core Editor Properties
 			content: T.string(""),
 			language: T.string({ sync: "local", defaultValue: "javascript" }),
 			filePath: T.string({ sync: "local" }),
-			selectedServer: T.string({ sync: "local", defaultValue: "default" }),
-			serverOptions: T.object({
-				defaultValue: {
-					default: {
-						label: "Default Feature-Rich Server",
-						path: "/templates/servers/basic.js",
-					},
-					simple: {
-						label: "Simple Greeter Server",
-						path: "/templates/servers/basic.js",
-					},
-				},
-			}),
-			isServerConnected: T.boolean({ sync: "local" }),
-			transportType: T.string({ sync: "local", defaultValue: "JavaScript" }),
-			command: T.string({ sync: "local" }),
-			args: T.string({ sync: "local" }),
-			history: T.array([]),
-			selectedHistoryItem: T.object(null),
-			activeTab: T.string(),
 			isDirty: T.boolean(false),
 			isSaving: T.boolean(false),
 			lastSaved: T.object(null),
-			compilerErrors: T.array([]),
+			compilerErrors: T.array({ defaultValue: [], sync: "local" }),
+			// Server Management Properties
+			availableServers: T.array([]),
+			selectedServer: T.string({ sync: "local", defaultValue: "default" }),
+			isServerConnected: T.boolean({ sync: "local", defaultValue: false }),
+			transportType: T.string({ sync: "local", defaultValue: "JavaScript" }),
+			command: T.string({ sync: "local" }),
+			args: T.string({ sync: "local" }),
+
+			// UI State
+			activeTab: T.string(),
+			history: T.array([]),
+			selectedHistoryItem: T.object(null),
 			validationTimeout: T.object(null),
-			tsLibCache: T.object({ defaultValue: {} }),
 			worker: T.object(null),
 			transpilePromises: T.object({ defaultValue: {} }),
 		},
+
 		async connected() {
 			this.initializeWorker();
-			const initialPath = this.serverOptions[this.selectedServer].path;
-			await this.loadServerContent(initialPath);
+			await this.initializeAI();
+			// Load initial server content based on saved selection or default
+			const server =
+				this.availableServers.find((s) => s.id === this.selectedServer) ||
+				this.availableServers[0];
+			if (server) {
+				// If the selectedServer wasn't found, update it to the default
+				if (server.id !== this.selectedServer) {
+					this.selectedServer = server.id;
+				}
+				await this.loadServerContent(server.path);
+			} else {
+				console.warn("No available servers found to load.");
+			}
 		},
+
 		disconnected() {
 			if (this.validationTimeout) clearTimeout(this.validationTimeout);
 			if (this.worker) this.worker.terminate();
 		},
+
+		// Fetches available servers from the AI service
+		async initializeAI() {
+			try {
+				if (!AI.isInitialized) {
+					await AI.init({
+						/* Your AI config here */
+					});
+				}
+				this.isServerConnected = AI.listClients().some(
+					(c) => c.alias === "dev_server",
+				);
+				this.availableServers = AI.listServers();
+			} catch (error) {
+				console.error("Error initializing AI service:", error);
+				this.isServerConnected = false;
+				this.availableServers = [];
+			}
+		},
+
 		async onServerChange(newServerKey) {
 			if (this.isDirty) {
 				console.warn(
@@ -1091,18 +322,24 @@ export default ({ T, html, IDE }) => ({
 				);
 			}
 			this.selectedServer = newServerKey;
-			const newPath = this.serverOptions[newServerKey].path;
-			await this.loadServerContent(newPath);
-
-			if (this.isServerConnected) {
-				await this.disconnectFromServer();
+			const server = this.availableServers.find((s) => s.id === newServerKey);
+			if (server) {
+				await this.loadServerContent(server.path);
+				if (this.isServerConnected) {
+					await this.disconnectFromServer();
+				}
+			} else {
+				console.error(\`Server with key \${newServerKey} not found.\`);
 			}
 		},
+
 		async loadServerContent(path) {
 			this.filePath = path;
 			this.command = path.replace(/\\.ts$/, ".js");
 			try {
 				const response = await fetch(path);
+				if (!response.ok)
+					throw new Error(\`HTTP error! status: \${response.status}\`);
 				const fileContent = await response.text();
 				this.content = fileContent;
 				this.isDirty = false;
@@ -1117,6 +354,7 @@ export default ({ T, html, IDE }) => ({
 				this.validateCode();
 			}
 		},
+
 		initializeWorker() {
 			this.worker = new Worker("/modules/apps/mcp/worker.js", {
 				type: "module",
@@ -1137,13 +375,10 @@ export default ({ T, html, IDE }) => ({
 					}
 				}
 			};
-			this.worker.onerror = (event) => {
-				console.error("Error in worker:", event);
-			};
-			this.worker.postMessage({
-				type: "init",
-			});
+			this.worker.onerror = (event) => console.error("Error in worker:", event);
+			this.worker.postMessage({ type: "init" });
 		},
+
 		validateCode() {
 			if (!this.worker) {
 				this.compilerErrors = [];
@@ -1154,6 +389,7 @@ export default ({ T, html, IDE }) => ({
 				payload: { code: this.content, filePath: this.filePath },
 			});
 		},
+
 		getTranspiledContent() {
 			if (this.language !== "typescript") {
 				return Promise.resolve(this.content);
@@ -1173,6 +409,7 @@ export default ({ T, html, IDE }) => ({
 				}, 10000);
 			});
 		},
+
 		async applyCodeChanges() {
 			if (!$APP.fs || !$APP.fs.writeFile) {
 				console.warn("File system not available");
@@ -1204,24 +441,16 @@ export default ({ T, html, IDE }) => ({
 				this.isSaving = false;
 			}
 		},
+
 		onEditorUpdate(newContent) {
 			this.content = newContent;
 			this.isDirty = true;
 			if (this.validationTimeout) clearTimeout(this.validationTimeout);
 			this.validationTimeout = setTimeout(() => this.validateCode(), 500);
 		},
-		toggleLanguage() {
-			const newLang =
-				this.language === "javascript" ? "typescript" : "javascript";
-			const oldExt = this.language === "javascript" ? ".js" : ".ts";
-			const newExt = newLang === "javascript" ? ".js" : ".ts";
 
-			this.language = newLang;
-			const newPath = this.filePath.replace(oldExt, newExt);
-
-			this.loadServerContent(newPath);
-		},
 		async connectToServer() {
+			await this.applyCodeChanges();
 			if (!this.command) {
 				console.error("Connection command/URL cannot be empty.");
 				return;
@@ -1230,7 +459,7 @@ export default ({ T, html, IDE }) => ({
 				const transportConfig = {
 					type: this.transportType,
 					command: this.command,
-					args: this.args ? this.args.split(" ") : [],
+					args: this.args ? this.args.split(" ").filter(Boolean) : [],
 				};
 				await AI.connect(transportConfig, { alias: "dev_server" });
 				this.isServerConnected = true;
@@ -1239,6 +468,7 @@ export default ({ T, html, IDE }) => ({
 				this.isServerConnected = false;
 			}
 		},
+
 		async disconnectFromServer() {
 			try {
 				await AI.disconnect("dev_server");
@@ -1247,51 +477,61 @@ export default ({ T, html, IDE }) => ({
 				console.error("Failed to disconnect:", e);
 			}
 		},
+
 		async reconnectToServer() {
 			if (this.isServerConnected) {
 				await this.disconnectFromServer();
+				// Brief pause to ensure full disconnect before reconnecting
 				setTimeout(() => {
 					this.connectToServer();
 				}, 200);
 			}
 		},
-		onSelectHistory(item) {
-			this.selectedHistoryItem = item;
+
+		// Combined handler for the connect/disconnect button
+		async handleConnectionToggle() {
+			if (this.isServerConnected) {
+				await this.disconnectFromServer();
+			} else {
+				await this.connectToServer();
+			}
 		},
-		clearSelectedHistory() {
-			this.selectedHistoryItem = null;
+
+		// Handler for the reload/refresh button
+		async handleReload() {
+			if (this.isDirty) {
+				await this.applyCodeChanges();
+			}
+			if (this.isServerConnected) {
+				await this.reconnectToServer();
+			}
 		},
+
+		selectTab(tabKey) {
+			this.activeTab = tabKey;
+		},
+
+		// RENDER METHODS
 		renderErrorPanel() {
 			return html\`<div class="flex flex-col h-full bg-[#1d2021]">
-				<div class="p-2 border-b border-[#504945] flex items-center">
-					<uix-icon
-						name="triangle-alert"
-						class="w-4 h-4 mr-2 text-red-400"
-					></uix-icon>
-					<h3 class="text-md font-semibold text-[#ebdbb2]">
-						Problems (\${this.compilerErrors.length})
-					</h3>
-				</div>
-				<div class="flex-1 overflow-auto font-mono text-xs">
-					\${this.compilerErrors.map(
-						(error) => html\`
-							<div
-								class="p-2 border-b border-[#3c3836] hover:bg-[#3c3836]"
-							>
-								<span class="text-red-400">Error:</span>
-								<span class="text-[#bdae93]"
-									>(\${error.line}:\${error.character})</span
-								>
-								<span class="text-white ml-2">\${error.message}</span>
-							</div>
-						\`,
-					)}
-				</div>
-			</div>\`;
+                <div class="p-2 border-b border-[#504945] flex items-center">
+                    <uix-icon name="triangle-alert" class="w-4 h-4 mr-2 text-red-400"></uix-icon>
+                    <h3 class="text-md font-semibold text-[#ebdbb2]">Problems (\${this.compilerErrors.length})</h3>
+                </div>
+                <div class="flex-1 overflow-auto font-mono text-xs">
+                    \${this.compilerErrors.map(
+											(error) => html\`
+                            <div class="p-2 border-b border-[#3c3836] hover:bg-[#3c3836]">
+                                <span class="text-red-400">Error:</span>
+                                <span class="text-[#bdae93]">(\${error.line}:\${error.character})</span>
+                                <span class="text-white ml-2">\${error.message}</span>
+                            </div>
+                        \`,
+										)}
+                </div>
+            </div>\`;
 		},
-		selectTab(index) {
-			this.activeTab = index;
-		},
+
 		render() {
 			const tabs = [
 				{ key: "dashboard", label: "Dashboard", icon: "layout-dashboard" },
@@ -1299,6 +539,7 @@ export default ({ T, html, IDE }) => ({
 				{ key: "resources", label: "Resources", icon: "database" },
 				{ key: "prompts", label: "Prompts", icon: "terminal" },
 			];
+
 			const renderTabContent = (tab) => {
 				switch (tab.key) {
 					case "dashboard":
@@ -1313,61 +554,291 @@ export default ({ T, html, IDE }) => ({
 						return html\`<div class="text-center p-8 text-gray-500">View not implemented: \${tab.key}</div>\`;
 				}
 			};
+
+			const availableServersForSelect = this.availableServers.map((val) => ({
+				value: val.id,
+				label: val.name,
+			}));
+
 			return html\`
-						<editor-textarea
-							content=\${this.content}
-							.language=\${this.language}
-							.onUpdate=\${this.onEditorUpdate.bind(this)}
-							class="flex-1"
-						></editor-textarea>
-						<uix-divider
-							vertical
-							resizable
-							style="--uix-divider-color: #3c3836;"
-						></uix-divider>
-						<div class="flex-1 h-full flex flex-col min-w-0">
-							\${
-								this.isServerConnected
-									? html\`<div class="flex-1 flex flex-col min-h-0">
-            <uix-tabs
-              style="--uix-tabs-font-size: 1rem; --uix-tabs-active-background-color: var(--colors-red-700); --uix-tabs-border-color: var(--colors-red-800); --uix-tabs-text: #ebdbb2; --uix-tabs-active-text: #ebdbb2;"
-              class="flex flex-col flex-grow" .activeTab=\${this.activeTab} .selectTab=\${this.selectTab.bind(this)}
-              .tabs=\${tabs.map((tab) => [html\`<uix-icon name=\${tab.icon} class="mr-2 w-5"></uix-icon> \${tab.label}\`, html\`<div class="p-4 flex-grow overflow-auto">\${renderTabContent(tab)}</div>\`])}
-            ></uix-tabs>
-          </div>\`
-									: html\`
-                                      <div class="flex-1 flex items-center justify-center bg-[#282828]">
-                                          <div class="text-center max-w-md p-4">
-                                              <uix-icon name="server-off" class="w-16 h-16 text-[#928374] mx-auto mb-4"></uix-icon>
-                                              <h3 class="text-lg font-semibold text-[#ebdbb2] mb-2">Server Not Connected</h3>
-                                              <p class="text-[#bdae93] mb-6">Edit your server code, then click Connect to run it.</p>
-																						<uix-button
-																							label="Connect"
-																							@click=\${this.connectToServer.bind(this)}
-																							size="small"
-																						></uix-button>
-																							
-                                          </div>
-                                      </div>
-                                  \`
-							}
-							<mcp-requests></mcp-requests>
-							\${
-								this.compilerErrors.length > 0
-									? html\`
-										<uix-divider resizable></uix-divider>
-										<div class="flex-shrink-0 h-50 overflow-auto">
-											\${this.renderErrorPanel()}
-										</div>
-								  \`
-									: ""
-							}
-						</div>
-			\`;
+                <!-- Left Panel: Editor -->
+                <div class="flex-1 h-full flex flex-col min-w-0">
+                     <div class="h-15 bg-[#3c3836] border-b border-[#504945] p-2 flex items-center justify-between">
+                         <div class="flex items-center space-x-2">
+                             <uix-input
+                                 ghost
+                                 class="dark w-3xs"
+                                 type="select"
+                                 .options=\${availableServersForSelect}
+                                 .value=\${this.selectedServer}
+                                 @change=\${(e) => this.onServerChange(e.target.value)}
+                             ></uix-input>
+                         </div>
+                         <div class="flex items-center space-x-2 gap-2">
+                             \${
+																this.isServerConnected && this.isDirty
+																	? html\`<uix-link
+                                     @click=\${this.handleReload.bind(this)}
+                                     class="dark"
+                                     size="small"
+                                     label="Refresh"
+                                     icon="refresh-cw"
+                                 ></uix-link>\`
+																	: ""
+															}
+                             <uix-button
+                                 .label=\${this.isServerConnected ? "Disconnect" : "Connect"}
+                                 class=\${this.isServerConnected ? "bg-red-700" : "bg-green-700"}
+                                 @click=\${this.handleConnectionToggle.bind(this)}
+                                 size="small"
+                             ></uix-button>
+                         </div>
+                    </div>
+                    <uix-code
+                        .content=\${this.content}
+                        .language=\${this.language}
+                        .onUpdate=\${this.onEditorUpdate.bind(this)}
+                        class="flex-1 overflow-y-auto"
+                    ></uix-code>
+                </div>
+
+                <uix-divider vertical resizable style="--uix-divider-color: #3c3836;"></uix-divider>
+
+                <!-- Right Panel: Dashboard/Tools -->
+                <div class="flex-1 h-full flex flex-col min-w-0">
+                    \${
+											this.isServerConnected
+												? html\`<div class="flex-1 flex flex-col min-h-0">
+                            <uix-tabs
+                                style="--uix-tabs-font-size: 1rem; --uix-tabs-active-background-color: var(--colors-red-700); --uix-tabs-border-color: var(--colors-red-800); --uix-tabs-text: #ebdbb2; --uix-tabs-active-text: #ebdbb2;"
+                                class="flex flex-col flex-grow"
+                                activeTab=\${this.activeTab}
+                                .selectTab=\${this.selectTab.bind(this)}
+                                .tabs=\${tabs.map((tab) => [
+																	html\`<uix-icon name=\${tab.icon} class="mr-2 w-5"></uix-icon> \${tab.label}\`,
+																	html\`<div class="p-4 flex-grow overflow-auto">\${renderTabContent(tab)}</div>\`,
+																])}
+                            ></uix-tabs>
+                          </div>\`
+												: html\`
+                          <div class="flex-1 flex items-center justify-center bg-[#282828]">
+                              <div class="text-center max-w-md p-4">
+                                  <uix-icon name="server-off" class="w-16 h-16 text-[#928374] mx-auto mb-4"></uix-icon>
+                                  <h3 class="text-lg font-semibold text-[#ebdbb2] mb-2">Server Not Connected</h3>
+                                  <p class="text-[#bdae93] mb-6">Edit your server code, then click Connect to run it.</p>
+                                  <uix-button
+                                      label="Connect"
+                                      @click=\${this.connectToServer.bind(this)}
+                                      size="small"
+                                  ></uix-button>
+                              </div>
+                          </div>
+                        \`
+										}
+                    <mcp-requests></mcp-requests>
+                    \${
+											this.compilerErrors.length > 0
+												? html\`
+                            <uix-divider resizable></uix-divider>
+                            <div class="flex-shrink-0 h-50 overflow-auto">
+                                \${this.renderErrorPanel()}
+                            </div>
+                          \`
+												: ""
+										}
+                </div>
+            \`;
 		},
 	};
 };
-`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/editor/views/textarea.js":{content:`const cm = {
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/mcp/views/history.js":{content:`export default ({ html, AI, T }) => {
+	$APP.define("mcp-history-view", {
+		properties: {
+			item: T.object(null),
+			onBack: T.function(),
+		},
+
+		handleBack() {
+			if (this.onBack) {
+				this.onBack();
+			}
+		},
+
+		render() {
+			if (!this.item) {
+				return html\`<div class="text-center text-gray-500 h-full flex items-center justify-center">Select a history item to view details.</div>\`;
+			}
+
+			const { item } = this;
+
+			return html\`
+                <div class="text-sm">
+                    <uix-link label="Back" icon="arrow-left" reverse @click=\${this.handleBack.bind(this)} class="text-xs text-blue-600 hover:underline mb-3 flex items-center"></uix-link>
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="font-mono text-xs font-bold text-gray-700 mb-1">REQUEST</h4>
+                            <pre class="text-xs whitespace-pre-wrap bg-gray-800 text-gray-200 p-2 rounded-lg font-mono overflow-auto">\${JSON.stringify({ tool: item.toolName, args: item.args || item.params }, null, 2)}</pre>
+                        </div>
+                        <div>
+                            <h4 class="font-mono text-xs font-bold text-gray-700 mb-1">RESPONSE</h4>
+                            \${
+															item.status === "success"
+																? html\`<pre class="text-xs whitespace-pre-wrap bg-gray-900 text-green-400 p-2 rounded-lg font-mono overflow-auto">\${JSON.stringify(item.result, null, 2)}</pre>\`
+																: item.status === "error"
+																	? html\`<pre class="text-xs whitespace-pre-wrap bg-red-100 text-red-700 p-2 rounded-lg font-mono overflow-auto">\${item.error}</pre>\`
+																	: html\`<p class="text-xs text-gray-500">Request is still pending...</p>\`
+														}
+                        </div>
+                    </div>
+                </div>
+            \`;
+		},
+	});
+
+	return {
+		properties: {
+			history: T.array([]),
+			selectedHistoryId: T.string(null),
+			onSelect: T.function(),
+			listOnly: T.boolean(),
+		},
+		selectHistoryItem(item) {
+			this.selectedHistoryId = item ? item.id : undefined;
+			if (this.onHistorySelect) this.onSelect(item);
+		},
+		connected() {
+			this.historyUnsubscribe = AI.onHistoryChange((event) => {
+				this.history = event.history;
+			});
+			this.history = AI.getHistory();
+		},
+		render() {
+			if (this.history.length === 0)
+				return html\`<p class="text-center text-xs text-gray-400 p-4">No history yet</p>\`;
+			const selectedHistoryItem = this.history.find(
+				(h) => h.id === this.selectedHistoryId,
+			);
+
+			return html\`
+                <ul class="text-xs space-y-1 font-mono">
+                    \${this.history.map(
+											(item) => html\`
+                            <li
+                                class="flex flex-col \${this.selectedHistoryId === item.id ? "font-semibold text-blue-100 p-2" : item.status === "error" ? "text-red-100" : "text-white"}">
+                                <div 
+																 @click=\${() => this.selectHistoryItem(item)}
+																class="cursor-pointer flex items-center justify-between p-2 rounded hover:bg-gray-700">
+																<span class="text-ellipsis">\${item.toolName}</span>
+                                <div class="flex items-center">
+                                    <span class="text-gray-500 mr-2">\${item.status}</span>
+                                    <uix-icon name="chevron-right" class="h-4 w-4 text-gray-400"></uix-icon>
+                                </div>
+																</div>
+																\${!this.listOnly || !selectedHistoryItem || selectedHistoryItem.id !== item.id ? null : html\`<mcp-history-view .item=\${selectedHistoryItem} .onBack=\${() => this.selectHistoryItem(null)}></mcp-history-view>\`}
+                            </li>
+                        \`,
+										)}
+                </ul>
+            \`;
+		},
+	};
+};
+`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/layout/divider.js":{content:`let throttleTimeout = null;
+let lastEvent = null;
+
+export default ({ html, T }) => ({
+	tag: "uix-divider",
+	style: true,
+	properties: {
+		label: T.string(),
+		vertical: T.boolean(),
+		resizable: T.boolean({ defaultValue: false }),
+	},
+	firstUpdated() {
+		if (this.resizable) {
+			window.addEventListener("pointerdown", this.pointerDown.bind(this));
+		}
+	},
+
+	pointerDown(e) {
+		if (e.target !== this) return;
+		e.preventDefault();
+		this.setPointerCapture(e.pointerId);
+
+		this._startX = e.clientX;
+		this._startY = e.clientY;
+
+		this._prevElem = this.previousElementSibling;
+		this._nextElem = this.nextElementSibling;
+
+		this._prevElemStartWidth = this._prevElem ? this._prevElem.offsetWidth : 0;
+		this._nextElemStartWidth = this._nextElem ? this._nextElem.offsetWidth : 0;
+		this._prevElemStartHeight = this._prevElem
+			? this._prevElem.offsetHeight
+			: 0;
+		this._nextElemStartHeight = this._nextElem
+			? this._nextElem.offsetHeight
+			: 0;
+
+		window.addEventListener("pointermove", this.pointerMove.bind(this));
+		window.addEventListener("pointerup", this.pointerUp.bind(this));
+	},
+	pointerMove(e) {
+		lastEvent = e;
+		if (throttleTimeout) return;
+
+		throttleTimeout = setTimeout(() => {
+			throttleTimeout = null;
+			this.handleMouseMove(lastEvent);
+		}, 15);
+	},
+
+	handleMouseMove(e) {
+		if (!this._prevElem || !this._nextElem) return;
+
+		if (this.vertical) {
+			let dx = e.clientX - this._startX;
+			if (dx > 0) dx += 20;
+			const newPrevWidth = this._prevElemStartWidth + dx;
+			const newNextWidth = this._nextElemStartWidth - dx;
+
+			if (newPrevWidth > 0 && newNextWidth > 0) {
+				this._prevElem.style.flexBasis = \`\${newPrevWidth}px\`;
+				this._nextElem.style.flexBasis = \`\${newNextWidth}px\`;
+			}
+		} else {
+			const dy = e.clientY - this._startY;
+			const newPrevHeight = this._prevElemStartHeight + dy;
+			const newNextHeight = this._nextElemStartHeight - dy;
+
+			if (newPrevHeight > 0 && newNextHeight > 0) {
+				this._prevElem.style.flexBasis = \`\${newPrevHeight}px\`;
+				this._nextElem.style.flexBasis = \`\${newNextHeight}px\`;
+			}
+		}
+	},
+
+	pointerUp(e) {
+		this.releasePointerCapture(e.pointerId);
+		this._startX = null;
+		this._startY = null;
+
+		this._prevElem = null;
+		this._nextElem = null;
+
+		this._prevElemStartWidth = null;
+		this._nextElemStartWidth = null;
+		this._prevElemStartHeight = null;
+		this._nextElemStartHeight = null;
+		window.removeEventListener("pointermove", this.pointerMove.bind(this));
+		window.removeEventListener("pointerup", this.pointerUp.bind(this));
+	},
+
+	render() {
+		return !this.label ? null : html\`<span>\${this.label}</span>\`;
+	},
+});
+`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/form/code.js":{content:`const cm = {
 	core: () => import("https://esm.sh/@codemirror/state"),
 	view: () => import("https://esm.sh/@codemirror/view"),
 	commands: () => import("https://esm.sh/@codemirror/commands"),
@@ -1491,101 +962,6 @@ export default ({ T }) => ({
 
 	render() {
 		return null;
-	},
-});
-`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/layout/divider.js":{content:`let throttleTimeout = null;
-let lastEvent = null;
-
-export default ({ html, T }) => ({
-	tag: "uix-divider",
-	style: true,
-	properties: {
-		label: T.string(),
-		vertical: T.boolean(),
-		resizable: T.boolean({ defaultValue: false }),
-	},
-	firstUpdated() {
-		if (this.resizable) {
-			window.addEventListener("pointerdown", this.pointerDown.bind(this));
-		}
-	},
-
-	pointerDown(e) {
-		if (e.target !== this) return;
-		e.preventDefault();
-		this.setPointerCapture(e.pointerId);
-
-		this._startX = e.clientX;
-		this._startY = e.clientY;
-
-		this._prevElem = this.previousElementSibling;
-		this._nextElem = this.nextElementSibling;
-
-		this._prevElemStartWidth = this._prevElem ? this._prevElem.offsetWidth : 0;
-		this._nextElemStartWidth = this._nextElem ? this._nextElem.offsetWidth : 0;
-		this._prevElemStartHeight = this._prevElem
-			? this._prevElem.offsetHeight
-			: 0;
-		this._nextElemStartHeight = this._nextElem
-			? this._nextElem.offsetHeight
-			: 0;
-
-		window.addEventListener("pointermove", this.pointerMove.bind(this));
-		window.addEventListener("pointerup", this.pointerUp.bind(this));
-	},
-	pointerMove(e) {
-		lastEvent = e;
-		if (throttleTimeout) return;
-
-		throttleTimeout = setTimeout(() => {
-			throttleTimeout = null;
-			this.handleMouseMove(lastEvent);
-		}, 15);
-	},
-
-	handleMouseMove(e) {
-		if (!this._prevElem || !this._nextElem) return;
-
-		if (this.vertical) {
-			let dx = e.clientX - this._startX;
-			if (dx > 0) dx += 20;
-			const newPrevWidth = this._prevElemStartWidth + dx;
-			const newNextWidth = this._nextElemStartWidth - dx;
-
-			if (newPrevWidth > 0 && newNextWidth > 0) {
-				this._prevElem.style.flexBasis = \`\${newPrevWidth}px\`;
-				this._nextElem.style.flexBasis = \`\${newNextWidth}px\`;
-			}
-		} else {
-			const dy = e.clientY - this._startY;
-			const newPrevHeight = this._prevElemStartHeight + dy;
-			const newNextHeight = this._nextElemStartHeight - dy;
-
-			if (newPrevHeight > 0 && newNextHeight > 0) {
-				this._prevElem.style.flexBasis = \`\${newPrevHeight}px\`;
-				this._nextElem.style.flexBasis = \`\${newNextHeight}px\`;
-			}
-		}
-	},
-
-	pointerUp(e) {
-		this.releasePointerCapture(e.pointerId);
-		this._startX = null;
-		this._startY = null;
-
-		this._prevElem = null;
-		this._nextElem = null;
-
-		this._prevElemStartWidth = null;
-		this._nextElemStartWidth = null;
-		this._prevElemStartHeight = null;
-		this._nextElemStartHeight = null;
-		window.removeEventListener("pointermove", this.pointerMove.bind(this));
-		window.removeEventListener("pointerup", this.pointerUp.bind(this));
-	},
-
-	render() {
-		return !this.label ? null : html\`<span>\${this.label}</span>\`;
 	},
 });
 `,mimeType:"application/javascript",skipSW:!1},"/modules/apps/mcp/views/requests.js":{content:`export default ({ html, AI, T }) => {
@@ -1850,250 +1226,7 @@ export default ({ html, T }) => ({
 		},
 	};
 };
-`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/mcp/worker.js":{content:`let ts;
-let tsLibCache = {};
-async function loadCjsModule(url) {
-	try {
-		const response = await fetch(url);
-		if (!response.ok) {
-			throw new Error(\`HTTP error! status: \${response.status}\`);
-		}
-		const scriptText = await response.text();
-
-		// Prepare a fake CJS environment
-		const module = { exports: {} };
-		const exports = module.exports;
-
-		// Wrap the script text in a function and execute it
-		const scriptFunc = new Function("module", "exports", scriptText);
-		scriptFunc(module, exports);
-
-		// If the module uses \`module.exports = ...\`, it will be on module.exports.
-		// If it just uses \`exports.foo = ...\`, it will be on exports.
-		// We check \`module.exports\` first.
-		const exportedModule = module.exports;
-
-		// Sometimes the main export isn't \`default\`, we check if the object is empty.
-		if (Object.keys(exportedModule).length === 0) {
-			return exports;
-		}
-
-		return exportedModule;
-	} catch (error) {
-		console.error(\`Failed to load module from \${url}:\`, error);
-		throw error;
-	}
-}
-
-const loadTypeScript = async () => {
-	if (ts) return;
-	try {
-		const tsModule = await loadCjsModule(
-			"https://unpkg.com/typescript@latest/lib/typescript.js",
-		);
-		ts = tsModule;
-		self.ts = ts;
-		console.log({ ts }, self.ts);
-	} catch (error) {
-		console.error("Failed to load TypeScript:", error);
-	}
-};
-
-const loadTypeScriptLibs = async () => {
-	if (Object.keys(tsLibCache).length > 0) return;
-	const libsToFetch = [
-		"lib.es2020.d.ts",
-		"lib.es2018.d.ts",
-		"lib.es2019.d.ts",
-		"lib.es2019.string.d.ts",
-		"lib.es2019.array.d.ts",
-		"lib.es2019.object.d.ts",
-		"lib.es2020.bigint.d.ts",
-		"lib.es2020.date.d.ts",
-		"lib.es2020.number.d.ts",
-		"lib.es2020.promise.d.ts",
-		"lib.es2020.sharedmemory.d.ts",
-		"lib.es2020.string.d.ts",
-		"lib.es2020.symbol.wellknown.d.ts",
-		"lib.es2015.symbol.d.ts",
-		"lib.es2019.symbol.d.ts",
-		"lib.es2019.intl.d.ts",
-		"lib.es2015.iterable.d.ts",
-		"lib.es2018.intl.d.ts",
-		"lib.es2020.intl.d.ts",
-		"lib.es5.d.ts",
-		"lib.dom.d.ts",
-		"lib.es2017.d.ts",
-		"lib.es2018.asynciterable.d.ts",
-		"lib.es2018.asyncgenerator.d.ts",
-		"lib.es2018.promise.d.ts",
-		"lib.es2018.regexp.d.ts",
-		"lib.es2016.d.ts",
-		"lib.es2017.arraybuffer.d.ts",
-		"lib.es2017.date.d.ts",
-		"lib.es2017.intl.d.ts",
-		"lib.es2017.object.d.ts",
-		"lib.es2017.sharedmemory.d.ts",
-		"lib.es2017.string.d.ts",
-		"lib.es2017.typedarrays.d.ts",
-		"lib.es2015.d.ts",
-		"lib.es2016.array.include.d.ts",
-		"lib.es2016.intl.d.ts",
-		"lib.es2015.symbol.wellknown.d.ts",
-		"lib.es2015.core.d.ts",
-		"lib.es2015.collection.d.ts",
-		"lib.es2015.generator.d.ts",
-		"lib.es2015.promise.d.ts",
-		"lib.es2015.proxy.d.ts",
-		"lib.es2015.reflect.d.ts",
-		"lib.decorators.d.ts",
-		"lib.decorators.legacy.d.ts",
-	];
-
-	try {
-		const promises = libsToFetch.map((lib) =>
-			fetch(\`https://unpkg.com/typescript@latest/lib/\${lib}\`).then((res) => {
-				if (!res.ok) throw new Error(\`Failed to fetch \${lib}\`);
-				return res.text();
-			}),
-		);
-		const contents = await Promise.all(promises);
-		const newCache = {};
-		libsToFetch.forEach((lib, index) => {
-			newCache[lib] = contents[index];
-		});
-
-		return newCache;
-	} catch (e) {
-		console.error(
-			"Could not fetch TypeScript library definitions. Type checking will be less accurate.",
-			e,
-		);
-	}
-};
-
-self.onmessage = async (e) => {
-	const { type, payload } = e.data;
-	switch (type) {
-		case "init":
-			await loadTypeScript();
-			tsLibCache = await loadTypeScriptLibs();
-			break;
-		case "validate": {
-			if (!ts) return;
-			const validationErrors = validate(payload.code, payload.filePath);
-			self.postMessage({
-				type: "validationComplete",
-				payload: { errors: validationErrors },
-			});
-			break;
-		}
-		case "transpile": {
-			if (!ts) {
-				// Fallback if TS isn't loaded yet
-				self.postMessage({
-					type: "transpileComplete",
-					payload: {
-						transpiledCode: payload.code,
-						requestId: payload.requestId,
-					},
-				});
-				return;
-			}
-			const transpiledResult = transpile(payload.code);
-			self.postMessage({
-				type: "transpileComplete",
-				payload: {
-					transpiledCode: transpiledResult,
-					requestId: payload.requestId,
-				},
-			});
-			break;
-		}
-	}
-};
-
-const validate = (code, filePath) => {
-	try {
-		const defaultLibFileName = "lib.es2020.d.ts";
-		const compilerOptions = {
-			target: ts.ScriptTarget.ES2020,
-			module: ts.ModuleKind.CommonJS,
-			allowJs: true,
-			esModuleInterop: true,
-			noEmit: true,
-		};
-
-		const host = {
-			getSourceFile: (fileName, languageVersion) => {
-				const sourceText =
-					tsLibCache[fileName] || (fileName === filePath ? code : undefined);
-				return sourceText !== undefined
-					? ts.createSourceFile(fileName, sourceText, languageVersion)
-					: undefined;
-			},
-			writeFile: () => {},
-			getDefaultLibFileName: () => defaultLibFileName,
-			useCaseSensitiveFileNames: () => false,
-			getCanonicalFileName: (fileName) => fileName,
-			getCurrentDirectory: () => "/",
-			getNewLine: () => "\\n",
-			fileExists: (fileName) => fileName === filePath || !!tsLibCache[fileName],
-			readFile: (fileName) =>
-				fileName === filePath ? code : tsLibCache[fileName],
-		};
-
-		const program = ts.createProgram([filePath], compilerOptions, host);
-		const diagnostics = ts.getPreEmitDiagnostics(program);
-
-		return diagnostics.map((diagnostic) => {
-			const message = ts.flattenDiagnosticMessageText(
-				diagnostic.messageText,
-				"\\n",
-			);
-			if (diagnostic.file && diagnostic.start) {
-				const { line, character } = ts.getLineAndCharacterOfPosition(
-					diagnostic.file,
-					diagnostic.start,
-				);
-				return { line: line + 1, character: character + 1, message };
-			}
-			return { line: 0, character: 0, message };
-		});
-	} catch (error) {
-		console.error("Error during code validation in worker:", error);
-		return [
-			{
-				line: 0,
-				character: 0,
-				message: "An unexpected error occurred during validation.",
-			},
-		];
-	}
-};
-
-const transpile = (code) => {
-	try {
-		const jsResult = ts.transpileModule(code, {
-			compilerOptions: {
-				module: ts.ModuleKind.CommonJS,
-				target: ts.ScriptTarget.ES2020,
-			},
-		});
-		return jsResult.outputText;
-	} catch (error) {
-		console.error("TypeScript compilation failed in worker:", error);
-		return code;
-	}
-};
-`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/editor/views/textarea.css":{content:`.cm-scroller {
-	overflow: auto !important;
-}
-
-.cm-editor {
-	width: 100%;
-}
-`,mimeType:"text/css",skipSW:!1},"/modules/uix/layout/divider.css":{content:`.uix-divider {
+`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/layout/divider.css":{content:`.uix-divider {
 	--uix-divider-color: rgba(0, 0, 0, 0.05);
 	--uix-divider-size: 2px;
 	display: flex;
@@ -2144,206 +1277,982 @@ const transpile = (code) => {
 		}
 	}
 }
-`,mimeType:"text/css",skipSW:!1},"/modules/icon-lucide/lucide/server-off.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-5m-5 0L2.5 2.5C2 2 2 2.5 2 5v3a2 2 0 0 0 2 2zm12 7v-1a2 2 0 0 0-2-2h-1M4 14a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h16.5l1-.5l.5.5l-8-8zm2 4h.01M2 2l20 20"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/apps/mcp/views/servers.js":{content:`export default ({ html, AI, T }) => {
-	const starIcon = (isFilled = false) => html\`
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="\${isFilled ? "#fabd2f" : "none"}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="\${isFilled ? "text-[#fabd2f]" : "text-[#a89984]"}">
-            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-        </svg>
-    \`;
+`,mimeType:"text/css",skipSW:!1},"/modules/uix/form/code.css":{content:`.cm-scroller {
+	overflow: auto !important;
+}
 
-	return {
-		tag: "mcp-servers",
-		class:
-			"w-full h-full bg-[#282828] text-[#ebdbb2] flex flex-col p-6 md:p-8 font-sans text-sm overflow-y-auto",
+.cm-editor {
+	width: 100%;
+}
+`,mimeType:"text/css",skipSW:!1},"/modules/icon-lucide/lucide/code.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m16 18l6-6l-6-6M8 6l-6 6l6 6"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/message-circle.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/search.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21l-4.3-4.3"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/server.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><path d="M6 6h.01M6 18h.01"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/layout-grid.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/book.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/zap.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/computer.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="14" height="8" x="5" y="2" rx="2"/><rect width="20" height="8" x="2" y="14" rx="2"/><path d="M6 18h2m4 0h6"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/message-square-heart.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M14.8 7.5a1.84 1.84 0 0 0-2.6 0l-.2.3l-.3-.3a1.84 1.84 0 1 0-2.4 2.8L12 13l2.7-2.7c.9-.9.8-2.1.1-2.8"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/apps/mcp/views/chat.js":{content:`export default ({ $APP, html, AI, T, Model }) => {
+	let currentConversationId = null;
+
+	// *****************************************************************
+	// UPDATED: Context Bar Component
+	// This component displays information about the current context.
+	// *****************************************************************
+	$APP.define("mcp-context-bar", {
 		properties: {
-			searchQuery: T.string(""),
+			tokenCount: T.number(0),
+			selectedTools: T.array([]),
+			messageCount: T.number(0),
+			totalMessages: T.number(0),
+			onSelectAll: T.function(),
+			onDeselectAll: T.function(),
 		},
-		availableServers: [],
-		favoriteServerIds: [],
-		connectedServerId: null,
-
-		connected() {
-			this.availableServers = AI.listServers();
-			this.availableServers.map((server) =>
-				$APP.SW.request("SW:CACHE_FILE", {
-					path: server.path,
-					skipSW: true,
-				}),
-			);
-			this.favoriteServerIds = AI.getFavorites();
-			this.updateConnectionStatus();
-			this._updateFavorites = this.updateFavorites.bind(this);
-			this._updateConnectionStatus = this.updateConnectionStatus.bind(this);
-			AI.events.on("servers:favoritesChanged", this._updateFavorites);
-			AI.events.on("connect", this._updateConnectionStatus);
-			AI.events.on("disconnect", this._updateConnectionStatus);
-			this.update();
-		},
-
-		disconnected() {
-			AI.events.off("servers:favoritesChanged", this._updateFavorites);
-			AI.events.off("connect", this._updateConnectionStatus);
-			AI.events.off("disconnect", this._updateConnectionStatus);
-		},
-		updateFavorites(newFavoriteIds) {
-			this.favoriteServerIds = newFavoriteIds;
-			this.update();
-		},
-
-		updateConnectionStatus() {
-			const clients = AI.listClients();
-			const devClient = clients.find((c) => c.alias === "dev_server");
-			let newConnectedServerId = null;
-			if (devClient && this.availableServers) {
-				const connectedServer = this.availableServers.find(
-					(s) => s.path === devClient.command,
-				);
-				if (connectedServer) newConnectedServerId = connectedServer.id;
-			}
-			if (this.connectedServerId !== newConnectedServerId) {
-				this.connectedServerId = newConnectedServerId;
-				this.update();
-			}
-		},
-		async connectToServer(server) {
-			try {
-				if (this.connectedServerId) {
-					await this.disconnectFromServer();
-				}
-				const transportConfig = {
-					type: "JavaScript",
-					command: server.path,
-					args: [],
-				};
-				await AI.connect(transportConfig, { alias: "dev_server" });
-			} catch (e) {
-				console.error(\`Failed to connect to \${server.name}:\`, e);
-			}
-		},
-		async disconnectFromServer() {
-			try {
-				await AI.disconnect("dev_server");
-			} catch (e) {
-				console.error("Failed to disconnect from server:", e);
-			}
-		},
-
-		toggleFavorite(server) {
-			AI.toggleFavorite(server.id);
-		},
-
-		// --- Render Methods ---
-		renderServerCard(server) {
-			const isConnected = this.connectedServerId === server.id;
-			const isFavorited = this.favoriteServerIds.includes(server.id);
-
+		render() {
 			return html\`
-                <div class="bg-[#3c3836] border-2 border-[#504945] rounded-lg p-4 flex flex-col gap-4 font-semibold transition-all duration-200 shadow-[4px_4px_0px_#1d2021] hover:shadow-[6px_6px_0px_#83a598] hover:border-[#83a598]">
-                    <div class="flex justify-between items-start">
-                         <div class="flex items-center gap-4">
-                            <div class="w-12 h-12 rounded-md flex-shrink-0 flex items-center justify-center bg-[#282828] text-[#83a598]">
-                               \${html.unsafeHTML(server.icon)}
-                            </div>
-                            <div>
-                                <h3 class="font-bold text-md text-[#ebdbb2]">\${server.name}</h3>
-                                \${isConnected ? html\`<span class="text-xs text-[#b8bb26] font-medium">Currently connected</span>\` : ""}
-                            </div>
+                <div class="px-6 py-2 border-b border-[#504945] bg-[#282828] flex items-center justify-between text-sm text-[#bdae93] shadow-md">
+                    <div class="flex items-center gap-x-6">
+                        <div class="flex items-center gap-2" title="Messages in context / Total messages">
+                            <uix-icon name="list-checks" class="w-4 h-4 text-[#928374]"></uix-icon>
+                            <span>\${this.messageCount} / \${this.totalMessages} Messages</span>
                         </div>
-                        <button @click=\${() => this.toggleFavorite(server)} class="p-1 rounded-full hover:bg-[#504945] transition-colors">
-                            \${starIcon(isFavorited)}
+                        <div class="flex items-center gap-2" title="Estimated token count for the context">
+                            <uix-icon name="database" class="w-4 h-4 text-[#928374]"></uix-icon>
+                            <span>~\${this.tokenCount.toLocaleString()} Tokens</span>
+                        </div>
+                        <div class="flex items-center gap-2" title="Enabled tools for the next message">
+                            <uix-icon name="pickaxe" class="w-4 h-4 text-[#928374]"></uix-icon>
+                            <span>\${this.selectedTools.length} Tools Enabled</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button @click=\${this.onSelectAll} class="px-2 py-1 rounded-md hover:bg-[#504945] transition-colors flex items-center gap-1.5 text-sm font-medium">
+                            <uix-icon name="square-check" class="w-3.5 h-3.5"></uix-icon> Select All
+                        </button>
+                        <button @click=\${this.onDeselectAll} class="px-2 py-1 rounded-md hover:bg-[#504945] transition-colors flex items-center gap-1.5 text-sm font-medium">
+                           <uix-icon name="square" class="w-3.5 h-3.5"></uix-icon> Deselect All
                         </button>
                     </div>
+                </div>
+            \`;
+		},
+	});
 
-                    <!-- Middle Section: Description -->
-                    <p class="text-sm text-[#bdae93] font-medium min-h-[2.5rem]">\${server.description}</p>
+	$APP.define("mcp-chat-message", {
+		properties: {
+			message: T.object({}),
+			isUser: T.boolean(false),
+			isStreaming: T.boolean(false),
+			inContext: T.boolean(false),
+			onContextToggle: T.function(),
+		},
+		_formatTimestamp(timestamp) {
+			if (!timestamp) return "";
+			return new Date(timestamp).toLocaleTimeString([], {
+				hour: "2-digit",
+				minute: "2-digit",
+			});
+		},
+		_renderToolCall(toolCall) {
+			return html\`
+                <div class="bg-[#1d2021] border-l-4 border-[#504945] p-3 mt-2 rounded-md">
+                    <div class="font-mono text-[#83a598] font-semibold flex items-center gap-2">
+                        <uix-icon name="pickaxe" class="w-3.5 h-3.5"></uix-icon>
+                        \${toolCall.name}
+                    </div>
+                    \${
+											toolCall.arguments
+												? html\`<pre class="text-sm text-[#bdae93] mt-2 whitespace-pre-wrap bg-[#282828] p-2 rounded">\${JSON.stringify(toolCall.arguments, null, 2)}</pre>\`
+												: ""
+										}
+                    \${
+											toolCall.result
+												? html\`
+                                <div class="mt-2 text-[#ebdbb2]">
+                                    <div class="font-semibold text-sm text-[#928374]">Result:</div>
+                                    <pre class="text-sm bg-[#282828] p-2 rounded mt-1 whitespace-pre-wrap">\${typeof toolCall.result === "string" ? toolCall.result : JSON.stringify(toolCall.result, null, 2)}</pre>
+                                </div>
+                              \`
+												: ""
+										}
+                </div>
+            \`;
+		},
+		render() {
+			const { message, isUser } = this;
+			const senderIcon = isUser
+				? html\`<div class="w-8 h-8 rounded-full bg-[#458588] flex-shrink-0 flex items-center justify-center font-bold text-[#ebdbb2]">Y</div>\`
+				: html\`<div class="w-8 h-8 rounded-full bg-[#3c3836] border border-[#504945] flex-shrink-0 flex items-center justify-center text-[#83a598]">
+                            <uix-icon name="bot" class="w-5 h-5"></uix-icon>
+                        </div>\`;
+
+			return html\`
+                <!-- UPDATED: Restored left/right alignment and custom context toggle button -->
+                <div class="flex w-full items-start gap-3 my-4 group \${isUser ? "flex-row-reverse" : ""}">
+                     <div class="flex-shrink-0 pt-1.5">
+                         <button 
+                            @click=\${() => this.onContextToggle(this.message.id)}
+                            class="transition-all \${this.inContext ? "text-[#83a598]" : "text-[#665c54]"} hover:text-[#ebdbb2]"
+                            title="Include this message in the next turn's context"
+                         >
+                            <uix-icon name=\${this.inContext ? "circle-check" : "circle"} class="w-4 h-4"></uix-icon>
+                         </button>
+                    </div>
+
+                    \${senderIcon}
                     
-                    <!-- Bottom Section: Tags and Connect Button -->
-                     <div class="flex flex-wrap items-center justify-between gap-2 pt-4 border-t-2 border-dashed border-[#504945]">
-                        <div class="flex flex-wrap gap-2">
-                            \${server.tags.map((tag) => html\`<span class="text-xs font-bold px-2 py-1 rounded bg-[#504945] text-[#ebdbb2]">\${tag.toUpperCase()}</span>\`)}
+                    <div class="max-w-[75%]">
+                        <div class="flex items-baseline gap-2 mb-1 \${isUser ? "justify-end" : ""}">
+                            <span class="font-bold \${isUser ? "text-[#d5c4a1]" : "text-[#bdae93]"}">\${isUser ? "You" : "Assistant"}</span>
+                            \${message.timestamp ? html\`<span class="text-sm text-[#928374]">\${this._formatTimestamp(message.timestamp)}</span>\` : ""}
                         </div>
+                        <div class="bg-[#3c3836] border border-[#504945] rounded-lg p-3 shadow-sm text-[#ebdbb2]">
+                            \${message.content ? html\`<div class="prose prose-sm max-w-none text-[#ebdbb2] whitespace-pre-wrap">\${message.content}</div>\` : ""}
+                            \${message.toolCalls?.length > 0 ? message.toolCalls.map((toolCall) => this._renderToolCall(toolCall)) : ""}
+                            \${this.isStreaming ? html\`<div class="inline-block w-2 h-4 bg-[#ebdbb2] animate-pulse ml-1"></div>\` : ""}
+                        </div>
+                    </div>
+                </div>
+            \`;
+		},
+	});
+
+	$APP.define("mcp-chat-input", {
+		properties: {
+			value: T.string(""),
+			isLoading: T.boolean(false),
+			onSend: T.function(),
+			groupedTools: T.object({}),
+			expandedServers: T.array([]),
+			selectedTools: T.array([]),
+			onToolToggle: T.function(),
+			onServerToggle: T.function(),
+			onServerExpandToggle: T.function(),
+			selectedModel: T.string(""),
+			onModelChange: T.function(),
+			availableProviders: T.array([]),
+			selectedProvider: T.object(),
+			onProviderChange: T.function(),
+			onSettingsClick: T.function(),
+		},
+		handleInput(event) {
+			this.value = event.target.value;
+			this.autoResize(event.target);
+		},
+		autoResize(textarea) {
+			textarea.style.height = "auto";
+			textarea.style.height = \`\${textarea.scrollHeight}px\`;
+		},
+		handleKeyPress(event) {
+			if (event.key === "Enter" && !event.shiftKey) {
+				event.preventDefault();
+				this.sendMessage();
+			}
+		},
+		sendMessage() {
+			if (!this.value.trim() || this.isLoading) return;
+			const message = this.value.trim();
+			if (this.onSend) {
+				this.onSend(message);
+			}
+			this.value = "";
+			setTimeout(() => {
+				const textarea = this.querySelector("textarea");
+				if (textarea) this.autoResize(textarea);
+			}, 0);
+		},
+		render() {
+			return html\`
+                <div class="px-6 pb-4">
+                    <div class="bg-[#3c3836] border border-[#504945] rounded-xl shadow-lg p-2">
+                        <div class="px-2 pb-2 flex justify-between items-center flex-wrap gap-2">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                \${Object.keys(this.groupedTools || {}).map(
+																	(serverName) => {
+																		const toolsOnServer =
+																			this.groupedTools[serverName];
+																		const allSelected = toolsOnServer.every(
+																			(t) =>
+																				this.selectedTools.includes(t.name),
+																		);
+																		const someSelected =
+																			!allSelected &&
+																			toolsOnServer.some((t) =>
+																				this.selectedTools.includes(t.name),
+																			);
+																		const isExpanded =
+																			this.expandedServers.includes(serverName);
+
+																		let serverButtonClass = "bg-[#504945]";
+																		let serverTextColor = "text-[#ebdbb2]";
+																		if (allSelected) {
+																			serverButtonClass = "bg-[#83a598]";
+																			serverTextColor = "text-[#1d2021]";
+																		} else if (someSelected) {
+																			serverButtonClass = "bg-[#d65d0e]";
+																			serverTextColor = "text-[#1d2021]";
+																		}
+
+																		return html\`
+                                            <div class="relative inline-block text-left">
+                                                <div class="flex items-center rounded-md \${serverButtonClass} \${serverTextColor} text-sm font-medium transition-colors">
+                                                    <button
+                                                        @click=\${() => this.onServerToggle(serverName)}
+                                                        class="px-2 py-1 hover:bg-black/10 transition-all flex items-center gap-1.5 rounded-l-md"
+                                                        title=\${\`Toggle all tools for \${serverName}\`}
+                                                    >
+                                                        <span class="capitalize">\${serverName}</span>
+                                                    </button>
+                                                    <button @click=\${() => this.onServerExpandToggle(serverName)} class="px-1.5 py-1 hover:bg-black/10 rounded-r-md border-l border-black/20">
+                                                        <span class="\${isExpanded ? "rotate-180" : ""} inline-block transition-transform">
+                                                            <uix-icon name="chevron-down"></uix-icon>
+                                                        </span>
+                                                    </button>
+                                                </div>
+                                                \${
+																									isExpanded
+																										? html\`
+                                                            <div class="absolute bottom-full mb-2 z-10 w-64 bg-[#3c3836] border border-[#504945] rounded-md shadow-lg p-2 flex flex-col gap-1 max-h-60 overflow-y-auto">
+                                                                \${toolsOnServer.map(
+																																	(
+																																		tool,
+																																	) => html\`
+                                                                        <button
+                                                                            @click=\${() => this.onToolToggle(tool.name)}
+                                                                            class="w-full text-left p-1.5 rounded text-sm truncate transition-colors \${this.selectedTools.includes(tool.name) ? "bg-[#83a598] text-[#1d2021]" : "text-[#ebdbb2] hover:bg-[#504945]"}"
+                                                                            title=\${tool.description}
+                                                                        >
+                                                                            \${tool.name}
+                                                                        </button>
+                                                                    \`,
+																																)}
+                                                            </div>
+                                                          \`
+																										: ""
+																								}
+                                            </div>
+                                        \`;
+																	},
+																)}
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <select @change=\${(e) => this.onProviderChange(e.target.value)} .value=\${this.selectedProvider?.type} class="bg-[#504945] border border-[#665c54] rounded-md px-2 text-sm focus:ring-[#83a598] focus:outline-none h-7 capitalize">
+                                    \${this.availableProviders.map((provider) => html\`<option value=\${provider.type}>\${provider.type}</option>\`)}
+                                </select>
+                                \${
+																	!this.selectedProvider
+																		? null
+																		: html\`<select @change=\${(e) => this.onModelChange(e.target.value)} .value=\${this.selectedModel} class="bg-[#504945] border border-[#665c54] rounded-md px-2 text-sm focus:ring-[#83a598] focus:outline-none h-7">
+                                                    \${this.selectedProvider.models.map((model) => html\`<option value=\${model.id} ?selected=\${model.id === this.selectedModel}>\${model.name}</option>\`)}
+                                                </select>
+                                              \`
+																}
+                                <button @click=\${this.onSettingsClick} class="p-1.5 text-[#bdae93] hover:text-[#ebdbb2] hover:bg-[#504945] rounded-md">
+                                    <uix-icon name="settings" class="w-5 h-5"></uix-icon>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <textarea
+                                .value=\${this.value}
+                                @input=\${this.handleInput.bind(this)}
+                                @keydown=\${this.handleKeyPress.bind(this)}
+                                ?disabled=\${this.isLoading || this.availableProviders.length === 0}
+                                placeholder=\${this.availableProviders.length === 0 ? "Please add a provider in settings first." : "Type your message..."}
+                                rows="1"
+                                class="w-full bg-[#282828] p-4 pr-16 text-[#ebdbb2] placeholder-[#928374] resize-none focus:outline-none focus:ring-2 focus:ring-[#83a598] rounded-lg transition-all"
+                                style="max-height: 200px; overflow-y: auto;"
+                            ></textarea>
+                            <button
+                                @click=\${this.sendMessage.bind(this)}
+                                ?disabled=\${!this.value.trim() || this.isLoading || this.availableProviders.length === 0}
+                                class="absolute right-3 bottom-2.5 p-2 rounded-full text-[#ebdbb2] transition-colors
+                                \${
+																	!this.value.trim() ||
+																	this.isLoading ||
+																	this.availableProviders.length === 0
+																		? "bg-[#504945] cursor-not-allowed"
+																		: "bg-[#458588] hover:bg-[#83a598]"
+																}"
+                            >
+                                \${this.isLoading ? html\`<div class="w-5 h-5 border-2 border-t-transparent border-white rounded-full animate-spin"></div>\` : html\`<uix-icon name="send" class="w-5 h-5"></uix-icon>\`}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            \`;
+		},
+	});
+
+	$APP.define("mcp-conversation-list", {
+		properties: {
+			conversations: T.array([]),
+			currentId: T.any(null),
+			onSelect: T.function(),
+			onNew: T.function(),
+			onDelete: T.function(),
+		},
+		_getPreview(conversation) {
+			if (!conversation.messages || conversation.messages.length === 0)
+				return "New conversation";
+			const lastMessage =
+				conversation.messages[conversation.messages.length - 1];
+			if (!lastMessage) return "New conversation";
+			const content = lastMessage.content || "Tool Call";
+			return content.length > 35 ? \`\${content.substring(0, 35)}...\` : content;
+		},
+		_formatDate(timestamp) {
+			const date = new Date(timestamp);
+			const now = new Date();
+			if (date.toDateString() === now.toDateString()) {
+				return date.toLocaleTimeString([], {
+					hour: "2-digit",
+					minute: "2-digit",
+				});
+			}
+			return date.toLocaleDateString([], { month: "short", day: "numeric" });
+		},
+		render() {
+			const sortedConversations = [...this.conversations].sort(
+				(a, b) =>
+					new Date(b.updatedAt || b.createdAt) -
+					new Date(a.updatedAt || a.createdAt),
+			);
+
+			return html\`
+                <div class="h-full flex flex-col bg-[#3c3836]">
+                    <div class="p-3 border-b border-[#504945]">
+                        <button @click=\${this.onNew} class="w-full flex items-center justify-center gap-2 p-2 rounded-lg bg-[#458588] text-[#ebdbb2] hover:bg-[#83a598] transition-colors font-semibold">
+                            <uix-icon name="plus" class="w-4 h-4"></uix-icon> New Chat
+                        </button>
+                    </div>
+                    <div class="flex-1 overflow-y-auto p-2">
                         \${
-													isConnected
-														? html\`<uix-button label="Disconnect" @click=\${() => this.disconnectFromServer()} class="bg-[#fb4934] text-[#ebdbb2] font-bold" size="small"></uix-button>\`
-														: html\`<uix-button label="Connect" @click=\${() => this.connectToServer(server)} class="bg-[#458588] text-[#ebdbb2] font-bold" size="small"></uix-button>\`
+													!sortedConversations ||
+													sortedConversations.length === 0
+														? html\`<div class="p-4 text-center text-[#928374]">No conversations yet</div>\`
+														: sortedConversations.map(
+																(conv) => html\`
+                                        <div
+                                            @click=\${() => this.onSelect(conv.id)}
+                                            class="p-3 rounded-lg cursor-pointer transition-colors group relative \${this.currentId === conv.id ? "bg-[#504945]" : "hover:bg-[#504945]"}"
+                                        >
+                                            <div class="text-sm font-semibold text-[#ebdbb2] truncate">\${conv.title || "Untitled Chat"}</div>
+                                            <div class="flex justify-between items-center mt-1">
+                                                <div class="text-sm text-[#bdae93] truncate pr-10">\${this._getPreview(conv)}</div>
+                                                <span class="text-sm text-[#928374] flex-shrink-0">\${this._formatDate(conv.updatedAt || conv.createdAt)}</span>
+                                            </div>
+                                            <button
+                                                @click=\${(e) => {
+																									e.stopPropagation();
+																									this.onDelete(conv.id);
+																								}}
+                                                class="absolute top-2 right-2 p-1 text-[#928374] hover:text-[#fb4934] rounded-full hover:bg-[#1d2021] opacity-0 group-hover:opacity-100 transition-opacity"
+                                                title="Delete conversation"
+                                            >
+                                                <uix-icon name="trash-2" class="w-4 h-4"></uix-icon>
+                                            </button>
+                                        </div>
+                                    \`,
+															)
 												}
                     </div>
                 </div>
             \`;
 		},
+	});
+
+	return {
+		class: "w-full h-full bg-[#282828] text-[#ebdbb2] flex font-sans",
+		_data: {
+			model: "conversations",
+			includes: "messages",
+			orderBy: "-updatedAt",
+		},
+		properties: {
+			currentConversation: T.object(null),
+			providers: T.array([]),
+			isLoading: T.boolean(false),
+			error: T.string(""),
+			availableTools: T.array([]),
+			groupedTools: T.object({}),
+			expandedServers: T.array([]),
+			selectedTools: T.array([]),
+			availableModels: T.array([]),
+			selectedModel: T.string({ sync: "local" }),
+			selectedProvider: T.object({ sync: "local" }),
+			showSettings: T.boolean(false),
+			contextMessageIds: T.array([]),
+			contextTokenCount: T.number(0),
+		},
+
+		async initializeAI() {
+			try {
+				await AI.init({ providers: this.providers });
+			} catch (error) {
+				console.error("Error initializing AI service:", error);
+				this.error = "Failed to initialize AI Service.";
+			}
+		},
+
+		async connected() {
+			await this.loadState();
+			const activeProviders = this.providers.filter((p) => p.active);
+			if (activeProviders.length > 0) {
+				await this.initializeAI();
+				this.loadTools();
+				if (
+					!this.selectedProvider ||
+					!activeProviders.some((p) => p.id === this.selectedProvider.id)
+				) {
+					this.selectedProvider = activeProviders[0];
+					this.selectedModel = this.selectedProvider.models[0].id;
+				}
+			}
+			if (!currentConversationId && this._rows && this._rows.length > 0)
+				this.selectConversation(this._rows[0].id);
+			else if (this._rows && this._rows.length === 0)
+				await this.createNewConversation();
+		},
+		async loadState() {
+			this.providers = await Model.providers.getAll({ includes: ["models"] });
+		},
+
+		async addProvider(providerData) {
+			if (
+				this.providers.some((p) => p.active && p.type === providerData.type)
+			) {
+				this.error = \`A provider of type "\${providerData.type}" already exists. Please delete it first.\`;
+				return;
+			}
+			const newRecord = await Model.providers.add({
+				...providerData,
+				active: true,
+			});
+			await this.loadState();
+			await this.initializeAI();
+			const newProvider = this.providers.find((p) => p.id === newRecord.id);
+			if (newProvider) {
+				this.selectedProvider = newProvider;
+				this.selectedModel = this.selectedProvider.models[0].id;
+			}
+
+			this.error = "";
+		},
+
+		async deleteProvider(providerType) {
+			const providerToDelete = this.providers.find(
+				(p) => p.type === providerType,
+			);
+			if (providerToDelete) {
+				await Model.providers.remove(providerToDelete.id);
+			}
+			await this.loadState();
+			await this.initializeAI();
+
+			if (this.selectedProvider?.type === providerType) {
+				const activeProviders = this.providers.filter((p) => p.active);
+				this.selectedProvider =
+					activeProviders.length > 0 ? activeProviders[0] : null;
+			}
+		},
+		toggleSettings() {
+			this.showSettings = !this.showSettings;
+		},
+		async loadTools() {
+			try {
+				const { tools } = await AI.listTools();
+				this.availableTools = tools || [];
+				const groups = {};
+				for (const tool of this.availableTools) {
+					const serverName = tool.server || "local";
+					if (!groups[serverName]) groups[serverName] = [];
+					groups[serverName].push(tool);
+				}
+				this.groupedTools = groups;
+			} catch (e) {
+				console.error("Couldn't load tools", e);
+				this.availableTools = [];
+				this.groupedTools = {};
+			}
+		},
+		toggleTool(toolName) {
+			if (this.selectedTools.includes(toolName))
+				this.selectedTools = this.selectedTools.filter((t) => t !== toolName);
+			else this.selectedTools = [...this.selectedTools, toolName];
+			this.updateTokenCount(); // UPDATED
+		},
+		toggleServerTools(serverName) {
+			const toolsOnServer = this.groupedTools[serverName].map((t) => t.name);
+			const allSelected = toolsOnServer.every((t) =>
+				this.selectedTools.includes(t),
+			);
+			if (allSelected)
+				this.selectedTools = this.selectedTools.filter(
+					(t) => !toolsOnServer.includes(t),
+				);
+			else {
+				const currentSelectedSet = new Set(this.selectedTools);
+				toolsOnServer.forEach((t) => currentSelectedSet.add(t));
+				this.selectedTools = Array.from(currentSelectedSet);
+			}
+			this.updateTokenCount(); // UPDATED
+		},
+		toggleServerExpansion(serverName) {
+			if (this.expandedServers.includes(serverName)) {
+				this.expandedServers = this.expandedServers.filter(
+					(s) => s !== serverName,
+				);
+			} else {
+				this.expandedServers = [...this.expandedServers, serverName];
+			}
+		},
+		handleModelChange(modelId) {
+			this.selectedModel = modelId;
+		},
+		handleProviderChange(providerType) {
+			const provider = this.providers.find((p) => p.type === providerType);
+			if (provider) this.selectedProvider = provider;
+			if (provider.models.length > 0)
+				this.selectedModel = provider.models[0].id;
+		},
+		async createNewConversation() {
+			const conversation = {
+				title: "New Chat",
+				createdAt: new Date().toISOString(),
+				updatedAt: new Date().toISOString(),
+			};
+			const newConversation = await Model.conversations.add(conversation);
+			currentConversationId = newConversation.id;
+			this.currentConversation = newConversation;
+			newConversation.messages = [];
+			this.showSettings = false;
+			this.contextMessageIds = [];
+			this.updateTokenCount();
+		},
+		selectConversation(id) {
+			const conversation = this._rows.find((conv) => conv.id === id);
+			if (conversation) {
+				currentConversationId = id;
+				this.currentConversation = conversation;
+				this.contextMessageIds = conversation.messages.map((m) => m.id);
+				this.updateTokenCount();
+			}
+			this.showSettings = false;
+		},
+		async deleteConversation(id) {
+			await Model.conversations.remove(id);
+			if (currentConversationId === id) {
+				currentConversationId = null;
+				this.currentConversation = null;
+				if (this._rows.length > 0) {
+					this.selectConversation(this._rows[0].id);
+				} else {
+					await this.createNewConversation();
+				}
+			}
+		},
+
+		toggleMessageInContext(messageId) {
+			const idSet = new Set(this.contextMessageIds);
+			if (idSet.has(messageId)) {
+				idSet.delete(messageId);
+			} else {
+				idSet.add(messageId);
+			}
+			this.contextMessageIds = Array.from(idSet);
+			this.updateTokenCount();
+		},
+
+		selectAllMessages() {
+			if (this.currentConversation && this.currentConversation.messages) {
+				this.contextMessageIds = this.currentConversation.messages.map(
+					(m) => m.id,
+				);
+				this.updateTokenCount();
+			}
+		},
+
+		deselectAllMessages() {
+			this.contextMessageIds = [];
+			this.updateTokenCount();
+		},
+
+		// UPDATED: Token counting now includes tool definitions.
+		updateTokenCount() {
+			if (!this.currentConversation && this.selectedTools.length === 0) {
+				this.contextTokenCount = 0;
+				return;
+			}
+
+			let totalChars = 0;
+
+			// 1. Calculate message tokens
+			if (this.currentConversation) {
+				const contextMessages = this.currentConversation.messages.filter((m) =>
+					this.contextMessageIds.includes(m.id),
+				);
+				totalChars += contextMessages.reduce((sum, msg) => {
+					let messageChars = msg.content?.length || 0;
+					if (msg.toolCalls) {
+						messageChars += JSON.stringify(msg.toolCalls).length;
+					}
+					return sum + messageChars;
+				}, 0);
+			}
+
+			// 2. Calculate tool definition tokens
+			const selectedToolObjects = this.availableTools.filter((t) =>
+				this.selectedTools.includes(t.name),
+			);
+			const toolChars = selectedToolObjects.reduce((sum, tool) => {
+				const argumentString = tool.arguments
+					? JSON.stringify(tool.arguments)
+					: "";
+				// Estimate based on name, description, arguments and a bit for the JSON structure
+				return (
+					sum +
+					(tool.name?.length || 0) +
+					(tool.description?.length || 0) +
+					argumentString.length +
+					100
+				); // 100 chars for JSON overhead
+			}, 0);
+
+			totalChars += toolChars;
+
+			this.contextTokenCount = Math.ceil(totalChars / 4);
+		},
+
+		updateConversationTitle(conversation) {
+			if (
+				(!conversation.title || conversation.title === "New Chat") &&
+				conversation.messages.length > 0
+			) {
+				const firstMessage = conversation.messages.find(
+					(m) => m.role === "user",
+				);
+				if (firstMessage?.content) {
+					conversation.title =
+						firstMessage.content.length > 50
+							? \`\${firstMessage.content.substring(0, 50)}...\`
+							: firstMessage.content;
+				}
+			}
+		},
+		async sendMessage(content) {
+			if (this.providers.filter((p) => p.active).length === 0) {
+				this.error =
+					"Cannot send message. Please add a provider in the settings.";
+				return;
+			}
+			if (!this.selectedModel) {
+				this.error = "Cannot send message. No model selected.";
+				return;
+			}
+			if (!this.currentConversation) {
+				await this.createNewConversation();
+			}
+			const userMessage = {
+				role: "user",
+				content,
+				timestamp: new Date().toISOString(),
+			};
+
+			const savedUserMessage = await Model.messages.add({
+				...userMessage,
+				chat: this.currentConversation.id,
+			});
+
+			this.currentConversation.messages.push(savedUserMessage);
+			this.contextMessageIds = [...this.contextMessageIds, savedUserMessage.id];
+
+			this.updateConversationTitle(this.currentConversation);
+			this.updateTokenCount();
+
+			this.isLoading = true;
+			this.error = "";
+			const assistantMessage = {
+				role: "assistant",
+				content: "",
+				timestamp: null,
+				toolCalls: [],
+			};
+			this.currentConversation.messages.push(assistantMessage);
+			try {
+				const history = this.currentConversation.messages
+					.filter((m) => this.contextMessageIds.includes(m.id))
+					.slice(0, -1)
+					.map((m) => ({
+						role: m.role,
+						content: m.content,
+						toolCalls: m.toolCalls,
+					}));
+
+				const stream = AI.chat(history, {
+					stream: true,
+					enabledTools: this.selectedTools,
+					model: this.selectedModel,
+					provider: this.selectedProvider.type,
+				});
+				for await (const chunk of stream) {
+					if (chunk.type === "content") {
+						assistantMessage.content = chunk.content;
+					} else if (chunk.type === "tool_calls_start") {
+						assistantMessage.toolCalls = chunk.toolCalls;
+					} else if (
+						chunk.type === "tool_result" ||
+						chunk.type === "tool_error"
+					) {
+						const toolCall = assistantMessage.toolCalls.find(
+							(tc) => tc.id === chunk.id,
+						);
+						if (toolCall) {
+							toolCall.result = chunk.result || { error: chunk.error };
+						}
+					}
+					this.currentConversation = { ...this.currentConversation };
+					this.scrollToBottom();
+				}
+			} catch (error) {
+				console.error("Error sending message:", error);
+				this.error = error.message || "Failed to send message";
+				assistantMessage.content = \`Error: \${this.error}\`;
+			} finally {
+				this.isLoading = false;
+				assistantMessage.timestamp = new Date().toISOString();
+
+				const savedAssistantMessage = await Model.messages.add({
+					...assistantMessage,
+					chat: this.currentConversation.id,
+				});
+
+				const lastMsgIndex = this.currentConversation.messages.length - 1;
+				this.currentConversation.messages[lastMsgIndex] = savedAssistantMessage;
+
+				this.contextMessageIds = [
+					...this.contextMessageIds,
+					savedAssistantMessage.id,
+				];
+				this.updateTokenCount();
+			}
+		},
+
+		scrollToBottom() {
+			setTimeout(() => {
+				const chatContainer = this.querySelector(".chat-messages");
+				if (chatContainer) {
+					chatContainer.scrollTop = chatContainer.scrollHeight;
+				}
+			}, 0);
+		},
 
 		render() {
-			const lowerCaseQuery = this.searchQuery.toLowerCase();
-			const filteredServers = this.searchQuery
-				? this.availableServers.filter(
-						(s) =>
-							s.name.toLowerCase().includes(lowerCaseQuery) ||
-							s.description.toLowerCase().includes(lowerCaseQuery) ||
-							s.tags.some((t) => t.toLowerCase().includes(lowerCaseQuery)),
-					)
-				: this.availableServers;
-
-			const favoriteServers = filteredServers.filter((s) =>
-				this.favoriteServerIds.includes(s.id),
-			);
-			const otherServers = filteredServers.filter(
-				(s) => !this.favoriteServerIds.includes(s.id),
-			);
-
+			this.scrollToBottom();
+			const activeProviders = this.providers.filter((p) => p.active);
 			return html\`
-                <div class="w-full h-full flex flex-col space-y-6">
-                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        <div>
-                            <h1 class="font-bold text-3xl text-[#ebdbb2]">Servers</h1>
-                            <p class="text-[#bdae93]">Browse and connect to your available MCP test servers.</p>
-                        </div>
-                        <div class="relative">
-                            <input
-                                type="text"
-                                .value=\${this.searchQuery}
-                                @input=\${(e) => (this.searchQuery = e.target.value)}
-                                placeholder="Search servers..."
-                                class="w-full md:w-64 bg-[#504945] border-2 border-[#665c54] font-semibold text-[#ebdbb2] rounded-lg py-2 px-4 focus:outline-none focus:shadow-[2px_2px_0px_#1d2021] focus:border-[#83a598] transition"
-                            />
-                        </div>
-                    </div>
+                <div class="w-80 border-r border-[#504945] flex-shrink-0">
+                    <mcp-conversation-list
+                        .conversations=\${this._rows}
+                        .currentId=\${this.currentConversation?.id}
+                        .onSelect=\${this.selectConversation.bind(this)}
+                        .onNew=\${this.createNewConversation.bind(this)}
+                        .onDelete=\${this.deleteConversation.bind(this)}
+                    ></mcp-conversation-list>
+                </div>
+                <div class="flex-1 flex flex-col bg-[#282828] h-full relative">
                     \${
-											favoriteServers.length > 0
+											activeProviders.length === 0
 												? html\`
-                        <div>
-                            <h2 class="font-semibold text-xl text-[#ebdbb2] mb-4 flex items-center gap-2">
-                                <uix-icon name="star" class="w-5 h-5 text-[#fabd2f]"></uix-icon>
-                                Favorites
-                            </h2>
-                            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                                \${favoriteServers.map((server) => this.renderServerCard(server))}
-                            </div>
-                        </div>
-                    \`
+                                <div class="flex-1 overflow-y-auto">
+                                    <mcp-provider-settings
+                                        .providers=\${this.providers}
+                                        .onAddProvider=\${this.addProvider.bind(this)}
+                                        .onDeleteProvider=\${this.deleteProvider.bind(this)}
+                                    ></mcp-provider-settings>
+                                </div>
+                              \`
+												: html\`
+                                <mcp-context-bar
+                                    .tokenCount=\${this.contextTokenCount}
+                                    .selectedTools=\${this.selectedTools}
+                                    .messageCount=\${this.contextMessageIds.length}
+                                    .totalMessages=\${this.currentConversation?.messages.length || 0}
+                                    .onSelectAll=\${this.selectAllMessages.bind(this)}
+                                    .onDeselectAll=\${this.deselectAllMessages.bind(this)}
+                                ></mcp-context-bar>
+
+                                <div class="flex-1 overflow-y-auto chat-messages px-6">
+                                    \${this.error ? html\`<div class="bg-red-900/50 border border-[#fb4934] rounded-lg p-3 my-4 text-[#fabd2f]">\${this.error}</div>\` : ""}
+                                    \${this.currentConversation?.messages.map(
+																			(message, index) => html\`
+                                            <mcp-chat-message
+                                                .message=\${{ ...message }}
+                                                .isUser=\${message.role === "user"}
+                                                .isStreaming=\${this.isLoading && this.currentConversation && index === this.currentConversation.messages.length - 1}
+                                                .inContext=\${this.contextMessageIds.includes(message.id)}
+                                                .onContextToggle=\${this.toggleMessageInContext.bind(this)}
+                                            ></mcp-chat-message>
+                                        \`,
+																		)}
+                                </div>
+                              \`
+										}
+                    \${
+											this.showSettings && activeProviders.length > 0
+												? html\`
+                                <div class="absolute inset-0 bg-black/60 z-10 flex items-center justify-center p-4">
+                                    <div class="w-full max-w-2xl h-[80vh] max-h-[700px] bg-[#282828] rounded-lg shadow-2xl border border-[#504945] overflow-hidden">
+                                        <mcp-provider-settings
+                                            .providers=\${this.providers}
+                                            .onAddProvider=\${this.addProvider.bind(this)}
+                                            .onDeleteProvider=\${this.deleteProvider.bind(this)}
+                                            .isModal=\${true}
+                                            .onClose=\${this.toggleSettings.bind(this)}
+                                        ></mcp-provider-settings>
+                                    </div>
+                                </div>
+                              \`
 												: ""
 										}
-                    <div>
-                         <h2 class="font-semibold text-xl text-[#ebdbb2] mb-4">\${favoriteServers.length > 0 ? "Available Servers" : ""}</h2>
-                         \${
-														otherServers.length > 0
-															? html\`
-                                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                                    \${otherServers.map((server) => this.renderServerCard(server))}
-                                </div>\`
-															: html\`
-                                <div class="text-center text-[#928374] p-8 bg-[#3c3836] border-2 border-[#504945] rounded-lg shadow-[4px_4px_0px_#1d2021]">
-                                    <h3 class="font-bold text-lg text-[#ebdbb2]">No Servers Found</h3>
-                                    \${this.searchQuery ? html\`<p>Your search for "\${this.searchQuery}" did not match any servers.</p>\` : ""}
-                                </div>
-                            \`
-													}
-                    </div>
+                    <mcp-chat-input
+                        .isLoading=\${this.isLoading}
+                        .onSend=\${this.sendMessage.bind(this)}
+                        .groupedTools=\${this.groupedTools}
+                        .expandedServers=\${this.expandedServers}
+                        .selectedTools=\${this.selectedTools}
+                        .onToolToggle=\${this.toggleTool.bind(this)}
+                        .onServerToggle=\${this.toggleServerTools.bind(this)}
+                        .onServerExpandToggle=\${this.toggleServerExpansion.bind(this)}
+                        .selectedModel=\${this.selectedModel}
+                        .onModelChange=\${this.handleModelChange.bind(this)}
+                        .availableProviders=\${activeProviders}
+                        .selectedProvider=\${this.selectedProvider}
+                        .onProviderChange=\${this.handleProviderChange.bind(this)}
+                        .onSettingsClick=\${this.toggleSettings.bind(this)}
+                    ></mcp-chat-input>
                 </div>
             \`;
 		},
 	};
 };
-`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/navigation/tabs.js":{content:`export default ({ T, html }) => ({
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/mcp/views/provider-settings.js":{content:`export default ({ html, T }) => {
+	return {
+		properties: {
+			providers: T.array([]),
+			onAddProvider: T.function(),
+			onDeleteProvider: T.function(),
+			isModal: T.boolean(false),
+			onClose: T.function(),
+			newProviderType: T.string("local"),
+		},
+
+		async addProvider(providerData) {
+			if (providerConfigs.has(providerData.type)) {
+				this.error = \`A provider of type "\${providerData.type}" already exists. Please delete it first.\`;
+				return;
+			}
+			providerConfigs.set(providerData.type, providerData);
+			this.providers = Array.from(providerConfigs.values());
+			this.saveState();
+			await this.initializeAI();
+			await this.loadModels();
+			this.error = "";
+		},
+
+		async deleteProvider(providerType) {
+			providerConfigs.delete(providerType);
+			this.providers = Array.from(providerConfigs.values());
+			this.saveState();
+			await this.initializeAI();
+			await this.loadModels();
+		},
+		render() {
+			const activeProviders = this.providers.filter((p) => p.active);
+			return html\`
+            <div class="h-full flex flex-col p-6 bg-[#282828] text-[#ebdbb2]">
+                <div class="flex items-center justify-between mb-6">
+                    <h1 class="text-2xl font-bold">AI Providers</h1>
+                    \${this.isModal ? html\`<button @click=\${this.onClose} class="p-2 rounded-full hover:bg-[#504945] text-[#bdae93] hover:text-[#ebdbb2] text-2xl leading-none">&times;</button>\` : ""}
+                </div>
+
+                \${
+									!this.isModal && this.providers.length === 0
+										? html\`
+                <div class="bg-[#3c3836] border border-[#504945] rounded-lg p-4 mb-6 text-center">
+                    <p class="font-semibold text-lg">Welcome!</p>
+                    <p class="text-[#bdae93]">To start chatting, please add at least one AI provider below.</p>
+                </div>
+                \`
+										: ""
+								}
+
+                <!-- Add Provider Form -->
+                <div class="bg-[#3c3836] border border-[#504945] rounded-lg p-4 mb-6">
+                    <h2 class="text-lg font-semibold mb-3">Add New Provider</h2>
+                    <form @submit=\${(e) => {
+											e.preventDefault();
+											const formData = new FormData(e.target);
+											const data = Object.fromEntries(formData.entries());
+											this.onAddProvider(data);
+											e.target.reset();
+											this.newProviderType = "local";
+										}}>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                             <div>
+                                <label for="provider-type" class="block text-sm font-medium text-[#bdae93] mb-1">Provider Type</label>
+                                <select name="id" id="provider-type" @change=\${(e) => (this.newProviderType = e.target.value)} class="w-full bg-[#504945] border border-[#665c54] rounded-md px-3 py-1.5 text-sm focus:ring-[#83a598] focus:outline-none h-[34px]">
+                                	\${this.providers.map((provider) => html\`<option value=\${provider.id} ?selected=\${provider.id === this.newProviderType}>\${provider.name}</option>\`)}  																
+                                </select>
+                            </div>
+                            \${
+															this.newProviderType === "local"
+																? html\`
+                                <div>
+                                    <label for="api-endpoint" class="block text-sm font-medium text-[#bdae93] mb-1">API Endpoint</label>
+                                    <input type="url" name="endpoint" id="api-endpoint" required value="http://localhost:1234/v1/chat/completions" placeholder="http://localhost:1234/v1/chat/completions" class="w-full bg-[#504945] border border-[#665c54] rounded-md px-3 py-1.5 text-sm focus:ring-[#83a598] focus:outline-none">
+                                </div>
+                            \`
+																: ""
+														}
+                            <div class="col-span-1 md:col-span-2">
+                                <label for="api-key" class="block text-sm font-medium text-[#bdae93] mb-1">API Key</label>
+                                <input type="password" name="apiKey" id="api-key" placeholder="Optional for some local providers" class="w-full bg-[#504945] border border-[#665c54] rounded-md px-3 py-1.5 text-sm focus:ring-[#83a598] focus:outline-none">
+                            </div>
+                        </div>
+                        <button type="submit" class="mt-4 w-full md:w-auto flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-[#458588] text-[#ebdbb2] hover:bg-[#83a598] transition-colors font-semibold">
+                            Add Provider
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Existing Providers List -->
+                <div class="flex-1 overflow-y-auto">
+                     <h2 class="text-lg font-semibold mb-3">Configured Providers</h2>
+                     \${
+												activeProviders.length === 0
+													? html\`
+                        <div class="text-center py-8 px-4 border-2 border-dashed border-[#504945] rounded-lg">
+                            <p class="text-[#928374]">No providers configured yet.</p>
+                        </div>
+                     \`
+													: html\`
+                     <div class="space-y-3">
+                        \${activeProviders.map(
+													(p) => html\`
+                            <div class="bg-[#3c3836] border border-[#504945] rounded-lg p-3 flex justify-between items-center">
+                                <div>
+                                    <p class="font-semibold text-[#ebdbb2] capitalize">\${p.type}</p>
+                                    \${p.endpoint ? html\`<p class="text-xs text-[#928374]">\${p.endpoint}</p>\` : ""}
+                                </div>
+                                <uix-button ghost icon="trash" @click=\${() => this.onDeleteProvider(p.type)} 
+																	class="p-1.5 text-[#928374] hover:text-[#fb4934] rounded-full hover:bg-[#1d2021]">
+                              </uix-button>
+                            </div>
+                        \`,
+												)}
+                     </div>
+                     \`
+											}
+                </div>
+            </div>
+            \`;
+		},
+	};
+};
+`,mimeType:"application/javascript",skipSW:!1},"/modules/icon-lucide/lucide/bot.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2m16 0h2m-7-1v2m-6-2v2"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/circle-check.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m9 12l2 2l4-4"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/uix/navigation/tabs.js":{content:`export default ({ T, html }) => ({
 	tag: "uix-tabs",
 	style: true,
 	class: "overflow-auto",
@@ -2448,7 +2357,7 @@ const transpile = (code) => {
 		color: var(--uix-tabs-active-text, #fff);
 	}
 }
-`,mimeType:"text/css",skipSW:!1},"/modules/apps/mcp/views/dashboard.js":{content:`export default ({ html, T }) => ({
+`,mimeType:"text/css",skipSW:!1},"/modules/icon-lucide/lucide/refresh-cw.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9a9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5m5 4a9 9 0 0 1-9 9a9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/apps/mcp/views/dashboard.js":{content:`export default ({ html, T }) => ({
 	style: true,
 	properties: {
 		selectedHistoryItem: T.object(null),
@@ -3194,7 +3103,7 @@ const transpile = (code) => {
 		},
 	};
 };
-`,mimeType:"application/javascript",skipSW:!1},"/modules/icon-lucide/lucide/layout-dashboard.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/wrench.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/terminal.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m4 17l6-6l-6-6m8 14h8"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/git-branch-plus.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M6 3v12m12-6a3 3 0 1 0 0-6a3 3 0 0 0 0 6M6 21a3 3 0 1 0 0-6a3 3 0 0 0 0 6"/><path d="M15 6a9 9 0 0 0-9 9m12 0v6m3-3h-6"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/key.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m15.5 7.5l2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4m2-2l-9.6 9.6"/><circle cx="7.5" cy="15.5" r="5.5"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/uix/display/card.js":{content:`export default {
+`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/display/card.js":{content:`export default {
 	tag: "uix-card",
 	style: true,
 };
@@ -3215,1082 +3124,206 @@ const transpile = (code) => {
 		cursor: pointer;
 	}
 }
-`,mimeType:"text/css",skipSW:!1},"/modules/icon-lucide/lucide/file-text.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4M10 9H8m8 4H8m8 4H8"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/file-code-2.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v4"/><path d="M14 2v4a2 2 0 0 0 2 2h4M5 12l-3 3l3 3m4 0l3-3l-3-3"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/views/templates/app.js":{content:`export default ({ html, AI, T }) => {
+`,mimeType:"text/css",skipSW:!1},"/modules/icon-lucide/lucide/file-text.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4M10 9H8m8 4H8m8 4H8"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/file-code-2.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v4"/><path d="M14 2v4a2 2 0 0 0 2 2h4M5 12l-3 3l3 3m4 0l3-3l-3-3"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/arrow-left.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m12 19l-7-7l7-7m7 7H5"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/apps/mcp/views/servers.js":{content:`export default ({ html, AI, T }) => {
+	const starIcon = (isFilled = false) => html\`
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="\${isFilled ? "#fabd2f" : "none"}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="\${isFilled ? "text-[#fabd2f]" : "text-[#a89984]"}">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+        </svg>
+    \`;
+
 	return {
-		style: true,
-		class: "w-full h-screen bg-[#282828] text-[#ebdbb2] flex font-sans text-sm",
+		tag: "mcp-servers",
+		class:
+			"w-full h-full bg-[#282828] text-[#ebdbb2] flex flex-col p-6 md:p-8 font-sans text-sm overflow-y-auto",
 		properties: {
-			currentRoute: T.object({ sync: "ram" }),
-			isServerConnected: T.boolean({ sync: "local" }),
+			searchQuery: T.string(""),
 		},
-		async connected() {
-			await this.initializeAI();
+		availableServers: [],
+		favoriteServerIds: [],
+		connectedServerId: null,
+
+		connected() {
+			this.availableServers = AI.listServers();
+			this.availableServers.map((server) =>
+				$APP.SW.request("SW:CACHE_FILE", {
+					path: server.path,
+					skipSW: true,
+				}),
+			);
+			this.favoriteServerIds = AI.getFavorites();
+			this.updateConnectionStatus();
+			this._updateFavorites = this.updateFavorites.bind(this);
+			this._updateConnectionStatus = this.updateConnectionStatus.bind(this);
+			AI.events.on("servers:favoritesChanged", this._updateFavorites);
+			AI.events.on("connect", this._updateConnectionStatus);
+			AI.events.on("disconnect", this._updateConnectionStatus);
+			this.update();
 		},
-		async initializeAI() {
+
+		disconnected() {
+			AI.events.off("servers:favoritesChanged", this._updateFavorites);
+			AI.events.off("connect", this._updateConnectionStatus);
+			AI.events.off("disconnect", this._updateConnectionStatus);
+		},
+		updateFavorites(newFavoriteIds) {
+			this.favoriteServerIds = newFavoriteIds;
+			this.update();
+		},
+
+		updateConnectionStatus() {
+			const clients = AI.listClients();
+			const devClient = clients.find((c) => c.alias === "dev_server");
+			let newConnectedServerId = null;
+			if (devClient && this.availableServers) {
+				const connectedServer = this.availableServers.find(
+					(s) => s.path === devClient.command,
+				);
+				if (connectedServer) newConnectedServerId = connectedServer.id;
+			}
+			if (this.connectedServerId !== newConnectedServerId) {
+				this.connectedServerId = newConnectedServerId;
+				this.update();
+			}
+		},
+		async connectToServer(server) {
 			try {
-				if (!AI.isInitialized) {
-					await AI.init({
-						geminiApiKey: "",
-						localAIEndpoint: "http://localhost:1234/v1/chat/completions",
-						openrouterApiKey:
-							"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",
-						defaultRoots: [
-							{
-								uri: "file:///",
-								name: "Root Filesystem",
-								description: "Full filesystem access",
-							},
-						],
-					});
+				if (this.connectedServerId) {
+					await this.disconnectFromServer();
 				}
-				this.isServerConnected = AI.listClients().length > 0;
-			} catch (error) {
-				console.error("Error initializing AI service:", error);
-				this.isServerConnected = false;
+				const transportConfig = {
+					type: "JavaScript",
+					command: server.path,
+					args: [],
+				};
+				await AI.connect(transportConfig, { alias: "dev_server" });
+			} catch (e) {
+				console.error(\`Failed to connect to \${server.name}:\`, e);
 			}
 		},
-		render() {
-			return html\`
-				<mcp-sidebar></mcp-sidebar>
-				<div class="flex-1 h-full flex flex-col min-w-0">
-					<div
-						class="h-15 bg-[#3c3836] border-b border-[#504945] p-2 flex items-center justify-between"
-					>
-					
-					</div>
-					<div class="flex-1 overflow-auto flex">
-            \${this.component}
-					</div>
-				</div>
-			\`;
-		},
-	};
-};
-`,mimeType:"application/javascript",skipSW:!1},"/views/templates/app.css":{content:`.app-template {
-	.uix-card {
-		button {
-			color: #111;
-			cursor: pointer;
-		}
-	}
-}
-`,mimeType:"text/css",skipSW:!1},"/modules/apps/mcp/views/sidebar.js":{content:`export default ({ html, T }) => ({
-	class:
-		"w-64 bg-[#3c3836] text-[#ebdbb2] flex flex-col h-screen shrink-0 border-r border-[#504945]",
-	properties: {
-		currentRoute: T.object({ sync: "ram" }),
-		onSelectHistory: T.function(),
-		isDarkMode: T.boolean({ defaultValue: true, sync: "local" }),
-	},
-
-	_renderLink(link) {
-		const isActive = this.currentRoute.name === link.key;
-		return html\`
-            <uix-link href=\${link.key}
-          icon=\${link.icon}
-          label=\${link.label}
-          data-active=\${isActive}
-          class="
-            relative flex items-center text-sm font-bold p-2 rounded-md transition-colors w-full
-            text-[#ebdbb2] hover:bg-[#504945]
-            data-[active=true]:bg-[#504945] data-[active=true]:text-white
-          ">
-                \${
-									link.isComingSoon
-										? html\`<span class="ml-auto bg-[#b16286] text-xs font-bold text-[#ebdbb2] px-2 py-0.5 rounded-full absolute right-3">soon</span>\`
-										: ""
-								}
-            </uix-link>
-        \`;
-	},
-	toggleDarkMode() {
-		document.body.classList.toggle("dark", this.isDarkMode);
-		this.isDarkMode = !this.isDarkMode;
-	},
-
-	render() {
-		const mainLinks = [
-			{ key: "dev", label: "Develop", icon: "code" },
-			{ key: "chat", label: "Chat", icon: "message-circle" },
-			{ key: "inspector", label: "Inspector", icon: "search" },
-			{ key: "servers", label: "Servers", icon: "server" },
-			{ key: "agents", label: "Agents", icon: "bot", isComingSoon: true },
-			{ key: "apps", label: "Apps", icon: "layout-grid", isComingSoon: true },
-			{ key: "learn", label: "Learn", icon: "book", isComingSoon: true },
-			{
-				key: "vibecoding",
-				label: "Vibecoding",
-				icon: "zap",
-				isComingSoon: true,
-			},
-		];
-
-		return html\`<div class="h-15 p-4 border-b border-[#504945] flex items-center space-x-2 shrink-0">
-            <h2 class="text-xl font-semibold text-[#ebdbb2]">\u{1F336}\uFE0F MCPiQuant</h2>
-        </div>
-        <div class="flex-grow flex flex-col min-h-0">
-            <nav class="p-2 space-y-1 shrink-0">
-                \${mainLinks.map((link) => this._renderLink(link))}
-            </nav>
-            <div class="flex-grow flex flex-col border-t border-[#504945] min-h-0">
-                <h3 class="p-2 text-xs font-semibold text-[#928374] uppercase tracking-wider shrink-0">History</h3>
-                <div class="flex-1 overflow-y-auto">
-                    <mcp-history .onSelect=\${this.onSelectHistory} listOnly></mcp-history>
-                </div>
-            </div>
-            <div class="p-2 border-t border-[#504945] shrink-0">
-                \${this._renderLink({
-									key: "settings",
-									label: "Settings",
-									icon: "settings",
-								})}
-                \${this._renderLink({
-									key: "feedback",
-									label: "Feedback",
-									icon: "message-square-heart",
-								})}
-                <button @click=\${this.toggleDarkMode.bind(this)} class="w-full flex items-center p-2 rounded-md hover:bg-[#504945] text-left text-sm">
-                    <uix-icon name=\${
-											this.isDarkMode ? "sun" : "moon"
-										} class="w-5 h-5 mr-3 shrink-0"></uix-icon>
-                    <span>\${this.isDarkMode ? "Light Mode" : "Dark Mode"}</span>
-                    <div class="ml-auto w-10 h-5 \${
-											this.isDarkMode ? "bg-red-700" : "bg-gray-600"
-										} rounded-full flex items-center p-1 transition-colors">
-                        <div class="w-4 h-4 bg-white rounded-full transform transition-transform \${
-													this.isDarkMode ? "translate-x-4" : ""
-												}"></div>
-                    </div>
-                </button>
-            </div>
-        </div>
-      \`;
-	},
-});
-`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/mcp/views/chat.js":{content:`export default ({ $APP, html, AI, T }) => {
-	// In-memory store. In a real app, this would be persisted.
-	const conversations = new Map();
-	const providerConfigs = new Map(); // Store for provider configurations
-	let currentConversationId = null;
-
-	// --- Helper SVG Icons ---
-	const SendIcon = () => html\`
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5">
-            <path d="m22 2-7 20-4-9-9-4Z"></path>
-            <path d="m22 2-11 11"></path>
-        </svg>
-    \`;
-
-	const TrashIcon = () => html\`
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
-            <path d="M3 6h18"></path>
-            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-            <line x1="10" x2="10" y1="11" y2="17"></line>
-            <line x1="14" x2="14" y1="11" y2="17"></line>
-        </svg>
-    \`;
-
-	const PlusIcon = () => html\`
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
-            <path d="M5 12h14"></path>
-            <path d="M12 5v14"></path>
-        </svg>
-    \`;
-
-	const SettingsIcon = () => html\`
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82-.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-    \`;
-
-	const ToolIcon = () => html\`
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-3.5 h-3.5"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
-    \`;
-
-	const ChevronDownIcon = () => html\`
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>
-    \`;
-
-	// --- MCP Chat Message Component ---
-	$APP.define("mcp-chat-message", {
-		properties: {
-			message: T.object({}),
-			isUser: T.boolean(false),
-			isStreaming: T.boolean(false),
-		},
-		_formatTimestamp(timestamp) {
-			return new Date(timestamp).toLocaleTimeString([], {
-				hour: "2-digit",
-				minute: "2-digit",
-			});
-		},
-		_renderToolCall(toolCall) {
-			return html\`
-                <div class="bg-[#1d2021] border-l-4 border-[#504945] p-3 mt-2 rounded-md">
-                    <div class="font-mono text-[#83a598] font-semibold flex items-center gap-2">
-                        \${ToolIcon()}
-                        \${toolCall.name}
-                    </div>
-                    \${
-											toolCall.arguments
-												? html\`<pre class="text-sm text-[#bdae93] mt-2 whitespace-pre-wrap bg-[#282828] p-2 rounded">\${JSON.stringify(toolCall.arguments, null, 2)}</pre>\`
-												: ""
-										}
-                    \${
-											toolCall.result
-												? html\`
-            <div class="mt-2 text-[#ebdbb2]">
-                <div class="font-semibold text-sm text-[#928374]">Result:</div>
-                <pre class="text-sm bg-[#282828] p-2 rounded mt-1 whitespace-pre-wrap">\${typeof toolCall.result === "string" ? toolCall.result : JSON.stringify(toolCall.result, null, 2)}</pre>
-            </div>\`
-												: ""
-										}
-                </div>
-            \`;
-		},
-		render() {
-			const { message, isUser } = this;
-			const senderIcon = isUser
-				? html\`<div class="w-8 h-8 rounded-full bg-[#458588] flex-shrink-0 flex items-center justify-center font-bold text-[#ebdbb2]">Y</div>\`
-				: html\`<div class="w-8 h-8 rounded-full bg-[#3c3836] border border-[#504945] flex-shrink-0 flex items-center justify-center text-[#83a598]">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-5 h-5"><path d="M12 8V4H8"></path><rect width="16" height="12" x="4" y="8" rx="2"></rect><path d="M2 14h2"></path><path d="M20 14h2"></path><path d="M15 13v2"></path><path d="M9 13v2"></path></svg>
-                </div>\`;
-
-			return html\`
-                <div class="flex items-start gap-4 my-6 \${isUser ? "justify-end" : "justify-start"}">
-                    \${!isUser ? senderIcon : ""}
-                    <div class="max-w-[75%]">
-                        <div class="flex items-baseline gap-2 mb-1 \${isUser ? "justify-end" : ""}">
-                            <span class="font-bold \${isUser ? "text-[#d5c4a1]" : "text-[#bdae93]"}">\${isUser ? "You" : "Assistant"}</span>
-                            \${message.timestamp ? html\`<span class="text-sm text-[#928374]">\${this._formatTimestamp(message.timestamp)}</span>\` : ""}
-                        </div>
-                        <div class="bg-[#3c3836] border border-[#504945] rounded-lg p-3 shadow-sm text-[#ebdbb2]">
-                            \${message.content ? html\`<div class="prose prose-sm max-w-none text-[#ebdbb2] whitespace-pre-wrap">\${message.content}</div>\` : ""}
-                            \${message.toolCalls?.length > 0 ? message.toolCalls.map((toolCall) => this._renderToolCall(toolCall)) : ""}
-                            \${this.isStreaming ? html\`<div class="inline-block w-2 h-4 bg-[#ebdbb2] animate-pulse ml-1"></div>\` : ""}
-                        </div>
-                    </div>
-                    \${isUser ? senderIcon : ""}
-                </div>
-            \`;
-		},
-	});
-
-	// --- MCP Chat Input Component ---
-	$APP.define("mcp-chat-input", {
-		properties: {
-			value: T.string(""),
-			isLoading: T.boolean(false),
-			onSend: T.function(),
-			groupedTools: T.object({}),
-			expandedServers: T.array([]),
-			selectedTools: T.array([]),
-			onToolToggle: T.function(),
-			onServerToggle: T.function(),
-			onServerExpandToggle: T.function(),
-			availableModels: T.array([]),
-			selectedModel: T.string(""),
-			onModelChange: T.function(),
-			onSettingsClick: T.function(),
-		},
-		handleInput(event) {
-			this.value = event.target.value;
-			this.autoResize(event.target);
-		},
-		autoResize(textarea) {
-			textarea.style.height = "auto";
-			textarea.style.height = \`\${textarea.scrollHeight}px\`;
-		},
-		handleKeyPress(event) {
-			if (event.key === "Enter" && !event.shiftKey) {
-				event.preventDefault();
-				this.sendMessage();
+		async disconnectFromServer() {
+			try {
+				await AI.disconnect("dev_server");
+			} catch (e) {
+				console.error("Failed to disconnect from server:", e);
 			}
 		},
-		sendMessage() {
-			if (!this.value.trim() || this.isLoading) return;
-			const message = this.value.trim();
-			if (this.onSend) {
-				this.onSend(message);
-			}
-			this.value = "";
-			setTimeout(() => {
-				const textarea = this.querySelector("textarea");
-				if (textarea) this.autoResize(textarea);
-			}, 0);
+
+		toggleFavorite(server) {
+			AI.toggleFavorite(server.id);
 		},
-		render() {
+
+		// --- Render Methods ---
+		renderServerCard(server) {
+			const isConnected = this.connectedServerId === server.id;
+			const isFavorited = this.favoriteServerIds.includes(server.id);
+
 			return html\`
-                <div class="px-6 pb-4">
-                    <div class="bg-[#3c3836] border border-[#504945] rounded-xl shadow-lg p-2">
-                        <div class="px-2 pb-2 flex justify-between items-center flex-wrap gap-2">
-                            <div class="flex items-center gap-2 flex-wrap">
-                                \${Object.keys(this.groupedTools).map(
-																	(serverName) => {
-																		const toolsOnServer =
-																			this.groupedTools[serverName];
-																		const allSelected = toolsOnServer.every(
-																			(t) =>
-																				this.selectedTools.includes(t.name),
-																		);
-																		const someSelected =
-																			!allSelected &&
-																			toolsOnServer.some((t) =>
-																				this.selectedTools.includes(t.name),
-																			);
-																		const isExpanded =
-																			this.expandedServers.includes(serverName);
-
-																		let serverButtonClass = "bg-[#504945]";
-																		let serverTextColor = "text-[#ebdbb2]";
-																		if (allSelected) {
-																			serverButtonClass = "bg-[#83a598]";
-																			serverTextColor = "text-[#1d2021]";
-																		} else if (someSelected) {
-																			serverButtonClass = "bg-[#d65d0e]";
-																			serverTextColor = "text-[#1d2021]";
-																		}
-
-																		return html\`
-                                            <div class="relative inline-block text-left">
-                                                <div class="flex items-center rounded-md \${serverButtonClass} \${serverTextColor} text-sm font-medium transition-colors">
-                                                    <button
-                                                        @click=\${() => this.onServerToggle(serverName)}
-                                                        class="px-2 py-1 hover:bg-black/10 transition-all flex items-center gap-1.5 rounded-l-md"
-                                                        title=\${\`Toggle all tools for \${serverName}\`}
-                                                    >
-                                                        <span class="capitalize">\${serverName}</span>
-                                                    </button>
-                                                    <button @click=\${() => this.onServerExpandToggle(serverName)} class="px-1.5 py-1 hover:bg-black/10 rounded-r-md border-l border-black/20">
-                                                       <span class="\${isExpanded ? "rotate-180" : ""} inline-block transition-transform">
-                                                            \${ChevronDownIcon()}
-                                                        </span>
-                                                    </button>
-                                                </div>
-                                                \${
-																									isExpanded
-																										? html\`
-                                                <div class="absolute bottom-full mb-2 z-10 w-64 bg-[#3c3836] border border-[#504945] rounded-md shadow-lg p-2 flex flex-col gap-1 max-h-60 overflow-y-auto">
-                                                    \${toolsOnServer.map(
-																											(tool) => html\`
-                                                            <button
-                                                                @click=\${() => this.onToolToggle(tool.name)}
-                                                                class="w-full text-left p-1.5 rounded text-sm truncate transition-colors \${this.selectedTools.includes(tool.name) ? "bg-[#83a598] text-[#1d2021]" : "text-[#ebdbb2] hover:bg-[#504945]"}"
-                                                                title=\${tool.description}
-                                                            >
-                                                                \${tool.name}
-                                                            </button>
-                                                        \`,
-																										)}
-                                                </div>
-                                            \`
-																										: ""
-																								}
-                                            </div>
-                                        \`;
-																	},
-																)}
+                <div class="bg-[#3c3836] border-2 border-[#504945] rounded-lg p-4 flex flex-col gap-4 font-semibold transition-all duration-200 shadow-[4px_4px_0px_#1d2021] hover:shadow-[6px_6px_0px_#83a598] hover:border-[#83a598]">
+                    <div class="flex justify-between items-start">
+                         <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-md flex-shrink-0 flex items-center justify-center bg-[#282828] text-[#83a598]">
+                               \${html.unsafeHTML(server.icon)}
                             </div>
-                            <div class="flex items-center gap-2">
-                                <select @change=\${(e) => this.onModelChange(e.target.value)} .value=\${this.selectedModel} class="bg-[#504945] border border-[#665c54] rounded-md px-2 text-sm focus:ring-[#83a598] focus:outline-none h-7">
-                                    \${this.availableModels.map((model) => html\`<option value=\${model.id}>\${model.name}</option>\`)}
-                                </select>
-                                <button @click=\${this.onSettingsClick} class="p-1.5 text-[#bdae93] hover:text-[#ebdbb2] hover:bg-[#504945] rounded-md">
-                                    \${SettingsIcon()}
-                                </button>
+                            <div>
+                                <h3 class="font-bold text-md text-[#ebdbb2]">\${server.name}</h3>
+                                \${isConnected ? html\`<span class="text-xs text-[#b8bb26] font-medium">Currently connected</span>\` : ""}
                             </div>
                         </div>
-                        <div class="relative">
-                            <textarea
-                                .value=\${this.value}
-                                @input=\${this.handleInput.bind(this)}
-                                @keydown=\${this.handleKeyPress.bind(this)}
-                                ?disabled=\${this.isLoading || this.availableModels.length === 0}
-                                placeholder=\${this.availableModels.length === 0 ? "Please add a provider in settings first." : "Type your message..."}
-                                rows="1"
-                                class="w-full bg-[#282828] p-4 pr-16 text-[#ebdbb2] placeholder-[#928374] resize-none focus:outline-none focus:ring-2 focus:ring-[#83a598] rounded-lg transition-all"
-                                style="max-height: 200px; overflow-y: auto;"
-                            ></textarea>
-                            <button
-                                @click=\${this.sendMessage.bind(this)}
-                                ?disabled=\${!this.value.trim() || this.isLoading || this.availableModels.length === 0}
-                                class="absolute right-3 bottom-2.5 p-2 rounded-full text-[#ebdbb2] transition-colors
-                                \${
-																	!this.value.trim() ||
-																	this.isLoading ||
-																	this.availableModels.length === 0
-																		? "bg-[#504945] cursor-not-allowed"
-																		: "bg-[#458588] hover:bg-[#83a598]"
-																}"
-                            >
-                                \${this.isLoading ? html\`<div class="w-5 h-5 border-2 border-t-transparent border-white rounded-full animate-spin"></div>\` : SendIcon()}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            \`;
-		},
-	});
-
-	// --- MCP Conversation List Component ---
-	$APP.define("mcp-conversation-list", {
-		properties: {
-			conversations: T.array([]),
-			currentId: T.any(null),
-			onSelect: T.function(),
-			onNew: T.function(),
-			onDelete: T.function(),
-		},
-		_getPreview(conversation) {
-			const lastMessage =
-				conversation.messages[conversation.messages.length - 1];
-			if (!lastMessage) return "New conversation";
-			const content = lastMessage.content || "Tool Call";
-			return content.length > 35 ? \`\${content.substring(0, 35)}...\` : content;
-		},
-		_formatDate(timestamp) {
-			const date = new Date(timestamp);
-			const now = new Date();
-			if (date.toDateString() === now.toDateString()) {
-				return date.toLocaleTimeString([], {
-					hour: "2-digit",
-					minute: "2-digit",
-				});
-			}
-			return date.toLocaleDateString([], { month: "short", day: "numeric" });
-		},
-		render() {
-			return html\`
-                <div class="h-full flex flex-col bg-[#3c3836]">
-                    <div class="p-3 border-b border-[#504945]">
-                        <button @click=\${this.onNew} class="w-full flex items-center justify-center gap-2 p-2 rounded-lg bg-[#458588] text-[#ebdbb2] hover:bg-[#83a598] transition-colors font-semibold">
-                            \${PlusIcon()} New Chat
+                        <button @click=\${() => this.toggleFavorite(server)} class="p-1 rounded-full hover:bg-[#504945] transition-colors">
+                            \${starIcon(isFavorited)}
                         </button>
                     </div>
-                    <div class="flex-1 overflow-y-auto p-2">
+
+                    <!-- Middle Section: Description -->
+                    <p class="text-sm text-[#bdae93] font-medium min-h-[2.5rem]">\${server.description}</p>
+                    
+                    <!-- Bottom Section: Tags and Connect Button -->
+                     <div class="flex flex-wrap items-center justify-between gap-2 pt-4 border-t-2 border-dashed border-[#504945]">
+                        <div class="flex flex-wrap gap-2">
+                            \${server.tags.map((tag) => html\`<span class="text-xs font-bold px-2 py-1 rounded bg-[#504945] text-[#ebdbb2]">\${tag.toUpperCase()}</span>\`)}
+                        </div>
                         \${
-													this.conversations.length === 0
-														? html\`<div class="p-4 text-center text-[#928374]">No conversations yet</div>\`
-														: this.conversations.map(
-																(conv) => html\`
-                            <div
-                                @click=\${() => this.onSelect(conv.id)}
-                                class="p-3 rounded-lg cursor-pointer transition-colors group relative \${this.currentId === conv.id ? "bg-[#504945]" : "hover:bg-[#504945]"}"
-                            >
-                                <div class="text-sm font-semibold text-[#ebdbb2] truncate">\${conv.title || "Untitled Chat"}</div>
-                                <div class="flex justify-between items-center mt-1">
-                                    <div class="text-sm text-[#bdae93] truncate pr-10">\${this._getPreview(conv)}</div>
-                                    <span class="text-sm text-[#928374] flex-shrink-0">\${this._formatDate(conv.updatedAt || conv.createdAt)}</span>
-                                </div>
-                                <button
-                                    @click=\${(e) => {
-																			e.stopPropagation();
-																			this.onDelete(conv.id);
-																		}}
-                                    class="absolute top-2 right-2 p-1 text-[#928374] hover:text-[#fb4934] rounded-full hover:bg-[#1d2021] opacity-0 group-hover:opacity-100 transition-opacity"
-                                    title="Delete conversation">
-                                    \${TrashIcon()}
-                                </button>
-                            </div>
-                        \`,
-															)
+													isConnected
+														? html\`<uix-button label="Disconnect" @click=\${() => this.disconnectFromServer()} class="bg-[#fb4934] text-[#ebdbb2] font-bold" size="small"></uix-button>\`
+														: html\`<uix-button label="Connect" @click=\${() => this.connectToServer(server)} class="bg-[#458588] text-[#ebdbb2] font-bold" size="small"></uix-button>\`
 												}
                     </div>
                 </div>
             \`;
 		},
-	});
-
-	// --- MCP Provider Settings Component ---
-	$APP.define("mcp-provider-settings", {
-		properties: {
-			providers: T.array([]),
-			onAddProvider: T.function(),
-			onDeleteProvider: T.function(),
-			isModal: T.boolean(false),
-			onClose: T.function(),
-			newProviderType: T.string("openrouter"),
-		},
-		render() {
-			return html\`
-            <div class="h-full flex flex-col p-6 bg-[#282828] text-[#ebdbb2]">
-                <div class="flex items-center justify-between mb-6">
-                    <h1 class="text-2xl font-bold">AI Providers</h1>
-                    \${this.isModal ? html\`<button @click=\${this.onClose} class="p-2 rounded-full hover:bg-[#504945] text-[#bdae93] hover:text-[#ebdbb2] text-2xl leading-none">&times;</button>\` : ""}
-                </div>
-
-                \${
-									!this.isModal && this.providers.length === 0
-										? html\`
-                <div class="bg-[#3c3836] border border-[#504945] rounded-lg p-4 mb-6 text-center">
-                    <p class="font-semibold text-lg">Welcome!</p>
-                    <p class="text-[#bdae93]">To start chatting, please add at least one AI provider below.</p>
-                </div>
-                \`
-										: ""
-								}
-
-                <!-- Add Provider Form -->
-                <div class="bg-[#3c3836] border border-[#504945] rounded-lg p-4 mb-6">
-                    <h2 class="text-lg font-semibold mb-3">Add New Provider</h2>
-                    <form @submit=\${(e) => {
-											e.preventDefault();
-											const formData = new FormData(e.target);
-											const data = Object.fromEntries(formData.entries());
-											this.onAddProvider(data);
-											e.target.reset();
-											this.newProviderType = "openrouter"; // Reset selector
-										}}>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                             <div>
-                                <label for="provider-type" class="block text-sm font-medium text-[#bdae93] mb-1">Provider Type</label>
-                                <select name="type" id="provider-type" @change=\${(e) => (this.newProviderType = e.target.value)} class="w-full bg-[#504945] border border-[#665c54] rounded-md px-3 py-1.5 text-sm focus:ring-[#83a598] focus:outline-none h-[34px]">
-                                    <option value="openrouter">OpenRouter</option>
-                                    <option value="google">Google Gemini</option>
-                                    <option value="local">Local (OpenAI-Compatible)</option>
-                                </select>
-                            </div>
-                            \${
-															this.newProviderType === "local"
-																? html\`
-                                <div>
-                                    <label for="api-endpoint" class="block text-sm font-medium text-[#bdae93] mb-1">API Endpoint</label>
-                                    <input type="url" name="endpoint" id="api-endpoint" required value="http://localhost:1234/v1/chat/completions" placeholder="http://localhost:1234/v1/chat/completions" class="w-full bg-[#504945] border border-[#665c54] rounded-md px-3 py-1.5 text-sm focus:ring-[#83a598] focus:outline-none">
-                                </div>
-                            \`
-																: ""
-														}
-                            <div class="col-span-1 md:col-span-2">
-                                <label for="api-key" class="block text-sm font-medium text-[#bdae93] mb-1">API Key</label>
-                                <input type="password" name="apiKey" id="api-key" placeholder="Optional for some local providers" class="w-full bg-[#504945] border border-[#665c54] rounded-md px-3 py-1.5 text-sm focus:ring-[#83a598] focus:outline-none">
-                            </div>
-                        </div>
-                        <button type="submit" class="mt-4 w-full md:w-auto flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-[#458588] text-[#ebdbb2] hover:bg-[#83a598] transition-colors font-semibold">
-                            Add Provider
-                        </button>
-                    </form>
-                </div>
-
-                <!-- Existing Providers List -->
-                <div class="flex-1 overflow-y-auto">
-                     <h2 class="text-lg font-semibold mb-3">Configured Providers</h2>
-                     \${
-												this.providers.length === 0
-													? html\`
-                        <div class="text-center py-8 px-4 border-2 border-dashed border-[#504945] rounded-lg">
-                            <p class="text-[#928374]">No providers configured yet.</p>
-                        </div>
-                     \`
-													: html\`
-                     <div class="space-y-3">
-                        \${this.providers.map(
-													(p) => html\`
-                            <div class="bg-[#3c3836] border border-[#504945] rounded-lg p-3 flex justify-between items-center">
-                                <div>
-                                    <p class="font-semibold text-[#ebdbb2] capitalize">\${p.type}</p>
-                                    \${p.endpoint ? html\`<p class="text-xs text-[#928374]">\${p.endpoint}</p>\` : ""}
-                                </div>
-                                <button @click=\${() => this.onDeleteProvider(p.type)} class="p-1.5 text-[#928374] hover:text-[#fb4934] rounded-full hover:bg-[#1d2021]">
-                                    \${TrashIcon()}
-                                </button>
-                            </div>
-                        \`,
-												)}
-                     </div>
-                     \`
-											}
-                </div>
-            </div>
-            \`;
-		},
-	});
-
-	// --- Main Application Component ---
-	return {
-		class: "w-full h-full bg-[#282828] text-[#ebdbb2] flex font-sans",
-		properties: {
-			currentConversation: T.object(null),
-			conversations: T.array([]),
-			providers: T.array([]), // Holds configured providers
-			isLoading: T.boolean(false),
-			error: T.string(""),
-			availableTools: T.array([]),
-			groupedTools: T.object({}),
-			expandedServers: T.array([]),
-			selectedTools: T.array([]),
-			availableModels: T.array([]),
-			selectedModel: T.string(""),
-			showSettings: T.boolean(false),
-		},
-
-		async initializeAI() {
-			try {
-				if (!AI.isInitialized) {
-					await AI.init({
-						providers: this.providers,
-					});
-				} else {
-					const providerApi = AI.plugin("providers");
-					if (providerApi) {
-						providerApi.clearProviders();
-						this.providers.forEach((p) => providerApi.addProvider(p));
-					}
-				}
-			} catch (error) {
-				console.error("Error initializing AI service:", error);
-				this.error = "Failed to initialize AI Service.";
-			}
-		},
-
-		async connected() {
-			this.loadState();
-			await this.initializeAI();
-			this.loadTools();
-			await this.loadModels();
-
-			if (this.providers.length === 0) {
-				this.showSettings = false;
-			}
-
-			if (!currentConversationId && this.conversations.length > 0) {
-				this.selectConversation(this.conversations[0].id);
-			} else if (this.conversations.length === 0) {
-				this.createNewConversation();
-			}
-		},
-
-		saveState() {
-			// In a real app, this would use localStorage or a database
-		},
-
-		loadState() {
-			this.providers = Array.from(providerConfigs.values());
-			this.loadConversations();
-		},
-
-		async addProvider(providerData) {
-			if (providerConfigs.has(providerData.type)) {
-				this.error = \`A provider of type "\${providerData.type}" already exists. Please delete it first.\`;
-				return;
-			}
-			providerConfigs.set(providerData.type, providerData);
-			this.providers = Array.from(providerConfigs.values());
-			this.saveState();
-			await this.initializeAI();
-			await this.loadModels();
-			this.error = "";
-		},
-
-		async deleteProvider(providerType) {
-			providerConfigs.delete(providerType);
-			this.providers = Array.from(providerConfigs.values());
-			this.saveState();
-			await this.initializeAI();
-			await this.loadModels();
-		},
-
-		async loadModels() {
-			const providerApi = AI.plugin("providers");
-			if (providerApi && this.providers.length > 0) {
-				const models = await providerApi.getModels();
-				this.availableModels = models;
-				if (
-					models.length > 0 &&
-					!models.find((m) => m.id === this.selectedModel)
-				) {
-					this.selectedModel = models[0].id;
-				} else if (models.length === 0) {
-					this.selectedModel = "";
-				}
-			} else {
-				this.availableModels = [];
-				this.selectedModel = "";
-			}
-		},
-
-		toggleSettings() {
-			this.showSettings = !this.showSettings;
-		},
-
-		async loadTools() {
-			try {
-				const { tools } = await AI.listTools();
-				this.availableTools = tools || [];
-				const groups = {};
-				for (const tool of this.availableTools) {
-					const serverName = tool.server || "local";
-					if (!groups[serverName]) {
-						groups[serverName] = [];
-					}
-					groups[serverName].push(tool);
-				}
-				this.groupedTools = groups;
-			} catch (e) {
-				console.error("Couldn't load tools", e);
-				this.availableTools = [];
-				this.groupedTools = {};
-			}
-		},
-
-		toggleTool(toolName) {
-			if (this.selectedTools.includes(toolName)) {
-				this.selectedTools = this.selectedTools.filter((t) => t !== toolName);
-			} else {
-				this.selectedTools = [...this.selectedTools, toolName];
-			}
-		},
-
-		toggleServerTools(serverName) {
-			const toolsOnServer = this.groupedTools[serverName].map((t) => t.name);
-			const allSelected = toolsOnServer.every((t) =>
-				this.selectedTools.includes(t),
-			);
-			if (allSelected) {
-				this.selectedTools = this.selectedTools.filter(
-					(t) => !toolsOnServer.includes(t),
-				);
-			} else {
-				const currentSelectedSet = new Set(this.selectedTools);
-				toolsOnServer.forEach((t) => currentSelectedSet.add(t));
-				this.selectedTools = Array.from(currentSelectedSet);
-			}
-		},
-
-		toggleServerExpansion(serverName) {
-			if (this.expandedServers.includes(serverName)) {
-				this.expandedServers = this.expandedServers.filter(
-					(s) => s !== serverName,
-				);
-			} else {
-				this.expandedServers = [...this.expandedServers, serverName];
-			}
-		},
-
-		handleModelChange(modelId) {
-			this.selectedModel = modelId;
-		},
-
-		loadConversations() {
-			this.conversations = Array.from(conversations.values()).sort(
-				(a, b) =>
-					new Date(b.updatedAt || b.createdAt) -
-					new Date(a.updatedAt || a.createdAt),
-			);
-		},
-
-		createNewConversation() {
-			const id = Date.now().toString();
-			const conversation = {
-				id,
-				title: "",
-				messages: [],
-				createdAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
-			};
-			conversations.set(id, conversation);
-			currentConversationId = id;
-			this.currentConversation = conversation;
-			this.loadConversations();
-			this.showSettings = false;
-		},
-
-		selectConversation(id) {
-			const conversation = conversations.get(id);
-			if (conversation) {
-				currentConversationId = id;
-				this.currentConversation = conversation;
-			}
-			this.showSettings = false;
-		},
-
-		deleteConversation(id) {
-			conversations.delete(id);
-			this.loadConversations();
-			if (currentConversationId === id) {
-				currentConversationId = null;
-				this.currentConversation = null;
-				if (this.conversations.length > 0) {
-					this.selectConversation(this.conversations[0].id);
-				} else {
-					this.createNewConversation();
-				}
-			}
-		},
-
-		updateConversationTitle(conversation) {
-			if (!conversation.title && conversation.messages.length > 0) {
-				const firstMessage = conversation.messages.find(
-					(m) => m.role === "user",
-				);
-				if (firstMessage?.content) {
-					conversation.title =
-						firstMessage.content.length > 50
-							? \`\${firstMessage.content.substring(0, 50)}...\`
-							: firstMessage.content;
-				}
-			}
-		},
-
-		async sendMessage(content) {
-			if (this.providers.length === 0) {
-				this.error =
-					"Cannot send message. Please add a provider in the settings.";
-				return;
-			}
-			if (!this.selectedModel) {
-				this.error = "Cannot send message. No model selected.";
-				return;
-			}
-			if (!this.currentConversation) {
-				this.createNewConversation();
-			}
-
-			const userMessage = {
-				role: "user",
-				content,
-				timestamp: new Date().toISOString(),
-			};
-			this.currentConversation.messages.push(userMessage);
-			this.currentConversation.updatedAt = new Date().toISOString();
-			this.updateConversationTitle(this.currentConversation);
-			conversations.set(this.currentConversation.id, this.currentConversation);
-			this.currentConversation = { ...this.currentConversation };
-			this.loadConversations();
-
-			this.isLoading = true;
-			this.error = "";
-
-			const assistantMessage = {
-				role: "assistant",
-				content: "",
-				timestamp: null,
-				toolCalls: [],
-			};
-			this.currentConversation.messages.push(assistantMessage);
-
-			try {
-				const history = this.currentConversation.messages
-					.slice(0, -1)
-					.map((m) => ({
-						role: m.role,
-						content: m.content,
-						toolCalls: m.toolCalls,
-					}));
-
-				const stream = AI.chat(history, {
-					stream: true,
-					enabledTools: this.selectedTools,
-					model: this.selectedModel,
-				});
-
-				for await (const chunk of stream) {
-					if (chunk.type === "content") {
-						assistantMessage.content = chunk.content;
-					} else if (chunk.type === "tool_calls_start") {
-						assistantMessage.toolCalls = chunk.toolCalls;
-					} else if (
-						chunk.type === "tool_result" ||
-						chunk.type === "tool_error"
-					) {
-						const toolCall = assistantMessage.toolCalls.find(
-							(tc) => tc.name.replace(/__/g, "/") === chunk.name,
-						);
-						if (toolCall) {
-							toolCall.result = chunk.result || { error: chunk.error };
-						}
-					}
-					this.currentConversation = { ...this.currentConversation };
-					this.scrollToBottom();
-				}
-			} catch (error) {
-				console.error("Error sending message:", error);
-				this.error = error.message || "Failed to send message";
-				assistantMessage.content = \`Error: \${this.error}\`;
-			} finally {
-				this.isLoading = false;
-				assistantMessage.timestamp = new Date().toISOString();
-				this.currentConversation.updatedAt = new Date().toISOString();
-				conversations.set(
-					this.currentConversation.id,
-					this.currentConversation,
-				);
-				this.currentConversation = { ...this.currentConversation };
-				this.loadConversations();
-			}
-		},
-
-		scrollToBottom() {
-			setTimeout(() => {
-				const chatContainer = this.querySelector(".chat-messages");
-				if (chatContainer) {
-					chatContainer.scrollTop = chatContainer.scrollHeight;
-				}
-			}, 0);
-		},
 
 		render() {
-			this.scrollToBottom();
-			return html\`
-                <div class="w-80 border-r border-[#504945] flex-shrink-0">
-                    <mcp-conversation-list
-                        .conversations=\${this.conversations}
-                        .currentId=\${this.currentConversation?.id}
-                        .onSelect=\${this.selectConversation.bind(this)}
-                        .onNew=\${this.createNewConversation.bind(this)}
-                        .onDelete=\${this.deleteConversation.bind(this)}
-                    ></mcp-conversation-list>
-                </div>
+			const lowerCaseQuery = this.searchQuery.toLowerCase();
+			const filteredServers = this.searchQuery
+				? this.availableServers.filter(
+						(s) =>
+							s.name.toLowerCase().includes(lowerCaseQuery) ||
+							s.description.toLowerCase().includes(lowerCaseQuery) ||
+							s.tags.some((t) => t.toLowerCase().includes(lowerCaseQuery)),
+					)
+				: this.availableServers;
 
-                <div class="flex-1 flex flex-col bg-[#282828] h-full relative">
+			const favoriteServers = filteredServers.filter((s) =>
+				this.favoriteServerIds.includes(s.id),
+			);
+			const otherServers = filteredServers.filter(
+				(s) => !this.favoriteServerIds.includes(s.id),
+			);
+
+			return html\`
+                <div class="w-full h-full flex flex-col space-y-6">
+                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                        <div>
+                            <h1 class="font-bold text-3xl text-[#ebdbb2]">Servers</h1>
+                            <p class="text-[#bdae93]">Browse and connect to your available MCP test servers.</p>
+                        </div>
+                        <div class="relative">
+                            <input
+                                type="text"
+                                .value=\${this.searchQuery}
+                                @input=\${(e) => (this.searchQuery = e.target.value)}
+                                placeholder="Search servers..."
+                                class="w-full md:w-64 bg-[#504945] border-2 border-[#665c54] font-semibold text-[#ebdbb2] rounded-lg py-2 px-4 focus:outline-none focus:shadow-[2px_2px_0px_#1d2021] focus:border-[#83a598] transition"
+                            />
+                        </div>
+                    </div>
                     \${
-											this.providers.length === 0
-												? html\`<div class="flex-1 overflow-y-auto"><mcp-provider-settings
-                                .providers=\${this.providers}
-                                .onAddProvider=\${this.addProvider.bind(this)}
-                                .onDeleteProvider=\${this.deleteProvider.bind(this)}
-                            ></mcp-provider-settings></div>\`
-												: html\`
-                            <div class="flex-1 overflow-y-auto chat-messages px-6">
-                                \${this.error ? html\`<div class="bg-red-900/50 border border-[#fb4934] rounded-lg p-3 my-4 text-[#fabd2f]">\${this.error}</div>\` : ""}
-                                \${this.currentConversation?.messages.map(
-																	(message, index) => html\`
-                                        <mcp-chat-message
-                                            .message=\${{ ...message }}
-                                            .isUser=\${message.role === "user"}
-                                            .isStreaming=\${this.isLoading && this.currentConversation && index === this.currentConversation.messages.length - 1}
-                                        ></mcp-chat-message>
-                                    \`,
-																)}
-                            </div>
-                            
-                        \`
-										}
-                    \${
-											this.showSettings && this.providers.length > 0
+											favoriteServers.length > 0
 												? html\`
-                        <div class="absolute inset-0 bg-black/60 z-10 flex items-center justify-center p-4">
-                            <div class="w-full max-w-2xl h-[80vh] max-h-[700px] bg-[#282828] rounded-lg shadow-2xl border border-[#504945] overflow-hidden">
-                                 <mcp-provider-settings
-                                    .providers=\${this.providers}
-                                    .onAddProvider=\${this.addProvider.bind(this)}
-                                    .onDeleteProvider=\${this.deleteProvider.bind(this)}
-                                    .isModal=\${true}
-                                    .onClose=\${this.toggleSettings.bind(this)}
-                                ></mcp-provider-settings>
+                        <div>
+                            <h2 class="font-semibold text-xl text-[#ebdbb2] mb-4 flex items-center gap-2">
+                                <uix-icon name="star" class="w-5 h-5 text-[#fabd2f]"></uix-icon>
+                                Favorites
+                            </h2>
+                            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                                \${favoriteServers.map((server) => this.renderServerCard(server))}
                             </div>
                         </div>
                     \`
 												: ""
 										}
-										<mcp-chat-input .isLoading=\${this.isLoading}
-                                .onSend=\${this.sendMessage.bind(this)}
-                                .groupedTools=\${this.groupedTools}
-                                .expandedServers=\${this.expandedServers}
-                                .selectedTools=\${this.selectedTools}
-                                .onToolToggle=\${this.toggleTool.bind(this)}
-                                .onServerToggle=\${this.toggleServerTools.bind(this)}
-                                .onServerExpandToggle=\${this.toggleServerExpansion.bind(this)}
-                                .availableModels=\${this.availableModels}
-                                .selectedModel=\${this.selectedModel}
-                                .onModelChange=\${this.handleModelChange.bind(this)}
-                                .onSettingsClick=\${this.toggleSettings.bind(this)}
-                            ></mcp-chat-input>
-                </div>
-            \`;
-		},
-	};
-};
-`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/mcp/views/history.js":{content:`export default ({ html, AI, T }) => {
-	$APP.define("mcp-history-view", {
-		properties: {
-			item: T.object(null),
-			onBack: T.function(),
-		},
-
-		handleBack() {
-			if (this.onBack) {
-				this.onBack();
-			}
-		},
-
-		render() {
-			if (!this.item) {
-				return html\`<div class="text-center text-gray-500 h-full flex items-center justify-center">Select a history item to view details.</div>\`;
-			}
-
-			const { item } = this;
-
-			return html\`
-                <div class="text-sm">
-                    <uix-link label="Back" icon="arrow-left" reverse @click=\${this.handleBack.bind(this)} class="text-xs text-blue-600 hover:underline mb-3 flex items-center"></uix-link>
-                    <div class="space-y-4">
-                        <div>
-                            <h4 class="font-mono text-xs font-bold text-gray-700 mb-1">REQUEST</h4>
-                            <pre class="text-xs whitespace-pre-wrap bg-gray-800 text-gray-200 p-2 rounded-lg font-mono overflow-auto">\${JSON.stringify({ tool: item.toolName, args: item.args || item.params }, null, 2)}</pre>
-                        </div>
-                        <div>
-                            <h4 class="font-mono text-xs font-bold text-gray-700 mb-1">RESPONSE</h4>
-                            \${
-															item.status === "success"
-																? html\`<pre class="text-xs whitespace-pre-wrap bg-gray-900 text-green-400 p-2 rounded-lg font-mono overflow-auto">\${JSON.stringify(item.result, null, 2)}</pre>\`
-																: item.status === "error"
-																	? html\`<pre class="text-xs whitespace-pre-wrap bg-red-100 text-red-700 p-2 rounded-lg font-mono overflow-auto">\${item.error}</pre>\`
-																	: html\`<p class="text-xs text-gray-500">Request is still pending...</p>\`
-														}
-                        </div>
+                    <div>
+                         <h2 class="font-semibold text-xl text-[#ebdbb2] mb-4">\${favoriteServers.length > 0 ? "Available Servers" : ""}</h2>
+                         \${
+														otherServers.length > 0
+															? html\`
+                                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                                    \${otherServers.map((server) => this.renderServerCard(server))}
+                                </div>\`
+															: html\`
+                                <div class="text-center text-[#928374] p-8 bg-[#3c3836] border-2 border-[#504945] rounded-lg shadow-[4px_4px_0px_#1d2021]">
+                                    <h3 class="font-bold text-lg text-[#ebdbb2]">No Servers Found</h3>
+                                    \${this.searchQuery ? html\`<p>Your search for "\${this.searchQuery}" did not match any servers.</p>\` : ""}
+                                </div>
+                            \`
+													}
                     </div>
                 </div>
             \`;
 		},
-	});
-
-	return {
-		properties: {
-			history: T.array([]),
-			selectedHistoryId: T.string(null),
-			onSelect: T.function(),
-			listOnly: T.boolean(),
-		},
-		selectHistoryItem(item) {
-			this.selectedHistoryId = item ? item.id : undefined;
-			if (this.onHistorySelect) this.onSelect(item);
-		},
-		connected() {
-			this.historyUnsubscribe = AI.onHistoryChange((event) => {
-				this.history = event.history;
-			});
-			this.history = AI.getHistory();
-		},
-		render() {
-			if (this.history.length === 0)
-				return html\`<p class="text-center text-xs text-gray-400 p-4">No history yet</p>\`;
-			const selectedHistoryItem = this.history.find(
-				(h) => h.id === this.selectedHistoryId,
-			);
-
-			return html\`
-                <ul class="text-xs space-y-1 font-mono">
-                    \${this.history.map(
-											(item) => html\`
-                            <li
-                                class="flex flex-col \${this.selectedHistoryId === item.id ? "font-semibold text-blue-100 p-2" : item.status === "error" ? "text-red-100" : "text-white"}">
-                                <div 
-																 @click=\${() => this.selectHistoryItem(item)}
-																class="cursor-pointer flex items-center justify-between p-2 rounded hover:bg-gray-700">
-																<span class="text-ellipsis">\${item.toolName}</span>
-                                <div class="flex items-center">
-                                    <span class="text-gray-500 mr-2">\${item.status}</span>
-                                    <uix-icon name="chevron-right" class="h-4 w-4 text-gray-400"></uix-icon>
-                                </div>
-																</div>
-																\${!this.listOnly || !selectedHistoryItem || selectedHistoryItem.id !== item.id ? null : html\`<mcp-history-view .item=\${selectedHistoryItem} .onBack=\${() => this.selectHistoryItem(null)}></mcp-history-view>\`}
-                            </li>
-                        \`,
-										)}
-                </ul>
-            \`;
-		},
 	};
 };
-`,mimeType:"application/javascript",skipSW:!1},"/modules/icon-lucide/lucide/search.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21l-4.3-4.3"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/server.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><path d="M6 6h.01M6 18h.01"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/bot.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2m16 0h2m-7-1v2m-6-2v2"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/layout-grid.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/book.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/zap.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/message-square-heart.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M14.8 7.5a1.84 1.84 0 0 0-2.6 0l-.2.3l-.3-.3a1.84 1.84 0 1 0-2.4 2.8L12 13l2.7-2.7c.9-.9.8-2.1.1-2.8"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/apps/mcp/views/inspector.js":{content:`export default ({ $APP, html, AI, T }) => {
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/mcp/views/inspector.js":{content:`export default ({ $APP, html, AI, T }) => {
 	$APP.define("mcp-inspector-sidebar", {
 		class: "w-80 bg-[#3c3836] border-r border-[#504945] flex flex-col shrink-0",
 		properties: {
@@ -4573,7 +3606,1631 @@ const transpile = (code) => {
 		},
 	};
 };
-`,mimeType:"application/javascript",skipSW:!1},"/modules/icon-lucide/lucide/chevron-down.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 9l6 6l6-6"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/chevron-right.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 18l6-6l-6-6"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/manifest.json":{content:`{
+`,mimeType:"application/javascript",skipSW:!1},"/modules/ai/servers/vfs.js":{content:`import {
+	McpServer,
+	ResourceTemplate,
+} from "@modelcontextprotocol/sdk/server/mcp.js";
+import z from "zod";
+
+const server = new McpServer(
+	{
+		name: "filesystem-server",
+		version: "1.0.0",
+	},
+	{
+		capabilities: {
+			resources: { subscribe: true },
+			completions: {},
+			logging: {},
+			prompts: {},
+			tools: {},
+			elicitation: {},
+			sampling: {},
+		},
+	},
+);
+
+const VFS = {
+	"/": null,
+	"/teste.txt": "Teste",
+	"/home/": null,
+	"/home/user/": null,
+	"/home/user/documents/": null,
+	"/home/user/documents/welcome.txt": "Welcome to the MCP virtual filesystem!",
+	"/home/user/documents/project.plan": "Initial project plan document.",
+	"/home/user/downloads/": null,
+	"/etc/": null,
+	"/etc/config": "max_users=100",
+};
+
+const subscriptions = new Set();
+
+// Helper to get direct children of a directory
+const getDirectChildren = (dirPath) => {
+	if (!dirPath.endsWith("/")) dirPath += "/";
+	if (dirPath === "//") dirPath = "/";
+
+	const children = new Set();
+	for (const path of Object.keys(VFS)) {
+		if (path.startsWith(dirPath) && path !== dirPath) {
+			const relativePath = path.substring(dirPath.length);
+			const firstSlashIndex = relativePath.indexOf("/");
+			const childName =
+				firstSlashIndex === -1
+					? relativePath
+					: relativePath.substring(0, firstSlashIndex + 1);
+			if (childName) {
+				children.add(childName);
+			}
+		}
+	}
+	return Array.from(children);
+};
+
+server.registerResource(
+	"config",
+	"config://app",
+	{
+		title: "Application Config",
+		description: "Application configuration data",
+		mimeType: "text/plain",
+	},
+	async (uri) => ({
+		contents: [
+			{
+				uri: uri.href,
+				text: "App configuration here",
+			},
+		],
+	}),
+);
+
+Object.entries(VFS).map(([path, content]) => {
+	if (!path.endsWith("/"))
+		server.registerResource(
+			"filesystem",
+			\`vfs://\${path}\`,
+			{
+				title: path,
+				mimeType: "text/plain",
+			},
+			async (uri) => ({
+				contents: [
+					{
+						uri: uri.href,
+						text: content,
+					},
+				],
+			}),
+		);
+});
+
+server.registerResource(
+	"filesystem",
+	new ResourceTemplate("vfs://{path}", {
+		list: undefined,
+	}),
+	{
+		title: "Filesystem Resource",
+		description: "Represents a file or directory in the virtual filesystem.",
+	},
+	async (uri, { path }) => {
+		const fullPath = path || "";
+		const isDirectoryRequest =
+			fullPath.endsWith("/") || path === null || path === "";
+		const lookupPath =
+			isDirectoryRequest && fullPath !== "/"
+				? \`\${fullPath.replace(/\\/$/, "")}/\`
+				: fullPath;
+		if (!(lookupPath in VFS)) {
+			throw new Error(\`Path not found: \${fullPath}\`);
+		}
+		if (isDirectoryRequest) {
+			const dirPath = lookupPath;
+			const childrenNames = getDirectChildren(dirPath);
+
+			const links = childrenNames.map((name) => {
+				const childPath = \`\${dirPath === "/" ? "" : dirPath}\${name}\`;
+				const isDirectory = VFS[childPath] === null;
+				return {
+					type: "resource_link",
+					uri: \`vfs://\${childPath}\`,
+					name,
+					description: \`A \${isDirectory ? "directory" : "file"}\`,
+				};
+			});
+			return {
+				contents: [{ type: "text", text: \`Contents of \${dirPath}\` }, ...links],
+			};
+		}
+		const content = VFS[lookupPath];
+		return { contents: [{ uri: uri.href, text: content }] };
+	},
+);
+
+const notifySubscribers = (path) => {
+	const uri = \`vfs://\${path}\`;
+	if (subscriptions.has(uri)) {
+		server.notifyResourceUpdated(uri);
+	}
+	// Also notify the parent directory
+	const parentDir = path.substring(
+		0,
+		path.lastIndexOf("/", path.length - 2) + 1,
+	);
+	const parentUri = \`vfs://\${parentDir}\`;
+	if (subscriptions.has(parentUri)) {
+		server.notifyResourceUpdated(parentUri);
+	}
+};
+
+// --- Original Tools ---
+server.registerTool(
+	"fs/write",
+	{
+		title: "Write File",
+		description: "Writes content to a file in the virtual filesystem.",
+		inputSchema: {
+			path: z.string().describe("The full path of the file to write."),
+			content: z.string().describe("The content to write to the file."),
+		},
+	},
+	async ({ path, content }) => {
+		if (path.endsWith("/"))
+			throw new Error("Invalid file path. Path cannot be a directory.");
+
+		const dirPath = path.substring(0, path.lastIndexOf("/") + 1);
+		if (VFS[dirPath] !== null && dirPath !== "/") {
+			throw new Error(\`Directory not found: \${dirPath}\`);
+		}
+
+		VFS[path] = content;
+		notifySubscribers(path);
+
+		return {
+			content: [{ type: "text", text: \`Successfully wrote to \${path}\` }],
+		};
+	},
+);
+
+server.registerTool(
+	"fs/create_directory",
+	{
+		title: "Create Directory",
+		description: "Creates a new directory in the virtual filesystem.",
+		inputSchema: {
+			path: z.string().describe("The full path of the directory to create."),
+		},
+	},
+	async ({ path }) => {
+		let newPath = path;
+		if (!newPath.startsWith("/")) newPath = "/" + newPath;
+		if (!newPath.endsWith("/")) newPath += "/";
+
+		const parentPath = newPath.substring(
+			0,
+			newPath.lastIndexOf("/", newPath.length - 2) + 1,
+		);
+
+		if (VFS[parentPath] !== null && parentPath !== "/") {
+			throw new Error(\`Parent directory not found: \${parentPath}\`);
+		}
+
+		if (VFS[newPath] !== undefined) {
+			throw new Error(\`Directory or file already exists: \${newPath}\`);
+		}
+
+		VFS[newPath] = null; // Add new directory to VFS
+		notifySubscribers(parentPath);
+
+		return {
+			content: [
+				{ type: "text", text: \`Successfully created directory \${newPath}\` },
+			],
+		};
+	},
+);
+
+server.registerTool(
+	"fs/copy",
+	{
+		title: "Copy File (Slowly)",
+		description:
+			"Simulates a long-running file copy operation with progress updates.",
+		inputSchema: {
+			source: z.string().describe("The source file path."),
+			destination: z.string().describe("The destination file path."),
+		},
+	},
+	async ({ source, destination }, { progress }) => {
+		const sourceContent = VFS[source];
+		if (typeof sourceContent !== "string") {
+			throw new Error(\`Source file not found or is a directory: \${source}\`);
+		}
+		if (destination.endsWith("/")) {
+			throw new Error("Invalid destination path. Cannot be a directory.");
+		}
+
+		await server.sendLoggingMessage({
+			level: "info",
+			data: \`Starting copy from \${source} to \${destination}\`,
+		});
+
+		const steps = 5;
+		for (let i = 1; i <= steps; i++) {
+			await new Promise((res) => setTimeout(res, 500));
+			progress({ progress: i, total: steps });
+		}
+
+		const destDir = destination.substring(0, destination.lastIndexOf("/") + 1);
+		if (VFS[destDir] !== null && destDir !== "/") {
+			throw new Error(\`Destination directory not found: \${destDir}\`);
+		}
+
+		VFS[destination] = sourceContent;
+		notifySubscribers(destination);
+
+		await server.sendLoggingMessage({
+			level: "info",
+			data: \`Finished copy to \${destination}\`,
+		});
+		return {
+			content: [{ type: "text", text: \`Copied \${source} to \${destination}\` }],
+		};
+	},
+);
+
+server.registerTool(
+	"fs/delete_with_confirmation",
+	{
+		title: "Delete File with Confirmation",
+		description:
+			"Deletes a file after confirming with the user, with options for handling conflicts.",
+		inputSchema: {
+			path: z
+				.string()
+				.describe("The full path of the file or directory to delete."),
+			force: z
+				.boolean()
+				.optional()
+				.describe("Skip confirmation if true (default: false)"),
+		},
+	},
+	async ({ path, force = false }) => {
+		if (!(path in VFS)) {
+			throw new Error(\`Path not found: \${path}\`);
+		}
+
+		const isDirectory = VFS[path] === null;
+		const itemType = isDirectory ? "directory" : "file";
+
+		if (!force) {
+			const result = await server.server.elicitInput({
+				message: \`Are you sure you want to delete the \${itemType} "\${path}"?\${isDirectory ? " This will remove all contents." : ""}\`,
+				requestedSchema: {
+					type: "object",
+					properties: {
+						confirm: {
+							type: "boolean",
+							title: "Confirm deletion",
+							description: \`Confirm deletion of \${itemType} "\${path}"\`,
+						},
+						createBackup: {
+							type: "boolean",
+							title: "Create backup",
+							description: "Create a backup before deletion (files only)",
+							default: false,
+						},
+						backupLocation: {
+							type: "string",
+							title: "Backup location",
+							description: "Where to store the backup (optional)",
+							default: "/home/user/documents/backups/",
+						},
+					},
+					required: ["confirm"],
+				},
+			});
+
+			if (result.action !== "accept" || !result.content?.confirm)
+				return {
+					content: [
+						{
+							type: "text",
+							text: \`Deletion cancelled by user for \${path}\`,
+						},
+					],
+				};
+
+			if (!isDirectory && result.content?.createBackup) {
+				const backupDir =
+					result.content.backupLocation || "/home/user/documents/backups/";
+				const filename = path.substring(path.lastIndexOf("/") + 1);
+				const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+				const backupPath = \`\${backupDir}\${filename}.backup.\${timestamp}\`;
+
+				if (!(backupDir in VFS)) VFS[backupDir] = null;
+
+				VFS[backupPath] = VFS[path];
+				await server.sendLoggingMessage({
+					level: "info",
+					data: \`Created backup at \${backupPath}\`,
+				});
+			}
+		}
+		if (isDirectory) {
+			const keysToDelete = Object.keys(VFS).filter((key) =>
+				key.startsWith(path),
+			);
+			keysToDelete.forEach((key) => delete VFS[key]);
+		} else {
+			delete VFS[path];
+		}
+		notifySubscribers(path);
+
+		return {
+			content: [
+				{
+					type: "text",
+					text: \`Successfully deleted \${itemType}: \${path}\`,
+				},
+			],
+		};
+	},
+);
+
+server.registerTool(
+	"fs/generate_content",
+	{
+		title: "Generate File Content",
+		description:
+			"Uses AI to generate appropriate content for a file based on its path and type.",
+		inputSchema: {
+			path: z
+				.string()
+				.describe("The full path where the file should be created"),
+			contentType: z
+				.enum([
+					"readme",
+					"config",
+					"script",
+					"documentation",
+					"letter",
+					"report",
+					"custom",
+				])
+				.describe("Type of content to generate"),
+			prompt: z
+				.string()
+				.optional()
+				.describe(
+					"Custom prompt for content generation (required for 'custom' type)",
+				),
+			style: z
+				.enum(["professional", "casual", "technical", "creative"])
+				.optional()
+				.default("professional")
+				.describe("Writing style for the content"),
+		},
+	},
+	async ({ path, contentType, prompt, style = "professional" }) => {
+		if (path.endsWith("/")) {
+			throw new Error(
+				"Invalid file path. Cannot generate content for a directory.",
+			);
+		}
+
+		// Determine file extension and adjust content type if needed
+		const fileExtension = path
+			.substring(path.lastIndexOf(".") + 1)
+			.toLowerCase();
+
+		let generationPrompt = "";
+
+		switch (contentType) {
+			case "readme":
+				generationPrompt = \`Create a comprehensive README.md file for a project at path "\${path}". Include sections for description, installation, usage, and contributing. Use \${style} tone.\`;
+				break;
+			case "config":
+				generationPrompt = \`Generate a \${fileExtension} configuration file for "\${path}". Include common settings with comments explaining each option. Use \${style} style formatting.\`;
+				break;
+			case "script":
+				generationPrompt = \`Write a \${fileExtension} script file for "\${path}". Include proper headers, comments, and basic functionality. Use \${style} coding style.\`;
+				break;
+			case "documentation":
+				generationPrompt = \`Create technical documentation for "\${path}". Include clear explanations, examples, and proper formatting. Use \${style} writing style.\`;
+				break;
+			case "letter":
+				generationPrompt = \`Write a \${style} letter and save it to "\${path}". Include proper formatting and structure.\`;
+				break;
+			case "report":
+				generationPrompt = \`Generate a \${style} report document for "\${path}". Include executive summary, findings, and recommendations.\`;
+				break;
+			case "custom":
+				if (!prompt) {
+					throw new Error(
+						"Custom prompt is required when contentType is 'custom'",
+					);
+				}
+				generationPrompt = \`\${prompt}\\n\\nGenerate content in a \${style} style for file: "\${path}"\`;
+				break;
+			default:
+				generationPrompt = \`Generate appropriate content for the file "\${path}" in a \${style} style.\`;
+		}
+
+		try {
+			// Use MCP sampling to generate content
+			const response = await server.server.createMessage({
+				messages: [
+					{
+						role: "user",
+						content: {
+							type: "text",
+							text: generationPrompt,
+						},
+					},
+				],
+				maxTokens: 1000,
+				temperature: style === "creative" ? 0.8 : 0.3,
+			});
+
+			let generatedContent = "";
+			if (response.content.type === "text") {
+				generatedContent = response.content.text;
+			} else {
+				throw new Error("Failed to generate text content");
+			}
+
+			// Ensure the directory exists
+			const dirPath = path.substring(0, path.lastIndexOf("/") + 1);
+			if (dirPath !== "/" && !(dirPath in VFS)) {
+				// Create parent directories if they don't exist
+				const pathParts = dirPath.split("/").filter((part) => part !== "");
+				let currentPath = "/";
+				for (const part of pathParts) {
+					currentPath += part + "/";
+					if (!(currentPath in VFS)) {
+						VFS[currentPath] = null;
+					}
+				}
+			}
+
+			// Write the generated content to the file
+			VFS[path] = generatedContent;
+			notifySubscribers(path);
+
+			await server.sendLoggingMessage({
+				level: "info",
+				data: \`Generated \${contentType} content for \${path} in \${style} style\`,
+			});
+
+			return {
+				content: [
+					{
+						type: "text",
+						text: \`Successfully generated \${contentType} content for \${path}.\\n\\nGenerated content preview:\\n\${generatedContent.substring(0, 200)}\${generatedContent.length > 200 ? "..." : ""}\`,
+					},
+				],
+			};
+		} catch (error) {
+			await server.sendLoggingMessage({
+				level: "error",
+				data: \`Failed to generate content: \${error.message}\`,
+			});
+
+			throw new Error(\`Content generation failed: \${error.message}\`);
+		}
+	},
+);
+
+server.registerPrompt(
+	"simple_prompt",
+	{
+		title: "Simple Prompt",
+		description: "A prompt without arguments",
+	},
+	() => ({
+		messages: [
+			{
+				role: "user",
+				content: {
+					type: "text",
+					text: "This is a simple, static prompt without any arguments.",
+				},
+			},
+		],
+	}),
+);
+
+server.registerPrompt(
+	"complex_prompt",
+	{
+		title: "Complex Prompt",
+		description: "A prompt with arguments",
+		argsSchema: {
+			temperature: z.string().describe("Temperature Setting (Required)"),
+			style: z.string().describe("Output style"),
+		},
+	},
+	({ temperature, style }) => ({
+		messages: [
+			{
+				role: "assistant",
+				content: {
+					type: "text",
+					text: \`Please generate a creative story with a temperature of \${temperature} in a \${style} style.\`,
+				},
+			},
+		],
+	}),
+);
+
+server.registerPrompt(
+	"resource_prompt",
+	{
+		title: "Resource-Aware Prompt",
+		description: "A prompt that includes an embedded resource reference",
+		argsSchema: {
+			filePath: z
+				.string()
+				.describe(
+					"Path to the file to summarize (e.g., /home/user/documents/welcome.txt)",
+				),
+		},
+	},
+	({ filePath }) => ({
+		//TODO: we should fetch the resource
+		messages: [
+			{
+				role: "user",
+				content: {
+					type: "text",
+					text: "Please summarize the following document:",
+				},
+			},
+			{
+				role: "user",
+				content: {
+					type: "resource",
+					uri: \`vfs://\${filePath}\`,
+				},
+			},
+		],
+	}),
+);
+
+export default server;
+`,mimeType:"application/javascript",skipSW:!1},"/modules/icon-lucide/lucide/layout-dashboard.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/wrench.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/terminal.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m4 17l6-6l-6-6m8 14h8"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/git-branch-plus.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M6 3v12m12-6a3 3 0 1 0 0-6a3 3 0 0 0 0 6M6 21a3 3 0 1 0 0-6a3 3 0 0 0 0 6"/><path d="M15 6a9 9 0 0 0-9 9m12 0v6m3-3h-6"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/key.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m15.5 7.5l2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4m2-2l-9.6 9.6"/><circle cx="7.5" cy="15.5" r="5.5"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/star.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m12 2l3.09 6.26L22 9.27l-5 4.87l1.18 6.88L12 17.77l-6.18 3.25L7 14.14L2 9.27l6.91-1.01z"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/plus.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7-7v14"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/send.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m22 2l-7 20l-4-9l-9-4Zm0 0L11 13"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/trash-2.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2m-6 5v6m4-6v6"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/list-checks.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m3 17l2 2l4-4M3 7l2 2l4-4m4 1h8m-8 6h8m-8 6h8"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/database.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/pickaxe.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M14.531 12.469L6.619 20.38a1 1 0 1 1-3-3l7.912-7.912m4.155-5.154A12.5 12.5 0 0 0 5.461 2.958A1 1 0 0 0 5.58 4.71a22 22 0 0 1 6.318 3.393"/><path d="M17.7 3.7a1 1 0 0 0-1.4 0l-4.6 4.6a1 1 0 0 0 0 1.4l2.6 2.6a1 1 0 0 0 1.4 0l4.6-4.6a1 1 0 0 0 0-1.4z"/><path d="M19.686 8.314a12.5 12.5 0 0 1 1.356 10.225a1 1 0 0 1-1.751-.119a22 22 0 0 0-3.393-6.319"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/square-check.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="m9 12l2 2l4-4"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/square.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" rx="2"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/templates/servers/basic.js":{content:`import {
+	McpServer,
+	ResourceTemplate,
+} from "@modelcontextprotocol/sdk/server/mcp.js";
+import z from "zod";
+
+const server = new McpServer(
+	{
+		name: "example-server",
+		version: "0.1.0",
+	},
+	{
+		capabilities: {
+			tools: {},
+			resources: { subscribe: true },
+			logging: {},
+			prompts: {},
+			sampling: {},
+			elicitation: {},
+		},
+	},
+);
+
+// In-memory data storage
+const dataStore = {
+	users: [
+		{ id: 1, name: "Alice", email: "alice@example.com", role: "admin" },
+		{ id: 2, name: "Bob", email: "bob@example.com", role: "user" },
+		{ id: 3, name: "Charlie", email: "charlie@example.com", role: "user" },
+	],
+	posts: [
+		{
+			id: 1,
+			title: "Welcome Post",
+			content: "Welcome to our platform!",
+			authorId: 1,
+		},
+		{
+			id: 2,
+			title: "Getting Started",
+			content: "Here's how to get started...",
+			authorId: 1,
+		},
+	],
+	settings: {
+		theme: "dark",
+		language: "en",
+		notifications: true,
+		maxUsers: 100,
+	},
+};
+
+const subscriptions = new Set();
+
+server.registerTool(
+	"echo",
+	{
+		title: "Echo Tool",
+		description: "Echo back the input text with optional formatting",
+		inputSchema: {
+			text: z.string().describe("Text to echo back"),
+			uppercase: z.boolean().optional().describe("Convert to uppercase"),
+			repeat: z
+				.number()
+				.min(1)
+				.max(5)
+				.optional()
+				.default(1)
+				.describe("Number of times to repeat"),
+		},
+	},
+	async ({ text, uppercase = false, repeat = 1 }) => {
+		let result = uppercase ? text.toUpperCase() : text;
+		result = Array(repeat).fill(result).join(" | ");
+
+		return {
+			content: [
+				{
+					type: "text",
+					text: \`Echo: \${result}\`,
+				},
+			],
+		};
+	},
+);
+
+// Math calculator tool
+server.registerTool(
+	"calculate",
+	{
+		title: "Calculator",
+		description: "Perform basic mathematical operations",
+		inputSchema: {
+			operation: z
+				.enum(["add", "subtract", "multiply", "divide", "power"])
+				.describe("Mathematical operation to perform"),
+			a: z.number().describe("First number"),
+			b: z.number().describe("Second number"),
+		},
+	},
+	async ({ operation, a, b }) => {
+		let result;
+
+		switch (operation) {
+			case "add":
+				result = a + b;
+				break;
+			case "subtract":
+				result = a - b;
+				break;
+			case "multiply":
+				result = a * b;
+				break;
+			case "divide":
+				if (b === 0) throw new Error("Division by zero is not allowed");
+				result = a / b;
+				break;
+			case "power":
+				result = a ** b;
+				break;
+		}
+
+		return {
+			content: [
+				{
+					type: "text",
+					text: \`\${a} \${operation} \${b} = \${result}\`,
+				},
+			],
+		};
+	},
+);
+
+// User management tool with elicitation
+server.registerTool(
+	"manage_user",
+	{
+		title: "User Management",
+		description: "Create, update, or delete users",
+		inputSchema: {
+			action: z
+				.enum(["create", "update", "delete", "list"])
+				.describe("Action to perform"),
+			userId: z
+				.number()
+				.optional()
+				.describe("User ID (required for update/delete)"),
+			name: z.string().optional().describe("User name (required for create)"),
+			email: z
+				.string()
+				.email()
+				.optional()
+				.describe("User email (required for create)"),
+			role: z.enum(["admin", "user"]).optional().describe("User role"),
+		},
+	},
+	async ({ action, userId, name, email, role }) => {
+		switch (action) {
+			case "list": {
+				return {
+					content: [
+						{
+							type: "text",
+							text: \`Users:\\n\${dataStore.users.map((u) => \`\${u.id}: \${u.name} (\${u.email}) - \${u.role}\`).join("\\n")}\`,
+						},
+					],
+				};
+			}
+			case "create": {
+				if (!name || !email)
+					throw new Error("Name and email are required for creating a user");
+				const newUser = {
+					id: Math.max(...dataStore.users.map((u) => u.id)) + 1,
+					name,
+					email,
+					role: role || "user",
+				};
+				dataStore.users.push(newUser);
+
+				// Notify subscribers
+				if (subscriptions.has("data://users")) {
+					server.notifyResourceUpdated("data://users");
+				}
+
+				return {
+					content: [
+						{
+							type: "text",
+							text: \`Created user: \${newUser.name} (ID: \${newUser.id})\`,
+						},
+					],
+				};
+			}
+			case "update": {
+				if (!userId) throw new Error("User ID is required for updating");
+				const userIndex = dataStore.users.findIndex((u) => u.id === userId);
+				if (userIndex === -1)
+					throw new Error(\`User with ID \${userId} not found\`);
+
+				if (name) dataStore.users[userIndex].name = name;
+				if (email) dataStore.users[userIndex].email = email;
+				if (role) dataStore.users[userIndex].role = role;
+
+				// Notify subscribers
+				if (subscriptions.has("data://users")) {
+					server.notifyResourceUpdated("data://users");
+				}
+				if (subscriptions.has(\`data://users/\${userId}\`)) {
+					server.notifyResourceUpdated(\`data://users/\${userId}\`);
+				}
+
+				return {
+					content: [
+						{
+							type: "text",
+							text: \`Updated user: \${dataStore.users[userIndex].name}\`,
+						},
+					],
+				};
+			}
+			case "delete": {
+				if (!userId) throw new Error("User ID is required for deletion");
+				const deleteIndex = dataStore.users.findIndex((u) => u.id === userId);
+				if (deleteIndex === -1)
+					throw new Error(\`User with ID \${userId} not found\`);
+
+				const deletedUser = dataStore.users.splice(deleteIndex, 1)[0];
+
+				// Notify subscribers
+				if (subscriptions.has("data://users")) {
+					server.notifyResourceUpdated("data://users");
+				}
+
+				return {
+					content: [
+						{
+							type: "text",
+							text: \`Deleted user: \${deletedUser.name}\`,
+						},
+					],
+				};
+			}
+		}
+	},
+);
+
+// NEW: Delete user with confirmation using elicitation
+server.registerTool(
+	"delete_user_with_confirmation",
+	{
+		title: "Delete User with Confirmation",
+		description: "Deletes a user after confirming with the user",
+		inputSchema: {
+			userId: z.number().describe("ID of the user to delete"),
+			force: z
+				.boolean()
+				.optional()
+				.describe("Skip confirmation if true (default: false)"),
+		},
+	},
+	async ({ userId, force = false }) => {
+		const userIndex = dataStore.users.findIndex((u) => u.id === userId);
+		if (userIndex === -1) {
+			throw new Error(\`User with ID \${userId} not found\`);
+		}
+
+		const user = dataStore.users[userIndex];
+
+		if (!force) {
+			const result = await server.server.elicitInput({
+				message: \`Are you sure you want to delete user "\${user.name}" (\${user.email})?\`,
+				requestedSchema: {
+					type: "object",
+					properties: {
+						confirm: {
+							type: "boolean",
+							title: "Confirm deletion",
+							description: \`Confirm deletion of user "\${user.name}"\`,
+						},
+						transferPosts: {
+							type: "boolean",
+							title: "Transfer posts",
+							description: "Transfer user's posts to another user",
+							default: false,
+						},
+						newAuthorId: {
+							type: "number",
+							title: "New author ID",
+							description: "ID of user to transfer posts to (if transferring)",
+						},
+					},
+					required: ["confirm"],
+				},
+			});
+
+			if (result.action !== "accept" || !result.content?.confirm) {
+				return {
+					content: [
+						{
+							type: "text",
+							text: \`Deletion cancelled by user for \${user.name}\`,
+						},
+					],
+				};
+			}
+
+			if (result.content?.transferPosts && result.content?.newAuthorId) {
+				const newAuthor = dataStore.users.find(
+					(u) => u.id === result.content.newAuthorId,
+				);
+				if (newAuthor) {
+					dataStore.posts.forEach((post) => {
+						if (post.authorId === userId) {
+							post.authorId = result.content.newAuthorId;
+						}
+					});
+					await server.sendLoggingMessage({
+						level: "info",
+						data: \`Transferred posts from \${user.name} to \${newAuthor.name}\`,
+					});
+				}
+			}
+		}
+
+		// Delete the user
+		dataStore.users.splice(userIndex, 1);
+
+		// Notify subscribers
+		if (subscriptions.has("data://users")) {
+			server.notifyResourceUpdated("data://users");
+		}
+
+		return {
+			content: [
+				{
+					type: "text",
+					text: \`Successfully deleted user: \${user.name}\`,
+				},
+			],
+		};
+	},
+);
+
+// NEW: Generate post content using sampling
+server.registerTool(
+	"generate_post",
+	{
+		title: "Generate Post Content",
+		description:
+			"Uses AI to generate a blog post with the specified parameters",
+		inputSchema: {
+			title: z.string().describe("Title of the post"),
+			authorId: z.number().describe("ID of the author"),
+			topic: z.string().optional().describe("Topic or theme for the post"),
+			style: z
+				.enum(["professional", "casual", "technical", "creative"])
+				.optional()
+				.default("professional")
+				.describe("Writing style for the post"),
+		},
+	},
+	async ({ title, authorId, topic, style = "professional" }) => {
+		const author = dataStore.users.find((u) => u.id === authorId);
+		if (!author) {
+			throw new Error(\`Author with ID \${authorId} not found\`);
+		}
+
+		let generationPrompt = \`Write a blog post with the title "\${title}"\`;
+		if (topic) {
+			generationPrompt += \` about \${topic}\`;
+		}
+		generationPrompt += \`. Use a \${style} writing style. Keep it concise (2-3 paragraphs).\`;
+
+		try {
+			const response = await server.server.createMessage({
+				messages: [
+					{
+						role: "user",
+						content: {
+							type: "text",
+							text: generationPrompt,
+						},
+					},
+				],
+				maxTokens: 500,
+				temperature: style === "creative" ? 0.8 : 0.3,
+			});
+
+			let generatedContent = "";
+			if (response.content.type === "text") {
+				generatedContent = response.content.text;
+			} else {
+				throw new Error("Failed to generate text content");
+			}
+
+			// Create the new post
+			const newPost = {
+				id: Math.max(...dataStore.posts.map((p) => p.id)) + 1,
+				title,
+				content: generatedContent,
+				authorId,
+			};
+
+			dataStore.posts.push(newPost);
+
+			// Notify subscribers
+			if (subscriptions.has("data://posts")) {
+				server.notifyResourceUpdated("data://posts");
+			}
+
+			await server.sendLoggingMessage({
+				level: "info",
+				data: \`Generated post "\${title}" for author \${author.name} in \${style} style\`,
+			});
+
+			return {
+				content: [
+					{
+						type: "text",
+						text: \`Successfully generated post "\${title}" (ID: \${newPost.id})\\n\\nContent preview:\\n\${generatedContent.substring(0, 200)}\${generatedContent.length > 200 ? "..." : ""}\`,
+					},
+				],
+			};
+		} catch (error) {
+			await server.sendLoggingMessage({
+				level: "error",
+				data: \`Failed to generate post: \${error.message}\`,
+			});
+
+			throw new Error(\`Post generation failed: \${error.message}\`);
+		}
+	},
+);
+
+// Slow operation with progress
+server.registerTool(
+	"slow_task",
+	{
+		title: "Slow Task Simulator",
+		description: "Simulates a long-running task with progress updates",
+		inputSchema: {
+			taskName: z.string().describe("Name of the task to simulate"),
+			duration: z.number().min(1).max(10).describe("Duration in seconds"),
+		},
+	},
+	async ({ taskName, duration }, { progress }) => {
+		await server.sendLoggingMessage({
+			level: "info",
+			data: \`Starting task: \${taskName} (\${duration}s)\`,
+		});
+
+		const steps = duration * 2; // Update every 500ms
+		for (let i = 1; i <= steps; i++) {
+			await new Promise((resolve) => setTimeout(resolve, 500));
+			progress({ progress: i, total: steps });
+		}
+
+		await server.sendLoggingMessage({
+			level: "info",
+			data: \`Completed task: \${taskName}\`,
+		});
+
+		return {
+			content: [
+				{
+					type: "text",
+					text: \`Task "\${taskName}" completed successfully after \${duration} seconds!\`,
+				},
+			],
+		};
+	},
+);
+
+// ===== STATIC RESOURCES =====
+
+// App configuration
+server.registerResource(
+	"config",
+	"config://app",
+	{
+		title: "App Configuration",
+		description: "Application configuration settings",
+		mimeType: "application/json",
+	},
+	async (uri) => ({
+		contents: [
+			{
+				uri: uri.href,
+				mimeType: "application/json",
+				text: JSON.stringify(
+					{
+						name: "MCP Dev Server",
+						version: "1.0.0",
+						features: ["tools", "resources", "templates"],
+						status: "active",
+						...dataStore.settings,
+					},
+					null,
+					2,
+				),
+			},
+		],
+	}),
+);
+
+// Users list resource
+server.registerResource(
+	"data_users",
+	"data://users",
+	{
+		title: "Users List",
+		description: "List of all users in the system",
+		mimeType: "application/json",
+	},
+	async (uri) => ({
+		contents: [
+			{
+				uri: uri.href,
+				mimeType: "application/json",
+				text: JSON.stringify(dataStore.users, null, 2),
+			},
+		],
+	}),
+);
+
+// Posts list resource
+server.registerResource(
+	"data_posts",
+	"data://posts",
+	{
+		title: "Posts List",
+		description: "List of all posts in the system",
+		mimeType: "application/json",
+	},
+	async (uri) => ({
+		contents: [
+			{
+				uri: uri.href,
+				mimeType: "application/json",
+				text: JSON.stringify(dataStore.posts, null, 2),
+			},
+		],
+	}),
+);
+
+// ===== RESOURCE TEMPLATES =====
+
+// Individual user resource template
+server.registerResource(
+	"data_users_template",
+	new ResourceTemplate("data://users/{id}", {
+		list: undefined,
+	}),
+	{
+		title: "User Resource",
+		description: "Individual user data by ID",
+	},
+	async (uri, { id }) => {
+		const userId = Number.parseInt(id);
+		const user = dataStore.users.find((u) => u.id === userId);
+
+		if (!user) {
+			throw new Error(\`User with ID \${userId} not found\`);
+		}
+
+		// Include user's posts
+		const userPosts = dataStore.posts.filter((p) => p.authorId === userId);
+		const userData = {
+			...user,
+			posts: userPosts,
+		};
+
+		return {
+			contents: [
+				{
+					uri: uri.href,
+					mimeType: "application/json",
+					text: JSON.stringify(userData, null, 2),
+				},
+			],
+		};
+	},
+);
+
+// Individual post resource template
+server.registerResource(
+	"data_posts_template",
+	new ResourceTemplate("data://posts/{id}", {
+		list: undefined,
+	}),
+	{
+		title: "Post Resource",
+		description: "Individual post data by ID",
+	},
+	async (uri, { id }) => {
+		const postId = Number.parseInt(id);
+		const post = dataStore.posts.find((p) => p.id === postId);
+
+		if (!post) {
+			throw new Error(\`Post with ID \${postId} not found\`);
+		}
+
+		// Include author information
+		const author = dataStore.users.find((u) => u.id === post.authorId);
+		const postData = {
+			...post,
+			author: author ? { name: author.name, email: author.email } : null,
+		};
+
+		return {
+			contents: [
+				{
+					uri: uri.href,
+					mimeType: "application/json",
+					text: JSON.stringify(postData, null, 2),
+				},
+			],
+		};
+	},
+);
+
+// Dynamic report template
+server.registerResource(
+	"reports",
+	new ResourceTemplate("reports://{type}/{format}", {
+		list: undefined,
+	}),
+	{
+		title: "Dynamic Reports",
+		description: "Generate various reports in different formats",
+	},
+	async (uri, { type, format }) => {
+		let reportData;
+		let mimeType;
+
+		// Generate report based on type
+		switch (type) {
+			case "users":
+				reportData = {
+					title: "User Report",
+					generated: new Date().toISOString(),
+					summary: {
+						total: dataStore.users.length,
+						admins: dataStore.users.filter((u) => u.role === "admin").length,
+						users: dataStore.users.filter((u) => u.role === "user").length,
+					},
+					users: dataStore.users,
+				};
+				break;
+			case "posts":
+				reportData = {
+					title: "Posts Report",
+					generated: new Date().toISOString(),
+					summary: {
+						total: dataStore.posts.length,
+						byAuthor: dataStore.users.map((u) => ({
+							author: u.name,
+							count: dataStore.posts.filter((p) => p.authorId === u.id).length,
+						})),
+					},
+					posts: dataStore.posts,
+				};
+				break;
+			default:
+				throw new Error(\`Unknown report type: \${type}\`);
+		}
+
+		// Format the report
+		let content;
+		switch (format) {
+			case "json":
+				mimeType = "application/json";
+				content = JSON.stringify(reportData, null, 2);
+				break;
+			case "csv":
+				mimeType = "text/csv";
+				if (type === "users") {
+					content =
+						"ID,Name,Email,Role\\n" +
+						dataStore.users
+							.map((u) => \`\${u.id},\${u.name},\${u.email},\${u.role}\`)
+							.join("\\n");
+				} else {
+					content =
+						"ID,Title,Author ID\\n" +
+						dataStore.posts
+							.map((p) => \`\${p.id},\${p.title},\${p.authorId}\`)
+							.join("\\n");
+				}
+				break;
+			case "txt":
+				mimeType = "text/plain";
+				content = \`\${reportData.title}\\nGenerated: \${reportData.generated}\\n\\n\${JSON.stringify(reportData.summary, null, 2)}\`;
+				break;
+			default:
+				throw new Error(\`Unknown format: \${format}\`);
+		}
+
+		return {
+			contents: [
+				{
+					uri: uri.href,
+					mimeType,
+					text: content,
+				},
+			],
+		};
+	},
+);
+
+// ===== PROMPTS =====
+
+server.registerPrompt(
+	"simple_greeting",
+	{
+		title: "Simple Greeting",
+		description: "A basic greeting prompt",
+	},
+	() => ({
+		messages: [
+			{
+				role: "user",
+				content: {
+					type: "text",
+					text: "Please greet the user in a friendly and professional manner.",
+				},
+			},
+		],
+	}),
+);
+
+server.registerPrompt(
+	"analyze_user_data",
+	{
+		title: "Analyze User Data",
+		description: "Analyze user data with specific parameters",
+		argsSchema: {
+			userId: z.number().describe("ID of the user to analyze"),
+			includeStats: z
+				.boolean()
+				.default(true)
+				.describe("Include statistical analysis"),
+		},
+	},
+	({ userId, includeStats }) => ({
+		messages: [
+			{
+				role: "user",
+				content: {
+					type: "text",
+					text: \`Please analyze the user data for user ID \${userId}.\${includeStats ? " Include detailed statistics and insights." : " Provide a basic summary only."}\`,
+				},
+			},
+			{
+				role: "user",
+				content: {
+					type: "resource",
+					uri: \`data://users/\${userId}\`,
+				},
+			},
+		],
+	}),
+);
+
+server.registerPrompt(
+	"summarize_post",
+	{
+		title: "Summarize Post",
+		description: "Generate a summary of a specific post",
+		argsSchema: {
+			postId: z.number().describe("ID of the post to summarize"),
+		},
+	},
+	({ postId }) => ({
+		messages: [
+			{
+				role: "user",
+				content: {
+					type: "text",
+					text: "Please provide a concise summary of the following post:",
+				},
+			},
+			{
+				role: "user",
+				content: {
+					type: "resource",
+					uri: \`data://posts/\${postId}\`,
+				},
+			},
+		],
+	}),
+);
+
+export default server;
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/mcp/worker.js":{content:`let ts;
+let tsLibCache = {};
+async function loadCjsModule(url) {
+	try {
+		const response = await fetch(url);
+		if (!response.ok) {
+			throw new Error(\`HTTP error! status: \${response.status}\`);
+		}
+		const scriptText = await response.text();
+
+		// Prepare a fake CJS environment
+		const module = { exports: {} };
+		const exports = module.exports;
+
+		// Wrap the script text in a function and execute it
+		const scriptFunc = new Function("module", "exports", scriptText);
+		scriptFunc(module, exports);
+
+		// If the module uses \`module.exports = ...\`, it will be on module.exports.
+		// If it just uses \`exports.foo = ...\`, it will be on exports.
+		// We check \`module.exports\` first.
+		const exportedModule = module.exports;
+
+		// Sometimes the main export isn't \`default\`, we check if the object is empty.
+		if (Object.keys(exportedModule).length === 0) {
+			return exports;
+		}
+
+		return exportedModule;
+	} catch (error) {
+		console.error(\`Failed to load module from \${url}:\`, error);
+		throw error;
+	}
+}
+
+const loadTypeScript = async () => {
+	if (ts) return;
+	try {
+		const tsModule = await loadCjsModule(
+			"https://unpkg.com/typescript@latest/lib/typescript.js",
+		);
+		ts = tsModule;
+		self.ts = ts;
+		console.log({ ts }, self.ts);
+	} catch (error) {
+		console.error("Failed to load TypeScript:", error);
+	}
+};
+
+const loadTypeScriptLibs = async () => {
+	if (Object.keys(tsLibCache).length > 0) return;
+	const libsToFetch = [
+		"lib.es2020.d.ts",
+		"lib.es2018.d.ts",
+		"lib.es2019.d.ts",
+		"lib.es2019.string.d.ts",
+		"lib.es2019.array.d.ts",
+		"lib.es2019.object.d.ts",
+		"lib.es2020.bigint.d.ts",
+		"lib.es2020.date.d.ts",
+		"lib.es2020.number.d.ts",
+		"lib.es2020.promise.d.ts",
+		"lib.es2020.sharedmemory.d.ts",
+		"lib.es2020.string.d.ts",
+		"lib.es2020.symbol.wellknown.d.ts",
+		"lib.es2015.symbol.d.ts",
+		"lib.es2019.symbol.d.ts",
+		"lib.es2019.intl.d.ts",
+		"lib.es2015.iterable.d.ts",
+		"lib.es2018.intl.d.ts",
+		"lib.es2020.intl.d.ts",
+		"lib.es5.d.ts",
+		"lib.dom.d.ts",
+		"lib.es2017.d.ts",
+		"lib.es2018.asynciterable.d.ts",
+		"lib.es2018.asyncgenerator.d.ts",
+		"lib.es2018.promise.d.ts",
+		"lib.es2018.regexp.d.ts",
+		"lib.es2016.d.ts",
+		"lib.es2017.arraybuffer.d.ts",
+		"lib.es2017.date.d.ts",
+		"lib.es2017.intl.d.ts",
+		"lib.es2017.object.d.ts",
+		"lib.es2017.sharedmemory.d.ts",
+		"lib.es2017.string.d.ts",
+		"lib.es2017.typedarrays.d.ts",
+		"lib.es2015.d.ts",
+		"lib.es2016.array.include.d.ts",
+		"lib.es2016.intl.d.ts",
+		"lib.es2015.symbol.wellknown.d.ts",
+		"lib.es2015.core.d.ts",
+		"lib.es2015.collection.d.ts",
+		"lib.es2015.generator.d.ts",
+		"lib.es2015.promise.d.ts",
+		"lib.es2015.proxy.d.ts",
+		"lib.es2015.reflect.d.ts",
+		"lib.decorators.d.ts",
+		"lib.decorators.legacy.d.ts",
+	];
+
+	try {
+		const promises = libsToFetch.map((lib) =>
+			fetch(\`https://unpkg.com/typescript@latest/lib/\${lib}\`).then((res) => {
+				if (!res.ok) throw new Error(\`Failed to fetch \${lib}\`);
+				return res.text();
+			}),
+		);
+		const contents = await Promise.all(promises);
+		const newCache = {};
+		libsToFetch.forEach((lib, index) => {
+			newCache[lib] = contents[index];
+		});
+
+		return newCache;
+	} catch (e) {
+		console.error(
+			"Could not fetch TypeScript library definitions. Type checking will be less accurate.",
+			e,
+		);
+	}
+};
+
+self.onmessage = async (e) => {
+	const { type, payload } = e.data;
+	switch (type) {
+		case "init":
+			await loadTypeScript();
+			tsLibCache = await loadTypeScriptLibs();
+			break;
+		case "validate": {
+			if (!ts) return;
+			const validationErrors = validate(payload.code, payload.filePath);
+			self.postMessage({
+				type: "validationComplete",
+				payload: { errors: validationErrors },
+			});
+			break;
+		}
+		case "transpile": {
+			if (!ts) {
+				// Fallback if TS isn't loaded yet
+				self.postMessage({
+					type: "transpileComplete",
+					payload: {
+						transpiledCode: payload.code,
+						requestId: payload.requestId,
+					},
+				});
+				return;
+			}
+			const transpiledResult = transpile(payload.code);
+			self.postMessage({
+				type: "transpileComplete",
+				payload: {
+					transpiledCode: transpiledResult,
+					requestId: payload.requestId,
+				},
+			});
+			break;
+		}
+	}
+};
+
+const validate = (code, filePath) => {
+	try {
+		const defaultLibFileName = "lib.es2020.d.ts";
+		const compilerOptions = {
+			target: ts.ScriptTarget.ES2020,
+			module: ts.ModuleKind.CommonJS,
+			allowJs: true,
+			esModuleInterop: true,
+			noEmit: true,
+		};
+
+		const host = {
+			getSourceFile: (fileName, languageVersion) => {
+				const sourceText =
+					tsLibCache[fileName] || (fileName === filePath ? code : undefined);
+				return sourceText !== undefined
+					? ts.createSourceFile(fileName, sourceText, languageVersion)
+					: undefined;
+			},
+			writeFile: () => {},
+			getDefaultLibFileName: () => defaultLibFileName,
+			useCaseSensitiveFileNames: () => false,
+			getCanonicalFileName: (fileName) => fileName,
+			getCurrentDirectory: () => "/",
+			getNewLine: () => "\\n",
+			fileExists: (fileName) => fileName === filePath || !!tsLibCache[fileName],
+			readFile: (fileName) =>
+				fileName === filePath ? code : tsLibCache[fileName],
+		};
+
+		const program = ts.createProgram([filePath], compilerOptions, host);
+		const diagnostics = ts.getPreEmitDiagnostics(program);
+
+		return diagnostics.map((diagnostic) => {
+			const message = ts.flattenDiagnosticMessageText(
+				diagnostic.messageText,
+				"\\n",
+			);
+			if (diagnostic.file && diagnostic.start) {
+				const { line, character } = ts.getLineAndCharacterOfPosition(
+					diagnostic.file,
+					diagnostic.start,
+				);
+				return { line: line + 1, character: character + 1, message };
+			}
+			return { line: 0, character: 0, message };
+		});
+	} catch (error) {
+		console.error("Error during code validation in worker:", error);
+		return [
+			{
+				line: 0,
+				character: 0,
+				message: "An unexpected error occurred during validation.",
+			},
+		];
+	}
+};
+
+const transpile = (code) => {
+	try {
+		const jsResult = ts.transpileModule(code, {
+			compilerOptions: {
+				module: ts.ModuleKind.CommonJS,
+				target: ts.ScriptTarget.ES2020,
+			},
+		});
+		return jsResult.outputText;
+	} catch (error) {
+		console.error("TypeScript compilation failed in worker:", error);
+		return code;
+	}
+};
+`,mimeType:"application/javascript",skipSW:!1},"/modules/icon-lucide/lucide/server-off.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-5m-5 0L2.5 2.5C2 2 2 2.5 2 5v3a2 2 0 0 0 2 2zm12 7v-1a2 2 0 0 0-2-2h-1M4 14a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h16.5l1-.5l.5.5l-8-8zm2 4h.01M2 2l20 20"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/chevron-down.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 9l6 6l6-6"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/chevron-right.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 18l6-6l-6-6"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/manifest.json":{content:`{
 	"manifest_version": 3,
 	"name": "meetuprio",
 	"version": "1.0",
@@ -4768,8 +5425,8 @@ export default ({ T, html }) => {
 		},
 	});
 
-	const _rows = T.array({});
-	const _row = T.object({});
+	const _rows = T.array();
+	const _row = T.object();
 
 	function addClassTags(instance, proto) {
 		if (proto?.constructor) {
@@ -7482,13 +8139,14 @@ export default async ({ $APP }) => {
 			filter,
 			row,
 			rows,
+			key = "_rows",
 		} = instance._data;
 		if (row) {
 			instance._row = row;
 			return;
 		}
 		if (rows) {
-			instance._rows = rows;
+			instance[key] = rows;
 			return;
 		}
 		const method = (instance._data.method ?? id) ? "get" : "getMany";
@@ -7501,13 +8159,13 @@ export default async ({ $APP }) => {
 			if (method.toLowerCase() === "get") {
 				instance._row = res;
 			} else {
-				instance._rows = res.items ?? res;
+				instance[key] = res.items ?? res;
 				if (res.count) instance._data.count = res.count;
 			}
 			instance.requestUpdate();
 			instance.emit("dataLoaded", {
 				instance,
-				rows: instance._rows,
+				rows: instance[key],
 				row: instance._row,
 				component: instance.constructor,
 			});
@@ -7526,10 +8184,10 @@ export default async ({ $APP }) => {
 			connected: ({ instance }) => {
 				if (!instance._data) return;
 				instance._listeners = {};
-				const { model, id } = instance._data;
+				const { model, id, key = "_rows" } = instance._data;
 				const row = instance._row;
 				if (row && !id) instance._data.id = row.id;
-				if ((row && !id) || instance._rows) {
+				if ((row && !id) || instance[key]) {
 					instance.emit("dataLoaded", {
 						instance,
 						component: instance.constructor,
@@ -7554,7 +8212,7 @@ export default async ({ $APP }) => {
 					$APP.Model[model].onAny(instance._listeners.any);
 				}
 
-				if (!instance._row && !instance._rows) requestDataSync({ instance });
+				if (!instance._row && !instance[key]) requestDataSync({ instance });
 				instance.syncable = true;
 			},
 			disconnected: ({ instance }) => {
@@ -9446,6 +10104,7 @@ const adaptMessageToGemini = (msg) => {
 };
 const adaptMessagesToGemini = (messages = []) =>
 	messages.map(adaptMessageToGemini);
+
 const adaptGeminiResponseToCommon = (geminiResponse) => {
 	const candidate = geminiResponse.candidates?.[0];
 	if (!candidate?.content?.parts?.[0]) {
@@ -9498,7 +10157,9 @@ async function* streamGeminiAPI({
 			.json()
 			.catch(() => ({ error: { message: "Failed to parse error." } }));
 		throw new Error(
-			\`Gemini Streaming API Error: \${errorBody.error?.message || response.statusText}\`,
+			\`Gemini Streaming API Error: \${
+				errorBody.error?.message || response.statusText
+			}\`,
 		);
 	}
 	const reader = response.body.getReader();
@@ -9522,6 +10183,36 @@ async function* streamGeminiAPI({
 	}
 }
 
+async function* processStreamGemini(stream) {
+	const finalToolCalls = [];
+	for await (const chunk of stream) {
+		const candidate = chunk.candidates?.[0];
+		if (!candidate?.content?.parts?.[0]) continue;
+		let content = "";
+		for (const part of candidate.content.parts) {
+			if (part.text) {
+				content += part.text;
+			}
+			if (part.functionCall) {
+				finalToolCalls.push({
+					id: part.functionCall.name,
+					name: part.functionCall.name,
+					arguments: part.functionCall.args,
+				});
+			}
+		}
+		if (content) {
+			yield { type: "content", content: content };
+		}
+	}
+	const hasToolCalls = finalToolCalls.length > 0;
+	if (hasToolCalls) {
+		yield { type: "tool_calls", toolCalls: finalToolCalls };
+	}
+	const finishReason = hasToolCalls ? "tool_calls" : "stop";
+	yield { type: "finish_reason", reason: finishReason };
+}
+
 const googleProvider = {
 	type: "google",
 	models: [
@@ -9532,13 +10223,10 @@ const googleProvider = {
 	adaptTools: (tools) => tools.map(adaptMcpToolToGemini),
 	adaptResponse: adaptGeminiResponseToCommon,
 	streamAPI: streamGeminiAPI,
-	validateConfig: (config) => {
-		if (!config.apiKey) console.warn("Google API key is missing.");
-		return true;
-	},
+	processStream: processStreamGemini,
 };
 
-// --- OpenRouter Provider (and other OpenAI-compatible) ---
+// --- OpenAI-Compatible Providers ---
 const adaptMessageToOpenAI = (msg) => {
 	if (msg.role === "tool") {
 		const result = msg.structuredContent?.result || msg.result || msg.content;
@@ -9577,6 +10265,7 @@ const adaptMessageToOpenAI = (msg) => {
 };
 const adaptMessagesToOpenAI = (messages = []) =>
 	messages.map(adaptMessageToOpenAI);
+
 const adaptOpenAIResponseToCommon = (openAIResponse) => {
 	const choice = openAIResponse.choices?.[0];
 	if (!choice) return { role: "assistant", content: "" };
@@ -9619,6 +10308,7 @@ async function* streamOpenAIAPI({
 		...(tools?.length > 0 && { tools }),
 		stream: true,
 	};
+	console.error({ endpoint });
 	const response = await fetch(endpoint, {
 		method: "POST",
 		headers: {
@@ -9627,15 +10317,19 @@ async function* streamOpenAIAPI({
 		},
 		body: JSON.stringify(payload),
 	});
+	console.error({ response });
 	if (!response.ok) {
 		const errorBody = await response
 			.json()
 			.catch(() => ({ error: { message: "Failed to parse error." } }));
 		throw new Error(
-			\`OpenAI-compatible API Error: \${errorBody.error?.message || response.statusText}\`,
+			\`OpenAI-compatible API Error: \${
+				errorBody.error?.message || response.statusText
+			}\`,
 		);
 	}
 	const reader = response.body.getReader();
+	console.error({ reader });
 	const decoder = new TextDecoder();
 	let buffer = "";
 	while (true) {
@@ -9656,6 +10350,49 @@ async function* streamOpenAIAPI({
 	}
 }
 
+async function* processStreamOpenAI(stream) {
+	const toolCallChunks = {};
+	let finishReason = null;
+	for await (const chunk of stream) {
+		const choice = chunk.choices?.[0];
+		if (!choice) continue;
+		const { delta } = choice;
+		if (delta?.content) {
+			yield { type: "content", content: delta.content };
+		}
+		if (delta?.tool_calls) {
+			for (const toolCallDelta of delta.tool_calls) {
+				const { index } = toolCallDelta;
+				if (!toolCallChunks[index]) {
+					toolCallChunks[index] = {
+						id: "",
+						type: "function",
+						function: { name: "", arguments: "" },
+					};
+				}
+				const current = toolCallChunks[index];
+				if (toolCallDelta.id) current.id = toolCallDelta.id;
+				if (toolCallDelta.function?.name)
+					current.function.name += toolCallDelta.function.name;
+				if (toolCallDelta.function?.arguments)
+					current.function.arguments += toolCallDelta.function.arguments;
+			}
+		}
+		if (choice.finish_reason) {
+			finishReason = choice.finish_reason;
+		}
+	}
+	if (finishReason === "tool_calls") {
+		const finalToolCalls = Object.values(toolCallChunks).map((tc) => ({
+			id: tc.id,
+			name: tc.function.name,
+			arguments: JSON.parse(tc.function.arguments || "{}"),
+		}));
+		yield { type: "tool_calls", toolCalls: finalToolCalls };
+	}
+	yield { type: "finish_reason", reason: finishReason };
+}
+
 const openRouterProvider = {
 	type: "openrouter",
 	models: [
@@ -9670,25 +10407,22 @@ const openRouterProvider = {
 	adaptResponse: adaptOpenAIResponseToCommon,
 	streamAPI: (opts) =>
 		streamOpenAIAPI({ ...opts, endpoint: openRouterProvider.endpoint }),
-	validateConfig: (config) => {
-		if (!config.apiKey) throw new Error("OpenRouter API key is required.");
-		return true;
-	},
+	processStream: processStreamOpenAI,
 };
 
 const localAIProvider = {
 	type: "local",
 	models: [{ id: "local/local-model", name: "Local Model" }],
+	endpoint: "http://localhost:1234/v1/chat/completions",
 	adaptMessages: adaptMessagesToOpenAI,
 	adaptTools: (tools) => tools.map(adaptMcpToolToOpenAI),
 	adaptResponse: adaptOpenAIResponseToCommon,
 	streamAPI: (opts) =>
-		streamOpenAIAPI({ ...opts, endpoint: opts.config.endpoint }),
-	validateConfig: (config) => {
-		if (!config.endpoint)
-			throw new Error("Local AI provider requires an 'endpoint'.");
-		return true;
-	},
+		streamOpenAIAPI({
+			...opts,
+			endpoint: opts.provider.endpoint ?? opts.config.endpoint,
+		}),
+	processStream: processStreamOpenAI,
 };
 
 // --- Main Providers Plugin ---
@@ -9699,11 +10433,10 @@ const providerImplementations = {
 };
 
 export default () => {
-	const providers = new Map(); // Key is provider.type
-
+	const providers = new Map();
 	return {
 		name: "providers",
-		initialize(host) {
+		initialize() {
 			this.api.addProvider = (config) => {
 				if (!config.type || !providerImplementations[config.type]) {
 					throw new Error(\`Invalid provider type: \${config.type}\`);
@@ -9714,8 +10447,8 @@ export default () => {
 					);
 				}
 				providers.set(config.type, {
+					...providerImplementations[config.type],
 					...config,
-					impl: providerImplementations[config.type],
 				});
 				console.log(\`Provider of type "\${config.type}" added.\`);
 			};
@@ -9724,26 +10457,34 @@ export default () => {
 				providers.clear();
 			};
 
-			this.api.getProviderForModel = (modelId) => {
-				const modelProviderType = modelId.split("/")[0];
-				const provider = providers.get(modelProviderType);
-
+			this.api.getProvider = (providerId) => {
+				const provider = providers.get(providerId);
 				if (provider) return provider;
-
-				throw new Error(\`No configured provider found for model "\${modelId}"\`);
+				if (providerImplementations[providerId]) {
+					return providerImplementations[providerId];
+				}
+				throw new Error(\`No provider found for "\${providerId}"\`);
 			};
 
 			this.api.listProviders = () => {
-				return Array.from(providers.values()).map(({ impl, ...rest }) => rest);
+				return Array.from(providers.values()).map(
+					({
+						adaptMessages,
+						adaptTools,
+						adaptResponse,
+						streamAPI,
+						processStream,
+						...rest
+					}) => rest,
+				);
 			};
 
 			this.api.getModels = async () => {
 				let allModels = [];
-				for (const provider of providers.values()) {
-					// Prefix models with provider type for uniqueness in the UI
-					const providerModels = provider.impl.models.map((m) => ({
+				for (const [type, impl] of Object.entries(providerImplementations)) {
+					const providerModels = impl.models.map((m) => ({
 						...m,
-						id: \`\${provider.type}/\${m.id.split("/").pop()}\`, // e.g. openrouter/claude-3.5-sonnet
+						id: \`\${type}/\${m.id.split("/").pop()}\`,
 					}));
 					allModels = allModels.concat(providerModels);
 				}
@@ -9859,15 +10600,15 @@ export default () => {
 			const currentMessages = [...messages];
 			const { enabledTools = [], model, ...generationConfig } = options;
 
+			if (!options.provider)
+				throw new Error("A 'provider' must be specified in chat options.");
 			if (!model)
 				throw new Error("A 'model' must be specified in chat options.");
 
-			const providerConfig = providersApi.getProviderForModel(model);
-			if (!providerConfig)
+			console.log(options.provider);
+			const adapter = providersApi.getProvider(options.provider.id);
+			if (!adapter)
 				throw new Error(\`Could not find a provider for model \${model}\`);
-
-			const provider = providerConfig.impl;
-			provider.validateConfig(providerConfig);
 
 			const toolAliases = Array.from(host.clients.keys());
 			const { tools: mcpTools } = await toolsApi.listTools({
@@ -9878,83 +10619,38 @@ export default () => {
 				),
 			});
 
-			const adaptedTools = provider.adaptTools(
+			const adaptedTools = adapter.adaptTools(
 				mcpTools.filter((t) => enabledTools.includes(t.name)),
 			);
-			const adaptedMessages = provider.adaptMessages(currentMessages);
-			const modelName = model.substring(model.indexOf("/") + 1); // e.g., gemini-1.5-pro-latest
+			const adaptedMessages = adapter.adaptMessages(currentMessages);
+			const modelName = model.substring(model.indexOf("/") + 1);
 
-			const stream = provider.streamAPI({
-				config: providerConfig,
+			const stream = adapter.streamAPI({
+				config: adapter,
+				provider: options.provider,
 				model: modelName,
 				messages: adaptedMessages,
 				generationConfig,
 				tools: adaptedTools,
 			});
-
+			const processedStream = adapter.processStream(stream);
 			let fullContent = "";
+			let finalToolCalls = [];
 			let finishReason = null;
-			const toolCallChunks = {};
-
-			// OpenAI-compatible streaming logic
-			if (provider.type === "openrouter" || provider.type === "local") {
-				for await (const chunk of stream) {
-					const choice = chunk.choices?.[0];
-					if (!choice) continue;
-					const { delta } = choice;
-					if (delta?.content) {
-						fullContent += delta.content;
+			for await (const chunk of processedStream) {
+				switch (chunk.type) {
+					case "content":
+						fullContent += chunk.content;
 						yield { type: "content", content: fullContent, isComplete: false };
-					}
-					if (delta?.tool_calls) {
-						for (const toolCallDelta of delta.tool_calls) {
-							const { index } = toolCallDelta;
-							if (!toolCallChunks[index])
-								toolCallChunks[index] = {
-									id: "",
-									type: "function",
-									function: { name: "", arguments: "" },
-								};
-							const current = toolCallChunks[index];
-							if (toolCallDelta.id) current.id = toolCallDelta.id;
-							if (toolCallDelta.function?.name)
-								current.function.name += toolCallDelta.function.name;
-							if (toolCallDelta.function?.arguments)
-								current.function.arguments += toolCallDelta.function.arguments;
-						}
-					}
-					if (choice.finish_reason) finishReason = choice.finish_reason;
+						break;
+					case "tool_calls":
+						finalToolCalls = chunk.toolCalls;
+						break;
+					case "finish_reason":
+						finishReason = chunk.reason;
+						break;
 				}
 			}
-			// Gemini streaming logic
-			else if (provider.type === "google") {
-				for await (const chunk of stream) {
-					const response = provider.adaptResponse(chunk);
-					if (response.content) {
-						fullContent += response.content;
-						yield { type: "content", content: fullContent, isComplete: false };
-					}
-					if (response.toolCalls) {
-						response.toolCalls.forEach((tc, index) => {
-							toolCallChunks[index] = {
-								id: tc.id,
-								function: {
-									name: tc.name,
-									arguments: JSON.stringify(tc.arguments),
-								},
-							};
-						});
-					}
-				}
-				finishReason =
-					Object.keys(toolCallChunks).length > 0 ? "tool_calls" : "stop";
-			}
-
-			const finalToolCalls = Object.values(toolCallChunks).map((tc) => ({
-				id: tc.id,
-				name: tc.function.name,
-				arguments: JSON.parse(tc.function.arguments || "{}"),
-			}));
 
 			if (finishReason === "tool_calls" && finalToolCalls.length > 0) {
 				yield { type: "tool_calls_start", toolCalls: finalToolCalls };
@@ -9992,8 +10688,6 @@ export default () => {
 					}
 				}
 				currentMessages.push(...toolResponses);
-
-				// Recursively call to get final text response after tool calls
 				for await (const finalChunk of createStreamChatHandler(
 					currentMessages,
 					options,
@@ -10025,10 +10719,7 @@ export default () => {
 		this.api.chat = (messages, options = {}) => {
 			const { stream, ...restOptions } = options;
 			const operationName = stream ? "llm:stream_chat" : "llm:chat";
-
-			if (stream) {
-				return createStreamChatHandler(messages, restOptions);
-			}
+			if (stream) return createStreamChatHandler(messages, restOptions);
 
 			return historyApi.withHistory(operationName, { messages, options }, () =>
 				createChatHandler(messages, restOptions),
@@ -10228,12 +10919,12 @@ export default () => {
 	api: {},
 });
 `,mimeType:"application/javascript",skipSW:!1},"/modules/apps/admin/index.js":{content:`export const dependencies = {
-	cms: "/modules/apps/cms/index.js",
-	drive: "/modules/apps/drive/index.js",
-	project: "/modules/apps/project/index.js",
-	IDE: "/modules/apps/ide/index.js",
-	chat: "/modules/apps/chat/index.js",
-	editor: "/modules/apps/editor/index.js",
+	//cms: "/modules/apps/cms/index.js",
+	//drive: "/modules/apps/drive/index.js",
+	//project: "/modules/apps/project/index.js",
+	//IDE: "/modules/apps/ide/index.js",
+	//chat: "/modules/apps/chat/index.js",
+	//editor: "/modules/apps/editor/index.js",
 	Bundler: "/modules/apps/bundler/index.js",
 	mcp: "/modules/apps/mcp/index.js",
 };
@@ -10325,1892 +11016,6 @@ export default ({ $APP, html }) => {
 
 	$APP.routes.set(routes);
 };
-`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/cms/index.js":{content:`export default ({ $APP }) =>
-	$APP.addModule({
-		name: "cms",
-		path: "apps/cms/views",
-		settings: {
-			appbar: {
-				label: "Data",
-				icon: "database",
-			},
-		},
-	});
-`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/drive/index.js":{content:`export const migration = true;
-export default ({ $APP }) =>
-	$APP.addModule({
-		name: "drive",
-		path: "apps/drive",
-		backend: true,
-	});
-`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/project/index.js":{content:`export const migration = true;
-
-export default ({ $APP, Controller }) => {
-	const commands = {
-		"project:new-project": async ({ IDE }) => {
-			const name = prompt("Enter the new project name:");
-			if (name) {
-				const files = $APP.project.newProjectTemplate(name);
-				await IDE.filesystem.createFiles(files);
-				Controller.local.set("selectedProject", name);
-			}
-		},
-		"project:open-project": async ({ IDE }) => {
-			Controller.local.set("selectedProject", null);
-			Controller.local.set("selectedProjectConfig", null);
-		},
-		"project:save-project": async ({ IDE }) => {
-			const project = IDE.project.getCurrent();
-			if (project) {
-				await IDE.project.save(project);
-			}
-		},
-		"project:close-project": async () => {
-			if (confirm("Are you sure you want to close the project?")) {
-				Controller.local.set("selectedProject", null);
-				Controller.local.set("selectedProjectConfig", null);
-			}
-		},
-		"project:delete-project": async ({ IDE }) => {
-			const project = IDE.project.getCurrent();
-			if (project && confirm(\`Delete project \${project.name}?\`)) {
-				await IDE.project.delete(project);
-			}
-		},
-	};
-
-	const keybindings = {
-		"ctrl+n": "project:new-project",
-		"ctrl+o": "project:open-project",
-		"ctrl+shift+d": "project:delete-project",
-	};
-
-	const menu = {
-		"project:new-project": "New Project...",
-		"project:open-project": "Open Project...",
-		"project:close-project": "Close Project",
-		"project:delete-project": "Delete Project",
-	};
-
-	$APP.settings.add("globalKeybindings", keybindings);
-	$APP.settings.add("commands", commands);
-	$APP.settings.add("menu", menu);
-
-	$APP.addModule({
-		name: "project",
-		path: "apps/project",
-		settings: {
-			appbar: {
-				label: "Management",
-				icon: "folder",
-			},
-		},
-	});
-};
-`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/ide/index.js":{content:`import "/modules/apps/ide/plugins/highlight.js";
-import "/modules/apps/ide/plugins/format.js";
-import "/modules/apps/ide/plugins/explorer.js";
-import "/modules/apps/ide/plugins/edit.js";
-import "/modules/apps/ide/plugins/markdown.js";
-import "/modules/apps/ide/plugins/keybindings.js";
-import "/modules/apps/ide/highlights/css.js";
-import "/modules/apps/ide/highlights/html.js";
-import "/modules/apps/ide/highlights/javascript.js";
-
-export const dependencies = {
-	FileSystemAdapter: "/modules/sw/adapter.js",
-};
-
-const languagesByExtension = {
-	css: "css",
-	html: "html",
-	js: "javascript",
-	md: "markdown",
-};
-
-const getLanguage = (name) =>
-	languagesByExtension[name.split(".").at(-1)] || "javascript";
-
-export default ({ $APP, FileSystemAdapter, Controller }) => {
-	const { ram, local } = Controller;
-
-	const createIDE = () => {
-		const settings = $APP.settings.IDE;
-		const filesystem = new FileSystemAdapter();
-
-		const getActiveEditor = () => {
-			return window.$("editor-textarea");
-		};
-
-		const getExplorer = () => {
-			const explorer = window.$("editor-explorer");
-			return explorer?.q("editor-explorer");
-		};
-
-		const getActiveFile = () => {
-			const tabs = local.get("tabs");
-			const tabIndex = local.get("activeTab");
-			return tabs[tabIndex];
-		};
-
-		const saveFile = (file) => {
-			filesystem.saveFile(file).then(() => {
-				const preview = window.$("ide-preview");
-				if (preview) preview.reload();
-			});
-		};
-
-		const listFiles = async (path) => {
-			const files = await $APP.SW.request("FS:LIST_FILES", { path });
-			return files;
-		};
-		const listSystemFiles = async (path) => {
-			const files = await $APP.SW.request("FS:LIST_FILES", {
-				path,
-				system: true,
-			});
-			return files;
-		};
-		const openFile = async (path, system = false) => {
-			const file = await $APP.SW.request("FS:READ_FILE", { path, system });
-			if (!file) return;
-			window.$("editor-tabs").addTab({
-				name: path.split("/").at(-1),
-				path,
-				content: file.content,
-				original: file.content,
-				language: getLanguage(path),
-				system,
-			});
-		};
-
-		const executeCommand = (commandId, _args = {}) => {
-			const handler = $APP.settings.commands[commandId];
-			if (handler) {
-				const panel = getActiveEditor();
-				const explorer = getExplorer();
-				const IDE = ram.get("IDE");
-				const editor = window.$("editor-textarea");
-				const input = editor?.q("textarea");
-				const args = {
-					settings,
-					IDE,
-					panel,
-					editor,
-					explorer,
-					input,
-					..._args,
-				};
-
-				$APP.hooks.emit(commandId, args);
-				handler(args);
-			} else console.warn(\`Command \${commandId} is not registered.\`);
-		};
-		const getCommand = (commandId) => $APP.settings.commands[commandId];
-
-		const normalizeKeyCombo = (keyCombo) => {
-			return keyCombo.toLowerCase().split("+").sort().join("+");
-		};
-
-		const extractKeyCombo = (event) =>
-			normalizeKeyCombo(
-				(event.ctrlKey ? "ctrl+" : "") +
-					(event.metaKey ? "meta+" : "") +
-					(event.altKey ? "alt+" : "") +
-					(event.shiftKey ? "shift+" : "") +
-					event.key,
-			);
-
-		const createKeydownHandler = (bindings = "globalKeybindings") => {
-			return (event, context) => {
-				const keyCombo = extractKeyCombo(event);
-				if ($APP.settings?.[bindings][keyCombo]) {
-					event.preventDefault();
-					console.log($APP.settings?.[bindings][keyCombo]);
-					executeCommand($APP.settings?.[bindings][keyCombo], context);
-				}
-			};
-		};
-
-		const handleEditorKeydown = createKeydownHandler("editorKeybindings");
-		const handleGlobalKeydown = createKeydownHandler("globalKeybindings");
-
-		const attachKeybindings = (input, context) => {
-			detachKeybindings();
-			input.addEventListener("keydown", (event) =>
-				handleEditorKeydown(event, { ...context, event }),
-			);
-		};
-
-		const detachKeybindings = () => {};
-
-		const attachGlobalKeybindings = () => {
-			detachGlobalKeybindings();
-			window.addEventListener("keydown", handleGlobalKeydown);
-		};
-
-		const detachGlobalKeybindings = () => {
-			window.removeEventListener("keydown", handleGlobalKeydown);
-		};
-
-		const getMenuItems = () => {
-			const groupedMenuItems = {};
-			const menuItems = $APP.settings.menu || {};
-			Object.keys(menuItems).forEach((menuId) => {
-				const menuItem = menuItems[menuId];
-				const [category] = menuId.split(":");
-				if (!groupedMenuItems[category]) {
-					groupedMenuItems[category] = {
-						label: capitalize(category),
-						items: [],
-					};
-				}
-				groupedMenuItems[category].items.push([menuItem, menuId]);
-			});
-
-			return Object.values(groupedMenuItems);
-		};
-
-		const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
-
-		return {
-			getActiveEditor,
-			getActiveFile,
-			openFile,
-			saveFile,
-			listFiles,
-			listSystemFiles, // NEW: Expose the new function
-			filesystem,
-			getCommand,
-			executeCommand,
-			attachKeybindings,
-			attachGlobalKeybindings,
-			detachKeybindings,
-			detachGlobalKeybindings,
-			getMenuItems,
-		};
-	};
-
-	$APP.addModule({
-		name: "ide",
-		alias: "IDE",
-		backend: true,
-		path: "apps/ide/views",
-		settings: {
-			useTabs: false,
-			tabSize: 2,
-			autoClosing: true,
-			appbar: {
-				label: "IDE - Code Editor",
-				icon: "code",
-			},
-		},
-	});
-
-	const manager = createIDE();
-	ram.set("IDE", manager);
-	return manager;
-};
-`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/ide/plugins/highlight.js":{content:`import $APP from "/bootstrap.js";
-
-const Highlight = {
-	name: "highlight",
-	applyHighlighting({ language, code }) {
-		const highlighter = $APP.settings.highlights[language] || { regex: [] };
-		const tokens = this.tokenize(code, highlighter.regex);
-		const lines = this.tokensToHTMLLines(tokens, language);
-		return lines.map((line, index) => \`\${line || ""}\\n\`).join("");
-	},
-
-	tokenize(source, tokenSpec) {
-		const tokens = [];
-		let remaining = source;
-		while (remaining.length > 0) {
-			let matched = false;
-			for (const [regex, type] of tokenSpec) {
-				const match = regex.exec(remaining);
-				if (match && match.index === 0) {
-					tokens.push({ text: match[0], type });
-					remaining = remaining.slice(match[0].length);
-					matched = true;
-					break;
-				}
-			}
-			if (!matched) {
-				tokens.push({ text: remaining[0], type: "plain" });
-				remaining = remaining.slice(1);
-			}
-		}
-		return tokens;
-	},
-
-	tokensToHTMLLines(tokens, language) {
-		const lines = [];
-		let currentLineTokens = [];
-		for (const token of tokens) {
-			const parts = token.text.split("\\n");
-			parts.forEach((part, index) => {
-				if (index > 0) {
-					lines.push(this.renderTokens(currentLineTokens, language));
-					currentLineTokens = [];
-				}
-				if (part.length > 0)
-					currentLineTokens.push({ text: part, type: token.type });
-			});
-		}
-		lines.push(this.renderTokens(currentLineTokens, language));
-		return lines;
-	},
-
-	renderTokens(tokens, language) {
-		return tokens
-			.map((token) => {
-				if (token.type === "WHITESPACE") {
-					return token.text
-						.replace(/\\t/g, "&nbsp;&nbsp;")
-						.replace(/ /g, "&nbsp;");
-				}
-				if (token.type === "plain")
-					return \`<editor-tag \${language} plain>\${this.escapeHTML(token.text)}</editor-tag>\`;
-				return \`<editor-tag \${language} \${token.type.toLowerCase()}>\${this.escapeHTML(token.text)}</editor-tag>\`;
-			})
-			.join("");
-	},
-
-	escapeHTML(str) {
-		return str
-			.replace(/&/g, "&amp;")
-			.replace(/</g, "&lt;")
-			.replace(/>/g, "&gt;");
-	},
-};
-
-$APP.settings.add("commands", {
-	"highlight:apply": Highlight.applyHighlighting.bind(Highlight),
-});
-`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/ide/plugins/format.js":{content:`import $APP from "/bootstrap.js";
-
-const Format = {
-	handleKeydown({ event, input, editor }) {
-		const { selectionStart: start, selectionEnd: end } = input;
-		const { key } = event;
-		if (Format.isCharacterKey(event)) {
-			if (Format.isOpeningBrace(key) || Format.isQuote(key)) {
-				event.preventDefault();
-				Format.handleAutoComplete({ key, start, end, input, editor });
-			} else if (start !== end) {
-				event.preventDefault();
-				Format.handleReplaceSelection({ key, start, end, input, editor });
-			}
-		} else if (key === "Backspace" || key === "Delete") {
-			Format.handleDelete({ key, start, end, input, editor, event });
-		}
-	},
-
-	handleAutoComplete({ key, start, end, input, editor }) {
-		const pair = Format.getPair(key);
-		const newText = \`\${key}\${pair}\`;
-		Format.updateContent({
-			input,
-			start,
-			end,
-			newText,
-			cursorPosition: start + 1,
-			editor,
-		});
-	},
-
-	handleReplaceSelection({ key, start, end, input, editor }) {
-		Format.updateContent({
-			input,
-			start,
-			end,
-			cursorPosition: start + 1,
-			newText: key,
-			editor,
-		});
-	},
-
-	handleDelete({ key, start, end, input, editor, event }) {
-		const charBefore = input.value[start - 1];
-		const charAfter = input.value[start];
-
-		if (Format.isMatchingPair(charBefore, charAfter)) {
-			event.preventDefault();
-			Format.updateContent({
-				input,
-				start: start - 1,
-				end: end + 1,
-				cursorPosition: start - 1,
-				newText: "",
-				editor,
-			});
-		} else if (Format.isIndentationDeletion({ key, start, input })) {
-			event.preventDefault();
-			Format.updateContent({
-				input,
-				start: start - 2,
-				cursorPosition: start - 2,
-				end,
-				newText: "",
-				editor,
-			});
-		}
-	},
-
-	updateContent({ input, start, end, cursorPosition, newText, editor }) {
-		const value = input.value;
-		const newValue = value.slice(0, start) + newText + value.slice(end);
-		if (newValue !== value) {
-			editor.updateContent(newValue);
-			if (cursorPosition) {
-				setTimeout(() => {
-					input.selectionStart = cursorPosition;
-					input.selectionEnd = cursorPosition;
-				}, 0);
-			}
-		}
-	},
-
-	trimTrailingLines(content) {
-		// Remove all trailing empty lines and leave only one maximum
-		return content.replace(/\\s+$/g, "\\n").replace(/\\n{2,}$/, "\\n");
-	},
-
-	// Utility functions
-	isOpeningBrace(key) {
-		return ["{", "(", "["].includes(key);
-	},
-
-	isQuote(key) {
-		return ['"', "'", "\`"].includes(key);
-	},
-
-	getPair(key) {
-		const pairs = {
-			"{": "}",
-			"(": ")",
-			"[": "]",
-			'"': '"',
-			"'": "'",
-			"\`": "\`",
-		};
-		return pairs[key];
-	},
-
-	isMatchingPair(charBefore, charAfter) {
-		const pair = Format.getPair(charBefore);
-		return pair === charAfter;
-	},
-
-	isIndentationDeletion({ key, start, input }) {
-		if (key !== "Backspace" || start < 2) return false;
-		const textBefore = input.value.slice(start - 2, start);
-		return textBefore === "  "; // Check if we're deleting an indent (two spaces)
-	},
-
-	isCharacterKey(event) {
-		if (event.ctrlKey || event.altKey || event.metaKey) {
-			return false;
-		}
-		// A key is a character key if event.key is a single character (excluding control keys)
-		// and event.code is not part of the non-character key codes.
-		const key = event.key;
-		const code = event.code;
-
-		if (key.length === 1) return true;
-
-		if (code === "Enter") return false;
-
-		return !(
-			code.startsWith("Arrow") ||
-			code.startsWith("Home") ||
-			code.startsWith("End") ||
-			code.startsWith("Page") ||
-			[
-				"Tab",
-				"Escape",
-				"Backspace",
-				"Delete",
-				"Control",
-				"Alt",
-				"Shift",
-				"ContextMenu",
-			].includes(key)
-		);
-	},
-};
-const editorCommands = {
-	"editor:auto-complete": ({ key, start, end, input, editor }) => {
-		const pair = Format.getPair(key);
-		const newText = \`\${key}\${pair}\`;
-		Format.updateContent({
-			input,
-			start,
-			end,
-			newText,
-			cursorPosition: start + 1,
-			editor,
-		});
-	},
-	"editor:replace-selection": (args) => {
-		Format.handleReplaceSelection(args);
-	},
-	"editor:delete-pair": (args) => {
-		Format.handleDelete(args);
-	},
-	"editor:trim-trailing-lines": (args) => {
-		Format.trimTrailingLines(args);
-	},
-};
-
-$APP.hooks.on("onEditorInit", ({ editor, input }) => {
-	input.addEventListener("keydown", (event) =>
-		Format.handleKeydown({ event, input, editor }),
-	);
-});
-
-$APP.hooks.on("onFileOpen", ({ editor, settings, file }) => {
-	let content;
-	if (!settings.useTabs) {
-		const tabSize = settings.tabSize || 2;
-		const spaceEquivalent = " ".repeat(tabSize);
-		content = file.content.replace(/\\t/g, spaceEquivalent);
-	}
-	content = Format.trimTrailingLines(content);
-	editor.updateContent(content);
-});
-
-$APP.settings.add("commands", editorCommands);
-`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/ide/plugins/explorer.js":{content:`import $APP from "/bootstrap.js";
-
-const explorerCommands = {
-	"file:new-file": async ({ IDE, explorer, directory = "/" }) => {
-		setTimeout(async () => {
-			const name = prompt("What's the file name?");
-			if (name) {
-				const file = await IDE.filesystem.createFile({
-					name,
-					directory,
-					content: "",
-				});
-				if (file) {
-					explorer.selectItem(file);
-				}
-			}
-		}, 16);
-	},
-	"file:new-folder": async ({ IDE, directory = "/" }) => {
-		setTimeout(async () => {
-			const name = prompt("What's the folder name?");
-			if (name) {
-				await IDE.filesystem.createFolder({ name, directory });
-			}
-		}, 16);
-	},
-	"file:new-window": () => {
-		console.log("New Window command executed");
-		const currentUrl = window.location.href;
-		window.open(currentUrl, "_blank");
-	},
-	"file:open-file": async ({ IDE }) => {
-		const fileData = await IDE.filesystem.openFile();
-		if (fileData) {
-			IDE.openFile(fileData);
-		}
-	},
-	"file:open-folder": async ({ IDE }) => {
-		await IDE.filesystem.openFolder();
-	},
-	"file:save": async ({ IDE }) => {
-		const file = IDE.getActiveFile();
-		console.log({ file });
-		if (file) await IDE.saveFile(file);
-	},
-	"file:save-as": async ({ IDE, name, directory, path }) => {
-		const file = IDE.getActiveFile();
-		await IDE.saveFile({
-			name,
-			directory,
-			path,
-			content: file.content,
-		});
-	},
-	"file:delete-file": async ({ IDE, explorer }) => {
-		const selectedItems = explorer.selectedFiles;
-		for (const item of selectedItems) {
-			if (!item.isDirectory) {
-				await IDE.deleteFile(item);
-			}
-		}
-	},
-	"file:delete-folder": async ({ IDE }) => {
-		const selectedItems = await IDE.filesystem.getSelectedItems();
-		for (const item of selectedItems) {
-			if (item.isDirectory) {
-				await IDE.deleteFolder(item.path);
-			}
-		}
-	},
-	"file:rename": async ({ IDE }) => {
-		const selectedItems = await IDE.filesystem.getSelectedItems();
-		for (const item of selectedItems) {
-			const newName = prompt(\`Rename \${item.name} to:\`, item.name);
-			if (newName && newName !== item.name) {
-				const newPath = item.path.replace(item.name, newName);
-				await IDE.filesystem.editName(item.path, newPath);
-			}
-		}
-	},
-	"file:move": async ({ IDE }) => {
-		const selectedItems = await IDE.filesystem.getSelectedItems();
-		const newDir = prompt("Enter new directory path:");
-		if (newDir) {
-			for (const item of selectedItems) {
-				const newPath = \`\${newDir}/\${item.name}\`;
-				await IDE.filesystem.moveFileOrFolder(item.path, newPath);
-			}
-		}
-	},
-	"file:close-editor": ({ editor }) => {
-		console.log("Close Editor command executed");
-		if (editor) {
-			editor.clearContent();
-			editor.currentFileHandle = null;
-			editor.file = null;
-		}
-	},
-	"file:close-folder": ({ IDE }) => {
-		console.log("Close Folder command executed");
-		$APP.settings["editor:filesystem"] = false;
-		IDE.setFiles([]);
-	},
-	"file:close-window": () => {
-		console.log("Close Window command executed");
-		if (confirm("Are you sure you want to close this window?")) {
-			window.close();
-		}
-	},
-	"file:exit": () => {
-		console.log("Exit command executed");
-		if (confirm("Are you sure you want to exit the IDE?")) {
-			window.close();
-		}
-	},
-};
-
-const fileMenu = {
-	"file:new-file": "New File...",
-	"file:new-folder": "New Folder...",
-	"file:new-window": "New Window",
-	"file:open-file": "Open File...",
-	"file:open-folder": "Open Folder...",
-	"file:save": "Save",
-	"file:save-as": "Save As...",
-	"file:delete-file": "Delete File",
-	"file:delete-folder": "Delete Folder",
-	"file:rename": "Rename",
-	"file:move": "Move",
-	"file:close-editor": "Close Editor",
-	"file:close-folder": "Close Folder",
-	"file:close-window": "Close Window",
-	"file:exit": "Exit",
-};
-
-$APP.settings.add("commands", explorerCommands);
-$APP.settings.add("menu", fileMenu);
-`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/ide/plugins/edit.js":{content:`import $APP from "/bootstrap.js";
-
-const editorCommands = {
-	"selection:select-all"({ input }) {
-		input.setSelectionRange(0, input.value.length);
-	},
-
-	"selection:expand-selection"({ input }) {
-		const { selectionStart, selectionEnd, value } = input;
-		let newStart = selectionStart;
-		let newEnd = selectionEnd;
-		if (newStart > 0) newStart--;
-		if (newEnd < value.length) newEnd++;
-		input.setSelectionRange(newStart, newEnd);
-	},
-
-	"selection:shrink-selection"({ input }) {
-		const { selectionStart, selectionEnd } = input;
-		let newStart = selectionStart;
-		let newEnd = selectionEnd;
-		if (newStart < newEnd) newStart++;
-		if (newEnd > newStart) newEnd--;
-		input.setSelectionRange(newStart, newEnd);
-	},
-
-	"selection:copy-line-up"({ input, editor }) {
-		const { selectionStart, selectionEnd, value } = input;
-		const lineStart = value.lastIndexOf("\\n", selectionStart - 1) + 1;
-		const lineEnd =
-			value.indexOf("\\n", selectionEnd) === -1
-				? value.length
-				: value.indexOf("\\n", selectionEnd);
-		const lineContent = value.slice(lineStart, lineEnd);
-		const newValue = \`\${value.slice(0, lineStart)}\${lineContent}\\n\${value.slice(lineStart)}\`;
-		editor.updateContent(newValue);
-		input.setSelectionRange(
-			selectionStart + lineContent.length + 1,
-			selectionEnd + lineContent.length + 1,
-		);
-	},
-
-	"selection:copy-line-down"({ input, editor }) {
-		const { selectionStart, selectionEnd, value } = input;
-		const lineStart = value.lastIndexOf("\\n", selectionStart - 1) + 1;
-		const lineEnd =
-			value.indexOf("\\n", selectionEnd) === -1
-				? value.length
-				: value.indexOf("\\n", selectionEnd);
-		const lineContent = value.slice(lineStart, lineEnd);
-		const newValue = \`\${value.slice(0, lineEnd)}\\n\${lineContent}\${value.slice(lineEnd)}\`;
-		editor.updateContent(newValue);
-		input.setSelectionRange(
-			selectionStart + lineContent.length + 1,
-			selectionEnd + lineContent.length + 1,
-		);
-	},
-
-	"selection:move-line-up"({ input, editor }) {
-		const { selectionStart, selectionEnd, value } = input;
-		const lineStart = value.lastIndexOf("\\n", selectionStart - 1) + 1;
-		const lineEnd =
-			value.indexOf("\\n", selectionEnd) === -1
-				? value.length
-				: value.indexOf("\\n", selectionEnd);
-		const prevLineEnd = lineStart - 1;
-		const prevLineStart = value.lastIndexOf("\\n", prevLineEnd - 1) + 1;
-		if (prevLineStart >= 0 && prevLineEnd >= 0) {
-			const lineContent = value.slice(lineStart, lineEnd);
-			const prevLineContent = value.slice(prevLineStart, prevLineEnd);
-			const newValue = \`\${value.slice(0, prevLineStart)}\${lineContent}\\n\${prevLineContent}\${value.slice(lineEnd)}\`;
-			editor.updateContent(newValue);
-			const offset = lineContent.length + 1;
-			input.setSelectionRange(selectionStart - offset, selectionEnd - offset);
-		}
-	},
-
-	"selection:move-line-down"({ input, editor }) {
-		const { selectionStart, selectionEnd, value } = input;
-		const lineStart = value.lastIndexOf("\\n", selectionStart - 1) + 1;
-		const lineEnd =
-			value.indexOf("\\n", selectionEnd) === -1
-				? value.length
-				: value.indexOf("\\n", selectionEnd);
-		const nextLineStart = lineEnd + 1;
-		const nextLineEnd =
-			value.indexOf("\\n", nextLineStart) === -1
-				? value.length
-				: value.indexOf("\\n", nextLineStart);
-		if (nextLineStart < value.length) {
-			const lineContent = value.slice(lineStart, lineEnd);
-			const nextLineContent = value.slice(nextLineStart, nextLineEnd);
-			const newValue = \`\${value.slice(0, lineStart)}\${nextLineContent}\\n\${lineContent}\${value.slice(nextLineEnd)}\`;
-			editor.updateContent(newValue);
-			const offset = nextLineContent.length + 1;
-			input.setSelectionRange(selectionStart + offset, selectionEnd + offset);
-		}
-	},
-
-	"selection:duplicate-selection"({ input, editor }) {
-		const { selectionStart, selectionEnd, value } = input;
-		const selectedText = value.slice(selectionStart, selectionEnd);
-		const newValue =
-			value.slice(0, selectionEnd) + selectedText + value.slice(selectionEnd);
-		editor.updateContent(newValue);
-		input.setSelectionRange(selectionStart, selectionEnd + selectedText.length);
-	},
-
-	"edit:undo"() {
-		document.execCommand("undo");
-	},
-
-	"edit:redo"() {
-		document.execCommand("redo");
-	},
-
-	"edit:cut"() {
-		document.execCommand("cut");
-	},
-
-	"edit:copy"() {
-		document.execCommand("copy");
-	},
-
-	"edit:paste"() {
-		document.execCommand("paste");
-	},
-
-	"edit:find"() {
-		// Implement find functionality using editor's built-in or custom method
-	},
-
-	"edit:replace"() {
-		// Implement replace functionality using editor's built-in or custom method
-	},
-
-	"edit:find-in-files"() {
-		// Implement find-in-files functionality
-	},
-
-	"edit:replace-in-files"() {
-		// Implement replace-in-files functionality
-	},
-
-	"edit:toggle-line-comment"({ input, editor }) {
-		const { value } = input;
-		const start = input.selectionStart;
-		const end = input.selectionEnd;
-		const selectedText = value.slice(start, end);
-		const lines = selectedText.split("\\n");
-		const allCommented = lines.every((line) => line.trim().startsWith("//"));
-		const newText = lines
-			.map((line) => {
-				if (allCommented) {
-					return line.replace(/^(\\s*)\\/\\/\\s?/, "$1");
-				}
-				return \`// \${line}\`;
-			})
-			.join("\\n");
-		editor.updateContent(value.slice(0, start) + newText + value.slice(end));
-		input.setSelectionRange(start, start + newText.length);
-	},
-
-	"edit:toggle-block-comment"({ input, editor }) {
-		const { value } = input;
-		const start = input.selectionStart;
-		const end = input.selectionEnd;
-		const selectedText = value.slice(start, end);
-		if (selectedText.startsWith("/*") && selectedText.endsWith("*/")) {
-			const newText = selectedText.slice(2, -2).trim();
-			editor.updateContent(value.slice(0, start) + newText + value.slice(end));
-			input.setSelectionRange(start, start + newText.length);
-		} else {
-			const newText = \`/* \${selectedText} */\`;
-			editor.updateContent(value.slice(0, start) + newText + value.slice(end));
-			input.setSelectionRange(start, start + newText.length);
-		}
-	},
-};
-
-const keyBindings = {
-	"ctrl+z": "edit:undo",
-	"ctrl+y": "edit:redo",
-	"ctrl+x": "edit:cut",
-	"ctrl+c": "edit:copy",
-	//"ctrl+v": "edit:paste",
-	//"ctrl+f": "edit:find",
-	"ctrl+h": "edit:replace",
-	"ctrl+shift+f": "edit:find-in-files",
-	"ctrl+shift+h": "edit:replace-in-files",
-	"ctrl+/": "edit:toggle-line-comment",
-	"ctrl+shift+/": "edit:toggle-block-comment",
-};
-
-const editorMenu = {
-	"edit:undo": "Undo",
-	"edit:redo": "Redo",
-	"edit:cut": "Cut",
-	"edit:copy": "Copy",
-	"edit:paste": "Paste",
-	"edit:find": "Find",
-	"edit:replace": "Replace",
-	"edit:find-in-files": "Find in Files",
-	"edit:replace-in-files": "Replace in Files",
-	"edit:toggle-line-comment": "Toggle Line Comment",
-	"edit:toggle-block-comment": "Toggle Block Comment",
-	"selection:select-all": "Select All",
-	"selection:expand-selection": "Expand Selection",
-	"selection:shrink-selection": "Shrink Selection",
-	"selection:copy-line-up": "Copy Line Up",
-	"selection:copy-line-down": "Copy Line Down",
-	"selection:move-line-up": "Move Line Up",
-	"selection:move-line-down": "Move Line Down",
-	"selection:duplicate-selection": "Duplicate Selection",
-};
-
-$APP.hooks.on("onEditorInit", ({ input, editor }) => {
-	input.addEventListener("input", (event) => {
-		const updatedCode = event.target.value || event.target.textContent;
-		editor.content = updatedCode;
-	});
-});
-
-$APP.settings.add("globalKeybindings", keyBindings);
-$APP.settings.add("commands", editorCommands);
-$APP.settings.add("menu", editorMenu);
-`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/ide/plugins/markdown.js":{content:`// Implement https://overtype.dev/
-import $APP from "/bootstrap.js";
-import html from "/modules/mvc/view/html/index.js";
-import T from "/modules/types/index.js";
-
-function escapeHtml(text) {
-	const map = {
-		"&": "&amp;",
-		"<": "&lt;",
-		">": "&gt;",
-		'"': "&quot;",
-		"'": "&#39;",
-	};
-	return text.replace(/[&<>"']/g, (m) => map[m]);
-}
-
-const blockParsers = [
-	{
-		name: "code",
-		regex: /^\`\`\`\\n?([\\s\\S]*?)\\n\`\`\`$/gm,
-		replace: (match, code) =>
-			\`\\n%%CODEBLOCK%%\\n\${escapeHtml(code)}\\n%%CODEBLOCK%%\\n\`,
-	},
-	{
-		name: "headings",
-		regex: /^(#{1,6})\\s+(.+)$/gm,
-		replace: (match, hashes, text) =>
-			\`<h\${hashes.length}>\${text}</h\${hashes.length}>\`,
-	},
-];
-
-const inlineParsers = [
-	{
-		name: "image",
-		regex: /!\\[([^\\]]+)\\]\\(([^)]+)\\)/g,
-		replace: (match, alt, src) => \`<img src="\${src}" alt="\${alt}" />\`,
-	},
-	{
-		name: "bold",
-		regex: /\\*\\*(.+?)\\*\\*/g,
-		replace: (match, content) => \`<strong>\${content}</strong>\`,
-	},
-	{
-		name: "italic",
-		regex: /\\*(.+?)\\*/g,
-		replace: (match, content) => \`<em>\${content}</em>\`,
-	},
-	{
-		name: "link",
-		regex: /\\[([^\\]]+)\\]\\(([^)]+)\\)/g,
-		replace: (match, text, url) => \`<a href="\${url}">\${text}</a>\`,
-	},
-];
-
-function parseFrontMatter(markdown) {
-	const fmRegex = /^---\\s*\\n([\\s\\S]*?)\\n---\\s*\\n?/;
-	const match = markdown.match(fmRegex);
-	if (!match) return { frontMatter: {}, markdown };
-	const frontMatter = match[1].split("\\n").reduce((acc, line) => {
-		const [key, ...rest] = line.split(":");
-		if (rest.length === 0) return acc;
-		return { ...acc, [key.trim()]: rest.join(":").trim() };
-	}, {});
-	return { frontMatter, markdown: markdown.replace(fmRegex, "") };
-}
-
-function parseMarkdown(markdown) {
-	const { frontMatter, markdown: md } = parseFrontMatter(markdown);
-	return { frontMatter, markdown: parseMarkdownContent(md) };
-}
-
-const markdownLanguage = {
-	name: "Markdown",
-	regex: [
-		[/^\\[ \\]/, "TASK_PENDING"],
-		[/^---$/, "FRONT_MATTER_TAG"],
-		[/^---\\s*\\n([\\s\\S]*?)\\n---\\s*\\n/, "FRONT_MATTER_BLOCK"],
-		[/^\\s*([\\w-]+):\\s*(.*)/, "FRONT_MATTER_PROP"],
-		[/^\\[x\\]/i, "TASK_DONE"],
-		[/^\\[-\\]/, "TASK_WONT_FIX"],
-		[/^(#{1,6})\\s+(.+)$/, "HEADER"],
-		[/^>\\s+(.+)$/, "BLOCKQUOTE"],
-		[/^(\\s*[-+*]|\\d+\\.)\\s+/, "LIST"],
-		[/\\*\\*([^*]+)\\*\\*/, "BOLD"],
-		[/\\*([^*]+)\\*/, "ITALIC"],
-		[/__([^_]+)__/, "BOLD"],
-		[/_([^_]+)_/, "ITALIC"],
-		[/~~([^~]+)~~/, "STRIKETHROUGH"],
-		[/\`([^\`]+)\`/, "INLINE_CODE"],
-		[/^\`\`\`([\\s\\S]+?)\`\`\`/, "CODE_BLOCK"],
-		[/^\\s{4}(.+)/, "CODE_BLOCK"],
-		[/\\[(.+?)\\]\\((https?:\\/\\/[^\\s]+)\\)/, "LINK"],
-		[/!\\[(.+?)\\]\\((https?:\\/\\/[^\\s]+)\\)/, "IMAGE"],
-		[/<[^>]+>/, "HTML_TAG"],
-		[/\\\\([\`*_{}[\\]()#+\\-.!>])/, "ESCAPE"],
-	],
-};
-
-const MarkdownViewer = {
-	properties: {
-		content: T.string(),
-		frontMatter: T.object({ defaultValue: {} }),
-	},
-	render() {
-		const { frontMatter, markdown } = parseMarkdown(this.content);
-		this.frontMatter = frontMatter;
-		return html\`\${
-			frontMatter
-				? html\`
-          <div class="front-matter">
-            <h3>Metadata</h3>
-            <table>
-              \${Object.entries(frontMatter).map(
-								([key, value]) => html\`
-                  <tr>
-                    <th>\${key}</th>
-                    <td>\${value}</td>
-                  </tr>
-                \`,
-							)}
-            </table>
-          </div>
-          <uix-divider padding="0-md"></uix-divider>
-        \`
-				: null
-		}
-      \${html.unsafeHTML(markdown)}\`;
-	},
-};
-
-const processCodeBlocks = (content) => {
-	const codeMatches = Array.from(content.matchAll(/^\`\`\`\\n?([\\s\\S]*?)\\n\`\`\`$/gm));
-	const codeBlocks = codeMatches.map((m) => escapeHtml(m[1]));
-	const replaced = codeMatches.reduce(
-		(acc, m, i) => acc.replace(m[0], \`\\n%%CODEBLOCK_\${i}%%\\n\`),
-		content,
-	);
-	return { content: replaced, codeBlocks };
-};
-
-const applyParsers = (content, parsers) =>
-	parsers.reduce(
-		(acc, { regex, replace }) =>
-			acc.replace(regex, (...args) => replace(...args)),
-		content,
-	);
-
-function parseMarkdownContent(markdown) {
-	const { content: withPlaceholders, codeBlocks } = processCodeBlocks(markdown);
-	const afterBlockParsers = applyParsers(withPlaceholders, blockParsers);
-	const afterLists = parseNestedLists(afterBlockParsers);
-	const afterInlineParsers = applyParsers(afterLists, inlineParsers);
-	const afterRestoreCodeBlocks = afterInlineParsers.replace(
-		/%%CODEBLOCK_(\\d+)%%/g,
-		(match, index) => \`<pre><code>\${codeBlocks[index]}</code></pre>\`,
-	);
-	const paragraphs = afterRestoreCodeBlocks
-		.split("\\n")
-		.map((line) =>
-			line.trim() && !line.startsWith("<") ? \`<p>\${line}</p>\` : line,
-		)
-		.join("\\n");
-	return paragraphs.replace(/\\n{2,}/g, (match) =>
-		"<br/>".repeat(match.length - 1),
-	);
-}
-
-function parseNestedLists(markdown) {
-	const { lines, currentList } = markdown.split("\\n").reduce(
-		(acc, line) => {
-			if (/^\\s*([*\\-+]|\\d+\\.)\\s+/.test(line))
-				return { ...acc, currentList: [...acc.currentList, line] };
-			return {
-				lines: acc.currentList.length
-					? [...acc.lines, parseListBlock(acc.currentList), line]
-					: [...acc.lines, line],
-				currentList: [],
-			};
-		},
-		{ lines: [], currentList: [] },
-	);
-	return currentList.length
-		? [...lines, parseListBlock(currentList)].join("\\n")
-		: lines.join("\\n");
-}
-
-function parseListBlock(lines) {
-	const { html, stack } = lines.reduce(
-		(acc, line) => {
-			const match = line.match(/^(\\s*)([*\\-+]|\\d+\\.)\\s+(.*)/);
-			if (!match) return acc;
-			const indent = match[1].length;
-			const marker = match[2];
-			const content = match[3];
-			const listType = /^\\d+\\.$/.test(marker) ? "ol" : "ul";
-			let { html, stack } = acc;
-			while (stack.length && indent < stack[stack.length - 1].indent) {
-				const { type } = stack.pop();
-				html += \`</li></\${type}>\`;
-			}
-			if (stack.length && indent === stack[stack.length - 1].indent) {
-				if (stack[stack.length - 1].type !== listType) {
-					stack.pop();
-					html += \`</li></\${listType === "ol" ? "ul" : "ol"}>\`;
-					html += \`<\${listType}>\`;
-					stack.push({ indent, type: listType });
-				} else {
-					html += "</li>";
-				}
-			} else if (!stack.length || indent > stack[stack.length - 1].indent) {
-				html += \`<\${listType}>\`;
-				stack.push({ indent, type: listType });
-			}
-			html += \`<li>\${content}\`;
-			return { html, stack };
-		},
-		{ html: "", stack: [] },
-	);
-	const closingTags = stack.reduce(
-		(acc, { type }) => \`\${acc}</li></\${type}>\`,
-		"",
-	);
-	return html + closingTags;
-}
-
-function generateMarkdownTree(markdown) {
-	return markdown.split("\\n").reduce(
-		(acc, line) => {
-			const match = line.match(/^(#{1,6})\\s+(.+)$/);
-			if (match) {
-				const level = match[1].length;
-				const title = match[2];
-				const node = { level, title, children: [] };
-				while (
-					acc.stack.length &&
-					acc.stack[acc.stack.length - 1].level >= level
-				) {
-					acc.stack.pop();
-				}
-				if (!acc.stack.length) {
-					acc.tree.push(node);
-				} else {
-					acc.stack[acc.stack.length - 1].children.push(node);
-				}
-				acc.stack.push(node);
-			}
-			return acc;
-		},
-		{ tree: [], stack: [] },
-	).tree;
-}
-
-$APP.settings.add("highlights", { markdown: markdownLanguage });
-$APP.define({ "markdown-viewer": MarkdownViewer });
-`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/ide/plugins/keybindings.js":{content:`import $APP from "/bootstrap.js";
-
-const Keybindings = {
-	name: "Keybindings",
-	deleteChar({ editor, input }) {
-		const start = input.selectionStart;
-		const end = input.selectionEnd;
-
-		if (start === end) {
-			// No text is selected, delete the character in front of the cursor
-			const value = editor.getValue();
-			if (start < value.length) {
-				const newValue = value.slice(0, start) + value.slice(start + 1);
-				editor.updateContent(newValue);
-				editor.setCursorPosition(start);
-			}
-		} else {
-			// Text is selected, delete the selection
-			const value = editor.getValue();
-			const newValue = value.slice(0, start) + value.slice(end);
-			editor.updateContent(newValue);
-			editor.setCursorPosition(start);
-		}
-	},
-
-	tabIndent({ editor, input, settings }) {
-		const result = Keybindings.indentOrOutdentSelection(
-			{ input, settings },
-			false,
-		);
-		Keybindings.applyIndentationChange({ editor, input }, result);
-	},
-
-	outdentSelection({ editor, input, settings }) {
-		const result = Keybindings.indentOrOutdentSelection(
-			{ input, settings },
-			true,
-		);
-		Keybindings.applyIndentationChange({ editor, input }, result);
-	},
-
-	applyIndentationChange(
-		{ editor },
-		{ newContent, replaceStart, replaceEnd, newSelStart, newSelEnd },
-	) {
-		const currentValue = editor.getValue();
-		const updatedContent =
-			currentValue.slice(0, replaceStart) +
-			newContent +
-			currentValue.slice(replaceEnd);
-		editor.updateContent(updatedContent);
-		setTimeout(() => {
-			editor.setCursorPosition(newSelStart, newSelEnd);
-		}, 50);
-	},
-
-	indentOrOutdentSelection({ input, settings }, outdent = false) {
-		const value = input.value;
-		const selStart = input.selectionStart;
-		const selEnd = input.selectionEnd;
-		const tabCharacter = settings.useTabs ? "\\t" : " ".repeat(settings.tabSize);
-		// Find the start and end of the lines containing the selection
-		const lineStart = value.lastIndexOf("\\n", selStart - 1) + 1;
-		const lineEnd =
-			value.indexOf("\\n", selEnd) === -1
-				? value.length
-				: value.indexOf("\\n", selEnd);
-
-		// Extract the affected lines
-		const selectedLines = value.slice(lineStart, lineEnd).split("\\n");
-
-		// Process each line
-		const processedLines = selectedLines.map((line) => {
-			if (outdent) {
-				if (line.startsWith(tabCharacter)) {
-					return line.slice(tabCharacter.length);
-				}
-				if (line.startsWith("\\t")) {
-					return line.slice(1);
-				}
-				return line;
-			}
-			return tabCharacter + line;
-		});
-
-		// Join the processed lines
-		const newContent = processedLines.join("\\n");
-
-		// Calculate the new selection start and end
-		const startDiff = processedLines[0].length - selectedLines[0].length;
-		const newSelStart = selStart + (selStart > lineStart ? startDiff : 0);
-		const newSelEnd = selEnd + newContent.length - (lineEnd - lineStart);
-
-		// Return the necessary information for the editor to update
-		return {
-			newContent,
-			replaceStart: lineStart,
-			replaceEnd: lineEnd,
-			newSelStart: selStart === selEnd ? newSelEnd : newSelStart,
-			newSelEnd,
-		};
-	},
-
-	moveWordLeft({ editor, input, event }) {
-		event.preventDefault(); // Prevent default behavior
-		const value = editor.getValue();
-		let pos = input.selectionStart;
-
-		while (pos > 0 && /\\s/.test(value[pos - 1])) pos--;
-		while (pos > 0 && /\\S/.test(value[pos - 1])) pos--;
-
-		editor.setCursorPosition(pos);
-	},
-
-	moveWordRight({ editor, input, event }) {
-		event.preventDefault(); // Prevent default behavior
-		const value = editor.getValue();
-		let pos = input.selectionEnd;
-
-		while (pos < value.length && /\\s/.test(value[pos])) pos++;
-		while (pos < value.length && /\\S/.test(value[pos])) pos++;
-
-		editor.setCursorPosition(pos);
-	},
-
-	moveToLineStart({ editor, input, event }) {
-		event.preventDefault(); // Prevent default behavior
-		const value = editor.getValue();
-		const start = input.selectionStart;
-		let lineStart = start;
-		while (lineStart > 0 && value[lineStart - 1] !== "\\n") lineStart--;
-		editor.setCursorPosition(lineStart);
-	},
-
-	moveToLineEnd({ editor, input, event }) {
-		event.preventDefault(); // Prevent default behavior
-		const value = editor.getValue();
-		const end = input.selectionEnd;
-		let lineEnd = end;
-		while (lineEnd < value.length && value[lineEnd] !== "\\n") lineEnd++;
-		editor.setCursorPosition(lineEnd);
-	},
-
-	moveToTextStart({ editor, event }) {
-		event.preventDefault(); // Prevent default behavior
-		editor.setCursorPosition(0);
-	},
-
-	moveToTextEnd({ editor, event }) {
-		event.preventDefault(); // Prevent default behavior
-		editor.setCursorPosition(editor.getValue().length);
-	},
-
-	handleEnter({ editor, input }) {
-		const start = input.selectionStart;
-		const end = input.selectionEnd;
-		const value = editor.getValue();
-		let lineStart = start;
-		while (lineStart > 0 && value[lineStart - 1] !== "\\n") lineStart--;
-		let indent = "";
-		while (value[lineStart] === " " || value[lineStart] === "\\t") {
-			indent += value[lineStart++];
-		}
-		if (start === end) {
-			const newText = \`\\n\${indent}\`;
-			editor.insertTextAtRange(newText, start, end);
-		} else editor.insertTextAtRange(\`\\n\${indent}\`, start, end);
-	},
-
-	handleEscape({ editor, input }) {
-		input.blur();
-		editor.focus();
-	},
-
-	openFile({ event }) {
-		event.preventDefault();
-		console.log("Opening file dialog...");
-		// Implement the logic to open a file dialog
-	},
-
-	newWindow({ event }) {
-		event.preventDefault();
-		console.log("Opening a new window...");
-		// Implement the logic to open a new editor window
-	},
-
-	openCommandPalette({ event, IDE }) {
-		event.preventDefault();
-		console.log("Opening command palette...");
-		// Implement the logic to open the command palette
-		// The command palette could list all registered commands and allow the user to execute them
-	},
-
-	openSettings({ event }) {
-		event.preventDefault();
-		console.log("Opening settings...");
-		// Implement the logic to open the settings page or panel
-	},
-
-	addExtension({ event }) {
-		event.preventDefault();
-		console.log("Opening extension manager...");
-		// Implement the logic to add modules (plugins)
-	},
-
-	toggleSidebar({ event }) {
-		event.preventDefault();
-		console.log("Toggling sidebar visibility...");
-		// Implement the logic to toggle the sidebar visibility
-	},
-};
-
-const editorKeyBindings = {
-	"ctrl+d": "editor:delete-char",
-	tab: "editor:tab-indent",
-	"shift+tab": "editor:outdent-selection",
-	"ctrl+w": "editor:quit",
-	enter: "editor:insert-newline",
-	escape: "editor:escape",
-	"alt+arrowleft": "editor:move-word-left",
-	"alt+arrowright": "editor:move-word-right",
-	"alt+arrowup": "editor:move-line-start",
-	"alt+arrowdown": "editor:move-line-end",
-	"ctrl+arrowup": "editor:move-text-start",
-	"ctrl+arrowdown": "editor:move-text-end",
-};
-
-const GlobalKeyBindings = {
-	"ctrl+p": "global:open-file",
-	"ctrl+n": "global:new-window",
-	"ctrl+shift+p": "global:open-command-palette",
-	",+ctrl": "global:open-settings",
-	"ctrl+shift+x": "global:add-extension",
-	"ctrl+b": "global:toggle-sidebar",
-	"ctrl+s": "file:save",
-};
-
-const commands = {
-	"editor:delete-char": Keybindings.deleteChar,
-	"editor:tab-indent": Keybindings.tabIndent,
-	"editor:outdent-selection": Keybindings.outdentSelection,
-	"editor:insert-newline": Keybindings.handleEnter,
-	"editor:move-word-left": Keybindings.moveWordLeft,
-	"editor:move-word-right": Keybindings.moveWordRight,
-	"editor:move-line-start": Keybindings.moveToLineStart,
-	"editor:move-line-end": Keybindings.moveToLineEnd,
-	"editor:move-text-start": Keybindings.moveToTextStart,
-	"editor:move-text-end": Keybindings.moveToTextEnd,
-	"editor:escape": Keybindings.handleEscape,
-	"global:open-file": Keybindings.openFile,
-	"global:new-window": Keybindings.newWindow,
-	"global:open-command-palette": Keybindings.openCommandPalette,
-	"global:open-settings": Keybindings.openSettings,
-	"global:add-extension": Keybindings.addExtension,
-	"global:toggle-sidebar": Keybindings.toggleSidebar,
-};
-
-$APP.settings.add("commands", commands);
-$APP.settings.add("globalKeybindings", GlobalKeyBindings);
-$APP.settings.add("editorKeybindings", editorKeyBindings);
-$APP.hooks.on(
-	"onEditorInit",
-
-	({ editor, explorer, panel, input, IDE, settings }) => {
-		IDE.attachKeybindings(input, {
-			input,
-			editor,
-			panel,
-			explorer,
-			IDE,
-			settings,
-		});
-	},
-);
-`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/ide/highlights/css.js":{content:`import $APP from "/bootstrap.js";
-
-const css = {
-	name: "css",
-	regex: [
-		[/^\\s+/, "WHITESPACE"],
-		[/^\\/\\*[\\s\\S]*?\\*\\//, "COMMENT"],
-		[/^#[a-fA-F0-9]{3,6}/, "COLOR_HEX"],
-		[/^\\.[a-zA-Z_][\\w-]*/, "CLASS_NAME"],
-		[/^\\b[a-zA-Z-]+\\b(?=\\s*:\\s*)/, "PROPERTY_NAME"],
-		[/^:[a-zA-Z_][\\w-]*/, "PSEUDO_CLASS"],
-		[/^[{}()[\\];,:]/, "PUNCTUATOR"],
-	],
-};
-
-$APP.settings.add("highlights", { css });
-`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/ide/highlights/javascript.js":{content:`import $APP from "/bootstrap.js";
-
-const javascript = {
-	name: "highlight-javascript",
-	regex: [
-		[/^\\t+/, "WHITESPACE"],
-		[/^\\s+/, "WHITESPACE"],
-		[/^\\/\\/.*$/, "COMMENT"],
-		[/^\\/\\*[\\s\\S]*?\\*\\//, "COMMENT"],
-		[/^"([^"\\\\]|\\\\.)*"/, "STRING"],
-		[/^'([^'\\\\]|\\\\.)*'/, "STRING"],
-		[/^\\b(import|export|from)\\b/, "importExport"],
-		[
-			/^\\b(abstract|arguments|await|boolean|break|byte|case|catch|char|class|const|continue|debugger|default|delete|do|double|else|enum|export|extends|false|final|finally|float|for|function|goto|if|implements|import|in|instanceof|int|interface|let|long|native|new|null|package|private|protected|public|return|short|static|super|switch|synchronized|this|throw|throws|transient|true|try|typeof|var|void|volatile|while|with|yield|from|as|of)\\b/,
-			"KEYWORD",
-		],
-		[/^\\b([A-Z][a-zA-Z0-9_$]*)\\b/, "type"],
-		[/^\\b([a-zA-Z_$][a-zA-Z0-9_$]*)\\b(?=\\()/, "FUNCTION"],
-		[/^\\b([a-zA-Z_$][a-zA-Z0-9_$]*)\\b(?=\\.)/, "OBJECT"],
-		[/^\\.(\\w+)/, "PROPERTY"],
-		[/^\\b([a-zA-Z_$][a-zA-Z0-9_$]*)\\b/, "IDENTIFIER"],
-		[/^[0-9]+/, "NUMBER"],
-		[/^[{}()[\\];,:]/, "PUNCTUATOR"],
-		[/^[=!+-/*<>]+/, "OPERATOR"],
-	],
-};
-
-$APP.settings.add("highlights", { javascript });
-`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/ide/highlights/html.js":{content:`import $APP from "/bootstrap.js";
-
-const html = {
-	name: "html",
-	regex: [
-		[/^\\s+/, "WHITESPACE"],
-		[/^<!--[\\s\\S]*?-->/, "COMMENT"],
-		[/^<!DOCTYPE[^>]+>/i, "DOCTYPE"],
-		[/^<[/]?[a-z][a-z0-9]*[^>]*>/i, "TAG"],
-		[/^"([^"\\\\]|\\\\.)*"/, "ATTRIBUTE_VALUE"],
-		[/^\\b[a-zA-Z-:]+\\b(?=\\s*=)/, "ATTRIBUTE_NAME"],
-		[/^&[a-zA-Z0-9#]+;/, "ENTITY"],
-		[/^[{}()[\\];,:]/, "PUNCTUATOR"],
-	],
-};
-
-$APP.settings.add("highlights", { html });
-`,mimeType:"application/javascript",skipSW:!1},"/modules/sw/adapter.js":{content:`export default ({ $APP }) => {
-	class SWAdapter {
-		async namespaceExists({ namespace }) {
-			try {
-				const files = await this.listDirectory({ namespace });
-				return files.length > 0;
-			} catch (error) {
-				console.error("Error checking namespace existence:", error);
-				return false;
-			}
-		}
-
-		async createFiles({ namespace, files, system }) {
-			return $APP.SW.request("FS:WRITE_FILES", { namespace, files, system });
-		}
-
-		async createFile({ namespace, path, content = "" }) {
-			return this.writeFile({ namespace, path, content });
-		}
-
-		async saveFile({ namespace, path, content, system }) {
-			return this.writeFile({ namespace, path, content, system });
-		}
-
-		async writeFile({ namespace, path, system, content = "" }) {
-			console.trace();
-			return $APP.SW.request("FS:WRITE_FILE", {
-				namespace,
-				path,
-				content,
-				system,
-			});
-		}
-
-		async readFile({ namespace, path, system }) {
-			const { content } = await $APP.SW.request("FS:READ_FILE", {
-				namespace,
-				path,
-				system,
-			});
-			return content;
-		}
-
-		async deleteFile({ namespace, path }) {
-			return $APP.SW.request("FS:DELETE_FILE", { namespace, path });
-		}
-
-		async createFolder({ namespace, path }) {
-			const dirPath = path.endsWith("/") ? path : \`\${path}/\`;
-			const placeholderPath = \`\${dirPath}.dir-placeholder\`;
-			return this.writeFile({ namespace, path: placeholderPath, content: "" });
-		}
-
-		async deleteDirectory({ namespace, path }) {
-			return $APP.SW.request("FS:DELETE_DIRECTORY", { namespace, path });
-		}
-
-		async listDirectory({ namespace, path = "/", recursive = true }) {
-			const { files } = await $APP.SW.request("FS:LIST_FILES", {
-				namespace,
-				path,
-				recursive,
-			});
-			return files;
-		}
-
-		async deleteNamespace({ namespace }) {
-			return $APP.SW.request("FS:DELETE_NAMESPACE", { namespace });
-		}
-	}
-
-	return SWAdapter;
-};
-`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/chat/index.js":{content:`export const migration = true;
-export default ({ $APP, T, AI, Model, html }) => {
-	$APP.events.on("INIT_APP", async () => {
-		$APP.define("app-chat-message", {
-			properties: {
-				message: T.object(),
-			},
-			render() {
-				if (!this.message) return html\`\`;
-
-				const { role, content, toolCalls } = this.message;
-				const isUser = role === "user";
-				const isTool = !!toolCalls;
-
-				if (isTool) {
-					return html\`
-                    <div class="text-xs text-gray-400 italic text-center my-2">
-                        <uix-icon name="cog" class="animate-spin"></uix-icon>
-                        Using tool: <strong>\${toolCalls[0].name}</strong>
-                    </div>\`;
-				}
-
-				return html\`
-                <div class="flex \${isUser ? "justify-end" : "justify-start"}">
-                    <div class="flex items-end gap-2 max-w-lg">
-                        \${!isUser ? html\`<uix-avatar class="is-sm bg-gray-700 text-white" icon="bot"></uix-avatar>\` : ""}
-                        <div class="p-3 rounded-lg \${isUser ? "bg-blue-600 text-white rounded-br-none" : "bg-gray-200 text-gray-800 rounded-bl-none"}">
-                            <p>\${content}</p>
-                        </div>
-                    </div>
-                </div>
-            \`;
-			},
-		});
-
-		$APP.define("app-chat-input", {
-			properties: {
-				conversation: T.object(),
-				messages: T.array(),
-				isThinking: T.boolean(false),
-				newMessage: T.string(""),
-			},
-			async sendMessage() {
-				if (!this.newMessage?.trim() || !this.conversation) return;
-
-				const userMessageContent = this.newMessage;
-				this.newMessage = ""; // Clear input immediately
-				this.isThinking = true;
-
-				try {
-					// 1. Add user message to the model
-					await Model.messages.add({
-						conversationId: this.conversation.id,
-						role: "user",
-						content: userMessageContent,
-					});
-
-					// 2. Prepare conversation history for the AI
-					const conversationHistory = this.messages.map((m) => ({
-						role: m.role,
-						content: m.content,
-						toolCalls: m.toolCalls, // Pass tool history as well
-					}));
-					conversationHistory.push({
-						role: "user",
-						content: userMessageContent,
-					});
-
-					// 3. Get AI response
-					const aiResponse = await AI.chat(conversationHistory);
-
-					// 4. Add AI response to the model
-					await Model.messages.add({
-						conversationId: this.conversation.id,
-						...aiResponse,
-					});
-				} catch (error) {
-					console.error("Chat AI error:", error);
-					// Add an error message to the conversation
-					await Model.messages.add({
-						conversationId: this.conversation.id,
-						role: "assistant",
-						content: \`Sorry, an error occurred: \${error.message}\`,
-					});
-				} finally {
-					this.isThinking = false;
-				}
-			},
-			render() {
-				return html\`
-                <footer class="p-2 border-t bg-white">
-                    <uix-form .submit=\${this.sendMessage.bind(this)}>
-                        <uix-join>
-                            <uix-input
-                                .bind=\${this.prop("newMessage")}
-                                placeholder="Type a message..."
-                                class="w-full"
-                                ?disabled=\${this.isThinking}
-                            ></uix-input>
-                            <uix-button type="submit" icon="send" ?disabled=\${!this.newMessage?.trim() || this.isThinking}>
-                                \${this.isThinking ? "Thinking..." : "Send"}
-                            </uix-button>
-                        </uix-join>
-                    </uix-form>
-                </footer>
-            \`;
-			},
-		});
-
-		/**
-		 * Component: app-chat-window
-		 * Displays the main chat window for a selected conversation, including the message history
-		 * and the input form.
-		 */
-		$APP.define("app-chat-window", {
-			extends: "uix-list", // Assuming uix-list provides _rows for conversations
-			properties: {
-				conversationId: T.string(),
-			},
-			get conversation() {
-				if (!this._rows || !this.conversationId) return null;
-				return this._rows.find((c) => c.id === this.conversationId);
-			},
-			render() {
-				if (!this.conversationId) {
-					return html\`
-                    <div class="flex-1 flex flex-col items-center justify-center bg-gray-50 text-gray-500 text-center p-8">
-                        <uix-icon name="message-circle" class="text-5xl mb-4"></uix-icon>
-                        <h2 class="text-2xl font-bold">Select a conversation</h2>
-                        <p>Choose a conversation from the sidebar to start chatting.</p>
-                    </div>
-                \`;
-				}
-
-				if (!this.conversation) {
-					return html\`<div class="flex-1 flex items-center justify-center"><uix-spinner></uix-spinner></div>\`;
-				}
-
-				// Determine icon based on conversation type (channel/dm)
-				const conversationIcon =
-					this.conversation.type === "channel" ? "hash" : "at-sign";
-
-				return html\`
-                <div class="flex-1 flex flex-col bg-white">
-                    <header class="p-4 border-b flex items-center gap-3">
-                        <uix-icon name=\${conversationIcon} class="text-gray-500"></uix-icon>
-                        <h3 class="font-bold text-lg">\${this.conversation.name}</h3>
-                    </header>
-
-                    <app-messages-list
-                        ._data=\${{ model: "messages", where: { conversationId: this.conversationId }, sort: "createdAt" }}
-                        class="flex-1 p-4 overflow-y-auto flex flex-col gap-4"
-                    ></app-messages-list>
-                    
-                    <app-chat-input 
-                        .conversation=\${this.conversation}
-                        ._data=\${{ model: "messages", where: { conversationId: this.conversationId }, sort: "createdAt" }}
-                    ></app-chat-input>
-                </div>
-            \`;
-			},
-		});
-
-		/**
-		 * Component: app-messages-list
-		 * A simple component to render the list of messages. It observes the messages model
-		 * and renders an app-chat-message for each message.
-		 */
-		$APP.define("app-messages-list", {
-			extends: "uix-list",
-			render() {
-				if (!this._rows) {
-					return html\`<div class="flex-1 flex items-center justify-center"><uix-spinner></uix-spinner></div>\`;
-				}
-				// Scroll to bottom when new messages are added
-				this.scrollTop = this.scrollHeight;
-
-				return this._rows.map(
-					(message) =>
-						html\`<app-chat-message .message=\${message}></app-chat-message>\`,
-				);
-			},
-		});
-
-		/**
-		 * Component: app-chat-sidebar
-		 * Displays a single, unified list of all conversations.
-		 */
-		$APP.define("app-chat-sidebar", {
-			extends: "uix-list", // Gets conversations via ._data
-			properties: {
-				selectedConversationId: T.string({ sync: "querystring" }),
-				newConversationName: T.string(),
-				newConversationType: T.string("channel"), // Default to channel
-			},
-			async createConversation() {
-				if (!this.newConversationName?.trim()) return;
-				try {
-					await Model.conversations.add({
-						name: this.newConversationName,
-						type: this.newConversationType,
-					});
-					this.newConversationName = "";
-					// Find and hide the modal
-					const modal = this.querySelector("#new-conversation-modal");
-					if (modal) modal.hide();
-				} catch (error) {
-					console.error("Failed to create conversation:", error);
-					alert(\`Error: \${error.message}\`);
-				}
-			},
-			selectConversation(id) {
-				console.log({ id });
-				this.selectedConversationId = id;
-			},
-			render() {
-				if (!this._rows)
-					return html\`<div class="p-4"><uix-spinner></uix-spinner></div>\`;
-
-				// Sort all conversations alphabetically
-				const sortedConversations = [...this._rows];
-
-				return html\`
-                <div class="w-full px-2">
-                    <div class="flex justify-between items-center p-2">
-                        <h4 class="text-sm font-bold uppercase text-gray-400">Conversations</h4>
-                        <uix-modal id="new-conversation-modal">
-                            <uix-button size="is-sm" shape="circle" icon="plus"></uix-button>
-                            <dialog class="p-4 flex flex-col gap-4 rounded-lg shadow-xl w-80">
-                                <h3 class="text-lg font-bold">New Conversation</h3>
-                                <uix-form .submit=\${this.createConversation.bind(this)}>
-                                    <uix-input
-                                        label="Name"
-                                        placeholder="e.g. general-questions"
-                                        .bind=\${this.prop("newConversationName")}
-                                    ></uix-input>
-                                    <uix-input type="select" .options=\${["channel", "dm"]} .bind=\${this.prop("newConversationType")} label="Type" class="mt-2">                                        
-                                    </uix-input>
-                                    <uix-list class="flex justify-end gap-2 pt-4">
-                                        <uix-button type="submit" label="Create" class="is-primary"></uix-button>
-                                    </uix-list>
-                                </uix-form>
-                            </dialog>
-                        </uix-modal>
-                    </div>
-                    <uix-list class="flex flex-col gap-1">
-                        \${sortedConversations.map((conv) => {
-													const icon =
-														conv.type === "channel" ? "hash" : "at-sign";
-													console.log({ conv });
-													return html\`
-                                <a @click=\${() => this.selectConversation(conv.id)} class="flex items-center gap-2 p-2 rounded-md cursor-pointer hover:bg-gray-700 \${this.selectedConversationId === conv.id ? "bg-gray-900" : ""}">
-                                    <uix-icon name=\${icon} class="text-gray-500"></uix-icon>
-                                    <span>\${conv.parent.name}</span>
-                                </a>
-                            \`;
-												})}
-                    </uix-list>
-                </div>
-            \`;
-			},
-		});
-
-		$APP.define("app-chat", {
-			properties: {
-				selectedConversationId: T.string({ sync: "querystring" }),
-			},
-			render() {
-				return html\`<aside class="w-64 bg-gray-800 text-gray-200 flex flex-col">
-											<header class="p-4 border-b border-gray-700">
-													<h2 class="text-xl font-bold">Chat</h2>
-											</header>
-											<app-chat-sidebar
-													._data=\${{ model: "conversations", includes: ["parent"] }}
-													.selectedConversationId=\${this.selectedConversationId}
-													class="flex-1 overflow-y-auto py-2"
-											></app-chat-sidebar>
-									</aside>
-
-									<!-- Main Chat Area -->
-									<main class="flex-1 flex flex-col">
-											<app-chat-window
-													._data=\${{ model: "conversations", id: this.selectedConversationId }}
-											></app-chat-window>
-									</main>\`;
-			},
-		});
-	});
-
-	$APP.addModule({
-		name: "chat",
-		path: "apps/chat",
-		settings: {
-			appbar: {
-				label: "Conversations",
-				icon: "message-circle",
-			},
-		},
-	});
-};
-`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/editor/index.js":{content:`export default ({ $APP }) =>
-	$APP.addModule({
-		name: "editor",
-		path: "apps/editor/views",
-	});
 `,mimeType:"application/javascript",skipSW:!1},"/modules/apps/bundler/index.js":{content:"export default {}"},"/modules/integrations/github.js":{content:"export default {}"},"/modules/apps/mcp/index.js":{content:`export default ({ $APP }) => {
 	$APP.addModule({
 		name: "mcp",
@@ -12254,6 +11059,7 @@ export default ({ $APP, T, AI, Model, html }) => {
 				"textarea",
 				"time",
 				"rating",
+				"code",
 				"join",
 				"file-upload", // \u{1F53A} ToDo
 				"number-input", // \u{1F53A} ToDo
@@ -12380,14 +11186,12 @@ const MessageHandler = {
 		const respond =
 			data.eventId &&
 			((responsePayload) => {
-				if (commsPort) {
-					console.log({ responsePayload, data });
+				if (commsPort)
 					commsPort.postMessage({
 						eventId: data.eventId,
 						payload: responsePayload,
 						connection: data.connection,
 					});
-				}
 			});
 
 		if ($APP?.Backend) {
@@ -15546,561 +14350,173 @@ export default Model;
 `,mimeType:"application/javascript",skipSW:!1},"/models/migration.js":{content:`export const version = 1;
 
 export default ({ T, $APP }) => {
+	$APP.models.set({
+		users: {
+			name: T.string(),
+			avatar: T.string(),
+			conversations: T.many("conversations", "user"),
+		},
+		conversations: {
+			name: T.string(),
+			user: T.belongs("users", "conversations"),
+			server: T.belongs("servers", "conversations"),
+			messages: T.many("messages", "chat"),
+			createdAt: T.string({ index: true }),
+		},
+		messages: {
+			content: T.string(),
+			timestamp: T.string({ index: true }),
+			role: T.string({ options: ["user", "assistant", "tool"] }),
+			toolCalls: T.object(),
+			toolCallId: T.string(),
+			result: T.object(),
+			chat: T.belongs("conversations", "messages"),
+		},
+		servers: {
+			name: T.string(),
+			description: T.string(),
+			path: T.string(),
+			icon: T.string(),
+			favorite: T.boolean({ index: true }),
+			tags: T.array({ index: true }),
+			conversations: T.many("conversations", "server"),
+		},
+		providers: {
+			name: T.string(),
+			type: T.string(),
+			baseUrl: T.string(),
+			apiKey: T.string(),
+			active: T.boolean(),
+			models: T.many("models", "provider"),
+		},
+		models: {
+			name: T.string(),
+			provider: T.belongs("providers", "models"),
+		},
+	});
+
 	const data = {
-		blocks: [
+		users: [
 			{
-				id: "posts-schema-definition",
-				collection: "posts",
-				properties: {
-					title: T.string({ required: true }),
-					headline: T.string(),
-					content: T.string({ type: "textarea" }),
-					status: T.string({
-						enum: ["draft", "published", "scheduled"],
-						index: true,
-					}),
-					createdAt: T.string({ type: "datetime" }),
-					feed_items: T.many("feed", "item"),
-					tags: T.many("tags", "taggable"),
-				},
+				id: "user",
+				name: "You",
+				avatar: "https://i.pravatar.cc/40?u=user-1",
 			},
 			{
-				id: "links-schema-definition",
-				collection: "links",
-				properties: {
-					url: T.string({ required: true }),
-					title: T.string({ required: true }),
-					description: T.string({ type: "textarea" }),
-					createdAt: T.string({ type: "datetime" }),
-					feed_items: T.many("feed", "item"),
-					tags: T.many("tags", "taggable"),
-				},
-			},
-			{
-				id: "projects-schema-definition",
-				collection: "projects",
-				properties: {
-					name: T.string({ required: true }),
-					description: T.string({ type: "textarea" }),
-					url: T.string(),
-					image: T.string(),
-					status: T.string({ enum: ["active", "archived"] }),
-					feed_items: T.many("feed", "item"),
-					tags: T.many("tags", "taggable"),
-					stack: T.many("stack", "projects"), // Relationship to the stack
-				},
-			},
-			{
-				id: "stack-schema-definition",
-				collection: "stack",
-				properties: {
-					name: T.string({ required: true, index: true }),
-					projects: T.belongs_many("projects", "stack"), // Relationship back to projects
-				},
-			},
-
-			// --- Polymorphic Relationship Schemas ---
-			{
-				id: "feed-schema-definition",
-				collection: "feed",
-				properties: {
-					type: T.string({ index: true, defaultValue: "main" }),
-					item: T.one("*", "feed_items", { polymorphic: true }),
-					createdAt: T.string({ type: "datetime" }),
-				},
-			},
-			{
-				id: "tags-schema-definition",
-				collection: "tags",
-				properties: {
-					name: T.string({ required: true, index: true }),
-					taggable: T.belongs_many("*", "tags", { polymorphic: true }),
-				},
-			},
-
-			// --- Other Schemas ---
-			{
-				id: "profile-schema-definition",
-				collection: "profiles",
-				properties: {
-					name: T.string(),
-					handle: T.string(),
-					bio: T.string({ input: "textarea" }),
-					avatar: T.string(),
-					headerImage: T.string(),
-				},
-			},
-			{
-				id: "favorites-schema-definition",
-				collection: "favorites",
-				properties: {
-					favoritable: T.one("*", "favorites", { polymorphic: true }),
-					list: T.string({ defaultValue: "default" }),
-				},
-			},
-			{
-				id: "notifications-schema-definition",
-				collection: "notifications",
-				properties: {
-					title: T.string({ required: true }),
-					body: T.string({ type: "textarea" }),
-					read: T.boolean({ defaultValue: false }),
-					endpoint: T.string(),
-					p256dh: T.string(),
-					auth: T.string(),
-				},
+				id: "assistant",
+				name: "Assistant",
+				avatar: "https://i.pravatar.cc/40?u=assistant",
 			},
 		],
-
-		profiles: [
+		providers: [
 			{
-				id: "main-profile",
-				name: "Alan Leal",
-				handle: "brazuka.dev",
-				bio: "I started to code at age 12 to create a website about Dragon Ball Z that got aired in a national TV program. Since then I've been trying to do something cooler without much success. Currently I work as a software engineer and consultant for tech companies and am now starting to write about a lot of stuff at brazuka.dev.",
-				avatar:
-					"https://lh3.googleusercontent.com/a/ACg8ocLY8rMTOQdVufDG-cMsgnz69KbyOWGh_zT59jNyl-JVyFbVQ07q=s288-c-no",
-				headerImage:
-					"https://cdn.bsky.app/img/banner/plain/did:plc:kft6lu4trxowqmter2b6vg6z/bafkreiek62qzg63w5utds443ptdul7u5kodm53rep3ib4lf62b53s343hi@jpeg",
+				id: "local",
+				name: "Local",
+				type: "local",
+				baseUrl: "http://localhost:1234/v1/chat/completions",
+			},
+			{
+				id: "google",
+				name: "Google",
+				type: "google",
+			},
+			{
+				id: "openrouter",
+				name: "OpenRouter",
+				type: "openrouter",
+				baseUrl: "https://openrouter.ai/api/v1",
 			},
 		],
-		posts: [
+		models: [
 			{
-				id: "hello-world",
-				title: "Brazuka.dev's First Post",
-				content:
-					"After ages, I have a blog to write about tech again. This is the first post! :)",
-				createdAt: "2025-08-29T10:00:00Z",
-				tags: ["tag-js", "tag-webdev"],
+				id: "google/gemini-1.5-pro-latest",
+				name: "Gemini 1.5 Pro",
+				provider: "google",
 			},
-		],
-		links: [
 			{
-				id: "link-1",
-				url: "https://arstechnica.com/information-technology/2025/08/the-personhood-trap-how-ai-fakes-human-personality/",
-				title: "The Personhood Trap: How AI Fakes Human Personality",
-				description: // Changed from 'content' to 'description' to match schema
-					"A comprehensive survey of prompt engineering demonstrated just how powerful these prompts are. Adding instructions like 'You are a helpful assistant' versus 'You are an expert researcher' changed accuracy on factual questions by up to 15 percent.",
-				createdAt: "2025-08-27T11:00:00Z",
-				tags: ["tag-ai"],
+				id: "google/gemini-1.5-flash-latest",
+				name: "Gemini 1.5 Flash",
+				provider: "google",
 			},
-		],
-		projects: [
 			{
-				id: "proj-1",
-				name: "Personal Website & Blog",
+				id: "openrouter/anthropic/claude-3.5-sonnet",
+				name: "Claude 3.5 Sonnet",
+				provider: "openrouter",
+			},
+			{
+				id: "openrouter/openai/gpt-4o",
+				name: "GPT-4o",
+				provider: "openrouter",
+			},
+			{
+				id: "openrouter/mistralai/mistral-large",
+				name: "Mistral Large",
+				provider: "openrouter",
+			},
+			{
+				id: "openrouter/qwen/qwen2-72b-instruct",
+				name: "Qwen 2 72B",
+				provider: "openrouter",
+			},
+			// Local Models
+			{ id: "local/local-model", name: "Local Model", provider: "local" },
+		],
+		servers: [
+			{
+				id: "default-feature-rich",
+				name: "Default Feature-Rich Server",
 				description:
-					"The very website you're looking at now. Built with a custom frontend framework and a flexible, block-based data model.",
-				url: "https://brazuka.dev",
-				status: "active",
-				tags: ["tag-webdev"],
-				stack: [
-					// Added stack data
-					"stack-js",
-					"stack-html",
-					"stack-tailwind",
-					"stack-css",
-					"stack-wc",
-					"stack-idb",
-					"stack-lit",
-					"stack-git",
-					"stack-md",
-					"stack-cm",
-					"stack-mcp",
-				],
+					"A comprehensive server with a wide range of capabilities, including tools, resources, and prompts.",
+				path: "/templates/servers/basic.js",
+				tags: ["Official", "Recommended", "Full-Featured"],
+				icon: \`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>\`,
+				favorite: true,
 			},
-		],
-		stack: [
-			// Added stack collection data
-			{ id: "stack-js", name: "JavaScript" },
-			{ id: "stack-html", name: "HTML" },
-			{ id: "stack-css", name: "CSS" },
-			{ id: "stack-tailwind", name: "Tailwind" },
-			{ id: "stack-wc", name: "Web Component" },
-			{ id: "stack-idb", name: "IndexedDB" },
-			{ id: "stack-lit", name: "Lit-html" },
-			{ id: "stack-git", name: "Git" },
-			{ id: "stack-md", name: "Markdown" },
-			{ id: "stack-cm", name: "CodeMirror" },
-			{ id: "stack-mcp", name: "MCP (Model Context Protocol)" },
-		],
-		feed: [
 			{
-				id: "feed-1",
-				item: "posts@hello-world",
-				createdAt: "2025-08-26T10:00:00Z",
+				id: "eval",
+				name: "Simple Greeter Server",
+				description:
+					"A minimal server that demonstrates basic greeting functionality. Ideal for getting started.",
+				path: "/templates/servers/eval.js",
+				tags: ["Example", "Beginner"],
+				icon: \`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>\`,
+				favorite: false,
 			},
-			{ id: "feed-2", item: "links@link-1", createdAt: "2025-08-25T14:00:00Z" },
 			{
-				id: "feed-3",
-				item: "projects@proj-1",
-				createdAt: "2025-08-24T18:00:00Z",
+				id: "react-agent",
+				name: "ReAct Agent",
+				description:
+					"Reasoning and Acting agent that alternates between thinking and taking actions. Implements the ReAct pattern for systematic problem-solving.",
+				path: "/templates/servers/react-agent.js",
+				tags: ["AI Reasoning", "Agent", "Official", "Advanced"],
+				icon: \`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M12 1v6m0 6v6m5.2-13.2l-4.2 4.2m-2 2l-4.2 4.2M23 12h-6m-6 0H1m18.2 5.2l-4.2-4.2m-2-2l-4.2-4.2"></path></svg>\`,
+				favorite: false,
 			},
-			{ id: "feed-4", item: "links@link-1", createdAt: "2025-08-27T11:00:00Z" },
-		],
-		tags: [
-			{ id: "tag-js", name: "JavaScript" },
-			{ id: "tag-webdev", name: "Web Development" },
-			{ id: "tag-api", name: "API" },
 			{
-				id: "tag-ai",
-				name: "AI",
-				taggable: ["posts@hello-world", "links@link-1"],
+				id: "chain-of-thought",
+				name: "Chain-of-Thought Reasoner",
+				description:
+					"Step-by-step reasoning framework that breaks down complex problems into logical sequences. Perfect for mathematical and analytical tasks.",
+				path: "/templates/servers/cot-reasoner.js",
+				tags: ["AI Reasoning", "Logic", "Official", "Advanced"],
+				icon: \`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>\`,
+				favorite: false,
 			},
-		],
-		favorites: [
-			{ id: "fav-1", favoritable: "posts@hello-world", list: "reading-list" },
-			{ id: "fav-2", favoritable: "links@link-1" },
+			{
+				id: "tree-of-thoughts",
+				name: "Tree-of-Thoughts Explorer",
+				description:
+					"Explores multiple reasoning paths simultaneously, evaluates them, and selects the best solution. Ideal for complex decision-making.",
+				path: "/templates/servers/tot-explorer.js",
+				tags: ["AI Reasoning", "Decision Making", "Official", "Advanced"],
+				icon: \`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v6m0 0l-3-3m3 3l3-3M12 8v8m0 0l-3 3m3-3l3 3M6 8l-3 3 3 3m12-6l3 3-3 3"></path></svg>\`,
+				favorite: false,
+			},
 		],
 	};
 
 	$APP.data.set(data);
-	$APP.models.set({
-		blocks: {
-			name: T.string({ index: true }),
-			title: T.string(),
-			tag: T.string({ index: true }),
-			type: T.string({ defaultValue: "block" }),
-			properties: T.object(),
-			indexed: T.many("index", "indexed", { polymorphic: true }),
-			blocks: T.belongs_many("*", "parents", {
-				mixed: true,
-				polymorphic: true,
-			}),
-			parents: T.many("*", "blocks", { polymorphic: true }),
-			collection: T.string({
-				index: true,
-				description:
-					"If present, this block defines and uses a data collection.",
-			}),
-			mixed: T.boolean(),
-			tags: T.array({
-				description:
-					"If mixed is false, defines the blocks which can be used inside this container",
-			}),
-		},
-		index: {
-			indexed: T.belongs("*", "indexed", { polymorphic: true }),
-		},
-	});
-
-	$APP.hooks.on("ModelAddRecord-blocks", async ({ row }) => {
-		if (row.collection) {
-			$APP.dynamicModels.add(row.collection);
-			return $APP.Backend.addModel({
-				name: row.collection,
-				schema: row.properties,
-			});
-		}
-	});
 };
-`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/drive/models/migration.js":{content:`import $APP from "/bootstrap.js";
-import T from "/modules/types/index.js";
-
-const blogData = {
-	files: [
-		{ name: "modules", directory: "", isDirectory: true },
-		{
-			name: "app.js",
-			directory: "",
-			content: \`
-import T from "/modules/types/index.js";
-import html from "/modules/mvc/view/html/index.js";
-export default ({tag: "app-index",
-
-	properties: {
-		name: T.string({ defaultValue: "Visitor" }),
-	},
-
-	render() {
-		return html\\\`
-			<div class="p-4">
-				<uix-card class="p-6 shadow rounded-xl bg-white">
-					<span class="text-lg font-bold text-center">\\\${this.name}, Welcome to Bootstrapp!</span>
-					<uix-button class="mt-4" label="Click!"></uix-button>
-				</uix-card>
-			</div>
-		\\\`;
-	}
-});\`,
-		},
-	],
-};
-
-$APP.data.set(blogData);
-
-$APP.models.set({
-	files: {
-		name: T.string({ index: true }),
-		directory: T.string({ index: true }),
-		path: T.string({
-			index: true,
-			virtual: "\${directory}/\${name}",
-		}),
-		isDirectory: T.boolean({ index: true }),
-		mimeType: T.string({ defaultValue: "plain/text" }),
-		content: T.string(),
-	},
-});
-`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/project/models/migration.js":{content:`const newProjectTemplate = (name) => {
-	const htmlContent = \`<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>\${name}</title>
-  <link rel="stylesheet" href="index.css">
-</head>
-<body>
-  <h1>Welcome to \${name}!</h1>
-  <p>Your new project is ready to go.</p>
-  <script type="module" src="index.js"><\/script>
-</body>
-</html>\`;
-
-	const jsContent = \`console.log("\u2728 Hello from \${name}!");console.trace();
-
-// Your JavaScript code starts here.
-\`;
-
-	const cssContent = \`body {
-  font-family: system-ui, -apple-system, sans-serif;
-  display: grid;
-  place-content: center;
-  text-align: center;
-  min-height: 100vh;
-  margin: 0;
-  background-color: #f0f2f5;
-  color: #1c1e21;
-}
-\`;
-
-	return [
-		// The main project directory
-		{ name, directory: "/projects", isDirectory: true },
-
-		{
-			name: "index.html",
-			directory: \`/projects/\${name}\`,
-			content: htmlContent,
-			mimeType: "text/html",
-		},
-
-		{
-			name: "index.js",
-			directory: \`/projects/\${name}\`,
-			content: jsContent,
-			mimeType: "application/javascript",
-		},
-
-		{
-			name: "index.css",
-			directory: \`/projects/\${name}\`,
-			content: cssContent,
-			mimeType: "text/css",
-		},
-	];
-};
-export default ({ T, $APP }) => {
-	$APP.data.set({
-		boards: [
-			{ name: "Backlog", description: "Development Tasks" },
-			{ name: "Development", description: "Development Tasks" },
-			{ name: "Finished", description: "Development Tasks" },
-			{ name: "Cancelled", description: "Development Tasks" },
-		],
-		files: [
-			{ name: "projects", directory: "", isDirectory: true },
-			//...$APP.project.newProjectTemplate("untitled-1"),
-		],
-	});
-	$APP.data.set({
-		boards: [
-			{ name: "Backlog", description: "Development Tasks" },
-			{ name: "In Development", description: "Development Tasks" },
-			{ name: "Finished", description: "Development Tasks" },
-			{ name: "Cancelled", description: "Development Tasks" },
-		],
-		files: [
-			{ name: "projects", directory: "", isDirectory: true },
-			...newProjectTemplate("untitled-1"),
-		],
-	});
-	$APP.models.set({
-		users: {
-			username: T.string({ primary: true }),
-			email: T.string({ unique: true }),
-			role: T.string({ defaultValue: "user", enum: ["admin", "user"] }),
-		},
-		boards: {
-			name: T.string(),
-			description: T.string(),
-			tasks: T.many("tasks", "boardId"),
-		},
-		tasks: {
-			title: T.string(),
-			description: T.string({ input: "textarea" }),
-			completed: T.boolean({ defaultValue: false }),
-			dueDate: T.date(),
-			priority: T.string({
-				defaultValue: "medium",
-				enum: ["low", "medium", "high"],
-			}),
-			boardId: T.belongs("boards", "tasks"),
-			createdBy: T.belongs("users", "tasks"),
-			assignedTo: T.belongs("users", "assignedTasks"),
-			comments: T.array(),
-		},
-	});
-};
-`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/chat/models/migration.js":{content:`import $APP from "/bootstrap.js";
-import T from "/modules/types/index.js";
-
-/**
- * Mock Backend Data Store
- *
- * This version restores the polymorphic parent relationship for conversations,
- * aligning with the original architecture.
- */
-const chatData = {
-	users: [
-		{ id: "user-1", name: "You", avatar: "https://i.pravatar.cc/40?u=user-1" },
-		{ id: "user-2", name: "Alex", avatar: "https://i.pravatar.cc/40?u=user-2" },
-		{
-			id: "user-3",
-			name: "Jordan",
-			avatar: "https://i.pravatar.cc/40?u=user-3",
-		},
-		{
-			id: "bot-1",
-			name: "Habit Coach",
-			avatar: "https://i.pravatar.cc/40?u=bot-1",
-			isBot: true,
-		},
-	],
-
-	channels: [
-		{
-			id: "chan-1",
-			name: "general",
-			topic: "General chat about habits",
-			participants: ["user-1", "user-2", "user-3"],
-		},
-		{
-			id: "chan-2",
-			name: "random",
-			topic: "Anything else!",
-			participants: ["user-1", "user-3"],
-		},
-	],
-
-	// Conversations now link to a parent (either a channel or a user for DMs)
-	conversations: [
-		{
-			id: "conv-1",
-			type: "channel",
-			parent: "channels@chan-1", // Belongs to the 'general' channel
-		},
-		{
-			id: "conv-2",
-			type: "channel",
-			parent: "channels@chan-2", // Belongs to the 'random' channel
-		},
-		{
-			id: "conv-3",
-			type: "dm",
-			parent: "users@user-2", // A DM with Alex
-		},
-		{
-			id: "conv-4",
-			type: "dm",
-			parent: "users@bot-1", // A DM with the Habit Coach
-		},
-	],
-
-	messages: [
-		// Message in DM with Alex
-		{
-			id: "msg-1",
-			conversation: "conv-3",
-			sender: "user-2",
-			role: "user",
-			content: "Hey! How's the new habit tracker working out?",
-			timestamp: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
-		},
-		{
-			id: "msg-2",
-			conversation: "conv-3",
-			sender: "user-1",
-			role: "user",
-			content: "It's great! The AI integration is super helpful.",
-			timestamp: new Date(Date.now() - 1000 * 60 * 4).toISOString(),
-		},
-		// Message in DM with Habit Coach Bot
-		{
-			id: "msg-3",
-			conversation: "conv-4",
-			sender: "bot-1",
-			role: "assistant",
-			content:
-				"Hello! I'm here to help you build better habits. What's on your mind?",
-			timestamp: new Date(Date.now() - 1000 * 60 * 10).toISOString(),
-		},
-		// Message in #general channel
-		{
-			id: "msg-4",
-			conversation: "conv-1",
-			sender: "user-3",
-			role: "user",
-			content: "Welcome to the general channel!",
-			timestamp: new Date(Date.now() - 1000 * 60 * 20).toISOString(),
-		},
-	],
-};
-
-// Initialize the mock data in the application
-$APP.data.set(chatData);
-
-/**
- * Model Definitions
- *
- * Restored polymorphic 'parent' relationship in the conversations model.
- */
-$APP.models.set({
-	users: {
-		name: T.string(),
-		avatar: T.string(),
-		isBot: T.boolean(false),
-		messages: T.many("messages", "sender"),
-		// A user can be the parent of many DM conversations
-		conversations: T.many("conversations", "parent", { polymorphic: true }),
-		channels: T.many("channels", "users"),
-	},
-
-	channels: {
-		name: T.string(),
-		topic: T.string(),
-		participants: T.belongs_many("users", "channels"),
-		// A channel can be the parent of one conversation
-		conversation: T.one("conversations", "parent", { polymorphic: true }),
-	},
-
-	conversations: {
-		type: T.string({ options: ["channel", "dm"] }), // Kept for frontend convenience
-		// This is the polymorphic relationship you requested
-		parent: T.belongs("*", "conversations", { polymorphic: true }),
-		messages: T.many("messages", "conversation"),
-	},
-
-	messages: {
-		content: T.string(),
-		timestamp: T.string(), // ISO string
-		role: T.string({ options: ["user", "assistant"] }),
-		toolCalls: T.object(null),
-		sender: T.belongs("users", "messages"),
-		conversation: T.belongs("conversations", "messages"),
-	},
-});
 `,mimeType:"application/javascript",skipSW:!1},"/modules/apps/bundler/models/migration.js":{content:`import $APP from "/bootstrap.js";
 import T from "/modules/types/index.js";
 
@@ -16466,6 +14882,15 @@ div [container][horizontal] {
 		}
 	},
 });
+`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/navigation/navbar.js":{content:`export default ({ T }) => ({
+	tag: "uix-navbar",
+	style: true,
+	extends: "uix-list",
+	properties: {
+		join: T.boolean({ defaultValue: true }),
+		docked: T.string(),
+	},
+});
 `,mimeType:"application/javascript",skipSW:!1},"/modules/uix/utility/darkmode.js":{content:`export default ({ T }) => ({
 	tag: "uix-darkmode",
 	extends: "uix-button",
@@ -16491,212 +14916,6 @@ div [container][horizontal] {
 	connected() {
 		this.icon = this.darkmode ? "sun" : "moon";
 		if (this.darkmode) document.documentElement.classList.add("dark");
-	},
-});
-`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/navigation/navbar.js":{content:`export default ({ T }) => ({
-	tag: "uix-navbar",
-	style: true,
-	extends: "uix-list",
-	properties: {
-		join: T.boolean({ defaultValue: true }),
-		docked: T.string(),
-	},
-});
-`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/display/link.js":{content:`export default ({ T, html, Router }) => ({
-	tag: "uix-link",
-	style: true,
-	properties: {
-		content: T.object(),
-		context: T.object(),
-		external: T.boolean(),
-		selectable: T.boolean(),
-		skipRoute: T.boolean(),
-		hideLabel: T.boolean(),
-		accordion: T.boolean(),
-		float: T.object(),
-		tab: T.boolean(),
-		tooltip: T.boolean(),
-		dropdown: T.boolean(),
-		direction: T.string(),
-		name: T.string(),
-		alt: T.string(),
-		label: T.string(),
-		type: T.string(),
-		href: T.string(),
-		related: T.string(),
-		icon: T.string(),
-		active: T.boolean(),
-		reverse: T.boolean(),
-		vertical: T.boolean(),
-		selected: T.boolean(),
-		floatOpen: T.boolean(),
-		click: T.function(),
-		confirmation: T.string(),
-	},
-
-	connected() {
-		this.boundHandleOutsideClick = this.handleOutsideClick.bind(this);
-		this.boundHandleEscKey = this.handleEscKey.bind(this);
-
-		if (this.context) {
-			this.addEventListener("contextmenu", this.handleContextMenu);
-		}
-	},
-
-	disconnected() {
-		// --- REFACTOR: Clean up all listeners on disconnect.
-		this.removeEventListener("contextmenu", this.handleContextMenu);
-		this._removeGlobalListeners();
-	},
-
-	// --- NEW: Helper method to add global listeners.
-	_addGlobalListeners() {
-		// Use a slight delay to prevent the same click that opened the popup from closing it.
-		setTimeout(() => {
-			document.addEventListener("click", this.boundHandleOutsideClick);
-			document.addEventListener("keydown", this.boundHandleEscKey);
-		}, 0);
-	},
-
-	// --- NEW: Helper method to remove global listeners.
-	_removeGlobalListeners() {
-		document.removeEventListener("click", this.boundHandleOutsideClick);
-		document.removeEventListener("keydown", this.boundHandleEscKey);
-	},
-
-	// --- NEW: A single method to close all popups and clean up listeners.
-	closeAllPopups() {
-		let wasOpen = false;
-		if (this.hasAttribute("selected")) {
-			this.removeAttribute("selected");
-			wasOpen = true;
-		}
-		const contextContainer = this.q("[context]");
-		if (contextContainer?.hasAttribute("open")) {
-			contextContainer.removeAttribute("open");
-			wasOpen = true;
-		}
-		if (this.hasAttribute("floatOpen")) {
-			this.removeAttribute("floatOpen");
-			wasOpen = true;
-		}
-
-		// Only remove listeners if something was actually closed.
-		if (wasOpen) {
-			this._removeGlobalListeners();
-		}
-	},
-
-	defaultOnClick(e) {
-		if (e.ctrlKey || e.metaKey || e.shiftKey || e.button === 1) {
-			return;
-		}
-		const link = e.currentTarget;
-		const localLink =
-			this.href && link.origin === window.location.origin && !this.external;
-		const isComponent = this.dropdown || this.accordion || this.tab;
-
-		if (!this.href || localLink || isComponent || this.float) {
-			e.preventDefault();
-		}
-
-		if (this.float) {
-			this.toggleAttribute("floatOpen");
-			// --- REFACTOR: Use helpers to manage listeners.
-			this.hasAttribute("floatOpen")
-				? this._addGlobalListeners()
-				: this._removeGlobalListeners();
-			return;
-		}
-		if (localLink && !this.skipRoute) {
-			const path = [link.pathname, link.search].filter(Boolean).join("");
-			isComponent ? Router.push(path) : Router.go(path);
-			return;
-		}
-
-		if (this.click && this.type !== "submit") {
-			if (this.confirmation) {
-				if (window.confirm(this.confirmation)) {
-					this.click(e);
-				}
-			} else {
-				this.click(e);
-			}
-			e.stopImmediatePropagation();
-		}
-
-		if (this.dropdown) {
-			this.toggleAttribute("selected");
-			this.hasAttribute("selected")
-				? this._addGlobalListeners()
-				: this._removeGlobalListeners();
-		}
-	},
-
-	handleContextMenu(e) {
-		e.preventDefault();
-		const contextContainer = this.q("[context]");
-		if (contextContainer) {
-			contextContainer.toggleAttribute("open");
-			// --- REFACTOR: Use helpers to manage listeners.
-			contextContainer.hasAttribute("open")
-				? this._addGlobalListeners()
-				: this._removeGlobalListeners();
-		}
-	},
-
-	// --- REFACTOR: Simplified outside click handler.
-	handleOutsideClick(e) {
-		// If the click is outside the component OR on a link inside a popup, close everything.
-		const isLinkInsidePopup =
-			this.q("[dropdown], [context], [float]")?.contains(e.target) &&
-			e.target.closest("a");
-
-		if (!this.contains(e.target) || isLinkInsidePopup) {
-			this.closeAllPopups();
-		}
-	},
-
-	// --- REFACTOR: Simplified escape key handler.
-	handleEscKey(e) {
-		if (e.key === "Escape") {
-			e.preventDefault();
-			this.closeAllPopups();
-		}
-	},
-
-	render() {
-		// The render method remains the same.
-		return html\`<a
-            class=\${this.icon ? "uix-text-icon__element" : undefined}
-            content
-            href=\${this.href}
-            @click=\${this.defaultOnClick.bind(this)}
-            related=\${this.related}
-            name=\${this.name || this.label || this.alt}
-            alt=\${this.alt || this.label || this.name}
-        >
-            \${
-							this.icon
-								? html\`<uix-icon
-                          name=\${this.icon}
-                          alt=\${this.alt || this.label || this.name}
-                          size=\${this.iconSize || this.size}
-                      ></uix-icon>\`
-								: ""
-						}
-            \${this.hideLabel ? null : this.label}
-        </a>
-        \${!this.dropdown ? null : html\`<div dropdown>\${this.dropdown}</div>\`}
-        \${!this.context ? null : html\`<div context>\${this.context}</div>\`}
-        \${!this.accordion ? null : html\`<div accordion>\${this.accordion}</div>\`}
-        \${
-					!this.tooltip
-						? null
-						: html\`<div tooltip>\${this.tooltip === true ? this.label : this.tooltip}</div>\`
-				}
-        \${!this.float ? null : html\`<div float>\${this.float}</div>\`}
-    \`;
 	},
 });
 `,mimeType:"application/javascript",skipSW:!1},"/modules/apps/bundler/views/ui.js":{content:`export default ({ T, html, $APP, Bundler }) => {
@@ -16998,6 +15217,203 @@ div [container][horizontal] {
 		},
 	};
 };
+`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/display/link.js":{content:`export default ({ T, html, Router }) => ({
+	tag: "uix-link",
+	style: true,
+	properties: {
+		content: T.object(),
+		context: T.object(),
+		external: T.boolean(),
+		selectable: T.boolean(),
+		skipRoute: T.boolean(),
+		hideLabel: T.boolean(),
+		accordion: T.boolean(),
+		float: T.object(),
+		tab: T.boolean(),
+		tooltip: T.boolean(),
+		dropdown: T.boolean(),
+		direction: T.string(),
+		name: T.string(),
+		alt: T.string(),
+		label: T.string(),
+		type: T.string(),
+		href: T.string(),
+		related: T.string(),
+		icon: T.string(),
+		active: T.boolean(),
+		reverse: T.boolean(),
+		vertical: T.boolean(),
+		selected: T.boolean(),
+		floatOpen: T.boolean(),
+		click: T.function(),
+		confirmation: T.string(),
+	},
+
+	connected() {
+		this.boundHandleOutsideClick = this.handleOutsideClick.bind(this);
+		this.boundHandleEscKey = this.handleEscKey.bind(this);
+
+		if (this.context) {
+			this.addEventListener("contextmenu", this.handleContextMenu);
+		}
+	},
+
+	disconnected() {
+		// --- REFACTOR: Clean up all listeners on disconnect.
+		this.removeEventListener("contextmenu", this.handleContextMenu);
+		this._removeGlobalListeners();
+	},
+
+	// --- NEW: Helper method to add global listeners.
+	_addGlobalListeners() {
+		// Use a slight delay to prevent the same click that opened the popup from closing it.
+		setTimeout(() => {
+			document.addEventListener("click", this.boundHandleOutsideClick);
+			document.addEventListener("keydown", this.boundHandleEscKey);
+		}, 0);
+	},
+
+	// --- NEW: Helper method to remove global listeners.
+	_removeGlobalListeners() {
+		document.removeEventListener("click", this.boundHandleOutsideClick);
+		document.removeEventListener("keydown", this.boundHandleEscKey);
+	},
+
+	// --- NEW: A single method to close all popups and clean up listeners.
+	closeAllPopups() {
+		let wasOpen = false;
+		if (this.hasAttribute("selected")) {
+			this.removeAttribute("selected");
+			wasOpen = true;
+		}
+		const contextContainer = this.q("[context]");
+		if (contextContainer?.hasAttribute("open")) {
+			contextContainer.removeAttribute("open");
+			wasOpen = true;
+		}
+		if (this.hasAttribute("floatOpen")) {
+			this.removeAttribute("floatOpen");
+			wasOpen = true;
+		}
+
+		// Only remove listeners if something was actually closed.
+		if (wasOpen) {
+			this._removeGlobalListeners();
+		}
+	},
+
+	defaultOnClick(e) {
+		if (e.ctrlKey || e.metaKey || e.shiftKey || e.button === 1) {
+			return;
+		}
+		const link = e.currentTarget;
+		const localLink =
+			this.href && link.origin === window.location.origin && !this.external;
+		const isComponent = this.dropdown || this.accordion || this.tab;
+
+		if (!this.href || localLink || isComponent || this.float) {
+			e.preventDefault();
+		}
+
+		if (this.float) {
+			this.toggleAttribute("floatOpen");
+			// --- REFACTOR: Use helpers to manage listeners.
+			this.hasAttribute("floatOpen")
+				? this._addGlobalListeners()
+				: this._removeGlobalListeners();
+			return;
+		}
+		if (localLink && !this.skipRoute) {
+			const path = [link.pathname, link.search].filter(Boolean).join("");
+			isComponent ? Router.push(path) : Router.go(path);
+			return;
+		}
+
+		if (this.click && this.type !== "submit") {
+			if (this.confirmation) {
+				if (window.confirm(this.confirmation)) {
+					this.click(e);
+				}
+			} else {
+				this.click(e);
+			}
+			e.stopImmediatePropagation();
+		}
+
+		if (this.dropdown) {
+			this.toggleAttribute("selected");
+			this.hasAttribute("selected")
+				? this._addGlobalListeners()
+				: this._removeGlobalListeners();
+		}
+	},
+
+	handleContextMenu(e) {
+		e.preventDefault();
+		const contextContainer = this.q("[context]");
+		if (contextContainer) {
+			contextContainer.toggleAttribute("open");
+			// --- REFACTOR: Use helpers to manage listeners.
+			contextContainer.hasAttribute("open")
+				? this._addGlobalListeners()
+				: this._removeGlobalListeners();
+		}
+	},
+
+	// --- REFACTOR: Simplified outside click handler.
+	handleOutsideClick(e) {
+		// If the click is outside the component OR on a link inside a popup, close everything.
+		const isLinkInsidePopup =
+			this.q("[dropdown], [context], [float]")?.contains(e.target) &&
+			e.target.closest("a");
+
+		if (!this.contains(e.target) || isLinkInsidePopup) {
+			this.closeAllPopups();
+		}
+	},
+
+	// --- REFACTOR: Simplified escape key handler.
+	handleEscKey(e) {
+		if (e.key === "Escape") {
+			e.preventDefault();
+			this.closeAllPopups();
+		}
+	},
+
+	render() {
+		// The render method remains the same.
+		return html\`<a
+            class=\${this.icon ? "uix-text-icon__element" : undefined}
+            content
+            href=\${this.href}
+            @click=\${this.defaultOnClick.bind(this)}
+            related=\${this.related}
+            name=\${this.name || this.label || this.alt}
+            alt=\${this.alt || this.label || this.name}
+        >
+            \${
+							this.icon
+								? html\`<uix-icon
+                          name=\${this.icon}
+                          alt=\${this.alt || this.label || this.name}
+                          size=\${this.iconSize || this.size}
+                      ></uix-icon>\`
+								: ""
+						}
+            \${this.hideLabel ? null : this.label}
+        </a>
+        \${!this.dropdown ? null : html\`<div dropdown>\${this.dropdown}</div>\`}
+        \${!this.context ? null : html\`<div context>\${this.context}</div>\`}
+        \${!this.accordion ? null : html\`<div accordion>\${this.accordion}</div>\`}
+        \${
+					!this.tooltip
+						? null
+						: html\`<div tooltip>\${this.tooltip === true ? this.label : this.tooltip}</div>\`
+				}
+        \${!this.float ? null : html\`<div float>\${this.float}</div>\`}
+    \`;
+	},
+});
 `,mimeType:"application/javascript",skipSW:!1},"/modules/uix/layout/list.js":{content:`export default ({ T }) => ({
 	tag: "uix-list",
 	style: true,
@@ -17088,6 +15504,246 @@ div [container][horizontal] {
 			return ids;
 		}, []);
 		if (this.onSelectedChanged) this.onSelectedChanged(this.selectedIds);
+	},
+});
+`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/form/input.js":{content:`import { ifDefined } from "/modules/mvc/view/html/directive.js";
+
+const inputTypes = { string: "text" };
+let uniqueIdCounter = 0;
+
+export default ({ T, html }) => ({
+	tag: "uix-input",
+	style: true,
+	properties: {
+		bind: T.object({ attribute: false }),
+		autofocus: T.boolean(),
+		value: T.string(),
+		placeholder: T.string(),
+		name: T.string(),
+		label: T.string(),
+		disabled: T.boolean(),
+		required: T.boolean(),
+		type: T.string({
+			defaultValue: "text",
+			enum: [
+				"text",
+				"textarea",
+				"select",
+				"password",
+				"email",
+				"number",
+				"decimal",
+				"search",
+				"tel",
+				"url",
+				"checkbox",
+				"radio",
+			],
+		}),
+		options: T.array({ defaultValue: [] }),
+		checked: T.boolean(),
+		selected: T.boolean(),
+		regex: T.string(),
+		maxLength: T.string(),
+		rows: T.number({ defaultValue: 4 }),
+		keydown: T.function(),
+		input: T.function(),
+		icon: T.string(),
+	},
+	formAssociated: true,
+	formResetCallback() {
+		const $input = this.getInput();
+		if (!$input) return;
+		if (!["submit", "button", "reset"].includes($input.type))
+			$input.value = this._defaultValue || "";
+		if (["radio", "checkbox", "switch"].includes($input.type))
+			$input.checked = this._defaultValue || false;
+		this.value = this.isCheckable ? $input.checked : $input.value;
+		this._updateHasValue();
+	},
+	formDisabledCallback(disabled) {
+		const $input = this.getInput();
+		if ($input) $input.disabled = disabled;
+	},
+	formStateRestoreCallback(state) {
+		const $input = this.getInput();
+		if ($input) $input.value = state;
+		this.value = state;
+		this._updateHasValue();
+	},
+	reportValidity() {
+		const $input = this.getInput();
+		if (!$input) return true;
+		const validity = $input.reportValidity() !== false;
+		$input?.classList.toggle("input-error", !validity);
+		return validity;
+	},
+	getInput() {
+		if (!this.$input) {
+			this.$input = this.querySelector("input, select, textarea");
+			if (this.$input) {
+				this._internals.setValidity(
+					this.$input.validity,
+					this.$input.validationMessage,
+					this.$input,
+				);
+			}
+		}
+		return this.$input;
+	},
+	connected() {
+		this._internals = this.attachInternals();
+		this.fieldId = \`uix-input-\${++uniqueIdCounter}\`;
+		this.isCheckable = this.type === "checkbox" || this.type === "radio";
+
+		if (!this.name) {
+			this.name = this.label
+				? \`uix-input-\${this.label.toLowerCase().replace(/\\s+/g, "-")}\`
+				: this.fieldId;
+		}
+		this.placeholder = this.placeholder || " ";
+		if (this.bind) {
+			this.value = this.bind.value;
+			if (this.bind.instance) {
+				this.bind.instance.on(\`\${this.bind.prop}Changed\`, ({ value }) => {
+					this.setValue(value);
+				});
+			}
+		}
+		this._updateHasValue();
+	},
+	_updateHasValue() {
+		if (this.isCheckable) {
+			this.classList.remove("has-value");
+			return;
+		}
+		const hasValue =
+			this.value !== null && this.value !== undefined && this.value !== "";
+		this.classList.toggle("has-value", hasValue);
+	},
+	_onInput(event) {
+		const { target } = event;
+		const newValue = this.isCheckable ? target.checked : target.value;
+
+		if (this.value !== newValue) {
+			this.value = newValue;
+			this._updateHasValue();
+			if (this.bind) this.bind.setValue(this.value);
+			if (this.input) this.input(event);
+		}
+	},
+	inputValue() {
+		const el = this.getInput();
+		return el ? (this.isCheckable ? el.checked : el.value) : undefined;
+	},
+	setValue(value) {
+		const el = this.getInput();
+		if (el) {
+			if (this.isCheckable) el.checked = !!value;
+			else el.value = value;
+		}
+		if (this.bind) this.bind.value = value;
+		this.value = value;
+		this._updateHasValue();
+		this.requestUpdate();
+	},
+	resetValue() {
+		const el = this.getInput();
+		if (el) {
+			if (this.isCheckable) el.checked = false;
+			else el.value = "";
+		}
+		this.value = this.isCheckable ? false : "";
+		if (this.bind) this.bind.value = this.value;
+		this._updateHasValue();
+		this.requestUpdate();
+	},
+	render() {
+		const {
+			fieldId,
+			name,
+			type,
+			label,
+			value = "",
+			placeholder,
+			rows,
+			regex,
+			autofocus,
+			required,
+			disabled,
+			maxLength,
+			keydown,
+			icon,
+			options,
+		} = this;
+		let fieldTemplate;
+		switch (type) {
+			case "textarea":
+				fieldTemplate = html\`
+                    <textarea
+                        id=\${fieldId}
+                        name=\${name}
+                        placeholder=\${ifDefined(placeholder)}
+                        ?autofocus=\${autofocus}
+                        ?disabled=\${disabled}
+                        ?required=\${required}
+                        maxLength=\${ifDefined(maxLength)}
+                        @input=\${this._onInput.bind(this)}
+                        @keydown=\${ifDefined(keydown)}
+                        rows=\${rows}
+                    >\${value}</textarea>\`;
+				break;
+
+			case "select":
+				fieldTemplate = html\`
+									<div class="select-container">
+											<select
+												id=\${fieldId}
+												name=\${name}
+												value=\${value}
+												?disabled=\${disabled}
+												?required=\${required}
+												?autofocus=\${autofocus}
+												@change=\${this._onInput.bind(this)}>
+													\${placeholder && !value ? html\`<option value="" disabled selected hidden>\${placeholder}</option>\` : ""}
+													\${options.map(
+														(option) => html\`
+															<option value=\${option.value ?? option} ?selected=\${(option.value ?? option) === this.value}>
+																	\${option.label ?? option}
+															</option>
+													\`,
+													)}
+											</select>
+											<uix-icon name="chevron-down" class="select-arrow"></uix-icon>
+										</div>
+										\`;
+				break;
+
+			default:
+				fieldTemplate = html\`
+                    <input
+                        id=\${fieldId}
+                        name=\${name}
+                        type=\${inputTypes[type] || type}
+                        .value=\${value}
+                        placeholder=\${ifDefined(placeholder)}
+                        ?autofocus=\${autofocus}
+                        maxLength=\${ifDefined(maxLength)}
+                        @input=\${this._onInput.bind(this)}
+                        @keydown=\${ifDefined(keydown)}
+                        ?disabled=\${disabled}
+                        ?required=\${required}
+                        pattern=\${ifDefined(regex)}
+                        ?checked=\${this.isCheckable && !!this.value}
+                    />\`;
+				break;
+		}
+
+		return html\`
+            \${label ? html\`<label for=\${fieldId} ?required=\${required}>\${label}</label>\` : ""}
+            \${fieldTemplate}
+            \${icon ? html\`<uix-icon name=\${icon} class="input-icon"></uix-icon>\` : ""}
+        \`;
 	},
 });
 `,mimeType:"application/javascript",skipSW:!1},"/modules/uix/display/link.css":{content:`:where(.uix-link) {
@@ -17344,6 +16000,38 @@ div [container][horizontal] {
 		box-shadow: var(--shadow-lg, 0 10px 15px -3px rgb(0 0 0 / 0.1));
 	}
 }
+`,mimeType:"text/css",skipSW:!1},"/modules/uix/layout/list.css":{content:`.uix-list {
+	display: flex;
+	&[vertical] {
+		flex-direction: column;
+	}
+}
+`,mimeType:"text/css",skipSW:!1},"/modules/uix/navigation/navbar.css":{content:`.uix-navbar {
+	--uix-navbar-text-color: var(--color-default-90);
+	--uix-navbar-hover-text-color: var(--color-surface-80);
+	--uix-navbar-border-radius: 0px;
+	--uix-navbar-border-color: var(--color-default-60);
+	--uix-navbar-border-size: 1px;
+	--uix-navbar-border-style: solid;
+	--uix-navbar-hover-background-color: var(--color-default-40);
+	--uix-container-position: var(--uix-navbar-position);
+	display: flex;
+	flex-direction: column;
+	&[docked] {
+		--uix-list-button-radius: 0;
+		border-bottom: 0;
+		position: fixed;
+		bottom: 0px;
+		background-color: var(--uix-navbar-background-color, var(--color-default-5));
+		> * {
+			border-right: 0;
+			border-bottom: 0;
+			&:first-child {
+				border-left: 0;
+			}
+		}
+	}
+}
 `,mimeType:"text/css",skipSW:!1},"/modules/uix/display/icon.js":{content:`export default ({ T, html, $APP, Icons, theme }) => ({
 	tag: "uix-icon",
 	style: true,
@@ -17383,292 +16071,7 @@ div [container][horizontal] {
 		return !this.svg ? null : html.unsafeHTML(this.svg);
 	},
 });
-`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/form/input.js":{content:`import { ifDefined } from "/modules/mvc/view/html/directive.js";
-
-const inputTypes = { string: "text" };
-let uniqueIdCounter = 0;
-
-export default ({ T, html }) => ({
-	tag: "uix-input",
-	style: true,
-	properties: {
-		bind: T.object({ attribute: false }),
-		autofocus: T.boolean(),
-		value: T.string(),
-		placeholder: T.string(),
-		name: T.string(),
-		label: T.string(),
-		disabled: T.boolean(),
-		required: T.boolean(),
-		type: T.string({
-			defaultValue: "text",
-			enum: [
-				"text",
-				"textarea",
-				"select",
-				"password",
-				"email",
-				"number",
-				"decimal",
-				"search",
-				"tel",
-				"url",
-				"checkbox",
-				"radio",
-			],
-		}),
-		options: T.array({ defaultValue: [] }),
-		checked: T.boolean(),
-		selected: T.boolean(),
-		regex: T.string(),
-		maxLength: T.string(),
-		rows: T.number({ defaultValue: 4 }),
-		keydown: T.function(),
-		input: T.function(),
-		icon: T.string(),
-	},
-	formAssociated: true,
-	formResetCallback() {
-		const $input = this.getInput();
-		if (!$input) return;
-		if (!["submit", "button", "reset"].includes($input.type))
-			$input.value = this._defaultValue || "";
-		if (["radio", "checkbox", "switch"].includes($input.type))
-			$input.checked = this._defaultValue || false;
-		this.value = this.isCheckable ? $input.checked : $input.value;
-		this._updateHasValue();
-	},
-	formDisabledCallback(disabled) {
-		const $input = this.getInput();
-		if ($input) $input.disabled = disabled;
-	},
-	formStateRestoreCallback(state) {
-		const $input = this.getInput();
-		if ($input) $input.value = state;
-		this.value = state;
-		this._updateHasValue();
-	},
-	reportValidity() {
-		const $input = this.getInput();
-		if (!$input) return true;
-		const validity = $input.reportValidity() !== false;
-		$input?.classList.toggle("input-error", !validity);
-		return validity;
-	},
-	getInput() {
-		if (!this.$input) {
-			this.$input = this.querySelector("input, select, textarea");
-			if (this.$input) {
-				this._internals.setValidity(
-					this.$input.validity,
-					this.$input.validationMessage,
-					this.$input,
-				);
-			}
-		}
-		return this.$input;
-	},
-	connected() {
-		this._internals = this.attachInternals();
-		this.fieldId = \`uix-input-\${++uniqueIdCounter}\`;
-		this.isCheckable = this.type === "checkbox" || this.type === "radio";
-
-		if (!this.name) {
-			this.name = this.label
-				? \`uix-input-\${this.label.toLowerCase().replace(/\\s+/g, "-")}\`
-				: this.fieldId;
-		}
-		this.placeholder = this.placeholder || " ";
-		if (this.bind) {
-			this.value = this.bind.value;
-			if (this.bind.instance) {
-				this.bind.instance.on(\`\${this.bind.prop}Changed\`, ({ value }) => {
-					this.setValue(value);
-				});
-			}
-		}
-		this._updateHasValue();
-	},
-	_updateHasValue() {
-		if (this.isCheckable) {
-			this.classList.remove("has-value");
-			return;
-		}
-		const hasValue =
-			this.value !== null && this.value !== undefined && this.value !== "";
-		this.classList.toggle("has-value", hasValue);
-	},
-	_onInput(event) {
-		const { target } = event;
-		const newValue = this.isCheckable ? target.checked : target.value;
-
-		if (this.value !== newValue) {
-			this.value = newValue;
-			this._updateHasValue();
-			if (this.bind) this.bind.setValue(this.value);
-			if (this.input) this.input(event);
-		}
-	},
-	inputValue() {
-		const el = this.getInput();
-		return el ? (this.isCheckable ? el.checked : el.value) : undefined;
-	},
-	setValue(value) {
-		const el = this.getInput();
-		if (el) {
-			if (this.isCheckable) el.checked = !!value;
-			else el.value = value;
-		}
-		if (this.bind) this.bind.value = value;
-		this.value = value;
-		this._updateHasValue();
-		this.requestUpdate();
-	},
-	resetValue() {
-		const el = this.getInput();
-		if (el) {
-			if (this.isCheckable) el.checked = false;
-			else el.value = "";
-		}
-		this.value = this.isCheckable ? false : "";
-		if (this.bind) this.bind.value = this.value;
-		this._updateHasValue();
-		this.requestUpdate();
-	},
-	render() {
-		const {
-			fieldId,
-			name,
-			type,
-			label,
-			value = "",
-			placeholder,
-			rows,
-			regex,
-			autofocus,
-			required,
-			disabled,
-			maxLength,
-			keydown,
-			icon,
-			options,
-		} = this;
-		let fieldTemplate;
-		switch (type) {
-			case "textarea":
-				fieldTemplate = html\`
-                    <textarea
-                        id=\${fieldId}
-                        name=\${name}
-                        placeholder=\${ifDefined(placeholder)}
-                        ?autofocus=\${autofocus}
-                        ?disabled=\${disabled}
-                        ?required=\${required}
-                        maxLength=\${ifDefined(maxLength)}
-                        @input=\${this._onInput.bind(this)}
-                        @keydown=\${ifDefined(keydown)}
-                        rows=\${rows}
-                    >\${value}</textarea>\`;
-				break;
-
-			case "select":
-				fieldTemplate = html\`
-									<div class="select-container">
-											<select
-												id=\${fieldId}
-												name=\${name}
-												value=\${value}
-												?disabled=\${disabled}
-												?required=\${required}
-												?autofocus=\${autofocus}
-												@change=\${this._onInput.bind(this)}>
-													\${placeholder && !value ? html\`<option value="" disabled selected hidden>\${placeholder}</option>\` : ""}
-													\${options.map(
-														(option) => html\`
-															<option value=\${option.value ?? option} ?selected=\${(option.value ?? option) === this.value}>
-																	\${option.label ?? option}
-															</option>
-													\`,
-													)}
-											</select>
-											<uix-icon name="chevron-down" class="select-arrow"></uix-icon>
-										</div>
-										\`;
-				break;
-
-			default:
-				fieldTemplate = html\`
-                    <input
-                        id=\${fieldId}
-                        name=\${name}
-                        type=\${inputTypes[type] || type}
-                        .value=\${value}
-                        placeholder=\${ifDefined(placeholder)}
-                        ?autofocus=\${autofocus}
-                        maxLength=\${ifDefined(maxLength)}
-                        @input=\${this._onInput.bind(this)}
-                        @keydown=\${ifDefined(keydown)}
-                        ?disabled=\${disabled}
-                        ?required=\${required}
-                        pattern=\${ifDefined(regex)}
-                        ?checked=\${this.isCheckable && !!this.value}
-                    />\`;
-				break;
-		}
-
-		return html\`
-            \${label ? html\`<label for=\${fieldId} ?required=\${required}>\${label}</label>\` : ""}
-            \${fieldTemplate}
-            \${icon ? html\`<uix-icon name=\${icon} class="input-icon"></uix-icon>\` : ""}
-        \`;
-	},
-});
-`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/layout/list.css":{content:`.uix-list {
-	display: flex;
-	&[vertical] {
-		flex-direction: column;
-	}
-}
-`,mimeType:"text/css",skipSW:!1},"/modules/uix/navigation/navbar.css":{content:`.uix-navbar {
-	--uix-navbar-text-color: var(--color-default-90);
-	--uix-navbar-hover-text-color: var(--color-surface-80);
-	--uix-navbar-border-radius: 0px;
-	--uix-navbar-border-color: var(--color-default-60);
-	--uix-navbar-border-size: 1px;
-	--uix-navbar-border-style: solid;
-	--uix-navbar-hover-background-color: var(--color-default-40);
-	--uix-container-position: var(--uix-navbar-position);
-	display: flex;
-	flex-direction: column;
-	&[docked] {
-		--uix-list-button-radius: 0;
-		border-bottom: 0;
-		position: fixed;
-		bottom: 0px;
-		background-color: var(--uix-navbar-background-color, var(--color-default-5));
-		> * {
-			border-right: 0;
-			border-bottom: 0;
-			&:first-child {
-				border-left: 0;
-			}
-		}
-	}
-}
-`,mimeType:"text/css",skipSW:!1},"/modules/uix/display/icon.css":{content:`.uix-icon {
-	display: inline-block;
-	vertical-align: middle;
-	svg {
-		height: inherit;
-		width: inherit;
-	}
-}
-
-&[solid] {
-	stroke: currentColor;
-	fill: currentColor;
-}
-`,mimeType:"text/css",skipSW:!1},"/modules/mvc/view/html/directive.js":{content:`/**
+`,mimeType:"application/javascript",skipSW:!1},"/modules/mvc/view/html/directive.js":{content:`/**
  * Creates a user-facing directive function from a Directive class. This
  * function has the same parameters as the directive's render() method.
  */
@@ -17768,7 +16171,20 @@ class Keyed extends Directive {
 export const keyed = directive(Keyed);
 
 export const ifDefined = (value) => value ?? nothing;
-`,mimeType:"application/javascript",skipSW:!1},"/modules/icon-lucide/lucide/folder.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/database.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/uix/form/input.css":{content:`:where(.uix-input) {
+`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/display/icon.css":{content:`.uix-icon {
+	display: inline-block;
+	vertical-align: middle;
+	svg {
+		height: inherit;
+		width: inherit;
+	}
+}
+
+&[solid] {
+	stroke: currentColor;
+	fill: currentColor;
+}
+`,mimeType:"text/css",skipSW:!1},"/modules/uix/form/input.css":{content:`:where(.uix-input) {
 	--uix-input-background-color: var(--colors-surface-100);
 	--uix-input-border-color: var(--colors-gray-900);
 	--uix-input-text-color: var(--colors-gray-900);
@@ -17996,5 +16412,5 @@ export const ifDefined = (value) => value ?? nothing;
 		}
 	}
 }
-`,mimeType:"text/css",skipSW:!1},"/modules/icon-lucide/lucide/cog.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12 20a8 8 0 1 0 0-16a8 8 0 0 0 0 16"/><path d="M12 14a2 2 0 1 0 0-4a2 2 0 0 0 0 4m0-12v2m0 18v-2m5 .66l-1-1.73m-5-8.66L7 3.34M20.66 17l-1.73-1M3.34 7l1.73 1M14 12h8M2 12h2m16.66-5l-1.73 1M3.34 17l1.73-1M17 3.34l-1 1.73m-5 8.66l-4 6.93"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/code.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m16 18l6-6l-6-6M8 6l-6 6l6 6"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/message-circle.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/square-mouse-pointer.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12.034 12.681a.498.498 0 0 1 .647-.647l9 3.5a.5.5 0 0 1-.033.943l-3.444 1.068a1 1 0 0 0-.66.66l-1.067 3.443a.5.5 0 0 1-.943.033z"/><path d="M21 11V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/bot-message-square.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V2H8m0 16l-4 4V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2Zm-6-6h2m5-1v2m6-2v2m5-1h2"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/sun.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/server-cog.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M4.5 10H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-.5m-15 4H4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2h-.5M6 6h.01M6 18h.01m9.69-4.6l-.9-.3m-5.6-2.2l-.9-.3m2.3 5.1l.3-.9m2.7.9l-.4-1m-2.4-5.4l-.4-1m-2.1 5.3l1-.4m5.4-2.4l1-.4m-2.3-2.1l-.3.9"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/settings.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2"/><circle cx="12" cy="12" r="3"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/style.css":{content:`@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_P-bnBeA.woff2) format("woff2");unicode-range:U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_G-bnBeA.woff2) format("woff2");unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_B-bnBeA.woff2) format("woff2");unicode-range:U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_N-bnBeA.woff2) format("woff2");unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_M-bnBeA.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_C-bk.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}@supports ((-webkit-hyphens: none) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color:rgb(from red r g b)))){*,:before,:after,::backdrop{--un-bg-opacity:100%;--un-text-opacity:100%;--un-ease:initial;--un-translate-x:initial;--un-translate-y:initial;--un-translate-z:initial;--un-border-opacity:100%;--un-space-x-reverse:initial;--un-space-y-reverse:initial;--un-ring-opacity:100%;--un-placeholder-opacity:100%}}@property --un-text-opacity{syntax:"<percentage>";inherits:false;initial-value:100%;}@property --un-outline-style{syntax:"*";inherits:false;initial-value:solid;}@property --un-border-opacity{syntax:"<percentage>";inherits:false;initial-value:100%;}@property --un-bg-opacity{syntax:"<percentage>";inherits:false;initial-value:100%;}@property --un-ring-opacity{syntax:"<percentage>";inherits:false;initial-value:100%;}@property --un-inset-ring-color{syntax:"*";inherits:false;}@property --un-inset-ring-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-inset-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-inset-shadow-color{syntax:"*";inherits:false;}@property --un-ring-color{syntax:"*";inherits:false;}@property --un-ring-inset{syntax:"*";inherits:false;}@property --un-ring-offset-color{syntax:"*";inherits:false;}@property --un-ring-offset-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-ring-offset-width{syntax:"<length>";inherits:false;initial-value:0px;}@property --un-ring-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-shadow-color{syntax:"*";inherits:false;}@property --un-translate-x{syntax:"*";inherits:false;initial-value:0;}@property --un-translate-y{syntax:"*";inherits:false;initial-value:0;}@property --un-translate-z{syntax:"*";inherits:false;initial-value:0;}@property --un-ease{syntax:"*";inherits:false;}@property --un-blur{syntax:"*";inherits:false;}@property --un-brightness{syntax:"*";inherits:false;}@property --un-contrast{syntax:"*";inherits:false;}@property --un-drop-shadow{syntax:"*";inherits:false;}@property --un-grayscale{syntax:"*";inherits:false;}@property --un-hue-rotate{syntax:"*";inherits:false;}@property --un-invert{syntax:"*";inherits:false;}@property --un-saturate{syntax:"*";inherits:false;}@property --un-sepia{syntax:"*";inherits:false;}@property --un-placeholder-opacity{syntax:"<percentage>";inherits:false;initial-value:100%;}@property --un-numeric-figure{syntax:"*";inherits:false;}@property --un-numeric-fraction{syntax:"*";inherits:false;}@property --un-numeric-spacing{syntax:"*";inherits:false;}@property --un-ordinal{syntax:"*";inherits:false;}@property --un-slashed-zero{syntax:"*";inherits:false;}@property --un-space-x-reverse{syntax:"*";inherits:false;initial-value:0;}@property --un-space-y-reverse{syntax:"*";inherits:false;initial-value:0;}:root,:host{--spacing: .25rem;--font-sans: "Manrope",ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";--font-serif: ui-serif,Georgia,Cambria,"Times New Roman",Times,serif;--font-mono: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;--font-family: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;--font-icon-family: lucide;--colors-black: #000;--colors-white: #fff;--colors-slate-50: oklch(98.4% .003 247.858);--colors-slate-100: oklch(96.8% .007 247.896);--colors-slate-200: oklch(92.9% .013 255.508);--colors-slate-300: oklch(86.9% .022 252.894);--colors-slate-400: oklch(70.4% .04 256.788);--colors-slate-500: oklch(55.4% .046 257.417);--colors-slate-600: oklch(44.6% .043 257.281);--colors-slate-700: oklch(37.2% .044 257.287);--colors-slate-800: oklch(27.9% .041 260.031);--colors-slate-900: oklch(20.8% .042 265.755);--colors-slate-950: oklch(12.9% .042 264.695);--colors-slate-DEFAULT: oklch(70.4% .04 256.788);--colors-gray-50: oklch(98.5% .002 247.839);--colors-gray-100: oklch(96.7% .003 264.542);--colors-gray-200: oklch(92.8% .006 264.531);--colors-gray-300: oklch(87.2% .01 258.338);--colors-gray-400: oklch(70.7% .022 261.325);--colors-gray-500: oklch(55.1% .027 264.364);--colors-gray-600: oklch(44.6% .03 256.802);--colors-gray-700: oklch(37.3% .034 259.733);--colors-gray-800: oklch(27.8% .033 256.848);--colors-gray-900: oklch(21% .034 264.665);--colors-gray-950: oklch(13% .028 261.692);--colors-gray-DEFAULT: oklch(70.7% .022 261.325);--colors-zinc-50: oklch(98.5% 0 0);--colors-zinc-100: oklch(96.7% .001 286.375);--colors-zinc-200: oklch(92% .004 286.32);--colors-zinc-300: oklch(87.1% .006 286.286);--colors-zinc-400: oklch(70.5% .015 286.067);--colors-zinc-500: oklch(55.2% .016 285.938);--colors-zinc-600: oklch(44.2% .017 285.786);--colors-zinc-700: oklch(37% .013 285.805);--colors-zinc-800: oklch(27.4% .006 286.033);--colors-zinc-900: oklch(21% .006 285.885);--colors-zinc-950: oklch(14.1% .005 285.823);--colors-zinc-DEFAULT: oklch(70.5% .015 286.067);--colors-neutral-50: oklch(98.5% 0 0);--colors-neutral-100: oklch(97% 0 0);--colors-neutral-200: oklch(92.2% 0 0);--colors-neutral-300: oklch(87% 0 0);--colors-neutral-400: oklch(70.8% 0 0);--colors-neutral-500: oklch(55.6% 0 0);--colors-neutral-600: oklch(43.9% 0 0);--colors-neutral-700: oklch(37.1% 0 0);--colors-neutral-800: oklch(26.9% 0 0);--colors-neutral-900: oklch(20.5% 0 0);--colors-neutral-950: oklch(14.5% 0 0);--colors-neutral-DEFAULT: oklch(70.8% 0 0);--colors-stone-50: oklch(98.5% .001 106.423);--colors-stone-100: oklch(97% .001 106.424);--colors-stone-200: oklch(92.3% .003 48.717);--colors-stone-300: oklch(86.9% .005 56.366);--colors-stone-400: oklch(70.9% .01 56.259);--colors-stone-500: oklch(55.3% .013 58.071);--colors-stone-600: oklch(44.4% .011 73.639);--colors-stone-700: oklch(37.4% .01 67.558);--colors-stone-800: oklch(26.8% .007 34.298);--colors-stone-900: oklch(21.6% .006 56.043);--colors-stone-950: oklch(14.7% .004 49.25);--colors-stone-DEFAULT: oklch(70.9% .01 56.259);--colors-red-50: oklch(97.1% .013 17.38);--colors-red-100: oklch(93.6% .032 17.717);--colors-red-200: oklch(88.5% .062 18.334);--colors-red-300: oklch(80.8% .114 19.571);--colors-red-400: oklch(70.4% .191 22.216);--colors-red-500: oklch(63.7% .237 25.331);--colors-red-600: oklch(57.7% .245 27.325);--colors-red-700: oklch(50.5% .213 27.518);--colors-red-800: oklch(44.4% .177 26.899);--colors-red-900: oklch(39.6% .141 25.723);--colors-red-950: oklch(25.8% .092 26.042);--colors-red-DEFAULT: oklch(70.4% .191 22.216);--colors-orange-50: oklch(98% .016 73.684);--colors-orange-100: oklch(95.4% .038 75.164);--colors-orange-200: oklch(90.1% .076 70.697);--colors-orange-300: oklch(83.7% .128 66.29);--colors-orange-400: oklch(75% .183 55.934);--colors-orange-500: oklch(70.5% .213 47.604);--colors-orange-600: oklch(64.6% .222 41.116);--colors-orange-700: oklch(55.3% .195 38.402);--colors-orange-800: oklch(47% .157 37.304);--colors-orange-900: oklch(40.8% .123 38.172);--colors-orange-950: oklch(26.6% .079 36.259);--colors-orange-DEFAULT: oklch(75% .183 55.934);--colors-amber-50: oklch(98.7% .022 95.277);--colors-amber-100: oklch(96.2% .059 95.617);--colors-amber-200: oklch(92.4% .12 95.746);--colors-amber-300: oklch(87.9% .169 91.605);--colors-amber-400: oklch(82.8% .189 84.429);--colors-amber-500: oklch(76.9% .188 70.08);--colors-amber-600: oklch(66.6% .179 58.318);--colors-amber-700: oklch(55.5% .163 48.998);--colors-amber-800: oklch(47.3% .137 46.201);--colors-amber-900: oklch(41.4% .112 45.904);--colors-amber-950: oklch(27.9% .077 45.635);--colors-amber-DEFAULT: oklch(82.8% .189 84.429);--colors-yellow-50: oklch(98.7% .026 102.212);--colors-yellow-100: oklch(97.3% .071 103.193);--colors-yellow-200: oklch(94.5% .129 101.54);--colors-yellow-300: oklch(90.5% .182 98.111);--colors-yellow-400: oklch(85.2% .199 91.936);--colors-yellow-500: oklch(79.5% .184 86.047);--colors-yellow-600: oklch(68.1% .162 75.834);--colors-yellow-700: oklch(55.4% .135 66.442);--colors-yellow-800: oklch(47.6% .114 61.907);--colors-yellow-900: oklch(42.1% .095 57.708);--colors-yellow-950: oklch(28.6% .066 53.813);--colors-yellow-DEFAULT: oklch(85.2% .199 91.936);--colors-lime-50: oklch(98.6% .031 120.757);--colors-lime-100: oklch(96.7% .067 122.328);--colors-lime-200: oklch(93.8% .127 124.321);--colors-lime-300: oklch(89.7% .196 126.665);--colors-lime-400: oklch(84.1% .238 128.85);--colors-lime-500: oklch(76.8% .233 130.85);--colors-lime-600: oklch(64.8% .2 131.684);--colors-lime-700: oklch(53.2% .157 131.589);--colors-lime-800: oklch(45.3% .124 130.933);--colors-lime-900: oklch(40.5% .101 131.063);--colors-lime-950: oklch(27.4% .072 132.109);--colors-lime-DEFAULT: oklch(84.1% .238 128.85);--colors-green-50: oklch(98.2% .018 155.826);--colors-green-100: oklch(96.2% .044 156.743);--colors-green-200: oklch(92.5% .084 155.995);--colors-green-300: oklch(87.1% .15 154.449);--colors-green-400: oklch(79.2% .209 151.711);--colors-green-500: oklch(72.3% .219 149.579);--colors-green-600: oklch(62.7% .194 149.214);--colors-green-700: oklch(52.7% .154 150.069);--colors-green-800: oklch(44.8% .119 151.328);--colors-green-900: oklch(39.3% .095 152.535);--colors-green-950: oklch(26.6% .065 152.934);--colors-green-DEFAULT: oklch(79.2% .209 151.711);--colors-emerald-50: oklch(97.9% .021 166.113);--colors-emerald-100: oklch(95% .052 163.051);--colors-emerald-200: oklch(90.5% .093 164.15);--colors-emerald-300: oklch(84.5% .143 164.978);--colors-emerald-400: oklch(76.5% .177 163.223);--colors-emerald-500: oklch(69.6% .17 162.48);--colors-emerald-600: oklch(59.6% .145 163.225);--colors-emerald-700: oklch(50.8% .118 165.612);--colors-emerald-800: oklch(43.2% .095 166.913);--colors-emerald-900: oklch(37.8% .077 168.94);--colors-emerald-950: oklch(26.2% .051 172.552);--colors-emerald-DEFAULT: oklch(76.5% .177 163.223);--colors-teal-50: oklch(98.4% .014 180.72);--colors-teal-100: oklch(95.3% .051 180.801);--colors-teal-200: oklch(91% .096 180.426);--colors-teal-300: oklch(85.5% .138 181.071);--colors-teal-400: oklch(77.7% .152 181.912);--colors-teal-500: oklch(70.4% .14 182.503);--colors-teal-600: oklch(60% .118 184.704);--colors-teal-700: oklch(51.1% .096 186.391);--colors-teal-800: oklch(43.7% .078 188.216);--colors-teal-900: oklch(38.6% .063 188.416);--colors-teal-950: oklch(27.7% .046 192.524);--colors-teal-DEFAULT: oklch(77.7% .152 181.912);--colors-cyan-50: oklch(98.4% .019 200.873);--colors-cyan-100: oklch(95.6% .045 203.388);--colors-cyan-200: oklch(91.7% .08 205.041);--colors-cyan-300: oklch(86.5% .127 207.078);--colors-cyan-400: oklch(78.9% .154 211.53);--colors-cyan-500: oklch(71.5% .143 215.221);--colors-cyan-600: oklch(60.9% .126 221.723);--colors-cyan-700: oklch(52% .105 223.128);--colors-cyan-800: oklch(45% .085 224.283);--colors-cyan-900: oklch(39.8% .07 227.392);--colors-cyan-950: oklch(30.2% .056 229.695);--colors-cyan-DEFAULT: oklch(78.9% .154 211.53);--colors-sky-50: oklch(97.7% .013 236.62);--colors-sky-100: oklch(95.1% .026 236.824);--colors-sky-200: oklch(90.1% .058 230.902);--colors-sky-300: oklch(82.8% .111 230.318);--colors-sky-400: oklch(74.6% .16 232.661);--colors-sky-500: oklch(68.5% .169 237.323);--colors-sky-600: oklch(58.8% .158 241.966);--colors-sky-700: oklch(50% .134 242.749);--colors-sky-800: oklch(44.3% .11 240.79);--colors-sky-900: oklch(39.1% .09 240.876);--colors-sky-950: oklch(29.3% .066 243.157);--colors-sky-DEFAULT: oklch(74.6% .16 232.661);--colors-blue-50: oklch(97% .014 254.604);--colors-blue-100: oklch(93.2% .032 255.585);--colors-blue-200: oklch(88.2% .059 254.128);--colors-blue-300: oklch(80.9% .105 251.813);--colors-blue-400: oklch(70.7% .165 254.624);--colors-blue-500: oklch(62.3% .214 259.815);--colors-blue-600: oklch(54.6% .245 262.881);--colors-blue-700: oklch(48.8% .243 264.376);--colors-blue-800: oklch(42.4% .199 265.638);--colors-blue-900: oklch(37.9% .146 265.522);--colors-blue-950: oklch(28.2% .091 267.935);--colors-blue-DEFAULT: oklch(70.7% .165 254.624);--colors-indigo-50: oklch(96.2% .018 272.314);--colors-indigo-100: oklch(93% .034 272.788);--colors-indigo-200: oklch(87% .065 274.039);--colors-indigo-300: oklch(78.5% .115 274.713);--colors-indigo-400: oklch(67.3% .182 276.935);--colors-indigo-500: oklch(58.5% .233 277.117);--colors-indigo-600: oklch(51.1% .262 276.966);--colors-indigo-700: oklch(45.7% .24 277.023);--colors-indigo-800: oklch(39.8% .195 277.366);--colors-indigo-900: oklch(35.9% .144 278.697);--colors-indigo-950: oklch(25.7% .09 281.288);--colors-indigo-DEFAULT: oklch(67.3% .182 276.935);--colors-violet-50: oklch(96.9% .016 293.756);--colors-violet-100: oklch(94.3% .029 294.588);--colors-violet-200: oklch(89.4% .057 293.283);--colors-violet-300: oklch(81.1% .111 293.571);--colors-violet-400: oklch(70.2% .183 293.541);--colors-violet-500: oklch(60.6% .25 292.717);--colors-violet-600: oklch(54.1% .281 293.009);--colors-violet-700: oklch(49.1% .27 292.581);--colors-violet-800: oklch(43.2% .232 292.759);--colors-violet-900: oklch(38% .189 293.745);--colors-violet-950: oklch(28.3% .141 291.089);--colors-violet-DEFAULT: oklch(70.2% .183 293.541);--colors-purple-50: oklch(97.7% .014 308.299);--colors-purple-100: oklch(94.6% .033 307.174);--colors-purple-200: oklch(90.2% .063 306.703);--colors-purple-300: oklch(82.7% .119 306.383);--colors-purple-400: oklch(71.4% .203 305.504);--colors-purple-500: oklch(62.7% .265 303.9);--colors-purple-600: oklch(55.8% .288 302.321);--colors-purple-700: oklch(49.6% .265 301.924);--colors-purple-800: oklch(43.8% .218 303.724);--colors-purple-900: oklch(38.1% .176 304.987);--colors-purple-950: oklch(29.1% .149 302.717);--colors-purple-DEFAULT: oklch(71.4% .203 305.504);--colors-fuchsia-50: oklch(97.7% .017 320.058);--colors-fuchsia-100: oklch(95.2% .037 318.852);--colors-fuchsia-200: oklch(90.3% .076 319.62);--colors-fuchsia-300: oklch(83.3% .145 321.434);--colors-fuchsia-400: oklch(74% .238 322.16);--colors-fuchsia-500: oklch(66.7% .295 322.15);--colors-fuchsia-600: oklch(59.1% .293 322.896);--colors-fuchsia-700: oklch(51.8% .253 323.949);--colors-fuchsia-800: oklch(45.2% .211 324.591);--colors-fuchsia-900: oklch(40.1% .17 325.612);--colors-fuchsia-950: oklch(29.3% .136 325.661);--colors-fuchsia-DEFAULT: oklch(74% .238 322.16);--colors-pink-50: oklch(97.1% .014 343.198);--colors-pink-100: oklch(94.8% .028 342.258);--colors-pink-200: oklch(89.9% .061 343.231);--colors-pink-300: oklch(82.3% .12 346.018);--colors-pink-400: oklch(71.8% .202 349.761);--colors-pink-500: oklch(65.6% .241 354.308);--colors-pink-600: oklch(59.2% .249 .584);--colors-pink-700: oklch(52.5% .223 3.958);--colors-pink-800: oklch(45.9% .187 3.815);--colors-pink-900: oklch(40.8% .153 2.432);--colors-pink-950: oklch(28.4% .109 3.907);--colors-pink-DEFAULT: oklch(71.8% .202 349.761);--colors-rose-50: oklch(96.9% .015 12.422);--colors-rose-100: oklch(94.1% .03 12.58);--colors-rose-200: oklch(89.2% .058 10.001);--colors-rose-300: oklch(81% .117 11.638);--colors-rose-400: oklch(71.2% .194 13.428);--colors-rose-500: oklch(64.5% .246 16.439);--colors-rose-600: oklch(58.6% .253 17.585);--colors-rose-700: oklch(51.4% .222 16.935);--colors-rose-800: oklch(45.5% .188 13.697);--colors-rose-900: oklch(41% .159 10.272);--colors-rose-950: oklch(27.1% .105 12.094);--colors-rose-DEFAULT: oklch(71.2% .194 13.428);--colors-light-50: oklch(99.4% 0 0);--colors-light-100: oklch(99.11% 0 0);--colors-light-200: oklch(98.51% 0 0);--colors-light-300: oklch(98.16% .0017 247.84);--colors-light-400: oklch(97.31% 0 0);--colors-light-500: oklch(96.12% 0 0);--colors-light-600: oklch(96.32% .0034 247.86);--colors-light-700: oklch(94.17% .0052 247.88);--colors-light-800: oklch(91.09% .007 247.9);--colors-light-900: oklch(90.72% .0051 228.82);--colors-light-950: oklch(89.23% .006 239.83);--colors-light-DEFAULT: oklch(97.31% 0 0);--colors-dark-50: oklch(40.91% 0 0);--colors-dark-100: oklch(35.62% 0 0);--colors-dark-200: oklch(31.71% 0 0);--colors-dark-300: oklch(29.72% 0 0);--colors-dark-400: oklch(25.2% 0 0);--colors-dark-500: oklch(23.93% 0 0);--colors-dark-600: oklch(22.73% .0038 286.09);--colors-dark-700: oklch(22.21% 0 0);--colors-dark-800: oklch(20.9% 0 0);--colors-dark-900: oklch(16.84% 0 0);--colors-dark-950: oklch(13.44% 0 0);--colors-dark-DEFAULT: oklch(25.2% 0 0);--colors-primary-50: hsl(198, 100%, 97%);--colors-primary-100: hsl(198, 100%, 92%);--colors-primary-200: hsl(198, 100%, 84%);--colors-primary-300: hsl(198, 100%, 75%);--colors-primary-400: hsl(198, 100%, 66%);--colors-primary-500: hsl(198, 100%, 55%);--colors-primary-600: hsl(198, 100%, 45%);--colors-primary-700: hsl(198, 100%, 35%);--colors-primary-800: hsl(198, 100%, 24%);--colors-primary-900: hsl(198, 100%, 15%);--colors-primary-DEFAULT: hsl(198, 100%, 55%);--colors-secondary-50: hsl(120, 100%, 97%);--colors-secondary-100: hsl(120, 100%, 92%);--colors-secondary-200: hsl(120, 100%, 84%);--colors-secondary-300: hsl(120, 100%, 75%);--colors-secondary-400: hsl(120, 100%, 66%);--colors-secondary-500: hsl(120, 100%, 55%);--colors-secondary-600: hsl(120, 100%, 45%);--colors-secondary-700: hsl(120, 100%, 35%);--colors-secondary-800: hsl(120, 100%, 24%);--colors-secondary-900: hsl(120, 100%, 15%);--colors-secondary-DEFAULT: hsl(120, 100%, 55%);--colors-tertiary-50: hsl(175, 100%, 97%);--colors-tertiary-100: hsl(175, 100%, 92%);--colors-tertiary-200: hsl(175, 100%, 84%);--colors-tertiary-300: hsl(175, 100%, 75%);--colors-tertiary-400: hsl(175, 100%, 66%);--colors-tertiary-500: hsl(175, 100%, 55%);--colors-tertiary-600: hsl(175, 100%, 45%);--colors-tertiary-700: hsl(175, 100%, 35%);--colors-tertiary-800: hsl(175, 100%, 24%);--colors-tertiary-900: hsl(175, 100%, 15%);--colors-tertiary-DEFAULT: hsl(175, 100%, 55%);--colors-success-50: hsl(149, 87%, 97%);--colors-success-100: hsl(149, 87%, 92%);--colors-success-200: hsl(149, 87%, 84%);--colors-success-300: hsl(149, 87%, 75%);--colors-success-400: hsl(149, 87%, 66%);--colors-success-500: hsl(149, 87%, 55%);--colors-success-600: hsl(149, 87%, 45%);--colors-success-700: hsl(149, 87%, 35%);--colors-success-800: hsl(149, 87%, 24%);--colors-success-900: hsl(149, 87%, 15%);--colors-success-DEFAULT: hsl(149, 87%, 55%);--colors-warning-50: hsl(32, 100%, 97%);--colors-warning-100: hsl(32, 100%, 92%);--colors-warning-200: hsl(32, 100%, 84%);--colors-warning-300: hsl(32, 100%, 75%);--colors-warning-400: hsl(32, 100%, 66%);--colors-warning-500: hsl(32, 100%, 55%);--colors-warning-600: hsl(32, 100%, 45%);--colors-warning-700: hsl(32, 100%, 35%);--colors-warning-800: hsl(32, 100%, 24%);--colors-warning-900: hsl(32, 100%, 15%);--colors-warning-DEFAULT: hsl(32, 100%, 55%);--colors-danger-50: hsl(345, 100%, 97%);--colors-danger-100: hsl(345, 100%, 92%);--colors-danger-200: hsl(345, 100%, 84%);--colors-danger-300: hsl(345, 100%, 75%);--colors-danger-400: hsl(345, 100%, 66%);--colors-danger-500: hsl(345, 100%, 55%);--colors-danger-600: hsl(345, 100%, 45%);--colors-danger-700: hsl(345, 100%, 35%);--colors-danger-800: hsl(345, 100%, 24%);--colors-danger-900: hsl(345, 100%, 15%);--colors-danger-DEFAULT: hsl(345, 100%, 55%);--colors-default-50: hsl(0, 0%, 97%);--colors-default-100: hsl(0, 0%, 92%);--colors-default-200: hsl(0, 0%, 84%);--colors-default-300: hsl(0, 0%, 75%);--colors-default-400: hsl(0, 0%, 66%);--colors-default-500: hsl(0, 0%, 55%);--colors-default-600: hsl(0, 0%, 45%);--colors-default-700: hsl(0, 0%, 35%);--colors-default-800: hsl(0, 0%, 24%);--colors-default-900: hsl(0, 0%, 15%);--colors-default-DEFAULT: hsl(0, 0%, 35%);--colors-surface-50: hsl(0, 0%, 97%);--colors-surface-100: hsl(0, 0%, 92%);--colors-surface-200: hsl(0, 0%, 84%);--colors-surface-300: hsl(0, 0%, 75%);--colors-surface-400: hsl(0, 0%, 66%);--colors-surface-500: hsl(0, 0%, 55%);--colors-surface-600: hsl(0, 0%, 45%);--colors-surface-700: hsl(0, 0%, 35%);--colors-surface-800: hsl(0, 0%, 24%);--colors-surface-900: hsl(0, 0%, 15%);--colors-surface-DEFAULT: hsl(0, 0%, 35%);--text-xs-fontSize: .75rem;--text-xs-lineHeight: 1rem;--text-sm-fontSize: .875rem;--text-sm-lineHeight: 1.25rem;--text-base-fontSize: 1rem;--text-base-lineHeight: 1.5rem;--text-lg-fontSize: 1.125rem;--text-lg-lineHeight: 1.75rem;--text-xl-fontSize: 1.25rem;--text-xl-lineHeight: 1.75rem;--text-2xl-fontSize: 1.5rem;--text-2xl-lineHeight: 2rem;--text-3xl-fontSize: 1.875rem;--text-3xl-lineHeight: 2.25rem;--text-4xl-fontSize: 2.25rem;--text-4xl-lineHeight: 2.5rem;--text-5xl-fontSize: 3rem;--text-5xl-lineHeight: 1;--text-6xl-fontSize: 3.75rem;--text-6xl-lineHeight: 1;--text-7xl-fontSize: 4.5rem;--text-7xl-lineHeight: 1;--text-8xl-fontSize: 6rem;--text-8xl-lineHeight: 1;--text-9xl-fontSize: 8rem;--text-9xl-lineHeight: 1;--text-color: var(--color-surface-100);--fontWeight-thin: 100;--fontWeight-extralight: 200;--fontWeight-light: 300;--fontWeight-normal: 400;--fontWeight-medium: 500;--fontWeight-semibold: 600;--fontWeight-bold: 700;--fontWeight-extrabold: 800;--fontWeight-black: 900;--tracking-tighter: -.05em;--tracking-tight: -.025em;--tracking-normal: 0em;--tracking-wide: .025em;--tracking-wider: .05em;--tracking-widest: .1em;--leading-none: 1;--leading-tight: 1.25;--leading-snug: 1.375;--leading-normal: 1.5;--leading-relaxed: 1.625;--leading-loose: 2;--textStrokeWidth-DEFAULT: 1.5rem;--textStrokeWidth-none: 0;--textStrokeWidth-sm: thin;--textStrokeWidth-md: medium;--textStrokeWidth-lg: thick;--radius-DEFAULT: .25rem;--radius-none: 0;--radius-xs: .125rem;--radius-sm: .25rem;--radius-md: .375rem;--radius-lg: .5rem;--radius-xl: .75rem;--radius-2xl: 1rem;--radius-3xl: 1.5rem;--radius-4xl: 2rem;--ease-linear: linear;--ease-in: cubic-bezier(.4, 0, 1, 1);--ease-out: cubic-bezier(0, 0, .2, 1);--ease-in-out: cubic-bezier(.4, 0, .2, 1);--ease-DEFAULT: cubic-bezier(.4, 0, .2, 1);--blur-DEFAULT: 8px;--blur-xs: 4px;--blur-sm: 8px;--blur-md: 12px;--blur-lg: 16px;--blur-xl: 24px;--blur-2xl: 40px;--blur-3xl: 64px;--perspective-dramatic: 100px;--perspective-near: 300px;--perspective-normal: 500px;--perspective-midrange: 800px;--perspective-distant: 1200px;--default-transition-duration: .15s;--default-transition-timingFunction: cubic-bezier(.4, 0, .2, 1);--default-font-family: var(--font-sans);--default-font-featureSettings: var(--font-sans--font-feature-settings);--default-font-variationSettings: var(--font-sans--font-variation-settings);--default-monoFont-family: var(--font-mono);--default-monoFont-featureSettings: var(--font-mono--font-feature-settings);--default-monoFont-variationSettings: var(--font-mono--font-variation-settings);--container-3xs: 16rem;--container-2xs: 18rem;--container-xs: 20rem;--container-sm: 24rem;--container-md: 28rem;--container-lg: 32rem;--container-xl: 36rem;--container-2xl: 42rem;--container-3xl: 48rem;--container-4xl: 56rem;--container-5xl: 64rem;--container-6xl: 72rem;--container-7xl: 80rem;--container-prose: 65ch;--background-color: var(--colors-primary-100);--boxShadow-md: 0 4px 6px -1px rgb(0 0 0 / .1), 0 2px 4px -2px rgb(0 0 0 / .1);--boxShadow-lg: 0 10px 15px -3px rgb(0 0 0 / .1), 0 4px 6px -4px rgb(0 0 0 / .1);--theme-font-family: "Manrope"}*,:after,:before,::backdrop,::file-selector-button{box-sizing:border-box;margin:0;padding:0;border:0 solid}html,:host{line-height:1.5;-webkit-text-size-adjust:100%;tab-size:4;font-family:var( --default-font-family, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" );font-feature-settings:var(--default-font-featureSettings, normal);font-variation-settings:var(--default-font-variationSettings, normal);-webkit-tap-highlight-color:transparent}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;-webkit-text-decoration:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,samp,pre{font-family:var( --default-monoFont-family, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace );font-feature-settings:var(--default-monoFont-featureSettings, normal);font-variation-settings:var(--default-monoFont-variationSettings, normal);font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}:-moz-focusring{outline:auto}progress{vertical-align:baseline}summary{display:list-item}ol,ul,menu{list-style:none}img,svg,video,canvas,audio,iframe,embed,object{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}button,input,select,optgroup,textarea,::file-selector-button{font:inherit;font-feature-settings:inherit;font-variation-settings:inherit;letter-spacing:inherit;color:inherit;border-radius:0;background-color:transparent;opacity:1}:where(select:is([multiple],[size])) optgroup{font-weight:bolder}:where(select:is([multiple],[size])) optgroup option{padding-inline-start:20px}::file-selector-button{margin-inline-end:4px}::placeholder{opacity:1}@supports (not (-webkit-appearance: -apple-pay-button)) or (contain-intrinsic-size: 1px){::placeholder{color:color-mix(in oklab,currentcolor 50%,transparent)}}textarea{resize:vertical}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-date-and-time-value{min-height:1lh;text-align:inherit}::-webkit-datetime-edit{display:inline-flex}::-webkit-datetime-edit-fields-wrapper{padding:0}::-webkit-datetime-edit,::-webkit-datetime-edit-year-field,::-webkit-datetime-edit-month-field,::-webkit-datetime-edit-day-field,::-webkit-datetime-edit-hour-field,::-webkit-datetime-edit-minute-field,::-webkit-datetime-edit-second-field,::-webkit-datetime-edit-millisecond-field,::-webkit-datetime-edit-meridiem-field{padding-block:0}:-moz-ui-invalid{box-shadow:none}button,input:where([type=button],[type=reset],[type=submit]),::file-selector-button{appearance:button}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[hidden]:where(:not([hidden=until-found])){display:none!important}.-container{width:-100%}.container{width:100%}@media (min-width: 40rem){.-container{max-width:-40rem}.container{max-width:40rem}}@media (min-width: 48rem){.-container{max-width:-48rem}.container{max-width:48rem}}@media (min-width: 64rem){.-container{max-width:-64rem}.container{max-width:64rem}}@media (min-width: 80rem){.-container{max-width:-80rem}.container{max-width:80rem}}@media (min-width: 96rem){.-container{max-width:-96rem}.container{max-width:96rem}}.text-2xl{font-size:var(--text-2xl-fontSize);line-height:var(--un-leading, var(--text-2xl-lineHeight))}.text-3xl{font-size:var(--text-3xl-fontSize);line-height:var(--un-leading, var(--text-3xl-lineHeight))}.text-4xl{font-size:var(--text-4xl-fontSize);line-height:var(--un-leading, var(--text-4xl-lineHeight))}.text-5xl{font-size:var(--text-5xl-fontSize);line-height:var(--un-leading, var(--text-5xl-lineHeight))}.text-6xl{font-size:var(--text-6xl-fontSize);line-height:var(--un-leading, var(--text-6xl-lineHeight))}.text-base{font-size:var(--text-base-fontSize);line-height:var(--un-leading, var(--text-base-lineHeight))}.text-lg{font-size:var(--text-lg-fontSize);line-height:var(--un-leading, var(--text-lg-lineHeight))}.text-sm{font-size:var(--text-sm-fontSize);line-height:var(--un-leading, var(--text-sm-lineHeight))}.text-xl{font-size:var(--text-xl-fontSize);line-height:var(--un-leading, var(--text-xl-lineHeight))}.text-xs{font-size:var(--text-xs-fontSize);line-height:var(--un-leading, var(--text-xs-lineHeight))}.text-\\[\\#1d2021\\]{color:color-mix(in oklab,#1d2021 var(--un-text-opacity),transparent)}.text-\\[\\#282828\\]{color:color-mix(in oklab,#282828 var(--un-text-opacity),transparent)}.text-\\[\\#83a598\\]{color:color-mix(in oklab,#83a598 var(--un-text-opacity),transparent)}.text-\\[\\#928374\\]{color:color-mix(in oklab,#928374 var(--un-text-opacity),transparent)}.text-\\[\\#a89984\\]{color:color-mix(in oklab,#a89984 var(--un-text-opacity),transparent)}.text-\\[\\#b8bb26\\]{color:color-mix(in oklab,#b8bb26 var(--un-text-opacity),transparent)}.text-\\[\\#bdae93\\]{color:color-mix(in oklab,#bdae93 var(--un-text-opacity),transparent)}.text-\\[\\#d5c4a1\\]{color:color-mix(in oklab,#d5c4a1 var(--un-text-opacity),transparent)}.text-\\[\\#ebdbb2\\]{color:color-mix(in oklab,#ebdbb2 var(--un-text-opacity),transparent)}.text-\\[\\#fabd2f\\]{color:color-mix(in oklab,#fabd2f var(--un-text-opacity),transparent)}.text-amber-600{color:color-mix(in srgb,var(--colors-amber-600) var(--un-text-opacity),transparent)}.text-amber-900{color:color-mix(in srgb,var(--colors-amber-900) var(--un-text-opacity),transparent)}.text-blue-100{color:color-mix(in srgb,var(--colors-blue-100) var(--un-text-opacity),transparent)}.text-blue-600{color:color-mix(in srgb,var(--colors-blue-600) var(--un-text-opacity),transparent)}.text-blue-700{color:color-mix(in srgb,var(--colors-blue-700) var(--un-text-opacity),transparent)}.text-gray-200{color:color-mix(in srgb,var(--colors-gray-200) var(--un-text-opacity),transparent)}.text-gray-300{color:color-mix(in srgb,var(--colors-gray-300) var(--un-text-opacity),transparent)}.text-gray-400{color:color-mix(in srgb,var(--colors-gray-400) var(--un-text-opacity),transparent)}.text-gray-500{color:color-mix(in srgb,var(--colors-gray-500) var(--un-text-opacity),transparent)}.text-gray-600{color:color-mix(in srgb,var(--colors-gray-600) var(--un-text-opacity),transparent)}.text-gray-700{color:color-mix(in srgb,var(--colors-gray-700) var(--un-text-opacity),transparent)}.text-gray-800{color:color-mix(in srgb,var(--colors-gray-800) var(--un-text-opacity),transparent)}.text-gray-900{color:color-mix(in srgb,var(--colors-gray-900) var(--un-text-opacity),transparent)}.text-green-400{color:color-mix(in srgb,var(--colors-green-400) var(--un-text-opacity),transparent)}.text-green-800{color:color-mix(in srgb,var(--colors-green-800) var(--un-text-opacity),transparent)}.text-red-100{color:color-mix(in srgb,var(--colors-red-100) var(--un-text-opacity),transparent)}.text-red-400{color:color-mix(in srgb,var(--colors-red-400) var(--un-text-opacity),transparent)}.text-red-700{color:color-mix(in srgb,var(--colors-red-700) var(--un-text-opacity),transparent)}.text-red-800{color:color-mix(in srgb,var(--colors-red-800) var(--un-text-opacity),transparent)}.text-white{color:color-mix(in srgb,var(--colors-white) var(--un-text-opacity),transparent)}.text-yellow-800{color:color-mix(in srgb,var(--colors-yellow-800) var(--un-text-opacity),transparent)}.hover\\:text-\\[\\#ebdbb2\\]:hover{color:color-mix(in oklab,#ebdbb2 var(--un-text-opacity),transparent)}.hover\\:text-\\[\\#fb4934\\]:hover{color:color-mix(in oklab,#fb4934 var(--un-text-opacity),transparent)}.tracking-wider{--un-tracking:var(--tracking-wider);letter-spacing:var(--tracking-wider)}.font-bold{--un-font-weight:var(--fontWeight-bold);font-weight:var(--fontWeight-bold)}.font-extrabold{--un-font-weight:var(--fontWeight-extrabold);font-weight:var(--fontWeight-extrabold)}.font-family{font-family:var(--font-family)}.font-medium{--un-font-weight:var(--fontWeight-medium);font-weight:var(--fontWeight-medium)}.font-mono{font-family:var(--font-mono)}.font-sans{font-family:var(--font-sans)}.font-semibold{--un-font-weight:var(--fontWeight-semibold);font-weight:var(--fontWeight-semibold)}.-tab{-moz-tab-size:-4;-o-tab-size:-4;tab-size:-4}.tab{-moz-tab-size:4;-o-tab-size:4;tab-size:4}.m\\[W\\]{margin:W}.m16{margin:calc(var(--spacing) * 16)}.m21{margin:calc(var(--spacing) * 21)}.m22{margin:calc(var(--spacing) * 22)}.m4{margin:calc(var(--spacing) * 4)}.m6{margin:calc(var(--spacing) * 6)}.m9{margin:calc(var(--spacing) * 9)}.ma{margin:auto}.mx-auto{margin-inline:auto}.my-2{margin-block:calc(var(--spacing) * 2)}.my-4{margin-block:calc(var(--spacing) * 4)}.my-6{margin-block:calc(var(--spacing) * 6)}.mb-1{margin-bottom:calc(var(--spacing) * 1)}.mb-2{margin-bottom:calc(var(--spacing) * 2)}.mb-3{margin-bottom:calc(var(--spacing) * 3)}.mb-4{margin-bottom:calc(var(--spacing) * 4)}.mb-6{margin-bottom:calc(var(--spacing) * 6)}.ml-1{margin-left:calc(var(--spacing) * 1)}.ml-2{margin-left:calc(var(--spacing) * 2)}.ml-auto{margin-left:auto}.mr-2{margin-right:calc(var(--spacing) * 2)}.mr-3{margin-right:calc(var(--spacing) * 3)}.mt-1{margin-top:calc(var(--spacing) * 1)}.mt-2{margin-top:calc(var(--spacing) * 2)}.mt-4{margin-top:calc(var(--spacing) * 4)}.mt-6{margin-top:calc(var(--spacing) * 6)}.mt-8{margin-top:calc(var(--spacing) * 8)}.p-1{padding:calc(var(--spacing) * 1)}.p-1\\.5{padding:calc(var(--spacing) * 1.5)}.p-2{padding:calc(var(--spacing) * 2)}.p-3{padding:calc(var(--spacing) * 3)}.p-4{padding:calc(var(--spacing) * 4)}.p-6{padding:calc(var(--spacing) * 6)}.p-8{padding:calc(var(--spacing) * 8)}.pa{padding:auto}.px-2{padding-inline:calc(var(--spacing) * 2)}.px-4{padding-inline:calc(var(--spacing) * 4)}.px-6{padding-inline:calc(var(--spacing) * 6)}.py-0\\.5{padding-block:calc(var(--spacing) * .5)}.py-1{padding-block:calc(var(--spacing) * 1)}.py-2{padding-block:calc(var(--spacing) * 2)}.py-8{padding-block:calc(var(--spacing) * 8)}.pb-2{padding-bottom:calc(var(--spacing) * 2)}.pb-4{padding-bottom:calc(var(--spacing) * 4)}.pla{padding-left:auto}.pr-10{padding-right:calc(var(--spacing) * 10)}.pr-16{padding-right:calc(var(--spacing) * 16)}.pr-2{padding-right:calc(var(--spacing) * 2)}.pr-4{padding-right:calc(var(--spacing) * 4)}.pra{padding-right:auto}.pt-2{padding-top:calc(var(--spacing) * 2)}.pt-4{padding-top:calc(var(--spacing) * 4)}.pt-6{padding-top:calc(var(--spacing) * 6)}.pta{padding-top:auto}.pisa{padding-inline-start:auto}.text-center{text-align:center}.text-left{text-align:left}.text-right{text-align:right}.-outline{outline-style:calc(var(--un-outline-style) * -1);outline-width:-1px}.outline{outline-style:var(--un-outline-style);outline-width:1px}.focus\\:outline-none:focus{--un-outline-style:none;outline-style:none}.-b,.-border{border-width:-1px}.b,.border{border-width:1px}.border-2{border-width:2px}.border-b{border-bottom-width:1px}.border-b-2{border-bottom-width:2px}.border-l{border-left-width:1px}.border-l-4{border-left-width:4px}.border-r{border-right-width:1px}.border-t{border-top-width:1px}.border-t-2{border-top-width:2px}.border-\\[\\#3c3836\\]{border-color:color-mix(in oklab,#3c3836 var(--un-border-opacity),transparent)}.border-\\[\\#504945\\]{border-color:color-mix(in oklab,#504945 var(--un-border-opacity),transparent)}.border-\\[\\#665c54\\]{border-color:color-mix(in oklab,#665c54 var(--un-border-opacity),transparent)}.border-\\[\\#fb4934\\]{border-color:color-mix(in oklab,#fb4934 var(--un-border-opacity),transparent)}.border-amber-200{border-color:color-mix(in srgb,var(--colors-amber-200) var(--un-border-opacity),transparent)}.border-amber-400{border-color:color-mix(in srgb,var(--colors-amber-400) var(--un-border-opacity),transparent)}.border-gray-200{border-color:color-mix(in srgb,var(--colors-gray-200) var(--un-border-opacity),transparent)}.border-gray-700{border-color:color-mix(in srgb,var(--colors-gray-700) var(--un-border-opacity),transparent)}.border-white{border-color:color-mix(in srgb,var(--colors-white) var(--un-border-opacity),transparent)}.hover\\:border-\\[\\#83a598\\]:hover{border-color:color-mix(in oklab,#83a598 var(--un-border-opacity),transparent)}.focus\\:border-\\[\\#83a598\\]:focus{border-color:color-mix(in oklab,#83a598 var(--un-border-opacity),transparent)}.border-t-transparent{border-top-color:transparent}.-rounded{border-radius:calc(var(--radius-DEFAULT) * -1)}.rd,.rounded{border-radius:var(--radius-DEFAULT)}.rounded-full{border-radius:calc(infinity * 1px)}.rounded-lg{border-radius:var(--radius-lg)}.rounded-md{border-radius:var(--radius-md)}.rounded-xl{border-radius:var(--radius-xl)}.rounded-b-lg{border-bottom-left-radius:var(--radius-lg);border-bottom-right-radius:var(--radius-lg)}.rounded-bl-none{border-bottom-left-radius:var(--radius-none)}.rounded-br-none{border-bottom-right-radius:var(--radius-none)}.border-dashed{--un-border-style:dashed;border-style:dashed}.bg-\\[\\#1d2021\\]{background-color:color-mix(in oklab,#1d2021 var(--un-bg-opacity),transparent)}.bg-\\[\\#282828\\]{background-color:color-mix(in oklab,#282828 var(--un-bg-opacity),transparent)}.bg-\\[\\#3c3836\\]{background-color:color-mix(in oklab,#3c3836 var(--un-bg-opacity),transparent)}.bg-\\[\\#458588\\]{background-color:color-mix(in oklab,#458588 var(--un-bg-opacity),transparent)}.bg-\\[\\#504945\\],.data-\\[active\\=true\\]\\:bg-\\[\\#504945\\][data-active=true]{background-color:color-mix(in oklab,#504945 var(--un-bg-opacity),transparent)}.bg-\\[\\#83a598\\]{background-color:color-mix(in oklab,#83a598 var(--un-bg-opacity),transparent)}.bg-\\[\\#b16286\\]{background-color:color-mix(in oklab,#b16286 var(--un-bg-opacity),transparent)}.bg-\\[\\#b8bb26\\]{background-color:color-mix(in oklab,#b8bb26 var(--un-bg-opacity),transparent)}.bg-\\[\\#ebdbb2\\]{background-color:color-mix(in oklab,#ebdbb2 var(--un-bg-opacity),transparent)}.bg-\\[\\#fb4934\\]{background-color:color-mix(in oklab,#fb4934 var(--un-bg-opacity),transparent)}.bg-amber-50{background-color:color-mix(in srgb,var(--colors-amber-50) var(--un-bg-opacity),transparent)}.bg-blue-50{background-color:color-mix(in srgb,var(--colors-blue-50) var(--un-bg-opacity),transparent)}.bg-blue-600{background-color:color-mix(in srgb,var(--colors-blue-600) var(--un-bg-opacity),transparent)}.bg-gray-100{background-color:color-mix(in srgb,var(--colors-gray-100) var(--un-bg-opacity),transparent)}.bg-gray-200{background-color:color-mix(in srgb,var(--colors-gray-200) var(--un-bg-opacity),transparent)}.bg-gray-50{background-color:color-mix(in srgb,var(--colors-gray-50) var(--un-bg-opacity),transparent)}.bg-gray-600{background-color:color-mix(in srgb,var(--colors-gray-600) var(--un-bg-opacity),transparent)}.bg-gray-700{background-color:color-mix(in srgb,var(--colors-gray-700) var(--un-bg-opacity),transparent)}.bg-gray-800{background-color:color-mix(in srgb,var(--colors-gray-800) var(--un-bg-opacity),transparent)}.bg-gray-900{background-color:color-mix(in srgb,var(--colors-gray-900) var(--un-bg-opacity),transparent)}.bg-green-100{background-color:color-mix(in srgb,var(--colors-green-100) var(--un-bg-opacity),transparent)}.bg-red-100{background-color:color-mix(in srgb,var(--colors-red-100) var(--un-bg-opacity),transparent)}.bg-red-50{background-color:color-mix(in srgb,var(--colors-red-50) var(--un-bg-opacity),transparent)}.bg-red-700{background-color:color-mix(in srgb,var(--colors-red-700) var(--un-bg-opacity),transparent)}.bg-red-900\\/50{background-color:color-mix(in srgb,var(--colors-red-900) 50%,transparent)}.bg-white{background-color:color-mix(in srgb,var(--colors-white) var(--un-bg-opacity),transparent)}.bg-yellow-100{background-color:color-mix(in srgb,var(--colors-yellow-100) var(--un-bg-opacity),transparent)}.hover\\:bg-\\[\\#1d2021\\]:hover{background-color:color-mix(in oklab,#1d2021 var(--un-bg-opacity),transparent)}.hover\\:bg-\\[\\#3c3836\\]:hover{background-color:color-mix(in oklab,#3c3836 var(--un-bg-opacity),transparent)}.hover\\:bg-\\[\\#504945\\]:hover{background-color:color-mix(in oklab,#504945 var(--un-bg-opacity),transparent)}.hover\\:bg-\\[\\#665c54\\]:hover{background-color:color-mix(in oklab,#665c54 var(--un-bg-opacity),transparent)}.hover\\:bg-\\[\\#83a598\\]:hover{background-color:color-mix(in oklab,#83a598 var(--un-bg-opacity),transparent)}.hover\\:bg-amber-100:hover{background-color:color-mix(in srgb,var(--colors-amber-100) var(--un-bg-opacity),transparent)}.hover\\:bg-gray-100:hover{background-color:color-mix(in srgb,var(--colors-gray-100) var(--un-bg-opacity),transparent)}.hover\\:bg-gray-700:hover{background-color:color-mix(in srgb,var(--colors-gray-700) var(--un-bg-opacity),transparent)}.opacity-0{opacity:0%}.group:hover .group-hover\\:opacity-100{opacity:100%}.underline,.hover\\:underline:hover{text-decoration-line:underline}.flex{display:flex}.flex-1{flex:1 1 0%}.flex-shrink-0,.shrink-0{flex-shrink:0}.selection\\:shrink-selection *::selection,.selection\\:shrink-selection::selection{flex-shrink:1}.flex-grow,.grow{flex-grow:1}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.gap-1{gap:calc(var(--spacing) * 1)}.gap-1\\.5{gap:calc(var(--spacing) * 1.5)}.gap-2{gap:calc(var(--spacing) * 2)}.gap-3{gap:calc(var(--spacing) * 3)}.gap-4{gap:calc(var(--spacing) * 4)}.gap-6{gap:calc(var(--spacing) * 6)}.gap-8{gap:calc(var(--spacing) * 8)}.grid{display:grid}.grid-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))}.grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.h-12{height:calc(var(--spacing) * 12)}.h-15{height:calc(var(--spacing) * 15)}.h-16{height:calc(var(--spacing) * 16)}.h-3\\.5{height:calc(var(--spacing) * 3.5)}.h-4{height:calc(var(--spacing) * 4)}.h-5{height:calc(var(--spacing) * 5)}.h-50{height:calc(var(--spacing) * 50)}.h-60{height:calc(var(--spacing) * 60)}.h-7{height:calc(var(--spacing) * 7)}.h-8{height:calc(var(--spacing) * 8)}.h-full{height:100%}.h-screen{height:100vh}.ha{height:auto}.max-h-32{max-height:calc(var(--spacing) * 32)}.max-h-48{max-height:calc(var(--spacing) * 48)}.max-w-\\[75\\%\\]{max-width:75%}.max-w-lg{max-width:var(--container-lg)}.max-w-md{max-width:var(--container-md)}.max-w-none{max-width:none}.min-h-\\[2\\.5rem\\]{min-height:2.5rem}.min-h-\\[200px\\]{min-height:200px}.min-h-0{min-height:calc(var(--spacing) * 0)}.min-h-screen{min-height:100vh}.min-w-0{min-width:calc(var(--spacing) * 0)}.w-1\\/3{width:33.3333333333%}.w-10{width:calc(var(--spacing) * 10)}.w-12{width:calc(var(--spacing) * 12)}.w-16{width:calc(var(--spacing) * 16)}.w-2{width:calc(var(--spacing) * 2)}.w-2\\/3{width:66.6666666667%}.w-28{width:calc(var(--spacing) * 28)}.w-3{width:calc(var(--spacing) * 3)}.w-3\\.5{width:calc(var(--spacing) * 3.5)}.w-3xs{width:var(--container-3xs)}.w-4{width:calc(var(--spacing) * 4)}.w-5{width:calc(var(--spacing) * 5)}.w-64{width:calc(var(--spacing) * 64)}.w-8{width:calc(var(--spacing) * 8)}.w-80{width:calc(var(--spacing) * 80)}.w-full{width:100%}.w\\[M\\]{width:M}.wa{width:auto}.inline{display:inline}.block{display:block}.inline-block{display:inline-block}.contents{display:contents}.hidden{display:none}.visible{visibility:visible}.invisible{visibility:hidden}.collapse{visibility:collapse}.cursor-pointer{cursor:pointer}.cursor-not-allowed{cursor:not-allowed}.cursor-col-resize{cursor:col-resize}.resize{resize:both}.resize-none{resize:none}.selection\\:select-all *::selection,.selection\\:select-all::selection{-webkit-user-select:all;user-select:all}.whitespace-pre-wrap{white-space:pre-wrap}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.text-ellipsis{text-overflow:ellipsis}.uppercase{text-transform:uppercase}.capitalize{text-transform:capitalize}.italic{font-style:italic}.-ring{--un-ring-shadow:calc(var(--un-ring-inset,) * -1) 0 0 0 calc(1px + var(--un-ring-offset-width)) var(--un-ring-color, currentColor);box-shadow:calc(var(--un-inset-shadow),* -1) var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.ring{--un-ring-shadow:var(--un-ring-inset,) 0 0 0 calc(1px + var(--un-ring-offset-width)) var(--un-ring-color, currentColor);box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.focus\\:ring-2:focus{--un-ring-shadow:var(--un-ring-inset,) 0 0 0 calc(2px + var(--un-ring-offset-width)) var(--un-ring-color, currentColor);box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.focus\\:ring-\\[\\#83a598\\]:focus{--un-ring-color:color-mix(in oklab, #83a598 var(--un-ring-opacity), transparent)}.-shadow{--un-shadow:0 1px 3px 0 var(--un-shadow-color, rgb(0 0 0 / .1)),0 1px 2px -1px var(--un-shadow-color, rgb(0 0 0 / .1));box-shadow:calc(var(--un-inset-shadow),* -1) var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.shadow,.shadow-sm{--un-shadow:0 1px 3px 0 var(--un-shadow-color, rgb(0 0 0 / .1)),0 1px 2px -1px var(--un-shadow-color, rgb(0 0 0 / .1));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.shadow-\\[4px_4px_0px_\\#1d2021\\]{--un-shadow:4px 4px 0px var(--un-shadow-color, rgb(29 32 33));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.shadow-lg{--un-shadow:0 10px 15px -3px var(--un-shadow-color, rgb(0 0 0 / .1)),0 4px 6px -4px var(--un-shadow-color, rgb(0 0 0 / .1));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.shadow-md{--un-shadow:0 4px 6px -1px var(--un-shadow-color, rgb(0 0 0 / .1)),0 2px 4px -2px var(--un-shadow-color, rgb(0 0 0 / .1));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.shadow-xl{--un-shadow:0 20px 25px -5px var(--un-shadow-color, rgb(0 0 0 / .1)),0 8px 10px -6px var(--un-shadow-color, rgb(0 0 0 / .1));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.hover\\:shadow-\\[6px_6px_0px_\\#83a598\\]:hover{--un-shadow:6px 6px 0px var(--un-shadow-color, rgb(131 165 152));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.focus\\:shadow-\\[2px_2px_0px_\\#1d2021\\]:focus{--un-shadow:2px 2px 0px var(--un-shadow-color, rgb(29 32 33));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.translate-x-4{--un-translate-x:calc(var(--spacing) * 4);translate:var(--un-translate-x) var(--un-translate-y)}.transform{transform:var(--un-rotate-x) var(--un-rotate-y) var(--un-rotate-z) var(--un-skew-x) var(--un-skew-y)}.-transition{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,--un-gradient-from,--un-gradient-via,--un-gradient-to,opacity,box-shadow,transform,translate,scale,rotate,filter,-webkit-backdrop-filter,backdrop-filter;transition-timing-function:calc(var(--un-ease, var(--default-transition-timingFunction)) * -1);transition-duration:calc(var(--un-duration, var(--default-transition-duration)) * -1)}.transition{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,--un-gradient-from,--un-gradient-via,--un-gradient-to,opacity,box-shadow,transform,translate,scale,rotate,filter,-webkit-backdrop-filter,backdrop-filter;transition-timing-function:var(--un-ease, var(--default-transition-timingFunction));transition-duration:var(--un-duration, var(--default-transition-duration))}.transition-all{transition-property:all;transition-timing-function:var(--un-ease, var(--default-transition-timingFunction));transition-duration:var(--un-duration, var(--default-transition-duration))}.transition-colors{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,--un-gradient-from,--un-gradient-via,--un-gradient-to;transition-timing-function:var(--un-ease, var(--default-transition-timingFunction));transition-duration:var(--un-duration, var(--default-transition-duration))}.transition-opacity{transition-property:opacity;transition-timing-function:var(--un-ease, var(--default-transition-timingFunction));transition-duration:var(--un-duration, var(--default-transition-duration))}.transition-transform{transition-property:transform,translate,scale,rotate;transition-timing-function:var(--un-ease, var(--default-transition-timingFunction));transition-duration:var(--un-duration, var(--default-transition-duration))}.duration-200{--un-duration:.2s;transition-duration:.2s}.ease{--un-ease:var(--ease-DEFAULT);transition-timing-function:var(--ease-DEFAULT)}.ease-in-out{--un-ease:var(--ease-in-out);transition-timing-function:var(--ease-in-out)}.ease-out{--un-ease:var(--ease-out);transition-timing-function:var(--ease-out)}.items-start{align-items:flex-start}.items-end{align-items:flex-end}.items-center{align-items:center}.items-baseline{align-items:baseline}.bottom-2\\.5{bottom:calc(var(--spacing) * 2.5)}.right-2{right:calc(var(--spacing) * 2)}.right-3{right:calc(var(--spacing) * 3)}.top-2{top:calc(var(--spacing) * 2)}.justify-start{justify-content:flex-start}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.absolute{position:absolute}.fixed{position:fixed}.relative{position:relative}.sticky{position:sticky}.static{position:static}.overflow-auto{overflow:auto}.overflow-y-auto{overflow-y:auto}@keyframes pulse{0%,to{opacity:1}50%{opacity:.5}}@keyframes spin{0%{transform:rotate(0)}to{transform:rotate(360deg)}}.animate-pulse{animation:pulse 2s cubic-bezier(.4,0,.6,1) infinite}.animate-spin{animation:spin 1s linear infinite}.columns-3{columns:3}.blur{--un-blur:blur(8px);filter:var(--un-blur,) var(--un-brightness,) var(--un-contrast,) var(--un-grayscale,) var(--un-hue-rotate,) var(--un-invert,) var(--un-saturate,) var(--un-sepia,) var(--un-drop-shadow,)}.invert{--un-invert:invert(100%);filter:var(--un-blur,) var(--un-brightness,) var(--un-contrast,) var(--un-grayscale,) var(--un-hue-rotate,) var(--un-invert,) var(--un-saturate,) var(--un-sepia,) var(--un-drop-shadow,)}.filter{filter:var(--un-blur,) var(--un-brightness,) var(--un-contrast,) var(--un-grayscale,) var(--un-hue-rotate,) var(--un-invert,) var(--un-saturate,) var(--un-sepia,) var(--un-drop-shadow,)}.placeholder-\\[\\#928374\\]::placeholder{color:color-mix(in oklab,#928374 var(--un-placeholder-opacity),transparent)}.table{display:table}.table-row{display:table-row}.ordinal{--un-ordinal:ordinal;font-variant-numeric:var(--un-ordinal,) var(--un-slashed-zero,) var(--un-numeric-figure,) var(--un-numeric-spacing,) var(--un-numeric-fraction,)}.space-x-2>:not(:last-child){--un-space-x-reverse:0;margin-inline-start:calc(calc(var(--spacing) * 2) * var(--un-space-x-reverse));margin-inline-end:calc(calc(var(--spacing) * 2) * calc(1 - var(--un-space-x-reverse)))}.space-x-3>:not(:last-child){--un-space-x-reverse:0;margin-inline-start:calc(calc(var(--spacing) * 3) * var(--un-space-x-reverse));margin-inline-end:calc(calc(var(--spacing) * 3) * calc(1 - var(--un-space-x-reverse)))}.space-y-1>:not(:last-child){--un-space-y-reverse:0;margin-block-start:calc(calc(var(--spacing) * 1) * var(--un-space-y-reverse));margin-block-end:calc(calc(var(--spacing) * 1) * calc(1 - var(--un-space-y-reverse)))}.space-y-2>:not(:last-child){--un-space-y-reverse:0;margin-block-start:calc(calc(var(--spacing) * 2) * var(--un-space-y-reverse));margin-block-end:calc(calc(var(--spacing) * 2) * calc(1 - var(--un-space-y-reverse)))}.space-y-3>:not(:last-child){--un-space-y-reverse:0;margin-block-start:calc(calc(var(--spacing) * 3) * var(--un-space-y-reverse));margin-block-end:calc(calc(var(--spacing) * 3) * calc(1 - var(--un-space-y-reverse)))}.space-y-4>:not(:last-child){--un-space-y-reverse:0;margin-block-start:calc(calc(var(--spacing) * 4) * var(--un-space-y-reverse));margin-block-end:calc(calc(var(--spacing) * 4) * calc(1 - var(--un-space-y-reverse)))}.space-y-6>:not(:last-child){--un-space-y-reverse:0;margin-block-start:calc(calc(var(--spacing) * 6) * var(--un-space-y-reverse));margin-block-end:calc(calc(var(--spacing) * 6) * calc(1 - var(--un-space-y-reverse)))}@supports (color: color-mix(in lab,red,red)){.text-amber-600{color:color-mix(in oklab,var(--colors-amber-600) var(--un-text-opacity),transparent)}.text-amber-900{color:color-mix(in oklab,var(--colors-amber-900) var(--un-text-opacity),transparent)}.text-blue-100{color:color-mix(in oklab,var(--colors-blue-100) var(--un-text-opacity),transparent)}.text-blue-600{color:color-mix(in oklab,var(--colors-blue-600) var(--un-text-opacity),transparent)}.text-blue-700{color:color-mix(in oklab,var(--colors-blue-700) var(--un-text-opacity),transparent)}.text-gray-200{color:color-mix(in oklab,var(--colors-gray-200) var(--un-text-opacity),transparent)}.text-gray-300{color:color-mix(in oklab,var(--colors-gray-300) var(--un-text-opacity),transparent)}.text-gray-400{color:color-mix(in oklab,var(--colors-gray-400) var(--un-text-opacity),transparent)}.text-gray-500{color:color-mix(in oklab,var(--colors-gray-500) var(--un-text-opacity),transparent)}.text-gray-600{color:color-mix(in oklab,var(--colors-gray-600) var(--un-text-opacity),transparent)}.text-gray-700{color:color-mix(in oklab,var(--colors-gray-700) var(--un-text-opacity),transparent)}.text-gray-800{color:color-mix(in oklab,var(--colors-gray-800) var(--un-text-opacity),transparent)}.text-gray-900{color:color-mix(in oklab,var(--colors-gray-900) var(--un-text-opacity),transparent)}.text-green-400{color:color-mix(in oklab,var(--colors-green-400) var(--un-text-opacity),transparent)}.text-green-800{color:color-mix(in oklab,var(--colors-green-800) var(--un-text-opacity),transparent)}.text-red-100{color:color-mix(in oklab,var(--colors-red-100) var(--un-text-opacity),transparent)}.text-red-400{color:color-mix(in oklab,var(--colors-red-400) var(--un-text-opacity),transparent)}.text-red-700{color:color-mix(in oklab,var(--colors-red-700) var(--un-text-opacity),transparent)}.text-red-800{color:color-mix(in oklab,var(--colors-red-800) var(--un-text-opacity),transparent)}.text-white{color:color-mix(in oklab,var(--colors-white) var(--un-text-opacity),transparent)}.text-yellow-800{color:color-mix(in oklab,var(--colors-yellow-800) var(--un-text-opacity),transparent)}.border-amber-200{border-color:color-mix(in oklab,var(--colors-amber-200) var(--un-border-opacity),transparent)}.border-amber-400{border-color:color-mix(in oklab,var(--colors-amber-400) var(--un-border-opacity),transparent)}.border-gray-200{border-color:color-mix(in oklab,var(--colors-gray-200) var(--un-border-opacity),transparent)}.border-gray-700{border-color:color-mix(in oklab,var(--colors-gray-700) var(--un-border-opacity),transparent)}.border-white{border-color:color-mix(in oklab,var(--colors-white) var(--un-border-opacity),transparent)}.bg-amber-50{background-color:color-mix(in oklab,var(--colors-amber-50) var(--un-bg-opacity),transparent)}.bg-blue-50{background-color:color-mix(in oklab,var(--colors-blue-50) var(--un-bg-opacity),transparent)}.bg-blue-600{background-color:color-mix(in oklab,var(--colors-blue-600) var(--un-bg-opacity),transparent)}.bg-gray-100{background-color:color-mix(in oklab,var(--colors-gray-100) var(--un-bg-opacity),transparent)}.bg-gray-200{background-color:color-mix(in oklab,var(--colors-gray-200) var(--un-bg-opacity),transparent)}.bg-gray-50{background-color:color-mix(in oklab,var(--colors-gray-50) var(--un-bg-opacity),transparent)}.bg-gray-600{background-color:color-mix(in oklab,var(--colors-gray-600) var(--un-bg-opacity),transparent)}.bg-gray-700{background-color:color-mix(in oklab,var(--colors-gray-700) var(--un-bg-opacity),transparent)}.bg-gray-800{background-color:color-mix(in oklab,var(--colors-gray-800) var(--un-bg-opacity),transparent)}.bg-gray-900{background-color:color-mix(in oklab,var(--colors-gray-900) var(--un-bg-opacity),transparent)}.bg-green-100{background-color:color-mix(in oklab,var(--colors-green-100) var(--un-bg-opacity),transparent)}.bg-red-100{background-color:color-mix(in oklab,var(--colors-red-100) var(--un-bg-opacity),transparent)}.bg-red-50{background-color:color-mix(in oklab,var(--colors-red-50) var(--un-bg-opacity),transparent)}.bg-red-700{background-color:color-mix(in oklab,var(--colors-red-700) var(--un-bg-opacity),transparent)}.bg-red-900\\/50{background-color:color-mix(in oklab,var(--colors-red-900) 50%,transparent)}.bg-white{background-color:color-mix(in oklab,var(--colors-white) var(--un-bg-opacity),transparent)}.bg-yellow-100{background-color:color-mix(in oklab,var(--colors-yellow-100) var(--un-bg-opacity),transparent)}.hover\\:bg-amber-100:hover{background-color:color-mix(in oklab,var(--colors-amber-100) var(--un-bg-opacity),transparent)}.hover\\:bg-gray-100:hover{background-color:color-mix(in oklab,var(--colors-gray-100) var(--un-bg-opacity),transparent)}.hover\\:bg-gray-700:hover{background-color:color-mix(in oklab,var(--colors-gray-700) var(--un-bg-opacity),transparent)}}@media (min-width: 48rem){.md\\:p-8{padding:calc(var(--spacing) * 8)}.md\\:flex-row{flex-direction:row}.md\\:col-span-2{grid-column:span 2/span 2}.md\\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.md\\:w-64{width:calc(var(--spacing) * 64)}.md\\:items-center{align-items:center}.md\\:justify-between{justify-content:space-between}}@media (min-width: 64rem){.lg\\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}}@media (min-width: 80rem){.xl\\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}}body{font-family:var(--font-family)}html,body{font-family:var(--theme-font-family);background-color:var(--theme-background-color)!important;color:var(--text-color)!important;width:100%;min-height:100%;height:100%;padding:0;margin:0}body:not(.production) *:not(:defined){border:1px solid red}.dark{filter:invert(1) hue-rotate(180deg)}.dark img,.dark dialog,.dark video,.dark iframe{filter:invert(1) hue-rotate(180deg)}html{font-size:14px}@media (max-width: 768px){html{font-size:18px}}@media (max-width: 480px){html{font-size:20px}}textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;color:inherit;margin:0;padding:0}:root{box-sizing:border-box;-moz-text-size-adjust:none;-webkit-text-size-adjust:none;text-size-adjust:none;line-height:1.2;-webkit-font-smoothing:antialiased}*,*:before,*:after{box-sizing:border-box}*{margin:0}body{-webkit-font-smoothing:antialiased;font-family:var(--font-family)}button,textarea,select{background-color:inherit;border-width:0;color:inherit}img,picture,video,canvas,svg{display:block;max-width:100%}input,button,textarea,select{font:inherit}p,h1,h2,h3,h4,h5,h6{font-family:var(--font-family);overflow-wrap:break-word}dialog::backdrop{background-color:#000c}*::-webkit-scrollbar{width:8px;margin-right:10px}*::-webkit-scrollbar-track{background:transparent}*::-webkit-scrollbar-thumb{&:hover{scrollbar-color:rgba(154,153,150,.8) transparent}border-radius:10px;border:none}*::-webkit-scrollbar-button{background:transparent;color:transparent}*{scrollbar-width:thin;scrollbar-color:transparent transparent;&:hover{scrollbar-color:rgba(154,153,150,.8) transparent}}[full]{width:100%;height:100vh}[w-full]{width:100%}[grow]{flex-grow:1}[hide],.hide{display:none!important}[noscroll]{overflow:hidden}div [container]{display:flex}div [container][horizontal]{display:flex;flex-direction:col}:where(.uix-link){font-weight:var(--uix-link-font-weight, 600);width:var(--uix-link-width, auto);color:var(--uix-link-text-color, var(--colors-default-900));--uix-link-indent: 0;cursor:pointer;&[vertical]{margin:0 auto}a,button{width:inherit;cursor:pointer;padding:var(--uix-link-padding);&:hover{color:var(--uix-link-hover-color, var(--uix-link-text-color))}}.uix-text-icon__element{display:flex;align-items:center;gap:var(--uix-link-icon-gap, .5rem);&[reverse][vertical]{flex-direction:column-reverse}&:not([reverse])[vertical]{flex-direction:column}&[reverse]:not([vertical]){flex-direction:row-reverse}&:not([reverse]):not([vertical]){flex-direction:row}}transition:all .3s ease-in-out;&[indent]{>a,>button{padding-left:var(--uix-link-indent)}}&[active]:hover{color:var(--uix-link-hover-text-color, var(--colors-primary-400))}&[selectable][selected]{background-color:var(--colors-primary-400)}&:hover{[tooltip]{display:flex}}&[tooltip]{display:inline-block;&:hover{[tooltip]{visibility:visible}}[tooltip]{visibility:hidden;width:120px;background-color:#000;color:#fff;text-align:center;border-radius:6px;padding:5px 10px;margin-left:3px;position:absolute;z-index:1000000000;top:50%;left:100%;transform:translateY(-50%)}}&[position~=top] [tooltip]{bottom:100%;left:50%;transform:translate(-50%)}&[position~=bottom] [tooltip]{top:100%;left:50%;transform:translate(-50%)}&[position~=left] [tooltip]{top:50%;right:100%;transform:translateY(-50%)}&[tooltip],&[dropdown],&[context],&[float]{position:relative}&[dropdown],&[accordion]{flex-direction:column}[float],[dropdown],[accordion],[context]{display:none}&[floatopen]>a{display:none}&[floatopen] [float]{display:block;position:relative;bottom:0;right:0}&[context]{z-index:auto}[context][open]{display:flex;flex-direction:column}[dropdown],[context][open]{position:absolute;left:0;top:100%;width:100%;min-width:200px;z-index:1000;background-color:var(--colors-primary-100);box-shadow:0 8px 16px #0003;.uix-link:hover,input{background-color:var(--colors-primary-200)}>.uix-link{width:100%}}[context][open]{display:flex}&[selected]{[dropdown],[accordion]{display:flex;flex-direction:column}}}:where(.uix-button){border:var(--uix-button-borderSize, 0) solid var(--uix-button-borderColor);border-radius:var(--uix-button-borderRadius, var(--radius-md));box-shadow:var(--uix-button-shadow);width:var(--uix-button-width);min-width:fit-content;background-color:var(--uix-button-backgroundColor, black);color:var(--uix-button-textColor, var(--colors-default-100));font-weight:var(--uix-button-fontWeight, 700);display:flex;text-align:center;transition:transform .2s ease-in-out,opacity .2s ease-in-out,background-color .2s ease-in-out;&:hover{opacity:var(--uix-button-hover-opacity, .4)}&:active{transform:scale(.97)}>button,>a,>input{width:max-content;display:block;border-radius:inherit;cursor:var(--uix-button-cursor, pointer);height:calc(var(--spacing) * 10);line-height:calc(var(--spacing) * 5);padding:var( --uix-button-padding, calc(var(--spacing) * 2.5) calc(var(--spacing) * 4) );word-break:keep-all;flex-basis:100%}.uix-icon,button,input,a{cursor:pointer}&[bordered]{--uix-button-border-size: 1px;--uix-button-backgroundColor: transparent;--uix-button-hoverBackgroundColor: var(--_variant-color-300);--uix-button-borderColor: var(--_variant-color-400);--uix-button-textColor: var(--_variant-color-700)}&[ghost]{--uix-button-backgroundColor: transparent;--uix-button-hoverBackgroundColor: var(--_variant-color-300);--uix-button-borderSize: 0px;--uix-button-textColor: var(--_variant-color-700)}&[outline]{--uix-button-backgroundColor: transparent;--uix-button-hoverBackgroundColor: var(--_variant-color-300);--uix-button-textColor: var(--_variant-color-800);--uix-button-borderSize: 1px;--uix-button-borderColor: var(--_variant-color-400)}&[float]{background-color:#000;--uix-button-hoverBackgroundColor: var(--_variant-color-500);--uix-button-textColor: var(--_variant-color-50);--uix-button-borderSize: 0px;--uix-button-borderRadius: 9999px;--uix-button-width: var(--uix-button-height);box-shadow:var(--shadow-md, 0 4px 6px -1px rgb(0 0 0 / .1));--uix-button-padding: .5rem}&[float]:hover{box-shadow:var(--shadow-lg, 0 10px 15px -3px rgb(0 0 0 / .1))}}.uix-list{display:flex;&[vertical]{flex-direction:column}}.uix-navbar{--uix-navbar-text-color: var(--color-default-90);--uix-navbar-hover-text-color: var(--color-surface-80);--uix-navbar-border-radius: 0px;--uix-navbar-border-color: var(--color-default-60);--uix-navbar-border-size: 1px;--uix-navbar-border-style: solid;--uix-navbar-hover-background-color: var(--color-default-40);--uix-container-position: var(--uix-navbar-position);display:flex;flex-direction:column;&[docked]{--uix-list-button-radius: 0;border-bottom:0;position:fixed;bottom:0;background-color:var(--uix-navbar-background-color, var(--color-default-5));>*{border-right:0;border-bottom:0;&:first-child{border-left:0}}}}.uix-icon{display:inline-block;vertical-align:middle;svg{height:inherit;width:inherit}}&[solid]{stroke:currentColor;fill:currentColor}:where(.uix-input){--uix-input-background-color: var(--colors-surface-100);--uix-input-border-color: var(--colors-gray-900);--uix-input-text-color: var(--colors-gray-900);--uix-input-placeholder-color: var(--colors-default-500);--uix-input-border-radius: var(--border-radius-md);--uix-input-border-width: 2px;--uix-input-padding-x: calc(var(--spacing) * 4);--uix-input-padding-y: calc(var(--spacing) * 2.5);--uix-input-font-size: var(--font-size-base);--uix-input-height: 2.5rem;--uix-input-disabled-opacity: .6;--uix-input-label-font-size: var(--font-size-sm);--uix-input-label-font-weight: var(--font-weight-bold);--uix-input-label-color: var(--colors-default-700);--uix-input-checkbox-size: 1.5rem;--uix-input-checkbox-border-radius: var(--border-radius-sm);--uix-input-checkbox-checked-bg: var(--colors-primary-600);--uix-input-checkbox-check-color: var(--colors-surface-100);width:100%;display:flex;flex-direction:column;input,select,textarea{width:100%;height:var(--uix-input-height);border-radius:var(--uix-input-border-radius);border:var(--uix-input-border-width) solid var(--uix-input-border-color);font-size:var(--uix-input-font-size);background-color:var(--uix-input-background-color);color:var(--uix-input-text-color);transition:var(--uix-transition);outline:none;padding:var(--uix-input-padding-y) var(--uix-input-padding-x)}textarea{resize:vertical}&:has(textarea){height:auto}select{appearance:none;-webkit-appearance:none;cursor:pointer;font-weight:600;padding-block:0;option{font-weight:600;background-color:var(--uix-input-background-color);font-size:1.1rem;line-height:1.5rem;color:#333;padding:50px;border:2px solid red}}.select-container{position:relative;.select-arrow{position:absolute;right:calc(2 * var(--spacing))}}input::placeholder{color:transparent}label{font-weight:var(--uix-input-label-font-weight);color:var(--uix-input-label-color, var(--colors-gray-600));margin-bottom:var(--spacing);font-size:.9rem;padding:0 4px;transition:all .2s ease-in-out;pointer-events:none;&[required]:after{content:"*";color:var(--colors-danger-500);margin-left:2px}}input:not(:placeholder-shown)+label,textarea:not(:placeholder-shown)+label,&:focus-within label,&.has-value label{top:-2px;transform:translateY(0);font-size:var(--uix-input-label-font-size)}&:focus-within input,&:focus-within select,&:focus-within textarea{box-shadow:0 0 var(--uix-input-focus-ring-width, 5px) var(--uix-input-focus-ring-color, rgba(0, 0, 255, .5))}&[disabled]{cursor:not-allowed;opacity:var(--uix-input-disabled-opacity);& label{cursor:not-allowed}}.input-icon,.select-arrow{position:absolute;top:50%;right:var(--spacing);transform:translateY(-50%);pointer-events:none;color:var(--uix-input-label-color);transition:transform .2s ease-in-out}&:has(select:hover:active) .select-arrow{transform:translateY(-50%) rotate(180deg)}&:has(.input-icon:not(.select-arrow))>input{padding-right:calc(var(--uix-input-padding-x) + 1.75em)}&[type=checkbox],&[type=radio]{flex-direction:row;align-items:center;border:0;height:auto;width:auto;background-color:transparent;box-shadow:none;gap:.75rem;cursor:pointer;label{margin:0;line-height:1.5rem;position:static;transform:none;background-color:transparent;padding:0;cursor:pointer;font-weight:var(--font-weight-normal);order:2;pointer-events:auto}input{appearance:none;-webkit-appearance:none;width:var(--uix-input-checkbox-size);height:var(--uix-input-checkbox-size);margin:0;border:var(--uix-input-border-width) solid var(--uix-input-border-color);background-color:var(--uix-input-background-color);cursor:pointer;position:relative;transition:var(--uix-transition);padding:0;&:after{content:"";position:absolute;display:none;left:50%;top:50%}&:checked{background-color:var(--uix-input-checkbox-checked-bg);border-color:var(--uix-input-checkbox-checked-bg);&:after{display:block}}&:focus-visible{box-shadow:0 0 0 var(--uix-input-focus-ring-width) var(--uix-input-focus-ring-color);border-color:var(--uix-input-focus-ring-color)}}}&[type=checkbox] input:after{width:.375rem;height:.75rem;border:solid var(--uix-input-checkbox-check-color);border-width:0 2px 2px 0;transform:translate(-50%,-60%) rotate(45deg)}&[type=radio] input{border-radius:var(--border-radius-full);&:after{width:calc(var(--uix-input-checkbox-size) / 2);height:calc(var(--uix-input-checkbox-size) / 2);border-radius:var(--border-radius-full);background-color:var(--uix-input-checkbox-check-color);transform:translate(-50%,-50%)}}&[ghost]{&:focus-within select{box-shadow:none}.select-arrow{margin-left:5px;padding-left:5px}select{background:inherit;border:0}}}
-`,metaType:"text/css"}};self.addEventListener("install",t=>t.waitUntil(self.skipWaiting())),self.addEventListener("activate",t=>t.waitUntil(self.clients.claim())),self.addEventListener("fetch",t=>{const e=new URL(t.request.url),n=FILE_BUNDLE[e.pathname];n&&t.respondWith(new Response(n.content,{headers:{"Content-Type":n.metaType||"application/javascript"}}))});
+`,mimeType:"text/css",skipSW:!1},"/modules/icon-lucide/lucide/cog.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12 20a8 8 0 1 0 0-16a8 8 0 0 0 0 16"/><path d="M12 14a2 2 0 1 0 0-4a2 2 0 0 0 0 4m0-12v2m0 18v-2m5 .66l-1-1.73m-5-8.66L7 3.34M20.66 17l-1.73-1M3.34 7l1.73 1M14 12h8M2 12h2m16.66-5l-1.73 1M3.34 17l1.73-1M17 3.34l-1 1.73m-5 8.66l-4 6.93"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/square-mouse-pointer.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12.034 12.681a.498.498 0 0 1 .647-.647l9 3.5a.5.5 0 0 1-.033.943l-3.444 1.068a1 1 0 0 0-.66.66l-1.067 3.443a.5.5 0 0 1-.943.033z"/><path d="M21 11V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/server-cog.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M4.5 10H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-.5m-15 4H4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2h-.5M6 6h.01M6 18h.01m9.69-4.6l-.9-.3m-5.6-2.2l-.9-.3m2.3 5.1l.3-.9m2.7.9l-.4-1m-2.4-5.4l-.4-1m-2.1 5.3l1-.4m5.4-2.4l1-.4m-2.3-2.1l-.3.9"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/bot-message-square.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V2H8m0 16l-4 4V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2Zm-6-6h2m5-1v2m6-2v2m5-1h2"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/sun.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/settings.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2"/><circle cx="12" cy="12" r="3"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/style.css":{content:`@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_P-bnBeA.woff2) format("woff2");unicode-range:U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_G-bnBeA.woff2) format("woff2");unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_B-bnBeA.woff2) format("woff2");unicode-range:U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_N-bnBeA.woff2) format("woff2");unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_M-bnBeA.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_C-bk.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}@supports ((-webkit-hyphens: none) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color:rgb(from red r g b)))){*,:before,:after,::backdrop{--un-bg-opacity:100%;--un-text-opacity:100%}}@property --un-text-opacity{syntax:"<percentage>";inherits:false;initial-value:100%;}@property --un-bg-opacity{syntax:"<percentage>";inherits:false;initial-value:100%;}@property --un-inset-ring-color{syntax:"*";inherits:false;}@property --un-inset-ring-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-inset-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-inset-shadow-color{syntax:"*";inherits:false;}@property --un-ring-color{syntax:"*";inherits:false;}@property --un-ring-inset{syntax:"*";inherits:false;}@property --un-ring-offset-color{syntax:"*";inherits:false;}@property --un-ring-offset-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-ring-offset-width{syntax:"<length>";inherits:false;initial-value:0px;}@property --un-ring-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-shadow-color{syntax:"*";inherits:false;}:root,:host{--spacing: .25rem;--font-sans: "Manrope",ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";--font-serif: ui-serif,Georgia,Cambria,"Times New Roman",Times,serif;--font-mono: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;--font-family: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;--font-icon-family: lucide;--colors-black: #000;--colors-white: #fff;--colors-slate-50: oklch(98.4% .003 247.858);--colors-slate-100: oklch(96.8% .007 247.896);--colors-slate-200: oklch(92.9% .013 255.508);--colors-slate-300: oklch(86.9% .022 252.894);--colors-slate-400: oklch(70.4% .04 256.788);--colors-slate-500: oklch(55.4% .046 257.417);--colors-slate-600: oklch(44.6% .043 257.281);--colors-slate-700: oklch(37.2% .044 257.287);--colors-slate-800: oklch(27.9% .041 260.031);--colors-slate-900: oklch(20.8% .042 265.755);--colors-slate-950: oklch(12.9% .042 264.695);--colors-slate-DEFAULT: oklch(70.4% .04 256.788);--colors-gray-50: oklch(98.5% .002 247.839);--colors-gray-100: oklch(96.7% .003 264.542);--colors-gray-200: oklch(92.8% .006 264.531);--colors-gray-300: oklch(87.2% .01 258.338);--colors-gray-400: oklch(70.7% .022 261.325);--colors-gray-500: oklch(55.1% .027 264.364);--colors-gray-600: oklch(44.6% .03 256.802);--colors-gray-700: oklch(37.3% .034 259.733);--colors-gray-800: oklch(27.8% .033 256.848);--colors-gray-900: oklch(21% .034 264.665);--colors-gray-950: oklch(13% .028 261.692);--colors-gray-DEFAULT: oklch(70.7% .022 261.325);--colors-zinc-50: oklch(98.5% 0 0);--colors-zinc-100: oklch(96.7% .001 286.375);--colors-zinc-200: oklch(92% .004 286.32);--colors-zinc-300: oklch(87.1% .006 286.286);--colors-zinc-400: oklch(70.5% .015 286.067);--colors-zinc-500: oklch(55.2% .016 285.938);--colors-zinc-600: oklch(44.2% .017 285.786);--colors-zinc-700: oklch(37% .013 285.805);--colors-zinc-800: oklch(27.4% .006 286.033);--colors-zinc-900: oklch(21% .006 285.885);--colors-zinc-950: oklch(14.1% .005 285.823);--colors-zinc-DEFAULT: oklch(70.5% .015 286.067);--colors-neutral-50: oklch(98.5% 0 0);--colors-neutral-100: oklch(97% 0 0);--colors-neutral-200: oklch(92.2% 0 0);--colors-neutral-300: oklch(87% 0 0);--colors-neutral-400: oklch(70.8% 0 0);--colors-neutral-500: oklch(55.6% 0 0);--colors-neutral-600: oklch(43.9% 0 0);--colors-neutral-700: oklch(37.1% 0 0);--colors-neutral-800: oklch(26.9% 0 0);--colors-neutral-900: oklch(20.5% 0 0);--colors-neutral-950: oklch(14.5% 0 0);--colors-neutral-DEFAULT: oklch(70.8% 0 0);--colors-stone-50: oklch(98.5% .001 106.423);--colors-stone-100: oklch(97% .001 106.424);--colors-stone-200: oklch(92.3% .003 48.717);--colors-stone-300: oklch(86.9% .005 56.366);--colors-stone-400: oklch(70.9% .01 56.259);--colors-stone-500: oklch(55.3% .013 58.071);--colors-stone-600: oklch(44.4% .011 73.639);--colors-stone-700: oklch(37.4% .01 67.558);--colors-stone-800: oklch(26.8% .007 34.298);--colors-stone-900: oklch(21.6% .006 56.043);--colors-stone-950: oklch(14.7% .004 49.25);--colors-stone-DEFAULT: oklch(70.9% .01 56.259);--colors-red-50: oklch(97.1% .013 17.38);--colors-red-100: oklch(93.6% .032 17.717);--colors-red-200: oklch(88.5% .062 18.334);--colors-red-300: oklch(80.8% .114 19.571);--colors-red-400: oklch(70.4% .191 22.216);--colors-red-500: oklch(63.7% .237 25.331);--colors-red-600: oklch(57.7% .245 27.325);--colors-red-700: oklch(50.5% .213 27.518);--colors-red-800: oklch(44.4% .177 26.899);--colors-red-900: oklch(39.6% .141 25.723);--colors-red-950: oklch(25.8% .092 26.042);--colors-red-DEFAULT: oklch(70.4% .191 22.216);--colors-orange-50: oklch(98% .016 73.684);--colors-orange-100: oklch(95.4% .038 75.164);--colors-orange-200: oklch(90.1% .076 70.697);--colors-orange-300: oklch(83.7% .128 66.29);--colors-orange-400: oklch(75% .183 55.934);--colors-orange-500: oklch(70.5% .213 47.604);--colors-orange-600: oklch(64.6% .222 41.116);--colors-orange-700: oklch(55.3% .195 38.402);--colors-orange-800: oklch(47% .157 37.304);--colors-orange-900: oklch(40.8% .123 38.172);--colors-orange-950: oklch(26.6% .079 36.259);--colors-orange-DEFAULT: oklch(75% .183 55.934);--colors-amber-50: oklch(98.7% .022 95.277);--colors-amber-100: oklch(96.2% .059 95.617);--colors-amber-200: oklch(92.4% .12 95.746);--colors-amber-300: oklch(87.9% .169 91.605);--colors-amber-400: oklch(82.8% .189 84.429);--colors-amber-500: oklch(76.9% .188 70.08);--colors-amber-600: oklch(66.6% .179 58.318);--colors-amber-700: oklch(55.5% .163 48.998);--colors-amber-800: oklch(47.3% .137 46.201);--colors-amber-900: oklch(41.4% .112 45.904);--colors-amber-950: oklch(27.9% .077 45.635);--colors-amber-DEFAULT: oklch(82.8% .189 84.429);--colors-yellow-50: oklch(98.7% .026 102.212);--colors-yellow-100: oklch(97.3% .071 103.193);--colors-yellow-200: oklch(94.5% .129 101.54);--colors-yellow-300: oklch(90.5% .182 98.111);--colors-yellow-400: oklch(85.2% .199 91.936);--colors-yellow-500: oklch(79.5% .184 86.047);--colors-yellow-600: oklch(68.1% .162 75.834);--colors-yellow-700: oklch(55.4% .135 66.442);--colors-yellow-800: oklch(47.6% .114 61.907);--colors-yellow-900: oklch(42.1% .095 57.708);--colors-yellow-950: oklch(28.6% .066 53.813);--colors-yellow-DEFAULT: oklch(85.2% .199 91.936);--colors-lime-50: oklch(98.6% .031 120.757);--colors-lime-100: oklch(96.7% .067 122.328);--colors-lime-200: oklch(93.8% .127 124.321);--colors-lime-300: oklch(89.7% .196 126.665);--colors-lime-400: oklch(84.1% .238 128.85);--colors-lime-500: oklch(76.8% .233 130.85);--colors-lime-600: oklch(64.8% .2 131.684);--colors-lime-700: oklch(53.2% .157 131.589);--colors-lime-800: oklch(45.3% .124 130.933);--colors-lime-900: oklch(40.5% .101 131.063);--colors-lime-950: oklch(27.4% .072 132.109);--colors-lime-DEFAULT: oklch(84.1% .238 128.85);--colors-green-50: oklch(98.2% .018 155.826);--colors-green-100: oklch(96.2% .044 156.743);--colors-green-200: oklch(92.5% .084 155.995);--colors-green-300: oklch(87.1% .15 154.449);--colors-green-400: oklch(79.2% .209 151.711);--colors-green-500: oklch(72.3% .219 149.579);--colors-green-600: oklch(62.7% .194 149.214);--colors-green-700: oklch(52.7% .154 150.069);--colors-green-800: oklch(44.8% .119 151.328);--colors-green-900: oklch(39.3% .095 152.535);--colors-green-950: oklch(26.6% .065 152.934);--colors-green-DEFAULT: oklch(79.2% .209 151.711);--colors-emerald-50: oklch(97.9% .021 166.113);--colors-emerald-100: oklch(95% .052 163.051);--colors-emerald-200: oklch(90.5% .093 164.15);--colors-emerald-300: oklch(84.5% .143 164.978);--colors-emerald-400: oklch(76.5% .177 163.223);--colors-emerald-500: oklch(69.6% .17 162.48);--colors-emerald-600: oklch(59.6% .145 163.225);--colors-emerald-700: oklch(50.8% .118 165.612);--colors-emerald-800: oklch(43.2% .095 166.913);--colors-emerald-900: oklch(37.8% .077 168.94);--colors-emerald-950: oklch(26.2% .051 172.552);--colors-emerald-DEFAULT: oklch(76.5% .177 163.223);--colors-teal-50: oklch(98.4% .014 180.72);--colors-teal-100: oklch(95.3% .051 180.801);--colors-teal-200: oklch(91% .096 180.426);--colors-teal-300: oklch(85.5% .138 181.071);--colors-teal-400: oklch(77.7% .152 181.912);--colors-teal-500: oklch(70.4% .14 182.503);--colors-teal-600: oklch(60% .118 184.704);--colors-teal-700: oklch(51.1% .096 186.391);--colors-teal-800: oklch(43.7% .078 188.216);--colors-teal-900: oklch(38.6% .063 188.416);--colors-teal-950: oklch(27.7% .046 192.524);--colors-teal-DEFAULT: oklch(77.7% .152 181.912);--colors-cyan-50: oklch(98.4% .019 200.873);--colors-cyan-100: oklch(95.6% .045 203.388);--colors-cyan-200: oklch(91.7% .08 205.041);--colors-cyan-300: oklch(86.5% .127 207.078);--colors-cyan-400: oklch(78.9% .154 211.53);--colors-cyan-500: oklch(71.5% .143 215.221);--colors-cyan-600: oklch(60.9% .126 221.723);--colors-cyan-700: oklch(52% .105 223.128);--colors-cyan-800: oklch(45% .085 224.283);--colors-cyan-900: oklch(39.8% .07 227.392);--colors-cyan-950: oklch(30.2% .056 229.695);--colors-cyan-DEFAULT: oklch(78.9% .154 211.53);--colors-sky-50: oklch(97.7% .013 236.62);--colors-sky-100: oklch(95.1% .026 236.824);--colors-sky-200: oklch(90.1% .058 230.902);--colors-sky-300: oklch(82.8% .111 230.318);--colors-sky-400: oklch(74.6% .16 232.661);--colors-sky-500: oklch(68.5% .169 237.323);--colors-sky-600: oklch(58.8% .158 241.966);--colors-sky-700: oklch(50% .134 242.749);--colors-sky-800: oklch(44.3% .11 240.79);--colors-sky-900: oklch(39.1% .09 240.876);--colors-sky-950: oklch(29.3% .066 243.157);--colors-sky-DEFAULT: oklch(74.6% .16 232.661);--colors-blue-50: oklch(97% .014 254.604);--colors-blue-100: oklch(93.2% .032 255.585);--colors-blue-200: oklch(88.2% .059 254.128);--colors-blue-300: oklch(80.9% .105 251.813);--colors-blue-400: oklch(70.7% .165 254.624);--colors-blue-500: oklch(62.3% .214 259.815);--colors-blue-600: oklch(54.6% .245 262.881);--colors-blue-700: oklch(48.8% .243 264.376);--colors-blue-800: oklch(42.4% .199 265.638);--colors-blue-900: oklch(37.9% .146 265.522);--colors-blue-950: oklch(28.2% .091 267.935);--colors-blue-DEFAULT: oklch(70.7% .165 254.624);--colors-indigo-50: oklch(96.2% .018 272.314);--colors-indigo-100: oklch(93% .034 272.788);--colors-indigo-200: oklch(87% .065 274.039);--colors-indigo-300: oklch(78.5% .115 274.713);--colors-indigo-400: oklch(67.3% .182 276.935);--colors-indigo-500: oklch(58.5% .233 277.117);--colors-indigo-600: oklch(51.1% .262 276.966);--colors-indigo-700: oklch(45.7% .24 277.023);--colors-indigo-800: oklch(39.8% .195 277.366);--colors-indigo-900: oklch(35.9% .144 278.697);--colors-indigo-950: oklch(25.7% .09 281.288);--colors-indigo-DEFAULT: oklch(67.3% .182 276.935);--colors-violet-50: oklch(96.9% .016 293.756);--colors-violet-100: oklch(94.3% .029 294.588);--colors-violet-200: oklch(89.4% .057 293.283);--colors-violet-300: oklch(81.1% .111 293.571);--colors-violet-400: oklch(70.2% .183 293.541);--colors-violet-500: oklch(60.6% .25 292.717);--colors-violet-600: oklch(54.1% .281 293.009);--colors-violet-700: oklch(49.1% .27 292.581);--colors-violet-800: oklch(43.2% .232 292.759);--colors-violet-900: oklch(38% .189 293.745);--colors-violet-950: oklch(28.3% .141 291.089);--colors-violet-DEFAULT: oklch(70.2% .183 293.541);--colors-purple-50: oklch(97.7% .014 308.299);--colors-purple-100: oklch(94.6% .033 307.174);--colors-purple-200: oklch(90.2% .063 306.703);--colors-purple-300: oklch(82.7% .119 306.383);--colors-purple-400: oklch(71.4% .203 305.504);--colors-purple-500: oklch(62.7% .265 303.9);--colors-purple-600: oklch(55.8% .288 302.321);--colors-purple-700: oklch(49.6% .265 301.924);--colors-purple-800: oklch(43.8% .218 303.724);--colors-purple-900: oklch(38.1% .176 304.987);--colors-purple-950: oklch(29.1% .149 302.717);--colors-purple-DEFAULT: oklch(71.4% .203 305.504);--colors-fuchsia-50: oklch(97.7% .017 320.058);--colors-fuchsia-100: oklch(95.2% .037 318.852);--colors-fuchsia-200: oklch(90.3% .076 319.62);--colors-fuchsia-300: oklch(83.3% .145 321.434);--colors-fuchsia-400: oklch(74% .238 322.16);--colors-fuchsia-500: oklch(66.7% .295 322.15);--colors-fuchsia-600: oklch(59.1% .293 322.896);--colors-fuchsia-700: oklch(51.8% .253 323.949);--colors-fuchsia-800: oklch(45.2% .211 324.591);--colors-fuchsia-900: oklch(40.1% .17 325.612);--colors-fuchsia-950: oklch(29.3% .136 325.661);--colors-fuchsia-DEFAULT: oklch(74% .238 322.16);--colors-pink-50: oklch(97.1% .014 343.198);--colors-pink-100: oklch(94.8% .028 342.258);--colors-pink-200: oklch(89.9% .061 343.231);--colors-pink-300: oklch(82.3% .12 346.018);--colors-pink-400: oklch(71.8% .202 349.761);--colors-pink-500: oklch(65.6% .241 354.308);--colors-pink-600: oklch(59.2% .249 .584);--colors-pink-700: oklch(52.5% .223 3.958);--colors-pink-800: oklch(45.9% .187 3.815);--colors-pink-900: oklch(40.8% .153 2.432);--colors-pink-950: oklch(28.4% .109 3.907);--colors-pink-DEFAULT: oklch(71.8% .202 349.761);--colors-rose-50: oklch(96.9% .015 12.422);--colors-rose-100: oklch(94.1% .03 12.58);--colors-rose-200: oklch(89.2% .058 10.001);--colors-rose-300: oklch(81% .117 11.638);--colors-rose-400: oklch(71.2% .194 13.428);--colors-rose-500: oklch(64.5% .246 16.439);--colors-rose-600: oklch(58.6% .253 17.585);--colors-rose-700: oklch(51.4% .222 16.935);--colors-rose-800: oklch(45.5% .188 13.697);--colors-rose-900: oklch(41% .159 10.272);--colors-rose-950: oklch(27.1% .105 12.094);--colors-rose-DEFAULT: oklch(71.2% .194 13.428);--colors-light-50: oklch(99.4% 0 0);--colors-light-100: oklch(99.11% 0 0);--colors-light-200: oklch(98.51% 0 0);--colors-light-300: oklch(98.16% .0017 247.84);--colors-light-400: oklch(97.31% 0 0);--colors-light-500: oklch(96.12% 0 0);--colors-light-600: oklch(96.32% .0034 247.86);--colors-light-700: oklch(94.17% .0052 247.88);--colors-light-800: oklch(91.09% .007 247.9);--colors-light-900: oklch(90.72% .0051 228.82);--colors-light-950: oklch(89.23% .006 239.83);--colors-light-DEFAULT: oklch(97.31% 0 0);--colors-dark-50: oklch(40.91% 0 0);--colors-dark-100: oklch(35.62% 0 0);--colors-dark-200: oklch(31.71% 0 0);--colors-dark-300: oklch(29.72% 0 0);--colors-dark-400: oklch(25.2% 0 0);--colors-dark-500: oklch(23.93% 0 0);--colors-dark-600: oklch(22.73% .0038 286.09);--colors-dark-700: oklch(22.21% 0 0);--colors-dark-800: oklch(20.9% 0 0);--colors-dark-900: oklch(16.84% 0 0);--colors-dark-950: oklch(13.44% 0 0);--colors-dark-DEFAULT: oklch(25.2% 0 0);--colors-primary-50: hsl(198, 100%, 97%);--colors-primary-100: hsl(198, 100%, 92%);--colors-primary-200: hsl(198, 100%, 84%);--colors-primary-300: hsl(198, 100%, 75%);--colors-primary-400: hsl(198, 100%, 66%);--colors-primary-500: hsl(198, 100%, 55%);--colors-primary-600: hsl(198, 100%, 45%);--colors-primary-700: hsl(198, 100%, 35%);--colors-primary-800: hsl(198, 100%, 24%);--colors-primary-900: hsl(198, 100%, 15%);--colors-primary-DEFAULT: hsl(198, 100%, 55%);--colors-secondary-50: hsl(120, 100%, 97%);--colors-secondary-100: hsl(120, 100%, 92%);--colors-secondary-200: hsl(120, 100%, 84%);--colors-secondary-300: hsl(120, 100%, 75%);--colors-secondary-400: hsl(120, 100%, 66%);--colors-secondary-500: hsl(120, 100%, 55%);--colors-secondary-600: hsl(120, 100%, 45%);--colors-secondary-700: hsl(120, 100%, 35%);--colors-secondary-800: hsl(120, 100%, 24%);--colors-secondary-900: hsl(120, 100%, 15%);--colors-secondary-DEFAULT: hsl(120, 100%, 55%);--colors-tertiary-50: hsl(175, 100%, 97%);--colors-tertiary-100: hsl(175, 100%, 92%);--colors-tertiary-200: hsl(175, 100%, 84%);--colors-tertiary-300: hsl(175, 100%, 75%);--colors-tertiary-400: hsl(175, 100%, 66%);--colors-tertiary-500: hsl(175, 100%, 55%);--colors-tertiary-600: hsl(175, 100%, 45%);--colors-tertiary-700: hsl(175, 100%, 35%);--colors-tertiary-800: hsl(175, 100%, 24%);--colors-tertiary-900: hsl(175, 100%, 15%);--colors-tertiary-DEFAULT: hsl(175, 100%, 55%);--colors-success-50: hsl(149, 87%, 97%);--colors-success-100: hsl(149, 87%, 92%);--colors-success-200: hsl(149, 87%, 84%);--colors-success-300: hsl(149, 87%, 75%);--colors-success-400: hsl(149, 87%, 66%);--colors-success-500: hsl(149, 87%, 55%);--colors-success-600: hsl(149, 87%, 45%);--colors-success-700: hsl(149, 87%, 35%);--colors-success-800: hsl(149, 87%, 24%);--colors-success-900: hsl(149, 87%, 15%);--colors-success-DEFAULT: hsl(149, 87%, 55%);--colors-warning-50: hsl(32, 100%, 97%);--colors-warning-100: hsl(32, 100%, 92%);--colors-warning-200: hsl(32, 100%, 84%);--colors-warning-300: hsl(32, 100%, 75%);--colors-warning-400: hsl(32, 100%, 66%);--colors-warning-500: hsl(32, 100%, 55%);--colors-warning-600: hsl(32, 100%, 45%);--colors-warning-700: hsl(32, 100%, 35%);--colors-warning-800: hsl(32, 100%, 24%);--colors-warning-900: hsl(32, 100%, 15%);--colors-warning-DEFAULT: hsl(32, 100%, 55%);--colors-danger-50: hsl(345, 100%, 97%);--colors-danger-100: hsl(345, 100%, 92%);--colors-danger-200: hsl(345, 100%, 84%);--colors-danger-300: hsl(345, 100%, 75%);--colors-danger-400: hsl(345, 100%, 66%);--colors-danger-500: hsl(345, 100%, 55%);--colors-danger-600: hsl(345, 100%, 45%);--colors-danger-700: hsl(345, 100%, 35%);--colors-danger-800: hsl(345, 100%, 24%);--colors-danger-900: hsl(345, 100%, 15%);--colors-danger-DEFAULT: hsl(345, 100%, 55%);--colors-default-50: hsl(0, 0%, 97%);--colors-default-100: hsl(0, 0%, 92%);--colors-default-200: hsl(0, 0%, 84%);--colors-default-300: hsl(0, 0%, 75%);--colors-default-400: hsl(0, 0%, 66%);--colors-default-500: hsl(0, 0%, 55%);--colors-default-600: hsl(0, 0%, 45%);--colors-default-700: hsl(0, 0%, 35%);--colors-default-800: hsl(0, 0%, 24%);--colors-default-900: hsl(0, 0%, 15%);--colors-default-DEFAULT: hsl(0, 0%, 35%);--colors-surface-50: hsl(0, 0%, 97%);--colors-surface-100: hsl(0, 0%, 92%);--colors-surface-200: hsl(0, 0%, 84%);--colors-surface-300: hsl(0, 0%, 75%);--colors-surface-400: hsl(0, 0%, 66%);--colors-surface-500: hsl(0, 0%, 55%);--colors-surface-600: hsl(0, 0%, 45%);--colors-surface-700: hsl(0, 0%, 35%);--colors-surface-800: hsl(0, 0%, 24%);--colors-surface-900: hsl(0, 0%, 15%);--colors-surface-DEFAULT: hsl(0, 0%, 35%);--text-xs-fontSize: .75rem;--text-xs-lineHeight: 1rem;--text-sm-fontSize: .875rem;--text-sm-lineHeight: 1.25rem;--text-base-fontSize: 1rem;--text-base-lineHeight: 1.5rem;--text-lg-fontSize: 1.125rem;--text-lg-lineHeight: 1.75rem;--text-xl-fontSize: 1.25rem;--text-xl-lineHeight: 1.75rem;--text-2xl-fontSize: 1.5rem;--text-2xl-lineHeight: 2rem;--text-3xl-fontSize: 1.875rem;--text-3xl-lineHeight: 2.25rem;--text-4xl-fontSize: 2.25rem;--text-4xl-lineHeight: 2.5rem;--text-5xl-fontSize: 3rem;--text-5xl-lineHeight: 1;--text-6xl-fontSize: 3.75rem;--text-6xl-lineHeight: 1;--text-7xl-fontSize: 4.5rem;--text-7xl-lineHeight: 1;--text-8xl-fontSize: 6rem;--text-8xl-lineHeight: 1;--text-9xl-fontSize: 8rem;--text-9xl-lineHeight: 1;--text-color: var(--color-surface-100);--fontWeight-thin: 100;--fontWeight-extralight: 200;--fontWeight-light: 300;--fontWeight-normal: 400;--fontWeight-medium: 500;--fontWeight-semibold: 600;--fontWeight-bold: 700;--fontWeight-extrabold: 800;--fontWeight-black: 900;--tracking-tighter: -.05em;--tracking-tight: -.025em;--tracking-normal: 0em;--tracking-wide: .025em;--tracking-wider: .05em;--tracking-widest: .1em;--leading-none: 1;--leading-tight: 1.25;--leading-snug: 1.375;--leading-normal: 1.5;--leading-relaxed: 1.625;--leading-loose: 2;--textStrokeWidth-DEFAULT: 1.5rem;--textStrokeWidth-none: 0;--textStrokeWidth-sm: thin;--textStrokeWidth-md: medium;--textStrokeWidth-lg: thick;--radius-DEFAULT: .25rem;--radius-none: 0;--radius-xs: .125rem;--radius-sm: .25rem;--radius-md: .375rem;--radius-lg: .5rem;--radius-xl: .75rem;--radius-2xl: 1rem;--radius-3xl: 1.5rem;--radius-4xl: 2rem;--ease-linear: linear;--ease-in: cubic-bezier(.4, 0, 1, 1);--ease-out: cubic-bezier(0, 0, .2, 1);--ease-in-out: cubic-bezier(.4, 0, .2, 1);--ease-DEFAULT: cubic-bezier(.4, 0, .2, 1);--blur-DEFAULT: 8px;--blur-xs: 4px;--blur-sm: 8px;--blur-md: 12px;--blur-lg: 16px;--blur-xl: 24px;--blur-2xl: 40px;--blur-3xl: 64px;--perspective-dramatic: 100px;--perspective-near: 300px;--perspective-normal: 500px;--perspective-midrange: 800px;--perspective-distant: 1200px;--default-transition-duration: .15s;--default-transition-timingFunction: cubic-bezier(.4, 0, .2, 1);--default-font-family: var(--font-sans);--default-font-featureSettings: var(--font-sans--font-feature-settings);--default-font-variationSettings: var(--font-sans--font-variation-settings);--default-monoFont-family: var(--font-mono);--default-monoFont-featureSettings: var(--font-mono--font-feature-settings);--default-monoFont-variationSettings: var(--font-mono--font-variation-settings);--container-3xs: 16rem;--container-2xs: 18rem;--container-xs: 20rem;--container-sm: 24rem;--container-md: 28rem;--container-lg: 32rem;--container-xl: 36rem;--container-2xl: 42rem;--container-3xl: 48rem;--container-4xl: 56rem;--container-5xl: 64rem;--container-6xl: 72rem;--container-7xl: 80rem;--container-prose: 65ch;--background-color: var(--colors-primary-100);--boxShadow-md: 0 4px 6px -1px rgb(0 0 0 / .1), 0 2px 4px -2px rgb(0 0 0 / .1);--boxShadow-lg: 0 10px 15px -3px rgb(0 0 0 / .1), 0 4px 6px -4px rgb(0 0 0 / .1);--theme-font-family: "Manrope"}*,:after,:before,::backdrop,::file-selector-button{box-sizing:border-box;margin:0;padding:0;border:0 solid}html,:host{line-height:1.5;-webkit-text-size-adjust:100%;tab-size:4;font-family:var( --default-font-family, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" );font-feature-settings:var(--default-font-featureSettings, normal);font-variation-settings:var(--default-font-variationSettings, normal);-webkit-tap-highlight-color:transparent}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;-webkit-text-decoration:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,samp,pre{font-family:var( --default-monoFont-family, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace );font-feature-settings:var(--default-monoFont-featureSettings, normal);font-variation-settings:var(--default-monoFont-variationSettings, normal);font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}:-moz-focusring{outline:auto}progress{vertical-align:baseline}summary{display:list-item}ol,ul,menu{list-style:none}img,svg,video,canvas,audio,iframe,embed,object{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}button,input,select,optgroup,textarea,::file-selector-button{font:inherit;font-feature-settings:inherit;font-variation-settings:inherit;letter-spacing:inherit;color:inherit;border-radius:0;background-color:transparent;opacity:1}:where(select:is([multiple],[size])) optgroup{font-weight:bolder}:where(select:is([multiple],[size])) optgroup option{padding-inline-start:20px}::file-selector-button{margin-inline-end:4px}::placeholder{opacity:1}@supports (not (-webkit-appearance: -apple-pay-button)) or (contain-intrinsic-size: 1px){::placeholder{color:color-mix(in oklab,currentcolor 50%,transparent)}}textarea{resize:vertical}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-date-and-time-value{min-height:1lh;text-align:inherit}::-webkit-datetime-edit{display:inline-flex}::-webkit-datetime-edit-fields-wrapper{padding:0}::-webkit-datetime-edit,::-webkit-datetime-edit-year-field,::-webkit-datetime-edit-month-field,::-webkit-datetime-edit-day-field,::-webkit-datetime-edit-hour-field,::-webkit-datetime-edit-minute-field,::-webkit-datetime-edit-second-field,::-webkit-datetime-edit-millisecond-field,::-webkit-datetime-edit-meridiem-field{padding-block:0}:-moz-ui-invalid{box-shadow:none}button,input:where([type=button],[type=reset],[type=submit]),::file-selector-button{appearance:button}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[hidden]:where(:not([hidden=until-found])){display:none!important}.text-2xl{font-size:var(--text-2xl-fontSize);line-height:var(--un-leading, var(--text-2xl-lineHeight))}.text-4xl{font-size:var(--text-4xl-fontSize);line-height:var(--un-leading, var(--text-4xl-lineHeight))}.text-sm{font-size:var(--text-sm-fontSize);line-height:var(--un-leading, var(--text-sm-lineHeight))}.text-xs{font-size:var(--text-xs-fontSize);line-height:var(--un-leading, var(--text-xs-lineHeight))}.text-gray-500{color:color-mix(in srgb,var(--colors-gray-500) var(--un-text-opacity),transparent)}.text-gray-700{color:color-mix(in srgb,var(--colors-gray-700) var(--un-text-opacity),transparent)}.text-gray-800{color:color-mix(in srgb,var(--colors-gray-800) var(--un-text-opacity),transparent)}.text-gray-900{color:color-mix(in srgb,var(--colors-gray-900) var(--un-text-opacity),transparent)}.text-yellow-800{color:color-mix(in srgb,var(--colors-yellow-800) var(--un-text-opacity),transparent)}.font-bold{--un-font-weight:var(--fontWeight-bold);font-weight:var(--fontWeight-bold)}.font-extrabold{--un-font-weight:var(--fontWeight-extrabold);font-weight:var(--fontWeight-extrabold)}.font-mono{font-family:var(--font-mono)}.font-semibold{--un-font-weight:var(--fontWeight-semibold);font-weight:var(--fontWeight-semibold)}.p-2{padding:calc(var(--spacing) * 2)}.p-4{padding:calc(var(--spacing) * 4)}.p-6{padding:calc(var(--spacing) * 6)}.px-2{padding-inline:calc(var(--spacing) * 2)}.py-1{padding-block:calc(var(--spacing) * 1)}.pb-2{padding-bottom:calc(var(--spacing) * 2)}.text-center{text-align:center}.text-right{text-align:right}.border{border-width:1px}.border-b{border-bottom-width:1px}.rounded{border-radius:var(--radius-DEFAULT)}.rounded-lg{border-radius:var(--radius-lg)}.rounded-md{border-radius:var(--radius-md)}.bg-gray-100{background-color:color-mix(in srgb,var(--colors-gray-100) var(--un-bg-opacity),transparent)}.bg-gray-200{background-color:color-mix(in srgb,var(--colors-gray-200) var(--un-bg-opacity),transparent)}.bg-gray-50{background-color:color-mix(in srgb,var(--colors-gray-50) var(--un-bg-opacity),transparent)}.bg-white{background-color:color-mix(in srgb,var(--colors-white) var(--un-bg-opacity),transparent)}.bg-yellow-100{background-color:color-mix(in srgb,var(--colors-yellow-100) var(--un-bg-opacity),transparent)}.flex{display:flex}.flex-1{flex:1 1 0%}.flex-shrink-0{flex-shrink:0}.flex-grow{flex-grow:1}.flex-col{flex-direction:column}.gap-2{gap:calc(var(--spacing) * 2)}.gap-3{gap:calc(var(--spacing) * 3)}.gap-4{gap:calc(var(--spacing) * 4)}.gap-6{gap:calc(var(--spacing) * 6)}.grid{display:grid}.grid-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))}.grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.h-full{height:100%}.min-h-screen{min-height:100vh}.w-full{width:100%}.shadow-md{--un-shadow:0 4px 6px -1px var(--un-shadow-color, rgb(0 0 0 / .1)),0 2px 4px -2px var(--un-shadow-color, rgb(0 0 0 / .1));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.items-center{align-items:center}.justify-end{justify-content:flex-end}.justify-between{justify-content:space-between}@supports (color: color-mix(in lab,red,red)){.text-gray-500{color:color-mix(in oklab,var(--colors-gray-500) var(--un-text-opacity),transparent)}.text-gray-700{color:color-mix(in oklab,var(--colors-gray-700) var(--un-text-opacity),transparent)}.text-gray-800{color:color-mix(in oklab,var(--colors-gray-800) var(--un-text-opacity),transparent)}.text-gray-900{color:color-mix(in oklab,var(--colors-gray-900) var(--un-text-opacity),transparent)}.text-yellow-800{color:color-mix(in oklab,var(--colors-yellow-800) var(--un-text-opacity),transparent)}.bg-gray-100{background-color:color-mix(in oklab,var(--colors-gray-100) var(--un-bg-opacity),transparent)}.bg-gray-200{background-color:color-mix(in oklab,var(--colors-gray-200) var(--un-bg-opacity),transparent)}.bg-gray-50{background-color:color-mix(in oklab,var(--colors-gray-50) var(--un-bg-opacity),transparent)}.bg-white{background-color:color-mix(in oklab,var(--colors-white) var(--un-bg-opacity),transparent)}.bg-yellow-100{background-color:color-mix(in oklab,var(--colors-yellow-100) var(--un-bg-opacity),transparent)}}@media (min-width: 48rem){.md\\:col-span-2{grid-column:span 2/span 2}.md\\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}}@media (min-width: 64rem){.lg\\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}}body{font-family:var(--font-family)}html,body{font-family:var(--theme-font-family);background-color:var(--theme-background-color)!important;color:var(--text-color)!important;width:100%;min-height:100%;height:100%;padding:0;margin:0}body:not(.production) *:not(:defined){border:1px solid red}.dark{filter:invert(1) hue-rotate(180deg)}.dark img,.dark dialog,.dark video,.dark iframe{filter:invert(1) hue-rotate(180deg)}html{font-size:14px}@media (max-width: 768px){html{font-size:18px}}@media (max-width: 480px){html{font-size:20px}}textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;color:inherit;margin:0;padding:0}:root{box-sizing:border-box;-moz-text-size-adjust:none;-webkit-text-size-adjust:none;text-size-adjust:none;line-height:1.2;-webkit-font-smoothing:antialiased}*,*:before,*:after{box-sizing:border-box}*{margin:0}body{-webkit-font-smoothing:antialiased;font-family:var(--font-family)}button,textarea,select{background-color:inherit;border-width:0;color:inherit}img,picture,video,canvas,svg{display:block;max-width:100%}input,button,textarea,select{font:inherit}p,h1,h2,h3,h4,h5,h6{font-family:var(--font-family);overflow-wrap:break-word}dialog::backdrop{background-color:#000c}*::-webkit-scrollbar{width:8px;margin-right:10px}*::-webkit-scrollbar-track{background:transparent}*::-webkit-scrollbar-thumb{&:hover{scrollbar-color:rgba(154,153,150,.8) transparent}border-radius:10px;border:none}*::-webkit-scrollbar-button{background:transparent;color:transparent}*{scrollbar-width:thin;scrollbar-color:transparent transparent;&:hover{scrollbar-color:rgba(154,153,150,.8) transparent}}[full]{width:100%;height:100vh}[w-full]{width:100%}[grow]{flex-grow:1}[hide],.hide{display:none!important}[noscroll]{overflow:hidden}div [container]{display:flex}div [container][horizontal]{display:flex;flex-direction:col}:where(.uix-link){font-weight:var(--uix-link-font-weight, 600);width:var(--uix-link-width, auto);color:var(--uix-link-text-color, var(--colors-default-900));--uix-link-indent: 0;cursor:pointer;&[vertical]{margin:0 auto}a,button{width:inherit;cursor:pointer;padding:var(--uix-link-padding);&:hover{color:var(--uix-link-hover-color, var(--uix-link-text-color))}}.uix-text-icon__element{display:flex;align-items:center;gap:var(--uix-link-icon-gap, .5rem);&[reverse][vertical]{flex-direction:column-reverse}&:not([reverse])[vertical]{flex-direction:column}&[reverse]:not([vertical]){flex-direction:row-reverse}&:not([reverse]):not([vertical]){flex-direction:row}}transition:all .3s ease-in-out;&[indent]{>a,>button{padding-left:var(--uix-link-indent)}}&[active]:hover{color:var(--uix-link-hover-text-color, var(--colors-primary-400))}&[selectable][selected]{background-color:var(--colors-primary-400)}&:hover{[tooltip]{display:flex}}&[tooltip]{display:inline-block;&:hover{[tooltip]{visibility:visible}}[tooltip]{visibility:hidden;width:120px;background-color:#000;color:#fff;text-align:center;border-radius:6px;padding:5px 10px;margin-left:3px;position:absolute;z-index:1000000000;top:50%;left:100%;transform:translateY(-50%)}}&[position~=top] [tooltip]{bottom:100%;left:50%;transform:translate(-50%)}&[position~=bottom] [tooltip]{top:100%;left:50%;transform:translate(-50%)}&[position~=left] [tooltip]{top:50%;right:100%;transform:translateY(-50%)}&[tooltip],&[dropdown],&[context],&[float]{position:relative}&[dropdown],&[accordion]{flex-direction:column}[float],[dropdown],[accordion],[context]{display:none}&[floatopen]>a{display:none}&[floatopen] [float]{display:block;position:relative;bottom:0;right:0}&[context]{z-index:auto}[context][open]{display:flex;flex-direction:column}[dropdown],[context][open]{position:absolute;left:0;top:100%;width:100%;min-width:200px;z-index:1000;background-color:var(--colors-primary-100);box-shadow:0 8px 16px #0003;.uix-link:hover,input{background-color:var(--colors-primary-200)}>.uix-link{width:100%}}[context][open]{display:flex}&[selected]{[dropdown],[accordion]{display:flex;flex-direction:column}}}:where(.uix-button){border:var(--uix-button-borderSize, 0) solid var(--uix-button-borderColor);border-radius:var(--uix-button-borderRadius, var(--radius-md));box-shadow:var(--uix-button-shadow);width:var(--uix-button-width);min-width:fit-content;background-color:var(--uix-button-backgroundColor, black);color:var(--uix-button-textColor, var(--colors-default-100));font-weight:var(--uix-button-fontWeight, 700);display:flex;text-align:center;transition:transform .2s ease-in-out,opacity .2s ease-in-out,background-color .2s ease-in-out;&:hover{opacity:var(--uix-button-hover-opacity, .4)}&:active{transform:scale(.97)}>button,>a,>input{width:max-content;display:block;border-radius:inherit;cursor:var(--uix-button-cursor, pointer);height:calc(var(--spacing) * 10);line-height:calc(var(--spacing) * 5);padding:var( --uix-button-padding, calc(var(--spacing) * 2.5) calc(var(--spacing) * 4) );word-break:keep-all;flex-basis:100%}.uix-icon,button,input,a{cursor:pointer}&[bordered]{--uix-button-border-size: 1px;--uix-button-backgroundColor: transparent;--uix-button-hoverBackgroundColor: var(--_variant-color-300);--uix-button-borderColor: var(--_variant-color-400);--uix-button-textColor: var(--_variant-color-700)}&[ghost]{--uix-button-backgroundColor: transparent;--uix-button-hoverBackgroundColor: var(--_variant-color-300);--uix-button-borderSize: 0px;--uix-button-textColor: var(--_variant-color-700)}&[outline]{--uix-button-backgroundColor: transparent;--uix-button-hoverBackgroundColor: var(--_variant-color-300);--uix-button-textColor: var(--_variant-color-800);--uix-button-borderSize: 1px;--uix-button-borderColor: var(--_variant-color-400)}&[float]{background-color:#000;--uix-button-hoverBackgroundColor: var(--_variant-color-500);--uix-button-textColor: var(--_variant-color-50);--uix-button-borderSize: 0px;--uix-button-borderRadius: 9999px;--uix-button-width: var(--uix-button-height);box-shadow:var(--shadow-md, 0 4px 6px -1px rgb(0 0 0 / .1));--uix-button-padding: .5rem}&[float]:hover{box-shadow:var(--shadow-lg, 0 10px 15px -3px rgb(0 0 0 / .1))}}.uix-list{display:flex;&[vertical]{flex-direction:column}}.uix-navbar{--uix-navbar-text-color: var(--color-default-90);--uix-navbar-hover-text-color: var(--color-surface-80);--uix-navbar-border-radius: 0px;--uix-navbar-border-color: var(--color-default-60);--uix-navbar-border-size: 1px;--uix-navbar-border-style: solid;--uix-navbar-hover-background-color: var(--color-default-40);--uix-container-position: var(--uix-navbar-position);display:flex;flex-direction:column;&[docked]{--uix-list-button-radius: 0;border-bottom:0;position:fixed;bottom:0;background-color:var(--uix-navbar-background-color, var(--color-default-5));>*{border-right:0;border-bottom:0;&:first-child{border-left:0}}}}.uix-icon{display:inline-block;vertical-align:middle;svg{height:inherit;width:inherit}}&[solid]{stroke:currentColor;fill:currentColor}:where(.uix-input){--uix-input-background-color: var(--colors-surface-100);--uix-input-border-color: var(--colors-gray-900);--uix-input-text-color: var(--colors-gray-900);--uix-input-placeholder-color: var(--colors-default-500);--uix-input-border-radius: var(--border-radius-md);--uix-input-border-width: 2px;--uix-input-padding-x: calc(var(--spacing) * 4);--uix-input-padding-y: calc(var(--spacing) * 2.5);--uix-input-font-size: var(--font-size-base);--uix-input-height: 2.5rem;--uix-input-disabled-opacity: .6;--uix-input-label-font-size: var(--font-size-sm);--uix-input-label-font-weight: var(--font-weight-bold);--uix-input-label-color: var(--colors-default-700);--uix-input-checkbox-size: 1.5rem;--uix-input-checkbox-border-radius: var(--border-radius-sm);--uix-input-checkbox-checked-bg: var(--colors-primary-600);--uix-input-checkbox-check-color: var(--colors-surface-100);width:100%;display:flex;flex-direction:column;input,select,textarea{width:100%;height:var(--uix-input-height);border-radius:var(--uix-input-border-radius);border:var(--uix-input-border-width) solid var(--uix-input-border-color);font-size:var(--uix-input-font-size);background-color:var(--uix-input-background-color);color:var(--uix-input-text-color);transition:var(--uix-transition);outline:none;padding:var(--uix-input-padding-y) var(--uix-input-padding-x)}textarea{resize:vertical}&:has(textarea){height:auto}select{appearance:none;-webkit-appearance:none;cursor:pointer;font-weight:600;padding-block:0;option{font-weight:600;background-color:var(--uix-input-background-color);font-size:1.1rem;line-height:1.5rem;color:#333;padding:50px;border:2px solid red}}.select-container{position:relative;.select-arrow{position:absolute;right:calc(2 * var(--spacing))}}input::placeholder{color:transparent}label{font-weight:var(--uix-input-label-font-weight);color:var(--uix-input-label-color, var(--colors-gray-600));margin-bottom:var(--spacing);font-size:.9rem;padding:0 4px;transition:all .2s ease-in-out;pointer-events:none;&[required]:after{content:"*";color:var(--colors-danger-500);margin-left:2px}}input:not(:placeholder-shown)+label,textarea:not(:placeholder-shown)+label,&:focus-within label,&.has-value label{top:-2px;transform:translateY(0);font-size:var(--uix-input-label-font-size)}&:focus-within input,&:focus-within select,&:focus-within textarea{box-shadow:0 0 var(--uix-input-focus-ring-width, 5px) var(--uix-input-focus-ring-color, rgba(0, 0, 255, .5))}&[disabled]{cursor:not-allowed;opacity:var(--uix-input-disabled-opacity);& label{cursor:not-allowed}}.input-icon,.select-arrow{position:absolute;top:50%;right:var(--spacing);transform:translateY(-50%);pointer-events:none;color:var(--uix-input-label-color);transition:transform .2s ease-in-out}&:has(select:hover:active) .select-arrow{transform:translateY(-50%) rotate(180deg)}&:has(.input-icon:not(.select-arrow))>input{padding-right:calc(var(--uix-input-padding-x) + 1.75em)}&[type=checkbox],&[type=radio]{flex-direction:row;align-items:center;border:0;height:auto;width:auto;background-color:transparent;box-shadow:none;gap:.75rem;cursor:pointer;label{margin:0;line-height:1.5rem;position:static;transform:none;background-color:transparent;padding:0;cursor:pointer;font-weight:var(--font-weight-normal);order:2;pointer-events:auto}input{appearance:none;-webkit-appearance:none;width:var(--uix-input-checkbox-size);height:var(--uix-input-checkbox-size);margin:0;border:var(--uix-input-border-width) solid var(--uix-input-border-color);background-color:var(--uix-input-background-color);cursor:pointer;position:relative;transition:var(--uix-transition);padding:0;&:after{content:"";position:absolute;display:none;left:50%;top:50%}&:checked{background-color:var(--uix-input-checkbox-checked-bg);border-color:var(--uix-input-checkbox-checked-bg);&:after{display:block}}&:focus-visible{box-shadow:0 0 0 var(--uix-input-focus-ring-width) var(--uix-input-focus-ring-color);border-color:var(--uix-input-focus-ring-color)}}}&[type=checkbox] input:after{width:.375rem;height:.75rem;border:solid var(--uix-input-checkbox-check-color);border-width:0 2px 2px 0;transform:translate(-50%,-60%) rotate(45deg)}&[type=radio] input{border-radius:var(--border-radius-full);&:after{width:calc(var(--uix-input-checkbox-size) / 2);height:calc(var(--uix-input-checkbox-size) / 2);border-radius:var(--border-radius-full);background-color:var(--uix-input-checkbox-check-color);transform:translate(-50%,-50%)}}&[ghost]{&:focus-within select{box-shadow:none}.select-arrow{margin-left:5px;padding-left:5px}select{background:inherit;border:0}}}
+`,metaType:"text/css"}};self.addEventListener("install",t=>t.waitUntil(self.skipWaiting())),self.addEventListener("activate",t=>t.waitUntil(self.clients.claim())),self.addEventListener("fetch",t=>{const n=new URL(t.request.url),e=FILE_BUNDLE[n.pathname];e&&t.respondWith(new Response(e.content,{headers:{"Content-Type":e.metaType||"application/javascript"}}))});
