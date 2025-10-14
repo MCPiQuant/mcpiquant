@@ -38,7 +38,8 @@
                     await ensureSWController();
                     console.log("✅ Service Worker is in control!");
                     const { default: $APP } = await import("/bootstrap.js");
-                    await $APP.loadApp();
+								
+                    await $APP.loadApp(true);
                 } catch (error) {
                     console.log({ error });
                     console.warn("Service Worker did not take control in time. Reloading...");
