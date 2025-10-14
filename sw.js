@@ -4605,7 +4605,1271 @@ export default server;
 		cursor: pointer;
 	}
 }
-`,mimeType:"text/css",skipSW:!1},"/modules/icon-lucide/lucide/file-text.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4M10 9H8m8 4H8m8 4H8"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/file-code-2.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v4"/><path d="M14 2v4a2 2 0 0 0 2 2h4M5 12l-3 3l3 3m4 0l3-3l-3-3"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/views/github-comments.js":{content:`export default ({ T, html }) => {
+`,mimeType:"text/css",skipSW:!1},"/modules/icon-lucide/lucide/file-text.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4M10 9H8m8 4H8m8 4H8"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/file-code-2.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v4"/><path d="M14 2v4a2 2 0 0 0 2 2h4M5 12l-3 3l3 3m4 0l3-3l-3-3"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/index.html":{content:`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script type="importmap">
+			{
+				"imports": {
+					"@modelcontextprotocol/sdk/": "https://cdn.jsdelivr.net/npm/@modelcontextprotocol/sdk@1.18.1/dist/esm/",
+					"zod": "https://esm.sh/zod@3.23.8",
+					"eventsource-parser/stream": "https://esm.sh/eventsource-parser/stream",
+					"pkce-challenge": "https://esm.sh/pkce-challenge",
+          "zod-to-json-schema": "https://esm.sh/zod-to-json-schema@3.24.5",          
+					"ajv": "https://esm.sh/ajv@6.12.6"
+				}
+			}
+		<\/script>
+  <meta charset="utf-8" />
+  <title>meetuprio</title>
+  <base href="/" />
+  
+  <meta name="viewport"
+    content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
+  <meta name="description" content="This is a meetuprio app" />
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#181818" />
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f3f3f3" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-title" content="meetuprio" />
+  <meta name="mobile-web-app-status-bar-style" content="black" />
+  <link id="favicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLW1vdW50YWluIj48cGF0aCBkPSJtOCAzIDQgOCA1LTUgNSAxNUgyTDggM3oiLz48L3N2Zz4="/>
+  <link rel="manifest" href="manifest.json" /> 
+	<script>
+		const ensureSWController = () => {
+			const timeoutPromise = new Promise((_, reject) => {
+				setTimeout(() => reject(new Error("Service Worker timed out.")), 100);
+			});
+			const controllerPromise = new Promise((resolve) => {
+				if (navigator.serviceWorker.controller) {
+					return resolve();
+				}
+				navigator.serviceWorker.addEventListener("controllerchange", () => {
+					return resolve();
+				});
+			});
+			return Promise.race([controllerPromise, timeoutPromise]);
+		};
+		const startApp = async () => {
+			if (!("serviceWorker" in navigator)) {
+				console.warn("Service Worker not supported.");
+				throw new Error("Platform not supported");
+			}
+			await navigator.serviceWorker.register("/sw.js", {
+				scope: "/",
+				type: "module",
+			});
+			try {
+				console.log("Waiting for Service Worker to take control...");
+				await ensureSWController();
+				console.log("\u2705 Service Worker is in control!");
+				const { default: $APP } = await import("/bootstrap.js");
+				await $APP.loadApp();
+			} catch (error) {
+				console.warn("Service Worker did not take control in time. Reloading...");
+				window.location.reload();
+			}
+		};
+		startApp();
+	<\/script>
+</head>
+<body>
+  <app-container></app-container>
+</body>
+</html>
+`,mimeType:"text/html",skipSW:!1},"/views/templates/app.js":{content:`export default ({ html, AI, T }) => {
+	return {
+		style: true,
+		class: "w-full h-screen bg-[#282828] text-[#ebdbb2] flex font-sans text-sm",
+		properties: {
+			currentRoute: T.object({ sync: "ram" }),
+			isServerConnected: T.boolean({ sync: "local" }),
+		},
+		async connected() {
+			await this.initializeAI();
+		},
+		async initializeAI() {
+			try {
+				if (!AI.isInitialized) {
+					await AI.init({
+						geminiApiKey: "",
+						localAIEndpoint: "http://localhost:1234/v1/chat/completions",
+						openrouterApiKey:
+							"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",
+						defaultRoots: [
+							{
+								uri: "file:///",
+								name: "Root Filesystem",
+								description: "Full filesystem access",
+							},
+						],
+					});
+				}
+				this.isServerConnected = AI.listClients().length > 0;
+			} catch (error) {
+				console.error("Error initializing AI service:", error);
+				this.isServerConnected = false;
+			}
+		},
+		render() {
+			return html\`
+				<mcp-sidebar></mcp-sidebar>
+				<div class="flex-1 h-full flex flex-col min-w-0">
+					<div
+						class="h-15 bg-[#3c3836] border-b border-[#504945] p-2 flex items-center justify-between"
+					>
+					
+					</div>
+					<div class="flex-1 overflow-auto flex">
+            \${this.component}
+					</div>
+				</div>
+			\`;
+		},
+	};
+};
+`,mimeType:"application/javascript",skipSW:!1},"/views/templates/app.css":{content:`.app-template {
+	.uix-card {
+		button {
+			color: #111;
+			cursor: pointer;
+		}
+	}
+}
+`,mimeType:"text/css",skipSW:!1},"/modules/apps/mcp/views/sidebar.js":{content:`export default ({ html, T }) => ({
+	class:
+		"w-64 bg-[#3c3836] text-[#ebdbb2] flex flex-col h-screen shrink-0 border-r border-[#504945]",
+	properties: {
+		currentRoute: T.object({ sync: "ram" }),
+		onSelectHistory: T.function(),
+		isDarkMode: T.boolean({ defaultValue: true, sync: "local" }),
+	},
+
+	_renderLink(link) {
+		const isActive = this.currentRoute.name === link.key;
+		return html\`
+            <uix-link href=\${link.key}
+          icon=\${link.icon}
+          label=\${link.label}
+          data-active=\${isActive}
+          class="[&>a>uix-icon]:w-5 [&>a>uix-icon]:h-5
+            relative flex items-center text-sm font-bold p-2 rounded-md transition-colors w-full
+            text-[#ebdbb2] hover:bg-[#504945]
+            data-[active=true]:bg-[#504945] data-[active=true]:text-white
+          ">
+                \${
+									link.isComingSoon
+										? html\`<span class="ml-auto bg-[#b16286] text-xs font-bold text-white px-2 py-0.5 rounded-full absolute right-3">soon</span>\`
+										: ""
+								}
+            </uix-link>
+        \`;
+	},
+	toggleDarkMode() {
+		document.body.classList.toggle("dark", this.isDarkMode);
+		this.isDarkMode = !this.isDarkMode;
+	},
+
+	render() {
+		const mainLinks = [
+			{ key: "discover", label: "Discover", icon: "telescope" },
+			{ key: "dev", label: "Develop", icon: "code" },
+			{ key: "chat", label: "Chat", icon: "message-circle" },
+			{ key: "inspector", label: "Inspector", icon: "search" },
+			{ key: "servers", label: "Servers", icon: "server" },
+			{ key: "agents", label: "Agents", icon: "bot", isComingSoon: true },
+			{ key: "apps", label: "Apps", icon: "layout-grid", isComingSoon: true },
+			{ key: "learn", label: "Learn", icon: "book", isComingSoon: true },
+			{
+				key: "vibecoding",
+				label: "Vibecoding",
+				icon: "zap",
+				isComingSoon: true,
+			},
+		];
+
+		return html\`<div class="h-15 p-4 border-b border-[#504945] flex items-center space-x-2 shrink-0">
+            <h2 class="text-xl text-[#ebdbb2] tracking-widest font-bold"><a href="/">\u{1F336}\uFE0F MCPiquant</a></h2>
+        </div>
+        <div class="flex-grow flex flex-col min-h-0">
+            <nav class="p-2 space-y-1 shrink-0">
+                \${mainLinks.map((link) => this._renderLink(link))}
+            </nav>
+            <div class="flex-grow flex flex-col border-t border-[#504945] min-h-0">
+                <h3 class="p-2 text-xs font-semibold text-[#928374] uppercase tracking-wider shrink-0">History</h3>
+                <div class="flex-1 overflow-y-auto">
+                    <mcp-history .onSelect=\${this.onSelectHistory} listOnly></mcp-history>
+                </div>
+            </div>
+            <div class="p-2 border-t border-[#504945] shrink-0">
+                \${this._renderLink({
+									key: "settings",
+									label: "Settings",
+									icon: "settings",
+								})}
+                \${this._renderLink({
+									key: "feedback",
+									label: "Feedback",
+									icon: "message-square-heart",
+								})}
+                <button @click=\${this.toggleDarkMode.bind(this)} class="w-full flex items-center p-2 rounded-md hover:bg-[#504945] text-left text-sm">
+                    <uix-icon name=\${
+											this.isDarkMode ? "sun" : "moon"
+										} class="w-5 h-5 mr-3 shrink-0"></uix-icon>
+                    <span>\${this.isDarkMode ? "Light Mode" : "Dark Mode"}</span>
+                    <div class="ml-auto w-10 h-5 \${
+											this.isDarkMode ? "bg-red-700" : "bg-gray-600"
+										} rounded-full flex items-center p-1 transition-colors">
+                        <div class="w-4 h-4 bg-white rounded-full transform transition-transform \${
+													this.isDarkMode ? "translate-x-4" : ""
+												}"></div>
+                    </div>
+                </button>
+            </div>
+        </div>
+      \`;
+	},
+});
+`,mimeType:"application/javascript",skipSW:!1},"/views/templates/discover.js":{content:`import { keyed } from "/modules/mvc/view/html/directive.js";
+export default ({ html, T, $APP, Model }) => {
+	$APP.define("mcp-discover-list-view", {
+		properties: {
+			type: T.string("server"),
+			tagId: T.string(),
+			p: T.string({ sync: "querystring" }),
+		},
+		render() {
+			const modelName = \`\${this.type}s\`;
+			const dataQuery = {
+				model: modelName,
+				key: "artifacts",
+				offset: (this.p ?? 0) * 6,
+				limit: 6,
+			};
+
+			if (this.tagId) dataQuery.where = { tags: { $includes: this.tagId } };
+
+			return keyed(
+				this.p,
+				html\`<mcp-artifact-grid
+										type=\${this.type}
+									.data-query=\${dataQuery}
+            			></mcp-artifact-grid>\`,
+			);
+		},
+	});
+
+	$APP.define("mcp-capabilities-display", {
+		properties: {
+			capabilities: T.object(),
+			type: T.string("server"),
+		},
+		render() {
+			if (!this.capabilities) return html\`\`;
+
+			const capabilityConfig = {
+				resources: { label: "Resources", icon: "database" },
+				prompts: { label: "Prompts", icon: "message-square" },
+				tools: { label: "Tools", icon: "wrench" },
+				discovery: { label: "Discovery", icon: "search" },
+				sampling: { label: "Sampling", icon: "activity" },
+				roots: { label: "Roots", icon: "folder-tree" },
+				elicitation: {
+					label: "Elicitation",
+					icon: "info",
+				},
+			};
+
+			const entries = Object.entries(this.capabilities);
+			if (entries.length === 0) return html\`\`;
+
+			return html\`
+                <div class="flex flex-col gap-3">
+                    <h4 class="text-xs font-bold text-[#a89984] uppercase tracking-wide">
+                        Capabilities
+                    </h4>
+                    <div class="grid grid-cols-2 gap-2">
+                        \${entries.map(([key, value]) => {
+													const config = capabilityConfig[key];
+													if (!config) return "";
+
+													const isEnabled = value === true;
+													return html\`
+                                <div class="flex items-center gap-2 px-3 py-2 rounded-md \${
+																	isEnabled
+																		? "bg-[#3c3836] border border-[#83a598]"
+																		: "bg-[#282828] border border-[#3c3836] opacity-50"
+																}">
+                                    <uix-icon 
+                                        name=\${config.icon} 
+                                        class="w-4 h-4 \${isEnabled ? "text-[#83a598]" : "text-[#665c54]"}"
+                                    ></uix-icon>
+                                    <span class="text-xs font-semibold \${
+																			isEnabled
+																				? "text-[#ebdbb2]"
+																				: "text-[#928374]"
+																		}">
+                                        \${config.label}
+                                    </span>
+                                </div>
+                            \`;
+												})}
+                    </div>
+                </div>
+            \`;
+		},
+	});
+
+	$APP.define("mcp-connection-configurator", {
+		properties: {
+			artifact: T.object(),
+			copyStatus: T.object({ defaultValue: {} }),
+			formValues: T.object({ defaultValue: {} }),
+		},
+		connected() {
+			this.formValues = {};
+			const pkg = this.artifact?.packages?.[0];
+			if (pkg?.environmentVariables) {
+				pkg.environmentVariables.forEach((env) => {
+					this.formValues[env.name] = env.defaultValue || "";
+				});
+			}
+			if (!this.formValues["port"]) {
+				this.formValues["port"] = "8080";
+			}
+		},
+		handleInputChange(name, value) {
+			this.formValues[name] = value;
+			this.update();
+		},
+		copyToClipboard(key, text) {
+			navigator.clipboard
+				.writeText(text)
+				.then(() => {
+					this.copyStatus[key] = "Copied!";
+					this.update();
+					setTimeout(() => {
+						this.copyStatus[key] = null;
+						this.update();
+					}, 2000);
+				})
+				.catch((err) => {
+					console.error("Failed to copy text: ", err);
+					this.copyStatus[key] = "Failed!";
+					this.update();
+				});
+		},
+		renderPackageRunner(pkg) {
+			const port = this.formValues["port"] || "8080";
+			const envVars = pkg.environmentVariables || [];
+
+			const mcpServerConfig = JSON.stringify(
+				{
+					mcpServers: {
+						[this.artifact.id]: {
+							type: pkg.transport.type === "stdio" ? "sse" : pkg.transport.type,
+							url: \`http://127.0.0.1:\${port}/\${pkg.transport.type === "stdio" ? "sse" : ""}\`.replace(
+								/\\/$/,
+								"",
+							),
+						},
+					},
+				},
+				null,
+				2,
+			);
+
+			const transportRunnerArgs = [pkg.identifier, "--port", port];
+			const transportRunnerConfig = JSON.stringify(
+				{
+					command: "npx",
+					args: transportRunnerArgs,
+					env: this.formValues,
+				},
+				null,
+				2,
+			);
+
+			return html\`
+                <div class="flex flex-col gap-4">
+                    <div>
+                        <h4 class="text-xs font-bold text-[#a89984] uppercase tracking-wide mb-2">Package Arguments</h4>
+                        <div class="flex flex-col gap-2">
+                            <div class="flex items-center gap-2">
+                                <label for="port" class="text-sm font-semibold text-[#bdae93] w-48">Server port number</label>
+                                <input id="port" type="number" value=\${port} @input=\${(e) => this.handleInputChange("port", e.target.value)} class="flex-1 bg-[#1d2021] border-2 border-[#3c3836] font-mono text-sm text-[#ebdbb2] rounded-md py-1.5 px-3 focus:outline-none focus:border-[#83a598]" />
+                            </div>
+                            \${envVars.map(
+															(env) => html\`
+                                    <div class="flex items-center gap-2">
+                                        <label for=\${env.name} class="text-sm font-semibold text-[#bdae93] w-48" title=\${env.description}>\${env.name}</label>
+                                        <input id=\${env.name} type=\${env.isSecret ? "password" : "text"} value=\${this.formValues[env.name] || ""} @input=\${(e) => this.handleInputChange(env.name, e.target.value)} class="flex-1 bg-[#1d2021] border-2 border-[#3c3836] font-mono text-sm text-[#ebdbb2] rounded-md py-1.5 px-3 focus:outline-none focus:border-[#83a598]" placeholder=\${env.description} />
+                                    </div>
+                                \`,
+														)}
+                        </div>
+                    </div>
+
+                    \${this.renderConfigBlock("MCP Server Configuration", mcpServerConfig, "mcpConfig")}
+                    \${this.renderConfigBlock("Transport Runner Configuration", transportRunnerConfig, "runnerConfig")}
+                </div>
+            \`;
+		},
+		renderRemoteConnector(remote) {
+			const mcpServerConfig = JSON.stringify(
+				{
+					mcpServers: {
+						[this.artifact.id]: {
+							type: remote.type.replace("streamable-http", "http"),
+							url: remote.url,
+						},
+					},
+				},
+				null,
+				2,
+			);
+
+			return html\`
+                <div class="flex flex-col gap-4">
+                       \${this.renderConfigBlock("MCP Server Configuration", mcpServerConfig, "mcpConfig")}
+                </div>
+            \`;
+		},
+		renderConfigBlock(title, configString, key) {
+			return html\`
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <h4 class="text-xs font-bold text-[#a89984] uppercase tracking-wide">\${title}</h4>
+                        <button @click=\${() => this.copyToClipboard(key, configString)} class="flex items-center gap-1.5 text-xs font-bold text-[#83a598] hover:text-[#ebdbb2] transition-colors">
+                            <uix-icon name="copy" class="w-3.5 h-3.5"></uix-icon>
+                            \${this.copyStatus[key] || "Copy"}
+                        </button>
+                    </div>
+                    <pre class="bg-[#1d2021] border border-[#3c3836] rounded-md p-3 text-xs text-[#98971a] font-mono overflow-x-auto"><code>\${configString}</code></pre>
+                </div>
+            \`;
+		},
+		render() {
+			const { artifact } = this;
+			if (!artifact) return html\`\`;
+
+			const pkg = artifact.packages?.[0];
+			const remote = artifact.remotes?.find(
+				(r) => r.type === "sse" || r.type === "streamable-http",
+			);
+
+			return html\`
+                <div class="flex flex-col gap-3 mt-4">
+                    <h4 class="text-xs font-bold text-[#a89984] uppercase tracking-wide">
+                        Connection
+                    </h4>
+                    <div class="bg-[#282828] border-2 border-dashed border-[#3c3836] rounded-lg p-4">
+                        \${pkg ? this.renderPackageRunner(pkg) : remote ? this.renderRemoteConnector(remote) : html\`<p class="text-sm text-[#928374]">No connection information available.</p>\`}
+                    </div>
+                </div>
+            \`;
+		},
+	});
+
+	$APP.define("mcp-tags-grid", {
+		properties: {
+			tags: T.array([]),
+			type: T.string("server"),
+		},
+		render() {
+			if (!this.tags || this.tags.length === 0) return html\`\`;
+
+			const baseUrl = \`/discover/\${this.type}s\`;
+
+			return html\`
+                <div class="grid grid-cols-3 gap-2">
+                    \${this.tags.map(
+											(tag) => html\`
+                            <uix-link
+                                href=\${\`\${baseUrl}/tag/\${encodeURIComponent(tag)}\`}
+                                label=\${tag}
+                                class="text-xs font-bold px-2 py-1 rounded bg-[#504945] text-[#ebdbb2] hover:bg-[#665c54] transition-colors truncate block text-center"
+                            >
+                            </uix-link>
+                        \`,
+										)}
+                </div>
+            \`;
+		},
+	});
+
+	$APP.define("mcp-server-card", {
+		properties: {
+			artifact: T.object(),
+			isDetailView: T.boolean(false),
+		},
+		onToggleHot(e) {
+			e.stopPropagation();
+			e.preventDefault();
+			Model.servers.edit({
+				id: this.artifact.id,
+				hots: (this.artifact.hots ?? 0) + (this.artifact.hotted ? -1 : 1),
+				hotted: !this.artifact.hotted,
+			});
+		},
+		onToggleFavorite(e) {
+			e.stopPropagation();
+			e.preventDefault();
+			Model.servers.edit({
+				id: this.artifact.id,
+				favorite: !this.artifact.favorite,
+			});
+		},
+		render() {
+			const { artifact, isDetailView } = this;
+			if (!artifact) return html\`\`;
+
+			const isFavorited = artifact.favorite;
+			const starClass = isFavorited ? "text-[#fabd2f]" : "text-[#a89984]";
+
+			const transportInfo = [];
+			if (artifact.transports) {
+				if (artifact.transports.stdio)
+					transportInfo.push({ icon: "terminal", label: "stdio" });
+				if (artifact.transports.sse)
+					transportInfo.push({ icon: "radio", label: "SSE" });
+				if (artifact.transports.streamableHTTP)
+					transportInfo.push({ icon: "globe", label: "HTTP" });
+			}
+
+			return html\`
+                <div class=\${\`\${isDetailView ? "" : "hover:border-[#cc241d] hover:shadow-[6px_6px_0px_#cc241d]"} bg-[#282828] 
+                    w-full h-full flex-1 border-2 border-[#3c3836] rounded-lg p-5 flex flex-col gap-5 
+                    font-semibold transition-all duration-200 shadow-[4px_4px_0px_#1d2021]\`}>
+                    <div class="flex items-center gap-4 w-full">
+                        <div class="w-12 h-12 text-xl rounded-md flex-shrink-0 flex items-center justify-center bg-[#1d2021] text-[#cc241d]">
+                            \${artifact.icon ? html\`<uix-icon name=\${artifact.icon} class="w-6 h-6"></uix-icon>\` : artifact.name[0].toUpperCase()}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h3 class="font-bold text-lg truncate">
+                                    <uix-link class="text-[#ebdbb2]" href=\${\`/discover/servers/\${encodeURIComponent(artifact.id)}\`} label=\${artifact.name}></uix-link>
+                                </h3>
+                                \${artifact.version ? html\`<span class="text-xs text-[#928374] font-mono bg-[#1d2021] px-2 py-0.5 rounded">v\${artifact.version}</span>\` : ""}
+                                \${artifact.isConnected ? html\`<span class="text-xs text-[#98971a] font-medium whitespace-nowrap">Connected</span>\` : ""}
+                            </div>
+                            \${artifact.repository?.url ? html\`<a href=\${artifact.repository.url} target="_blank" class="text-xs text-[#928374] hover:text-[#cc241d] truncate block flex items-center gap-1"><uix-icon name="github" class="w-3 h-3"></uix-icon>\${artifact.repository.url.replace("https://github.com/", "")}</a>\` : ""}
+                        </div>
+                        <uix-link
+                            @click=\${this.onToggleFavorite.bind(this)}
+                            icon="star"
+                            class="w-6 h-6 \${starClass} pointer transition-colors hover:text-yellow-300 flex-shrink-0"
+                            fill=\${isFavorited ? "currentColor" : "none"}
+                        ></uix-link>
+                    </div>
+
+                    <p class="text-sm text-[#bdae93] font-medium leading-relaxed">
+                        \${artifact.description}
+                    </p>
+
+                    \${
+											transportInfo.length > 0 && !isDetailView
+												? html\`
+                                <div class="flex flex-col gap-2">
+                                    <h4 class="text-xs font-bold text-[#a89984] uppercase tracking-wide">
+                                        Transports
+                                    </h4>
+                                    <div class="flex flex-wrap gap-2">
+                                        \${transportInfo.map(
+																					(t) => html\`
+                                                <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#3c3836] border border-[#83a598]">
+                                                    <uix-icon name=\${t.icon} class="w-3.5 h-3.5 text-[#83a598]"></uix-icon>
+                                                    <span class="text-xs font-semibold text-[#ebdbb2]">\${t.label}</span>
+                                                </div>
+                                            \`,
+																				)}
+                                    </div>
+                                </div>\`
+												: ""
+										}
+
+                    \${
+											artifact.capabilities
+												? html\`
+                                <mcp-capabilities-display 
+                                    .capabilities=\${artifact.capabilities}
+                                    type="server"
+                                ></mcp-capabilities-display>\`
+												: ""
+										}
+                    
+                    \${isDetailView ? html\`<mcp-connection-configurator .artifact=\${artifact}></mcp-connection-configurator>\` : ""}
+                    
+                    <div class="flex flex-col gap-4 pt-4 border-t-2 border-dashed border-[#504945] w-full mt-auto">
+                        <mcp-tags-grid .tags=\${artifact.tags || []} type="server"></mcp-tags-grid>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-4">
+                                <button
+                                    @click=\${this.onToggleHot.bind(this)}
+                                    class="flex items-center gap-1.5 px-2 py-1 rounded-md transition-colors font-bold text-sm \${
+																			artifact.hotted
+																				? "bg-[#fe8019] text-[#1d2021]"
+																				: "bg-[#504945] text-[#ebdbb2] hover:bg-[#665c54]"
+																		}"
+                                >
+                                    <uix-icon name="flame" class="w-4 h-4"></uix-icon>
+                                    <span>\${artifact.hots ?? 0}</span>
+                                </button>
+                                <div class="flex items-center gap-1.5 text-[#a89984] font-bold text-sm" title="Comments">
+                                    <uix-icon name="message-circle" class="w-4 h-4"></uix-icon>
+                                    <span>\${artifact.commentsCount ?? 0}</span>
+                                </div>
+                            </div>
+                               \${
+																	!isDetailView
+																		? artifact.isConnected
+																			? html\`<uix-button label="Disconnect" class="bg-[#cc241d] text-[#ebdbb2] font-bold" size="small"></uix-button>\`
+																			: html\`<uix-button label="Connect" class="bg-[#cc241d] text-[#ebdbb2] font-bold" size="small"></uix-button>\`
+																		: ""
+																}
+                        </div>
+                    </div>
+                </div>
+            \`;
+		},
+	});
+
+	$APP.define("mcp-client-card", {
+		properties: {
+			artifact: T.object(),
+			isDetailView: T.boolean(false),
+		},
+		onToggleHot(e) {
+			e.stopPropagation();
+			e.preventDefault();
+			Model.clients.edit({
+				id: this.artifact.id,
+				hots: (this.artifact.hots ?? 0) + (this.artifact.hotted ? -1 : 1),
+				hotted: !this.artifact.hotted,
+			});
+		},
+		onToggleFavorite(e) {
+			e.stopPropagation();
+			e.preventDefault();
+			Model.clients.edit({
+				id: this.artifact.id,
+				favorite: !this.artifact.favorite,
+			});
+		},
+		render() {
+			const { artifact, isDetailView } = this;
+			if (!artifact) return html\`\`;
+
+			const isFavorited = artifact.favorite;
+			const starClass = isFavorited ? "text-[#fabd2f]" : "text-[#a89984]";
+
+			return html\`
+                <div class=\${\`\${isDetailView ? "" : "hover:border-[#98971a] hover:shadow-[6px_6px_0px_#98971a]"} bg-[#282828] 
+                    w-full h-full flex-1 border-2 border-[#3c3836] rounded-lg p-5 flex flex-col gap-5 
+                    font-semibold transition-all duration-200 shadow-[4px_4px_0px_#1d2021]\`}>
+                    
+                    <div class="flex items-center gap-4 w-full">
+                        <div class="w-12 h-12 text-xl rounded-md flex-shrink-0 flex items-center justify-center bg-[#1d2021] text-[#98971a]">
+                            \${artifact.icon ? html\`<uix-icon name=\${artifact.icon} class="w-6 h-6"></uix-icon>\` : artifact.name[0].toUpperCase()}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2">
+                                <h3 class="font-bold text-lg truncate">
+                                    <uix-link class="text-[#ebdbb2]" href=\${\`/discover/clients/\${encodeURIComponent(artifact.id)}\`} label=\${artifact.name}></uix-link>
+                                </h3>
+                            </div>
+                            \${
+															artifact.url
+																? html\`<uix-link href=\${artifact.url} target="_blank" class="[&>a>uix-icon]:w-3 [&>a>uix-icon]:h-3 text-xs text-[#928374] hover:text-[#98971a] truncate block" label=\${artifact.url} icon="link"></uix-link>\`
+																: ""
+														}
+                        </div>
+                        <uix-link
+                            @click=\${this.onToggleFavorite.bind(this)}
+                            icon="star"
+                            class="[&>a>uix-icon]:w-6 [&>a>uix-icon]:h-6 \${starClass} pointer transition-colors hover:text-yellow-300 flex-shrink-0"
+                            fill=\${isFavorited ? "currentColor" : "none"}
+                        ></uix-link>
+                    </div>
+
+                    <!-- Description -->
+                    <p class="text-sm text-[#bdae93] font-medium leading-relaxed">
+                        \${artifact.description}
+                    </p>
+
+                    <!-- Capabilities (Client-specific) -->
+                    \${
+											artifact.capabilities
+												? html\`
+                                <mcp-capabilities-display 
+                                    .capabilities=\${artifact.capabilities}
+                                    type="client"
+                                ></mcp-capabilities-display>
+                            \`
+												: ""
+										}
+
+                    <!-- Platform Tags (Client-specific feature) -->
+                    \${
+											artifact.tags?.some((t) =>
+												["web", "desktop", "mobile"].includes(t),
+											)
+												? html\`
+                                <div class="flex flex-col gap-2">
+                                    <h4 class="text-xs font-bold text-[#a89984] uppercase tracking-wide">
+                                        Platforms
+                                    </h4>
+                                    <div class="flex flex-wrap gap-2">
+                                        \${artifact.tags
+																					.filter((t) =>
+																						[
+																							"web",
+																							"desktop",
+																							"mobile",
+																						].includes(t),
+																					)
+																					.map((platform) => {
+																						const platformIcons = {
+																							web: "globe",
+																							desktop: "monitor",
+																							mobile: "smartphone",
+																						};
+																						return html\`
+                                                    <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#3c3836] border border-[#98971a]">
+                                                        <uix-icon name=\${platformIcons[platform]} class="w-3.5 h-3.5 text-[#98971a]"></uix-icon>
+                                                        <span class="text-xs font-semibold text-[#ebdbb2] capitalize">\${platform}</span>
+                                                    </div>
+                                                \`;
+																					})}
+                                    </div>
+                                </div>
+                            \`
+												: ""
+										}
+
+                    <!-- Footer Section -->
+                    <div class="flex flex-col gap-4 pt-4 border-t-2 border-dashed border-[#504945] w-full mt-auto">
+                        <mcp-tags-grid .tags=\${(artifact.tags || []).filter((t) => !["web", "desktop", "mobile"].includes(t))} type="client"></mcp-tags-grid>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-4">
+                                <button
+                                    @click=\${this.onToggleHot.bind(this)}
+                                    class="flex items-center gap-1.5 px-2 py-1 rounded-md transition-colors font-bold text-sm \${
+																			artifact.hotted
+																				? "bg-[#fe8019] text-[#1d2021]"
+																				: "bg-[#504945] text-[#ebdbb2] hover:bg-[#665c54]"
+																		}"
+                                >
+                                    <uix-icon name="flame" class="w-4 h-4"></uix-icon>
+                                    <span>\${artifact.hots ?? 0}</span>
+                                </button>
+                                <div class="flex items-center gap-1.5 text-[#a89984] font-bold text-sm" title="Comments">
+                                    <uix-icon name="message-circle" class="w-4 h-4"></uix-icon>
+                                    <span>\${artifact.commentsCount}</span>
+                                </div>
+                            </div>
+                            <a href=\${artifact.url} target="_blank" class="no-underline">
+                                <uix-button label="View Client" class="bg-[#98971a] text-[#ebdbb2] font-bold" size="small"></uix-button>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            \`;
+		},
+	});
+
+	$APP.define("mcp-discover-header", {
+		properties: {
+			type: T.string("server"),
+			searchQuery: T.string(""),
+			availableTags: T.array([]),
+			onSearchChange: T.function(),
+			currentRoute: T.object({ sync: "ram" }),
+		},
+		render() {
+			const navItems = ["Servers", "Clients", "Agents"];
+			return html\`
+                <div class="flex flex-col gap-6">
+                    <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                        <div>
+                            <h1 class="font-bold text-3xl text-[#ebdbb2]">Discover</h1>
+                            <p class="text-[#bdae93]">
+                                Browse, experiment, develop, and discuss all things MCP
+                            </p>
+                        </div>
+                        <div class="relative">
+                            <input
+                                type="text"
+                                value=\${this.searchQuery}
+                                @input=\${(e) => this.onSearchChange(e.target.value)}
+                                placeholder="Search ..."
+                                class="w-full md:w-72 bg-[#282828] border-2 border-[#3c3836] font-semibold text-[#ebdbb2] rounded-lg py-2 pl-10 pr-4 focus:outline-none focus:shadow-[2px_2px_0px_#1d2021] focus:border-[#83a598] transition"
+                            />
+                            <uix-icon
+                                name="search"
+                                class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#928374]"
+                            ></uix-icon>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-4">
+                        <div class="flex items-center border border-[#3c3836] rounded-lg bg-[#282828] w-full md:w-auto self-start">
+                            \${navItems.map((item) => {
+															const tab = item.toLowerCase();
+															const url = \`/discover/\${tab}\`;
+															const isActive =
+																tab === "servers"
+																	? this.currentRoute.path === "/discover" ||
+																		this.currentRoute.path.startsWith(
+																			"/discover/servers",
+																		)
+																	: this.currentRoute.path.startsWith(url);
+															return html\`
+                                    <uix-link
+                                        href=\${url}
+                                        label=\${item}
+                                        class="block [&>a]:px-5 [&>a]:py-2.5 [&>a]:block rounded-md text-sm font-semibold transition-colors \${
+																					isActive
+																						? "bg-[#458588] text-[#ebdbb2]"
+																						: "text-[#bdae93] hover:bg-[#3c3836]"
+																				}"
+                                    >
+                                    </uix-link>
+                                \`;
+														})}
+                        </div>
+                        <div>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="text-[#a89984] font-bold text-xs self-center pr-2">TAGS:</span>
+                                \${this.availableTags.map((tag) => {
+																	const isActive =
+																		this.currentRoute.params.tagId &&
+																		this.currentRoute.params.tagId === tag.id;
+																	return html\`
+                                        <uix-link
+                                            href=\${\`/discover/\${this.type}s/tag/\${encodeURIComponent(tag.id)}\`}
+                                            label=\${tag.name}
+                                            class="text-xs font-bold px-2 py-1 rounded transition-colors \${
+																							isActive
+																								? "bg-[#83a598] text-[#1d2021]"
+																								: "bg-[#504945] text-[#ebdbb2] hover:bg-[#665c54]"
+																						}"
+                                        >
+                                          </uix-link>
+                                    \`;
+																})}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            \`;
+		},
+	});
+
+	$APP.define("mcp-artifact-grid", {
+		class: "flex flex-col gap-6",
+		properties: {
+			artifacts: T.array(),
+			type: T.string("server"),
+			onClearFilters: T.function(),
+			searchQuery: T.string(""),
+			activeTags: T.array([]),
+			availableTags: T.array([]),
+			component: T.object(),
+			p: T.string({ sync: "querystring" }),
+			currentRoute: T.object({
+				sync: "ram",
+				attribute: false,
+				reflect: false,
+			}),
+		},
+		async connected() {
+			this._currentArtifactType = undefined;
+		},
+		async _fetchTagsForType(type) {
+			if (this._currentArtifactType === type) return;
+			this._currentArtifactType = type;
+
+			if (!type) {
+				this.availableTags = [];
+				return;
+			}
+
+			const tags = await Model.tags.getAll();
+			this.availableTags = [...new Set(tags)];
+		},
+		_getArtifactTypeFromRoute() {
+			const path = this.currentRoute?.path || "";
+			const parts = path.split("/").filter((p) => p);
+			if (
+				parts[0] === "discover" &&
+				parts.length > 1 &&
+				["servers", "clients", "agents"].includes(parts[1])
+			) {
+				return parts[1];
+			}
+			if (parts[0] === "discover" && parts.length === 1) {
+				return "servers";
+			}
+			return null;
+		},
+		toggleTag(tagToToggle) {
+			const tagIndex = this.activeTags.indexOf(tagToToggle);
+			if (tagIndex > -1) {
+				this.activeTags.splice(tagIndex, 1);
+			} else {
+				this.activeTags.push(tagToToggle);
+			}
+			this.update();
+		},
+		clearFilters() {
+			this.activeTags = [];
+			this.searchQuery = "";
+			this.update();
+		},
+		render() {
+			const artifactType = this._getArtifactTypeFromRoute();
+			this._fetchTagsForType(artifactType);
+			const { artifacts = [] } = this;
+
+			const CardComponent =
+				this.type === "client" ? "mcp-client-card" : "mcp-server-card";
+
+			// --- Pagination Logic ---
+			const totalCount = this["data-query"]?.count;
+			const limit = this["data-query"]?.limit || 9;
+			let paginationHtml = html\`\`;
+
+			if (totalCount && totalCount > limit) {
+				const totalPages = Math.ceil(totalCount / limit);
+				const currentPage = this.p ? Number.parseInt(this.p, 10) : 1;
+				const path = this.currentRoute?.path.split("?")[0] || "";
+
+				const createLink = (pageNumber, customLabel = null) => {
+					const isActive = pageNumber === currentPage;
+					return html\`
+                        <uix-link
+                            href=\${\`\${path}?p=\${pageNumber}\`}
+                            label=\${customLabel || String(pageNumber)}
+                            class="block [&>a]:px-4 [&>a]:py-2 [&>a]:block rounded-md text-sm font-bold transition-colors \${
+															isActive
+																? "bg-[#83a598] text-[#1d2021]"
+																: "bg-[#3c3836] text-[#ebdbb2] hover:bg-[#504945]"
+														}"
+                        ></uix-link>
+                    \`;
+				};
+
+				const ellipsis = html\`<span class="flex items-center justify-center px-2 py-2 text-sm font-bold text-[#928374]">...</span>\`;
+				const pageLinks = [];
+
+				// Visible pages logic
+				const maxVisiblePages = 5;
+				if (totalPages <= maxVisiblePages + 2) {
+					// If total pages are few, show all of them
+					for (let i = 1; i <= totalPages; i++) {
+						pageLinks.push(createLink(i));
+					}
+				} else {
+					// Show first page
+					pageLinks.push(createLink(1));
+
+					let startPage = Math.max(2, currentPage - 2);
+					let endPage = Math.min(totalPages - 1, currentPage + 2);
+
+					if (currentPage <= 4) {
+						endPage = maxVisiblePages;
+					}
+					if (currentPage > totalPages - 4) {
+						startPage = totalPages - maxVisiblePages + 1;
+					}
+
+					if (startPage > 2) {
+						pageLinks.push(ellipsis);
+					}
+
+					for (let i = startPage; i <= endPage; i++) {
+						pageLinks.push(createLink(i));
+					}
+
+					if (endPage < totalPages - 1) {
+						pageLinks.push(ellipsis);
+					}
+
+					// Show last page
+					pageLinks.push(createLink(totalPages));
+				}
+
+				const hasPrev = currentPage > 1;
+				const hasNext = currentPage < totalPages;
+
+				paginationHtml = html\`
+                    <div class="flex items-center justify-center gap-2 mt-8">
+                        <uix-link
+                            href=\${hasPrev ? \`\${path}?p=\${currentPage - 1}\` : null}
+                            label="Previous"
+                            class="block [&>a]:px-4 [&>a]:py-2 [&>a]:block rounded-md text-sm font-bold bg-[#3c3836] text-[#ebdbb2] hover:bg-[#504945] transition-colors \${!hasPrev ? "opacity-50 pointer-events-none" : ""}"
+                        ></uix-link>
+                        \${pageLinks}
+                        <uix-link
+                            href=\${hasNext ? \`\${path}?p=\${currentPage + 1}\` : null}
+                            label="Next"
+                            class="block [&>a]:px-4 [&>a]:py-2 [&>a]:block rounded-md text-sm font-bold bg-[#3c3836] text-[#ebdbb2] hover:bg-[#504945] transition-colors \${!hasNext ? "opacity-50 pointer-events-none" : ""}"
+                        ></uix-link>
+                    </div>
+                \`;
+			}
+
+			return html\`
+                <mcp-discover-header
+                    type=\${this.type}
+                    searchQuery=\${this.searchQuery}
+                    .activeTags=\${this.activeTags}
+                    .availableTags=\${this.availableTags}
+                    .onSearchChange=\${(q) => {
+											this.searchQuery = q;
+										}}
+                >
+                </mcp-discover-header>
+                <div class="flex-grow">
+                    \${
+											artifacts.length === 0
+												? html\`
+                                <div class="w-full text-center text-[#928374] p-8 bg-[#282828] border-2 border-dashed border-[#3c3836] rounded-lg">
+                                    <h3 class="font-bold text-lg text-[#ebdbb2]">
+                                        No Artifacts Found
+                                    </h3>
+                                    <p>
+                                        Your search and filter combination did not match any artifacts.
+                                    </p>
+                                    <button
+                                        @click=\${() => this.onClearFilters()}
+                                        class="mt-4 text-sm font-bold text-[#83a598] hover:underline"
+                                    >
+                                        Clear all filters
+                                    </button>
+                                </div>
+                            \`
+												: html\`
+                                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                                    \${artifacts.map(
+																			(artifact) => html.staticHTML\`
+                                            <\${html.unsafeStatic(CardComponent)}
+                                                .artifact=\${artifact}
+                                            ></\${html.unsafeStatic(CardComponent)}>
+                                        \`,
+																		)}
+                                </div>
+                                \${paginationHtml}
+                            \`
+										}
+                </div>
+            \`;
+		},
+	});
+
+	$APP.define("mcp-artifact-detail", {
+		class: "flex-grow gap-8 flex flex-col",
+		properties: {
+			type: T.string("server"),
+			artifact: T.object(),
+		},
+		render() {
+			const { artifact } = this;
+			if (!artifact) return html\`\`;
+
+			const CardComponent =
+				this.type === "client" ? "mcp-client-card" : "mcp-server-card";
+
+			const backUrl =
+				this.type === "client" ? "/discover/clients" : "/discover/servers";
+
+			return html.staticHTML\`
+                <uix-link
+                    class="flex items-center gap-2 text-[#bdae93] hover:text-[#ebdbb2] font-semibold self-start -mb-4"
+                    label="Back to Discover"
+                    icon="arrow-left"
+                    href=\${backUrl}
+                >
+                </uix-link>
+                <\${html.unsafeStatic(CardComponent)}
+                    .artifact=\${artifact}
+                    isDetailView
+                ></\${html.unsafeStatic(CardComponent)}>
+                <div class="flex flex-col gap-y-10">
+                    <view-github-comments
+                        owner="mcpiquanthq"
+                        repo="githubcomments"
+                        title=\${artifact.name}
+                    >
+                    </view-github-comments>
+                </div>
+            \`;
+		},
+	});
+
+	$APP.define("mcp-trending-discussions", {
+		class:
+			"w-80 bg-[#282828] p-6 flex-col space-y-6 flex-shrink-0 hidden lg:flex border-l border-[#3c3836]",
+		properties: {
+			discussions: T.object(),
+		},
+		render() {
+			return html\`
+                <h2 class="font-semibold text-lg text-[#ebdbb2]">
+                    Trending Discussions
+                </h2>
+                <div class="flex flex-col gap-y-10">
+                    \${this.discussions?.map(
+											(d) => html\`
+                            <div class="flex items-start gap-3 text-[#bdae93]">
+                                <div class="w-8 h-8 flex-shrink-0 bg-[#3c3836] rounded-md flex items-center justify-center text-[#928374]">
+                                    <uix-icon name=\${d.icon} class="w-5 h-5"></uix-icon>
+                                </div>
+                                <div>
+                                    <p class="font-semibold text-[#ebdbb2] hover:text-[#83a598] cursor-pointer leading">
+                                        \${d.title}
+                                    </p>
+                                    <div class="text-xs text-[#928374] flex items-center gap-4 mt-1.5">
+                                        <span>\${d.category}</span>
+                                        <div class="flex items-center gap-1.5" title="Upvotes">
+                                            <uix-icon name="arrow-up" class="w-3.5 h-3.5"></uix-icon>
+                                            <span>\${d.upvotes}</span>
+                                        </div>
+                                        <div class="flex items-center gap-1.5" title="Comments">
+                                            <uix-icon name="message-circle" class="w-3.5 h-3.5"></uix-icon>
+                                            <span>\${d.comments}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        \`,
+										)}
+                </div>
+                <uix-button
+                    label="View all discussions"
+                    class="w-full mt-auto bg-[#3c3836]"
+                    size="small"
+                ></uix-button>
+            \`;
+		},
+	});
+
+	return {
+		tag: "mcp-main",
+		class:
+			"w-full h-full bg-[#1d2021] text-[#ebdbb2] flex font-sans text-sm overflow-hidden",
+		properties: {
+			currentRoute: T.object({
+				sync: "ram",
+				attribute: false,
+				reflect: false,
+			}),
+		},
+		render() {
+			return html\`
+                <main class="flex-grow p-6 md:p-8 flex flex-col gap-8 overflow-y-auto">
+                    \${this.currentRoute?.matched?.component}
+                </main>
+                <mcp-trending-discussions
+                    .data-query=\${{ model: "discussions", limit: 5, key: "discussions" }}
+                ></mcp-trending-discussions>
+            \`;
+		},
+	};
+};
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/mcp/views/history.js":{content:`export default ({ html, AI, T }) => {
+	$APP.define("mcp-history-view", {
+		properties: {
+			item: T.object(null),
+			onBack: T.function(),
+		},
+
+		handleBack() {
+			if (this.onBack) {
+				this.onBack();
+			}
+		},
+
+		render() {
+			if (!this.item) {
+				return html\`<div class="text-center text-gray-500 h-full flex items-center justify-center">Select a history item to view details.</div>\`;
+			}
+
+			const { item } = this;
+
+			return html\`
+                <div class="text-sm">
+                    <uix-link label="Back" icon="arrow-left" reverse @click=\${this.handleBack.bind(this)} class="text-xs text-blue-600 hover:underline mb-3 flex items-center"></uix-link>
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="font-mono text-xs font-bold text-gray-700 mb-1">REQUEST</h4>
+                            <pre class="text-xs whitespace-pre-wrap bg-gray-800 text-gray-200 p-2 rounded-lg font-mono overflow-auto">\${JSON.stringify({ tool: item.toolName, args: item.args || item.params }, null, 2)}</pre>
+                        </div>
+                        <div>
+                            <h4 class="font-mono text-xs font-bold text-gray-700 mb-1">RESPONSE</h4>
+                            \${
+															item.status === "success"
+																? html\`<pre class="text-xs whitespace-pre-wrap bg-gray-900 text-green-400 p-2 rounded-lg font-mono overflow-auto">\${JSON.stringify(item.result, null, 2)}</pre>\`
+																: item.status === "error"
+																	? html\`<pre class="text-xs whitespace-pre-wrap bg-red-100 text-red-700 p-2 rounded-lg font-mono overflow-auto">\${item.error}</pre>\`
+																	: html\`<p class="text-xs text-gray-500">Request is still pending...</p>\`
+														}
+                        </div>
+                    </div>
+                </div>
+            \`;
+		},
+	});
+
+	return {
+		properties: {
+			history: T.array([]),
+			selectedHistoryId: T.string(null),
+			onSelect: T.function(),
+			listOnly: T.boolean(),
+		},
+		selectHistoryItem(item) {
+			this.selectedHistoryId = item ? item.id : undefined;
+			if (this.onHistorySelect) this.onSelect(item);
+		},
+		connected() {
+			this.historyUnsubscribe = AI.onHistoryChange((event) => {
+				this.history = event.history;
+			});
+			this.history = AI.getHistory();
+		},
+		render() {
+			if (this.history.length === 0)
+				return html\`<p class="text-center text-xs text-gray-400 p-4">No history yet</p>\`;
+			const selectedHistoryItem = this.history.find(
+				(h) => h.id === this.selectedHistoryId,
+			);
+
+			return html\`
+                <ul class="text-xs space-y-1 font-mono">
+                    \${this.history.map(
+											(item) => html\`
+                            <li
+                                class="flex flex-col \${this.selectedHistoryId === item.id ? "font-semibold text-blue-100 p-2" : item.status === "error" ? "text-red-100" : "text-white"}">
+                                <div 
+																 @click=\${() => this.selectHistoryItem(item)}
+																class="cursor-pointer flex items-center justify-between p-2 rounded hover:bg-gray-700">
+																<span class="text-ellipsis">\${item.toolName}</span>
+                                <div class="flex items-center">
+                                    <span class="text-gray-500 mr-2">\${item.status}</span>
+                                    <uix-icon name="chevron-right" class="h-4 w-4 text-gray-400"></uix-icon>
+                                </div>
+																</div>
+																\${!this.listOnly || !selectedHistoryItem || selectedHistoryItem.id !== item.id ? null : html\`<mcp-history-view .item=\${selectedHistoryItem} .onBack=\${() => this.selectHistoryItem(null)}></mcp-history-view>\`}
+                            </li>
+                        \`,
+										)}
+                </ul>
+            \`;
+		},
+	};
+};
+`,mimeType:"application/javascript",skipSW:!1},"/modules/icon-lucide/lucide/telescope.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m10.065 12.493l-6.18 1.318a.934.934 0 0 1-1.108-.702l-.537-2.15a1.07 1.07 0 0 1 .691-1.265l13.504-4.44m-2.875 6.493l4.332-.924M16 21l-3.105-6.21"/><path d="M16.485 5.94a2 2 0 0 1 1.455-2.425l1.09-.272a1 1 0 0 1 1.212.727l1.515 6.06a1 1 0 0 1-.727 1.213l-1.09.272a2 2 0 0 1-2.425-1.455zM6.158 8.633l1.114 4.456M8 21l3.105-6.21"/><circle cx="12" cy="13" r="2"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/code.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m16 18l6-6l-6-6M8 6l-6 6l6 6"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/server.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><path d="M6 6h.01M6 18h.01"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/bot.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2m16 0h2m-7-1v2m-6-2v2"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/layout-grid.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/book.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/zap.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/message-square-heart.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M14.8 7.5a1.84 1.84 0 0 0-2.6 0l-.2.3l-.3-.3a1.84 1.84 0 1 0-2.4 2.8L12 13l2.7-2.7c.9-.9.8-2.1.1-2.8"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/chevron-right.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 18l6-6l-6-6"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/gem.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M6 3h12l4 6l-10 13L2 9Z"/><path d="M11 3L8 9l4 13l4-13l-3-6M2 9h20"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/users.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87m-3-12a4 4 0 0 1 0 7.75"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/arrow-up.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 12l7-7l7 7m-7 7V5"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/views/github-comments.js":{content:`export default ({ T, html }) => {
 	// Helper function to make GraphQL API calls to GitHub
 	const callGraphQL = async (token, query, variables) => {
 		const headers = {
@@ -5093,761 +6357,7 @@ export default server;
 		},
 	};
 };
-`,mimeType:"application/javascript",skipSW:!1},"/modules/icon-lucide/lucide/arrow-left.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m12 19l-7-7l7-7m7 7H5"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/index.html":{content:`<!DOCTYPE html>
-<html lang="en">
-<head>
-  <script type="importmap">
-			{
-				"imports": {
-					"@modelcontextprotocol/sdk/": "https://cdn.jsdelivr.net/npm/@modelcontextprotocol/sdk@1.18.1/dist/esm/",
-					"zod": "https://esm.sh/zod@3.23.8",
-					"eventsource-parser/stream": "https://esm.sh/eventsource-parser/stream",
-					"pkce-challenge": "https://esm.sh/pkce-challenge",
-          "zod-to-json-schema": "https://esm.sh/zod-to-json-schema@3.24.5",          
-					"ajv": "https://esm.sh/ajv@6.12.6"
-				}
-			}
-		<\/script>
-  <meta charset="utf-8" />
-  <title>meetuprio</title>
-  <base href="/" />
-  
-  <meta name="viewport"
-    content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
-  <meta name="description" content="This is a meetuprio app" />
-  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#181818" />
-  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f3f3f3" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="mobile-web-app-title" content="meetuprio" />
-  <meta name="mobile-web-app-status-bar-style" content="black" />
-  <link id="favicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLW1vdW50YWluIj48cGF0aCBkPSJtOCAzIDQgOCA1LTUgNSAxNUgyTDggM3oiLz48L3N2Zz4="/>
-  <link rel="manifest" href="manifest.json" /> 
-	<script>
-		const ensureSWController = () => {
-			const timeoutPromise = new Promise((_, reject) => {
-				setTimeout(() => reject(new Error("Service Worker timed out.")), 100);
-			});
-			const controllerPromise = new Promise((resolve) => {
-				if (navigator.serviceWorker.controller) {
-					return resolve();
-				}
-				navigator.serviceWorker.addEventListener("controllerchange", () => {
-					return resolve();
-				});
-			});
-			return Promise.race([controllerPromise, timeoutPromise]);
-		};
-		const startApp = async () => {
-			if (!("serviceWorker" in navigator)) {
-				console.warn("Service Worker not supported.");
-				throw new Error("Platform not supported");
-			}
-			await navigator.serviceWorker.register("/sw.js", {
-				scope: "/",
-				type: "module",
-			});
-			try {
-				console.log("Waiting for Service Worker to take control...");
-				await ensureSWController();
-				console.log("\u2705 Service Worker is in control!");
-				const { default: $APP } = await import("/bootstrap.js");
-				await $APP.loadApp();
-			} catch (error) {
-				console.warn("Service Worker did not take control in time. Reloading...");
-				window.location.reload();
-			}
-		};
-		startApp();
-	<\/script>
-</head>
-<body>
-  <app-container></app-container>
-</body>
-</html>
-`,mimeType:"text/html",skipSW:!1},"/modules/icon-lucide/lucide/pie-chart.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/monitor.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="20" height="14" x="2" y="3" rx="2"/><path d="M8 21h8m-4-4v4"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/views/templates/app.js":{content:`export default ({ html, AI, T }) => {
-	return {
-		style: true,
-		class: "w-full h-screen bg-[#282828] text-[#ebdbb2] flex font-sans text-sm",
-		properties: {
-			currentRoute: T.object({ sync: "ram" }),
-			isServerConnected: T.boolean({ sync: "local" }),
-		},
-		async connected() {
-			await this.initializeAI();
-		},
-		async initializeAI() {
-			try {
-				if (!AI.isInitialized) {
-					await AI.init({
-						geminiApiKey: "",
-						localAIEndpoint: "http://localhost:1234/v1/chat/completions",
-						openrouterApiKey:
-							"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",
-						defaultRoots: [
-							{
-								uri: "file:///",
-								name: "Root Filesystem",
-								description: "Full filesystem access",
-							},
-						],
-					});
-				}
-				this.isServerConnected = AI.listClients().length > 0;
-			} catch (error) {
-				console.error("Error initializing AI service:", error);
-				this.isServerConnected = false;
-			}
-		},
-		render() {
-			return html\`
-				<mcp-sidebar></mcp-sidebar>
-				<div class="flex-1 h-full flex flex-col min-w-0">
-					<div
-						class="h-15 bg-[#3c3836] border-b border-[#504945] p-2 flex items-center justify-between"
-					>
-					
-					</div>
-					<div class="flex-1 overflow-auto flex">
-            \${this.component}
-					</div>
-				</div>
-			\`;
-		},
-	};
-};
-`,mimeType:"application/javascript",skipSW:!1},"/views/templates/app.css":{content:`.app-template {
-	.uix-card {
-		button {
-			color: #111;
-			cursor: pointer;
-		}
-	}
-}
-`,mimeType:"text/css",skipSW:!1},"/modules/apps/mcp/views/sidebar.js":{content:`export default ({ html, T }) => ({
-	class:
-		"w-64 bg-[#3c3836] text-[#ebdbb2] flex flex-col h-screen shrink-0 border-r border-[#504945]",
-	properties: {
-		currentRoute: T.object({ sync: "ram" }),
-		onSelectHistory: T.function(),
-		isDarkMode: T.boolean({ defaultValue: true, sync: "local" }),
-	},
-
-	_renderLink(link) {
-		const isActive = this.currentRoute.name === link.key;
-		return html\`
-            <uix-link href=\${link.key}
-          icon=\${link.icon}
-          label=\${link.label}
-          data-active=\${isActive}
-          class="
-            relative flex items-center text-sm font-bold p-2 rounded-md transition-colors w-full
-            text-[#ebdbb2] hover:bg-[#504945]
-            data-[active=true]:bg-[#504945] data-[active=true]:text-white
-          ">
-                \${
-									link.isComingSoon
-										? html\`<span class="ml-auto bg-[#b16286] text-xs font-bold text-white px-2 py-0.5 rounded-full absolute right-3">soon</span>\`
-										: ""
-								}
-            </uix-link>
-        \`;
-	},
-	toggleDarkMode() {
-		document.body.classList.toggle("dark", this.isDarkMode);
-		this.isDarkMode = !this.isDarkMode;
-	},
-
-	render() {
-		const mainLinks = [
-			{ key: "discover", label: "Discover", icon: "telescope" },
-			{ key: "dev", label: "Develop", icon: "code" },
-			{ key: "chat", label: "Chat", icon: "message-circle" },
-			{ key: "inspector", label: "Inspector", icon: "search" },
-			{ key: "servers", label: "Servers", icon: "server" },
-			{ key: "agents", label: "Agents", icon: "bot", isComingSoon: true },
-			{ key: "apps", label: "Apps", icon: "layout-grid", isComingSoon: true },
-			{ key: "learn", label: "Learn", icon: "book", isComingSoon: true },
-			{
-				key: "vibecoding",
-				label: "Vibecoding",
-				icon: "zap",
-				isComingSoon: true,
-			},
-		];
-
-		return html\`<div class="h-15 p-4 border-b border-[#504945] flex items-center space-x-2 shrink-0">
-            <h2 class="text-xl text-[#ebdbb2] tracking-widest font-bold"><a href="/">\u{1F336}\uFE0F MCPiquant</a></h2>
-        </div>
-        <div class="flex-grow flex flex-col min-h-0">
-            <nav class="p-2 space-y-1 shrink-0">
-                \${mainLinks.map((link) => this._renderLink(link))}
-            </nav>
-            <div class="flex-grow flex flex-col border-t border-[#504945] min-h-0">
-                <h3 class="p-2 text-xs font-semibold text-[#928374] uppercase tracking-wider shrink-0">History</h3>
-                <div class="flex-1 overflow-y-auto">
-                    <mcp-history .onSelect=\${this.onSelectHistory} listOnly></mcp-history>
-                </div>
-            </div>
-            <div class="p-2 border-t border-[#504945] shrink-0">
-                \${this._renderLink({
-									key: "settings",
-									label: "Settings",
-									icon: "settings",
-								})}
-                \${this._renderLink({
-									key: "feedback",
-									label: "Feedback",
-									icon: "message-square-heart",
-								})}
-                <button @click=\${this.toggleDarkMode.bind(this)} class="w-full flex items-center p-2 rounded-md hover:bg-[#504945] text-left text-sm">
-                    <uix-icon name=\${
-											this.isDarkMode ? "sun" : "moon"
-										} class="w-5 h-5 mr-3 shrink-0"></uix-icon>
-                    <span>\${this.isDarkMode ? "Light Mode" : "Dark Mode"}</span>
-                    <div class="ml-auto w-10 h-5 \${
-											this.isDarkMode ? "bg-red-700" : "bg-gray-600"
-										} rounded-full flex items-center p-1 transition-colors">
-                        <div class="w-4 h-4 bg-white rounded-full transform transition-transform \${
-													this.isDarkMode ? "translate-x-4" : ""
-												}"></div>
-                    </div>
-                </button>
-            </div>
-        </div>
-      \`;
-	},
-});
-`,mimeType:"application/javascript",skipSW:!1},"/views/templates/discover.js":{content:`export default ({ html, T, $APP, Model }) => {
-	$APP.define("mcp-discover-header", {
-		properties: {
-			searchQuery: T.string(""),
-			activeTags: T.array([]),
-			availableTags: T.array([]),
-			onSearchChange: T.function(),
-			onToggleTag: T.function(),
-			currentRoute: T.object({ sync: "ram" }),
-		},
-		render() {
-			const navItems = ["Servers", "Clients", "Agents"];
-			return html\`
-        <div class="flex flex-col gap-6">
-          <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-            <div>
-              <h1 class="font-bold text-3xl text-[#ebdbb2]">Discover</h1>
-              <p class="text-[#bdae93]">
-                Browse, experiment, develop, and discuss all things MCP
-              </p>
-            </div>
-            <div class="relative">
-              <input
-                type="text"
-                value=\${this.searchQuery}
-                @input=\${(e) => this.onSearchChange(e.target.value)}
-                placeholder="Search ..."
-                class="w-full md:w-72 bg-[#282828] border-2 border-[#3c3836] font-semibold text-[#ebdbb2] rounded-lg py-2 pl-10 pr-4 focus:outline-none focus:shadow-[2px_2px_0px_#1d2021] focus:border-[#83a598] transition"
-              />
-              <uix-icon
-                name="search"
-                class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#928374]"
-              ></uix-icon>
-            </div>
-          </div>
-
-          <div class="flex flex-col gap-4">
-            <div class="flex items-center border border-[#3c3836] rounded-lg bg-[#282828] w-full md:w-auto self-start">
-              \${navItems.map((item) => {
-								const tab = item.toLowerCase();
-								const url = \`/discover/\${tab}\`;
-								const isActive =
-									tab === "servers"
-										? !this.currentRoute.path.startsWith("/discover/")
-										: this.currentRoute.path.startsWith(url);
-								return html\`
-                  <uix-link
-                    href=\${url}
-                    label=\${item}
-                    class="block [&>a]:px-5 [&>a]:py-2.5 [&>a]:block rounded-md text-sm font-semibold transition-colors \${
-											isActive
-												? "bg-[#458588] text-[#ebdbb2]"
-												: "text-[#bdae93] hover:bg-[#3c3836]"
-										}"
-                  >
-                  </uix-link>
-                \`;
-							})}
-            </div>
-            <div>
-              <div class="flex flex-wrap gap-2">
-                <span class="text-[#a89984] font-bold text-xs self-center pr-2">TAGS:</span>
-                \${this.availableTags.map((tag) => {
-									const isActive = this.activeTags.includes(tag.id);
-									return html\`
-                    <button
-                      @click=\${() => this.onToggleTag(tag.id)}
-                      class="text-xs font-bold px-2 py-1 rounded transition-colors \${
-												isActive
-													? "bg-[#83a598] text-[#1d2021]"
-													: "bg-[#504945] text-[#ebdbb2] hover:bg-[#665c54]"
-											}"
-                    >
-                      \${tag.name}
-                    </button>
-                  \`;
-								})}
-              </div>
-            </div>
-          </div>
-        </div>
-      \`;
-		},
-	});
-
-	$APP.define("mcp-artifact-card", {
-		properties: {
-			artifact: T.object(),
-			type: T.string("server"),
-			isDetailView: T.boolean(false),
-		},
-		onToggleHot(e) {
-			e.stopPropagation();
-			e.preventDefault();
-			Model[\`\${this.type.toLowerCase()}s\`].edit({
-				id: this.artifact.id,
-				hots: (this.artifact.hots ?? 0) + (this.artifact.hotted ? -1 : 1),
-				hotted: !this.artifact.hotted,
-			});
-		},
-		onToggleFavorite(e) {
-			e.stopPropagation();
-			e.preventDefault();
-			Model[\`\${this.type.toLowerCase()}s\`].edit({
-				id: this.artifact.id,
-				favorite: !this.artifact.favorite,
-			});
-		},
-		render() {
-			const { artifact } = this;
-			if (!artifact) return html\`\`;
-			const isFavorited = artifact.favorite;
-			const starClass = isFavorited ? "text-[#fabd2f]" : "text-[#a89984]";
-
-			return html\`
-        <div
-          class="hover:shadow-[6px_6px_0px_#83a598] hover:border-[#83a598] bg-[#282828] 
-									w-full h-full flex-1 [&>a]:flex [&>a]:w-full border-2 border-[#3c3836] rounded-lg p-4 flex gap-4 
-									font-semibold transition-all duration-200 shadow-[4px_4px_0px_#1d2021]">
-					<div class="flex flex-col justify-between items-start w-full">
-            <div class="flex items-center gap-4 w-full">
-              <div class="w-12 h-12 text-xl rounded-md flex-shrink-0 flex items-center justify-center bg-[#1d2021] text-[#83a598]">
-                \${artifact.icon ? html\`<uix-icon name=\${artifact.icon} class="w-6 h-6"></uix-icon>\` : artifact.name[0].toUpperCase()}
-              </div>
-              <div class="flex gap-3 items-center w-full">
-                <h3 class="font-bold flex-1 text-md">
-                  <uix-link class="text-[#ebdbb2]" href=\${\`/discover/\${this.type}/\${encodeURIComponent(artifact.id)}\`} label=\${artifact.name}></uix-link>
-                </h3>
-                \${
-									artifact.isConnected
-										? html\`<span class="text-xs text-[#b8bb26] font-medium"
-                      >Currently connected</span
-                    >\`
-										: ""
-								}
-                <uix-link
-                  @click=\${this.onToggleFavorite.bind(this)}
-                  icon="star"
-                  class="w-6 h-6 \${starClass} pointer transition-colors hover:text-yellow-300"
-                  fill=\${isFavorited ? "currentColor" : "none"}
-                ></uix-link>
-              </div>
-            </div>
-            <uix-link
-          		href=\${\`/discover/\${this.type}/\${encodeURIComponent(artifact.id)}\`}
-              class="text-sm text-[#bdae93] font-medium min-h-[2.5rem] flex-grow pb-5"
-							label=\${artifact.description}
-            ></uix-link>
-
-            <div class="flex flex-col gap-4 pt-4 border-t-2 border-dashed border-[#504945] w-full">
-              <div class="flex flex-wrap gap-2">
-                <span class="text-xs font-bold px-2 py-1 rounded bg-[#504945] text-[#d3869b]">\${this.type.toUpperCase()}</span>
-                \${artifact.tags.map(
-									(tag) =>
-										html\`<span
-                      class="text-xs font-bold px-2 py-1 rounded bg-[#504945] text-[#ebdbb2]"
-                      >\${tag}</span
-                    >\`,
-								)}
-              </div>
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-4">
-                  <button
-                    @click=\${this.onToggleHot.bind(this)}
-                    class="flex items-center gap-1.5 px-2 py-1 rounded-md transition-colors font-bold text-sm \${
-											artifact.hotted
-												? "bg-[#fe8019] text-[#1d2021]"
-												: "bg-[#504945] text-[#ebdbb2] hover:bg-[#665c54]"
-										}"
-                  >
-                    <uix-icon name="flame" class="w-4 h-4"></uix-icon>
-                    <span>\${artifact.hots ?? 0}</span>
-                  </button>
-                  <div class="flex items-center gap-1.5 text-[#a89984] font-bold text-sm" title="Comments">
-                    <uix-icon name="message-circle" class="w-4 h-4"></uix-icon>
-                    <span>\${artifact.commentsCount}</span>
-                  </div>
-                </div>
-                \${
-									artifact.isConnected
-										? html\`<uix-button
-                      label="Disconnect"
-                      class="bg-[#fb4934] text-[#ebdbb2] font-bold"
-                      size="small"
-                    ></uix-button>\`
-										: html\`<uix-button
-                      label="Connect"
-                      class="bg-[#458588] text-[#ebdbb2] font-bold"
-                      size="small"
-                    ></uix-button>\`
-								}
-              </div>
-            </div>
-          </div>
-				</div>
-      \`;
-		},
-	});
-
-	$APP.define("mcp-artifact-grid", {
-		properties: {
-			artifacts: T.array(),
-			type: T.string("server"),
-			onClearFilters: T.function(),
-		},
-		render() {
-			const { artifacts = [] } = this;
-
-			const favoriteArtifacts = artifacts.filter((a) => a.favorite);
-			const otherArtifacts = artifacts.filter((a) => !a.favorite);
-			return html\`<div class="flex-grow">
-        \${
-					artifacts.length === 0
-						? html\`
-              <div class="w-full text-center text-[#928374] p-8 bg-[#282828] border-2 border-dashed border-[#3c3836] rounded-lg">
-                <h3 class="font-bold text-lg text-[#ebdbb2]">
-                  No Artifacts Found
-                </h3>
-                <p>
-                  Your search and filter combination did not match any
-                  artifacts.
-                </p>
-                <button
-                  @click=\${() => this.onClearFilters()}
-                  class="mt-4 text-sm font-bold text-[#83a598] hover:underline"
-                >
-                  Clear all filters
-                </button>
-              </div>
-            \`
-						: html\`
-              \${
-								favoriteArtifacts.length > 0
-									? html\`
-                    <div class="mb-8">
-                      <h2 class="font-semibold text-xl text-[#ebdbb2] mb-4 flex items-center gap-2">
-                        <uix-icon
-                          name="star"
-                          class="w-5 h-5 text-[#fabd2f]"
-                          fill="currentColor"
-                        ></uix-icon>
-                        Favorites
-                      </h2>
-                      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 grid-rows-[1fr_auto] grid-cols-[1fr_auto]">
-                        \${favoriteArtifacts.map(
-													(artifact) => html\`
-                            <mcp-artifact-card
-                              .artifact=\${artifact}
-                              type=\${artifact.type ?? this.type}
-                            ></mcp-artifact-card>
-                          \`,
-												)}
-                      </div>
-                    </div>
-                  \`
-									: ""
-							}
-              <div>
-                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 grid-rows-[1fr_auto] grid-cols-[1fr_auto]">
-                  \${otherArtifacts.map(
-										(artifact) => html\`
-                      <mcp-artifact-card
-                        .artifact=\${artifact}
-                        type=\${artifact.type ?? this.type}
-                      ></mcp-artifact-card>
-                    \`,
-									)}
-                </div>
-              </div>
-            \`
-				}
-      </div>\`;
-		},
-	});
-
-	$APP.define("mcp-trending-discussions", {
-		class:
-			"w-80 bg-[#282828] p-6 flex-col space-y-6 flex-shrink-0 hidden lg:flex border-l border-[#3c3836]",
-		properties: {
-			discussions: T.object(),
-		},
-		render() {
-			return html\`<h2 class="font-semibold text-lg text-[#ebdbb2]">
-          Trending Discussions
-        </h2>
-        <div class="flex flex-col gap-y-10">
-          \${this.discussions?.map(
-						(d) => html\`
-              <div class="flex items-start gap-3 text-[#bdae93]">
-                <div class="w-8 h-8 flex-shrink-0 bg-[#3c3836] rounded-md flex items-center justify-center text-[#928374]">
-                  <uix-icon name=\${d.icon} class="w-5 h-5"></uix-icon>
-                </div>
-                <div>
-                  <p class="font-semibold text-[#ebdbb2] hover:text-[#83a598] cursor-pointer leading">
-                    \${d.title}
-                  </p>
-                  <div class="text-xs text-[#928374] flex items-center gap-4 mt-1.5">
-                    <span>\${d.category}</span>
-                    <div class="flex items-center gap-1.5" title="Upvotes">
-                      <uix-icon name="arrow-up" class="w-3.5 h-3.5"></uix-icon>
-                      <span>\${d.upvotes}</span>
-                    </div>
-                    <div class="flex items-center gap-1.5" title="Comments">
-                      <uix-icon name="message-circle" class="w-3.5 h-3.5"></uix-icon>
-                      <span>\${d.comments}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            \`,
-					)}
-        </div>
-        <uix-button
-          label="View all discussions"
-          class="w-full mt-auto bg-[#3c3836]"
-          size="small"
-        ></uix-button>\`;
-		},
-	});
-
-	$APP.define("mcp-artifact-detail", {
-		class: "flex-grow gap-8 flex flex-col overflow-y-auto",
-		properties: {
-			type: T.string("server"),
-			artifact: T.object(),
-		},
-		render() {
-			const { artifact } = this;
-			if (!artifact) return html\`\`;
-
-			return html\`
-        <uix-link
-          class="flex items-center gap-2 text-[#bdae93] hover:text-[#ebdbb2] font-semibold self-start -mb-4"
-          label="Back to Discover"
-          icon="arrow-left"
-          href="/discover"
-        >
-        </uix-link>
-        <mcp-artifact-card
-          .artifact=\${artifact}
-          type=\${this.type}
-          isDetailView="true"
-        >
-        </mcp-artifact-card>
-        <div class="flex flex-col gap-y-10">
-          <view-github-comments
-            owner="mcpiquanthq"
-            repo="githubcomments"
-            title=\${artifact.name}
-          >
-          </view-github-comments>
-        </div>
-        </div>
-      \`;
-		},
-	});
-
-	return {
-		tag: "mcp-main",
-		class:
-			"w-full h-full bg-[#1d2021] text-[#ebdbb2] flex font-sans text-sm overflow-hidden",
-		properties: {
-			searchQuery: T.string(""),
-			activeTags: T.array([]),
-			availableTags: T.array([]),
-			component: T.object(),
-			currentRoute: T.object({
-				sync: "ram",
-				attribute: false,
-				reflect: false,
-			}),
-		},
-		async connected() {
-			this._currentArtifactType = undefined; // Used to track route changes for tag fetching.
-		},
-		async _fetchTagsForType(type) {
-			if (this._currentArtifactType === type) return; // Avoid refetching for the same type.
-			this._currentArtifactType = type;
-
-			if (!type) {
-				this.availableTags = [];
-				return;
-			}
-
-			const tags = await Model.tags.getAll();
-			this.availableTags = [...new Set(tags)];
-		},
-		_getArtifactTypeFromRoute() {
-			const path = this.currentRoute?.path || "";
-			const parts = path.split("/").filter((p) => p);
-			if (
-				parts[0] === "discover" &&
-				parts.length > 1 &&
-				["servers", "clients", "agents"].includes(parts[1])
-			) {
-				return parts[1];
-			}
-			return null;
-		},
-		toggleTag(tagToToggle) {
-			const tagIndex = this.activeTags.indexOf(tagToToggle);
-			if (tagIndex > -1) {
-				this.activeTags.splice(tagIndex, 1);
-			} else {
-				this.activeTags.push(tagToToggle);
-			}
-			this.update();
-		},
-		clearFilters() {
-			this.activeTags = [];
-			this.searchQuery = "";
-			this.update();
-		},
-		render() {
-			const artifactType = this._getArtifactTypeFromRoute();
-			this._fetchTagsForType(artifactType);
-
-			return html\`
-        <main class="flex-grow p-6 md:p-8 flex flex-col gap-8 overflow-y-auto">
-          <mcp-discover-header
-            .searchQuery=\${this.searchQuery}
-            .activeTags=\${this.activeTags}
-            .availableTags=\${this.availableTags}
-            .onSearchChange=\${(q) => {
-							this.searchQuery = q;
-						}}
-            .onToggleTag=\${this.toggleTag.bind(this)}
-          >
-          </mcp-discover-header>
-          \${this.currentRoute?.matched?.component}
-        </main>
-        <mcp-trending-discussions
-					.data-query=\${{ model: "discussions", limit: 5, key: "discussions" }}
-        ></mcp-trending-discussions>
-      \`;
-		},
-	};
-};
-`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/mcp/views/history.js":{content:`export default ({ html, AI, T }) => {
-	$APP.define("mcp-history-view", {
-		properties: {
-			item: T.object(null),
-			onBack: T.function(),
-		},
-
-		handleBack() {
-			if (this.onBack) {
-				this.onBack();
-			}
-		},
-
-		render() {
-			if (!this.item) {
-				return html\`<div class="text-center text-gray-500 h-full flex items-center justify-center">Select a history item to view details.</div>\`;
-			}
-
-			const { item } = this;
-
-			return html\`
-                <div class="text-sm">
-                    <uix-link label="Back" icon="arrow-left" reverse @click=\${this.handleBack.bind(this)} class="text-xs text-blue-600 hover:underline mb-3 flex items-center"></uix-link>
-                    <div class="space-y-4">
-                        <div>
-                            <h4 class="font-mono text-xs font-bold text-gray-700 mb-1">REQUEST</h4>
-                            <pre class="text-xs whitespace-pre-wrap bg-gray-800 text-gray-200 p-2 rounded-lg font-mono overflow-auto">\${JSON.stringify({ tool: item.toolName, args: item.args || item.params }, null, 2)}</pre>
-                        </div>
-                        <div>
-                            <h4 class="font-mono text-xs font-bold text-gray-700 mb-1">RESPONSE</h4>
-                            \${
-															item.status === "success"
-																? html\`<pre class="text-xs whitespace-pre-wrap bg-gray-900 text-green-400 p-2 rounded-lg font-mono overflow-auto">\${JSON.stringify(item.result, null, 2)}</pre>\`
-																: item.status === "error"
-																	? html\`<pre class="text-xs whitespace-pre-wrap bg-red-100 text-red-700 p-2 rounded-lg font-mono overflow-auto">\${item.error}</pre>\`
-																	: html\`<p class="text-xs text-gray-500">Request is still pending...</p>\`
-														}
-                        </div>
-                    </div>
-                </div>
-            \`;
-		},
-	});
-
-	return {
-		properties: {
-			history: T.array([]),
-			selectedHistoryId: T.string(null),
-			onSelect: T.function(),
-			listOnly: T.boolean(),
-		},
-		selectHistoryItem(item) {
-			this.selectedHistoryId = item ? item.id : undefined;
-			if (this.onHistorySelect) this.onSelect(item);
-		},
-		connected() {
-			this.historyUnsubscribe = AI.onHistoryChange((event) => {
-				this.history = event.history;
-			});
-			this.history = AI.getHistory();
-		},
-		render() {
-			if (this.history.length === 0)
-				return html\`<p class="text-center text-xs text-gray-400 p-4">No history yet</p>\`;
-			const selectedHistoryItem = this.history.find(
-				(h) => h.id === this.selectedHistoryId,
-			);
-
-			return html\`
-                <ul class="text-xs space-y-1 font-mono">
-                    \${this.history.map(
-											(item) => html\`
-                            <li
-                                class="flex flex-col \${this.selectedHistoryId === item.id ? "font-semibold text-blue-100 p-2" : item.status === "error" ? "text-red-100" : "text-white"}">
-                                <div 
-																 @click=\${() => this.selectHistoryItem(item)}
-																class="cursor-pointer flex items-center justify-between p-2 rounded hover:bg-gray-700">
-																<span class="text-ellipsis">\${item.toolName}</span>
-                                <div class="flex items-center">
-                                    <span class="text-gray-500 mr-2">\${item.status}</span>
-                                    <uix-icon name="chevron-right" class="h-4 w-4 text-gray-400"></uix-icon>
-                                </div>
-																</div>
-																\${!this.listOnly || !selectedHistoryItem || selectedHistoryItem.id !== item.id ? null : html\`<mcp-history-view .item=\${selectedHistoryItem} .onBack=\${() => this.selectHistoryItem(null)}></mcp-history-view>\`}
-                            </li>
-                        \`,
-										)}
-                </ul>
-            \`;
-		},
-	};
-};
-`,mimeType:"application/javascript",skipSW:!1},"/modules/icon-lucide/lucide/atom.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="1"/><path d="M20.2 20.2c2.04-2.03.02-7.36-4.5-11.9c-4.54-4.52-9.87-6.54-11.9-4.5c-2.04 2.03-.02 7.36 4.5 11.9c4.54 4.52 9.87 6.54 11.9 4.5"/><path d="M15.7 15.7c4.52-4.54 6.54-9.87 4.5-11.9c-2.03-2.04-7.36-.02-11.9 4.5c-4.52 4.54-6.54 9.87-4.5 11.9c2.03 2.04 7.36.02 11.9-4.5"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/gem.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M6 3h12l4 6l-10 13L2 9Z"/><path d="M11 3L8 9l4 13l4-13l-3-6M2 9h20"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/bell-ring.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9m4.3 13a1.94 1.94 0 0 0 3.4 0M4 2C2.8 3.7 2 5.7 2 8m20 0c0-2.3-.8-4.3-2-6"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/users.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87m-3-12a4 4 0 0 1 0 7.75"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/terminal.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m4 17l6-6l-6-6m8 14h8"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/chevron-right.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 18l6-6l-6-6"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/telescope.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m10.065 12.493l-6.18 1.318a.934.934 0 0 1-1.108-.702l-.537-2.15a1.07 1.07 0 0 1 .691-1.265l13.504-4.44m-2.875 6.493l4.332-.924M16 21l-3.105-6.21"/><path d="M16.485 5.94a2 2 0 0 1 1.455-2.425l1.09-.272a1 1 0 0 1 1.212.727l1.515 6.06a1 1 0 0 1-.727 1.213l-1.09.272a2 2 0 0 1-2.425-1.455zM6.158 8.633l1.114 4.456M8 21l3.105-6.21"/><circle cx="12" cy="13" r="2"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/server.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><path d="M6 6h.01M6 18h.01"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/code.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m16 18l6-6l-6-6M8 6l-6 6l6 6"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/bot.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2m16 0h2m-7-1v2m-6-2v2"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/layout-grid.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/book.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/zap.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/message-square-heart.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M14.8 7.5a1.84 1.84 0 0 0-2.6 0l-.2.3l-.3-.3a1.84 1.84 0 1 0-2.4 2.8L12 13l2.7-2.7c.9-.9.8-2.1.1-2.8"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/search.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21l-4.3-4.3"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/workflow.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="8" height="8" x="3" y="3" rx="2"/><path d="M7 11v4a2 2 0 0 0 2 2h4"/><rect width="8" height="8" x="13" y="13" rx="2"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/flame.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3c-1.072-2.143-.224-4.054 2-6c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/star.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m12 2l3.09 6.26L22 9.27l-5 4.87l1.18 6.88L12 17.77l-6.18 3.25L7 14.14L2 9.27l6.91-1.01z"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/arrow-up.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 12l7-7l7 7m-7 7V5"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/message-circle.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/package.json":{content:`{
+`,mimeType:"application/javascript",skipSW:!1},"/modules/icon-lucide/lucide/pie-chart.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/atom.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="1"/><path d="M20.2 20.2c2.04-2.03.02-7.36-4.5-11.9c-4.54-4.52-9.87-6.54-11.9-4.5c-2.04 2.03-.02 7.36 4.5 11.9c4.54 4.52 9.87 6.54 11.9 4.5"/><path d="M15.7 15.7c4.52-4.54 6.54-9.87 4.5-11.9c-2.03-2.04-7.36-.02-11.9 4.5c-4.52 4.54-6.54 9.87-4.5 11.9c2.03 2.04 7.36.02 11.9-4.5"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/arrow-left.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m12 19l-7-7l7-7m7 7H5"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/monitor.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="20" height="14" x="2" y="3" rx="2"/><path d="M8 21h8m-4-4v4"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/globe.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20a14.5 14.5 0 0 0 0-20M2 12h20"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/terminal.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m4 17l6-6l-6-6m8 14h8"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/search.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21l-4.3-4.3"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/workflow.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="8" height="8" x="3" y="3" rx="2"/><path d="M7 11v4a2 2 0 0 0 2 2h4"/><rect width="8" height="8" x="13" y="13" rx="2"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/bell-ring.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9m4.3 13a1.94 1.94 0 0 0 3.4 0M4 2C2.8 3.7 2 5.7 2 8m20 0c0-2.3-.8-4.3-2-6"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/flame.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3c-1.072-2.143-.224-4.054 2-6c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/message-circle.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/star.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m12 2l3.09 6.26L22 9.27l-5 4.87l1.18 6.88L12 17.77l-6.18 3.25L7 14.14L2 9.27l6.91-1.01z"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/package.json":{content:`{
 	"name": "mcpiquant",
 	"version": "1",
 	"dependencies": {
@@ -18654,15 +19164,6 @@ $APP.models.set({
 		files: T.array(),
 	},
 });
-`,mimeType:"application/javascript",skipSW:!1},"/modules/app/container.js":{content:`export default ({ routes, T }) => ({
-	tag: "app-container",
-	class: "flex flex-grow",
-	extends: "router-ui",
-	properties: {
-		routes: T.object({ defaultValue: routes }),
-		full: T.boolean(true),
-	},
-});
 `,mimeType:"application/javascript",skipSW:!1},"/theme.css":{content:`body {
 	font-family: var(--font-family);
 }
@@ -18842,7 +19343,16 @@ div [container][horizontal] {
 	display: flex;
 	flex-direction: col;
 }
-`,mimeType:"text/css",skipSW:!1},"/modules/router/ui.js":{content:`export default ({ html, T }) => ({
+`,mimeType:"text/css",skipSW:!1},"/modules/app/container.js":{content:`export default ({ routes, T }) => ({
+	tag: "app-container",
+	class: "flex flex-grow",
+	extends: "router-ui",
+	properties: {
+		routes: T.object({ defaultValue: routes }),
+		full: T.boolean(true),
+	},
+});
+`,mimeType:"application/javascript",skipSW:!1},"/modules/router/ui.js":{content:`export default ({ html, T }) => ({
 	tag: "router-ui",
 	properties: {
 		currentRoute: T.object({
@@ -18937,15 +19447,6 @@ div [container][horizontal] {
     \`;
 	},
 });
-`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/navigation/navbar.js":{content:`export default ({ T }) => ({
-	tag: "uix-navbar",
-	style: true,
-	extends: "uix-list",
-	properties: {
-		join: T.boolean({ defaultValue: true }),
-		docked: T.string(),
-	},
-});
 `,mimeType:"application/javascript",skipSW:!1},"/modules/uix/display/button.js":{content:`export default ({ T }) => ({
 	tag: "uix-button",
 	properties: { variant: T.string("default") },
@@ -19016,6 +19517,15 @@ div [container][horizontal] {
 	connected() {
 		this.icon = this.darkmode ? "sun" : "moon";
 		if (this.darkmode) document.documentElement.classList.add("dark");
+	},
+});
+`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/navigation/navbar.js":{content:`export default ({ T }) => ({
+	tag: "uix-navbar",
+	style: true,
+	extends: "uix-list",
+	properties: {
+		join: T.boolean({ defaultValue: true }),
+		docked: T.string(),
 	},
 });
 `,mimeType:"application/javascript",skipSW:!1},"/modules/apps/bundler/views/ui.js":{content:`export default ({ T, html, $APP, Bundler }) => {
@@ -19330,6 +19840,98 @@ div [container][horizontal] {
 		},
 	};
 };
+`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/layout/list.js":{content:`export default ({ T }) => ({
+	tag: "uix-list",
+	style: true,
+	properties: {
+		multiple: T.boolean(),
+		multipleWithCtrl: T.boolean(),
+		multipleWithShift: T.boolean(),
+		lastSelectedIndex: T.number(),
+		selectedIds: T.array(),
+		onSelectedChanged: T.function(),
+		gap: T.string({ defaultValue: "md" }),
+		itemId: T.string(".uix-link"),
+		selectable: T.boolean(),
+	},
+	connected() {
+		if (this.selectable)
+			this.addEventListener("click", this.handleClick.bind(this));
+	},
+	disconnected() {
+		if (this.selectable)
+			this.removeEventListener("click", this.handleClick.bind(this));
+	},
+	handleClick: function (e) {
+		const link = e.target.closest(".uix-link");
+		if (!link || !this.contains(link)) return;
+		e.preventDefault();
+		const links = Array.from(this.qa(".uix-link"));
+		const index = links.indexOf(link);
+		if (index === -1) return;
+		if (
+			this.multipleWithShift &&
+			e.shiftKey &&
+			this.lastSelectedIndex !== null
+		) {
+			const start = Math.min(this.lastSelectedIndex, index);
+			const end = Math.max(this.lastSelectedIndex, index);
+			links
+				.slice(start, end + 1)
+				.forEach((el) => el.setAttribute("selected", ""));
+			this.lastSelectedIndex = index;
+			this.updateSelectedIds();
+			return;
+		}
+		if (this.multipleWithCtrl) {
+			if (e.ctrlKey) {
+				link.hasAttribute("selected")
+					? link.removeAttribute("selected")
+					: link.setAttribute("selected", "");
+				this.lastSelectedIndex = index;
+				this.updateSelectedIds();
+				return;
+			}
+			links.forEach((el) => el.removeAttribute("selected"));
+			if (link.hasAttribute("selected")) {
+				link.removeAttribute("selected");
+				this.lastSelectedIndex = null;
+			} else {
+				link.setAttribute("selected", "");
+				this.lastSelectedIndex = index;
+			}
+			this.updateSelectedIds();
+			return;
+		}
+
+		if (this.multiple) {
+			link.hasAttribute("selected")
+				? link.removeAttribute("selected")
+				: link.setAttribute("selected", "");
+			this.lastSelectedIndex = index;
+			this.updateSelectedIds();
+			return;
+		}
+
+		if (link.hasAttribute("selected")) {
+			links.forEach((el) => el.removeAttribute("selected"));
+			this.lastSelectedIndex = null;
+		} else {
+			links.forEach((el) => el.removeAttribute("selected"));
+			link.setAttribute("selected", "");
+			this.lastSelectedIndex = index;
+		}
+		this.updateSelectedIds();
+	},
+	updateSelectedIds() {
+		const links = Array.from(this.qa(this.itemId));
+		this.selectedIds = links.reduce((ids, el, index) => {
+			if (el.hasAttribute("selected")) ids.push(index);
+			return ids;
+		}, []);
+		if (this.onSelectedChanged) this.onSelectedChanged(this.selectedIds);
+	},
+});
 `,mimeType:"application/javascript",skipSW:!1},"/modules/uix/display/link.js":{content:`export default ({ T, html, Router }) => ({
 	tag: "uix-link",
 	style: true,
@@ -19511,98 +20113,6 @@ div [container][horizontal] {
 				}
         \${!this.float ? null : html\`<div float>\${this.float}</div>\`}
     \`;
-	},
-});
-`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/layout/list.js":{content:`export default ({ T }) => ({
-	tag: "uix-list",
-	style: true,
-	properties: {
-		multiple: T.boolean(),
-		multipleWithCtrl: T.boolean(),
-		multipleWithShift: T.boolean(),
-		lastSelectedIndex: T.number(),
-		selectedIds: T.array(),
-		onSelectedChanged: T.function(),
-		gap: T.string({ defaultValue: "md" }),
-		itemId: T.string(".uix-link"),
-		selectable: T.boolean(),
-	},
-	connected() {
-		if (this.selectable)
-			this.addEventListener("click", this.handleClick.bind(this));
-	},
-	disconnected() {
-		if (this.selectable)
-			this.removeEventListener("click", this.handleClick.bind(this));
-	},
-	handleClick: function (e) {
-		const link = e.target.closest(".uix-link");
-		if (!link || !this.contains(link)) return;
-		e.preventDefault();
-		const links = Array.from(this.qa(".uix-link"));
-		const index = links.indexOf(link);
-		if (index === -1) return;
-		if (
-			this.multipleWithShift &&
-			e.shiftKey &&
-			this.lastSelectedIndex !== null
-		) {
-			const start = Math.min(this.lastSelectedIndex, index);
-			const end = Math.max(this.lastSelectedIndex, index);
-			links
-				.slice(start, end + 1)
-				.forEach((el) => el.setAttribute("selected", ""));
-			this.lastSelectedIndex = index;
-			this.updateSelectedIds();
-			return;
-		}
-		if (this.multipleWithCtrl) {
-			if (e.ctrlKey) {
-				link.hasAttribute("selected")
-					? link.removeAttribute("selected")
-					: link.setAttribute("selected", "");
-				this.lastSelectedIndex = index;
-				this.updateSelectedIds();
-				return;
-			}
-			links.forEach((el) => el.removeAttribute("selected"));
-			if (link.hasAttribute("selected")) {
-				link.removeAttribute("selected");
-				this.lastSelectedIndex = null;
-			} else {
-				link.setAttribute("selected", "");
-				this.lastSelectedIndex = index;
-			}
-			this.updateSelectedIds();
-			return;
-		}
-
-		if (this.multiple) {
-			link.hasAttribute("selected")
-				? link.removeAttribute("selected")
-				: link.setAttribute("selected", "");
-			this.lastSelectedIndex = index;
-			this.updateSelectedIds();
-			return;
-		}
-
-		if (link.hasAttribute("selected")) {
-			links.forEach((el) => el.removeAttribute("selected"));
-			this.lastSelectedIndex = null;
-		} else {
-			links.forEach((el) => el.removeAttribute("selected"));
-			link.setAttribute("selected", "");
-			this.lastSelectedIndex = index;
-		}
-		this.updateSelectedIds();
-	},
-	updateSelectedIds() {
-		const links = Array.from(this.qa(this.itemId));
-		this.selectedIds = links.reduce((ids, el, index) => {
-			if (el.hasAttribute("selected")) ids.push(index);
-			return ids;
-		}, []);
-		if (this.onSelectedChanged) this.onSelectedChanged(this.selectedIds);
 	},
 });
 `,mimeType:"application/javascript",skipSW:!1},"/modules/uix/form/input.js":{content:`import { ifDefined } from "/modules/mvc/view/html/directive.js";
@@ -19845,7 +20355,39 @@ export default ({ T, html }) => ({
         \`;
 	},
 });
-`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/display/link.css":{content:`:where(.uix-link) {
+`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/layout/list.css":{content:`.uix-list {
+	display: flex;
+	&[vertical] {
+		flex-direction: column;
+	}
+}
+`,mimeType:"text/css",skipSW:!1},"/modules/uix/navigation/navbar.css":{content:`.uix-navbar {
+	--uix-navbar-text-color: var(--color-default-90);
+	--uix-navbar-hover-text-color: var(--color-surface-80);
+	--uix-navbar-border-radius: 0px;
+	--uix-navbar-border-color: var(--color-default-60);
+	--uix-navbar-border-size: 1px;
+	--uix-navbar-border-style: solid;
+	--uix-navbar-hover-background-color: var(--color-default-40);
+	--uix-container-position: var(--uix-navbar-position);
+	display: flex;
+	flex-direction: column;
+	&[docked] {
+		--uix-list-button-radius: 0;
+		border-bottom: 0;
+		position: fixed;
+		bottom: 0px;
+		background-color: var(--uix-navbar-background-color, var(--color-default-5));
+		> * {
+			border-right: 0;
+			border-bottom: 0;
+			&:first-child {
+				border-left: 0;
+			}
+		}
+	}
+}
+`,mimeType:"text/css",skipSW:!1},"/modules/uix/display/link.css":{content:`:where(.uix-link) {
 	font-weight: var(--uix-link-font-weight, 600);
 	width: var(--uix-link-width, auto);
 	color: var(--uix-link-text-color, var(--colors-default-900));
@@ -20097,38 +20639,6 @@ export default ({ T, html }) => ({
 	}
 	&[float]:hover {
 		box-shadow: var(--shadow-lg, 0 10px 15px -3px rgb(0 0 0 / 0.1));
-	}
-}
-`,mimeType:"text/css",skipSW:!1},"/modules/uix/layout/list.css":{content:`.uix-list {
-	display: flex;
-	&[vertical] {
-		flex-direction: column;
-	}
-}
-`,mimeType:"text/css",skipSW:!1},"/modules/uix/navigation/navbar.css":{content:`.uix-navbar {
-	--uix-navbar-text-color: var(--color-default-90);
-	--uix-navbar-hover-text-color: var(--color-surface-80);
-	--uix-navbar-border-radius: 0px;
-	--uix-navbar-border-color: var(--color-default-60);
-	--uix-navbar-border-size: 1px;
-	--uix-navbar-border-style: solid;
-	--uix-navbar-hover-background-color: var(--color-default-40);
-	--uix-container-position: var(--uix-navbar-position);
-	display: flex;
-	flex-direction: column;
-	&[docked] {
-		--uix-list-button-radius: 0;
-		border-bottom: 0;
-		position: fixed;
-		bottom: 0px;
-		background-color: var(--uix-navbar-background-color, var(--color-default-5));
-		> * {
-			border-right: 0;
-			border-bottom: 0;
-			&:first-child {
-				border-left: 0;
-			}
-		}
 	}
 }
 `,mimeType:"text/css",skipSW:!1},"/modules/uix/display/icon.js":{content:`export default ({ T, html, $APP, Icons, theme }) => ({
@@ -20413,5 +20923,5 @@ export default ({ T, html }) => ({
 		fill: currentColor;
 	}
 }
-`,mimeType:"text/css",skipSW:!1},"/modules/icon-lucide/lucide/square-mouse-pointer.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12.034 12.681a.498.498 0 0 1 .647-.647l9 3.5a.5.5 0 0 1-.033.943l-3.444 1.068a1 1 0 0 0-.66.66l-1.067 3.443a.5.5 0 0 1-.943.033z"/><path d="M21 11V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/cog.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12 20a8 8 0 1 0 0-16a8 8 0 0 0 0 16"/><path d="M12 14a2 2 0 1 0 0-4a2 2 0 0 0 0 4m0-12v2m0 18v-2m5 .66l-1-1.73m-5-8.66L7 3.34M20.66 17l-1.73-1M3.34 7l1.73 1M14 12h8M2 12h2m16.66-5l-1.73 1M3.34 17l1.73-1M17 3.34l-1 1.73m-5 8.66l-4 6.93"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/server-cog.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M4.5 10H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-.5m-15 4H4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2h-.5M6 6h.01M6 18h.01m9.69-4.6l-.9-.3m-5.6-2.2l-.9-.3m2.3 5.1l.3-.9m2.7.9l-.4-1m-2.4-5.4l-.4-1m-2.1 5.3l1-.4m5.4-2.4l1-.4m-2.3-2.1l-.3.9"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/settings.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2"/><circle cx="12" cy="12" r="3"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/sun.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/bot-message-square.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V2H8m0 16l-4 4V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2Zm-6-6h2m5-1v2m6-2v2m5-1h2"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/chevron-down.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 9l6 6l6-6"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/style.css":{content:`@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_P-bnBeA.woff2) format("woff2");unicode-range:U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_G-bnBeA.woff2) format("woff2");unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_B-bnBeA.woff2) format("woff2");unicode-range:U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_N-bnBeA.woff2) format("woff2");unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_M-bnBeA.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_C-bk.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}@supports ((-webkit-hyphens: none) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color:rgb(from red r g b)))){*,:before,:after,::backdrop{--un-bg-opacity:100%;--un-text-opacity:100%;--un-border-opacity:100%;--un-translate-x:initial;--un-translate-y:initial;--un-translate-z:initial;--un-space-x-reverse:initial;--un-space-y-reverse:initial;--un-leading:initial}}@property --un-text-opacity{syntax:"<percentage>";inherits:false;initial-value:100%;}@property --un-leading{syntax:"*";inherits:false;}@property --un-border-opacity{syntax:"<percentage>";inherits:false;initial-value:100%;}@property --un-bg-opacity{syntax:"<percentage>";inherits:false;initial-value:100%;}@property --un-inset-ring-color{syntax:"*";inherits:false;}@property --un-inset-ring-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-inset-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-inset-shadow-color{syntax:"*";inherits:false;}@property --un-ring-color{syntax:"*";inherits:false;}@property --un-ring-inset{syntax:"*";inherits:false;}@property --un-ring-offset-color{syntax:"*";inherits:false;}@property --un-ring-offset-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-ring-offset-width{syntax:"<length>";inherits:false;initial-value:0px;}@property --un-ring-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-shadow-color{syntax:"*";inherits:false;}@property --un-translate-x{syntax:"*";inherits:false;initial-value:0;}@property --un-translate-y{syntax:"*";inherits:false;initial-value:0;}@property --un-translate-z{syntax:"*";inherits:false;initial-value:0;}@property --un-space-x-reverse{syntax:"*";inherits:false;initial-value:0;}@property --un-space-y-reverse{syntax:"*";inherits:false;initial-value:0;}:root,:host{--spacing: .25rem;--font-sans: "Manrope",ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";--font-serif: ui-serif,Georgia,Cambria,"Times New Roman",Times,serif;--font-mono: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;--font-family: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;--font-icon-family: lucide;--colors-black: #000;--colors-white: #fff;--colors-slate-50: oklch(98.4% .003 247.858);--colors-slate-100: oklch(96.8% .007 247.896);--colors-slate-200: oklch(92.9% .013 255.508);--colors-slate-300: oklch(86.9% .022 252.894);--colors-slate-400: oklch(70.4% .04 256.788);--colors-slate-500: oklch(55.4% .046 257.417);--colors-slate-600: oklch(44.6% .043 257.281);--colors-slate-700: oklch(37.2% .044 257.287);--colors-slate-800: oklch(27.9% .041 260.031);--colors-slate-900: oklch(20.8% .042 265.755);--colors-slate-950: oklch(12.9% .042 264.695);--colors-slate-DEFAULT: oklch(70.4% .04 256.788);--colors-gray-50: oklch(98.5% .002 247.839);--colors-gray-100: oklch(96.7% .003 264.542);--colors-gray-200: oklch(92.8% .006 264.531);--colors-gray-300: oklch(87.2% .01 258.338);--colors-gray-400: oklch(70.7% .022 261.325);--colors-gray-500: oklch(55.1% .027 264.364);--colors-gray-600: oklch(44.6% .03 256.802);--colors-gray-700: oklch(37.3% .034 259.733);--colors-gray-800: oklch(27.8% .033 256.848);--colors-gray-900: oklch(21% .034 264.665);--colors-gray-950: oklch(13% .028 261.692);--colors-gray-DEFAULT: oklch(70.7% .022 261.325);--colors-zinc-50: oklch(98.5% 0 0);--colors-zinc-100: oklch(96.7% .001 286.375);--colors-zinc-200: oklch(92% .004 286.32);--colors-zinc-300: oklch(87.1% .006 286.286);--colors-zinc-400: oklch(70.5% .015 286.067);--colors-zinc-500: oklch(55.2% .016 285.938);--colors-zinc-600: oklch(44.2% .017 285.786);--colors-zinc-700: oklch(37% .013 285.805);--colors-zinc-800: oklch(27.4% .006 286.033);--colors-zinc-900: oklch(21% .006 285.885);--colors-zinc-950: oklch(14.1% .005 285.823);--colors-zinc-DEFAULT: oklch(70.5% .015 286.067);--colors-neutral-50: oklch(98.5% 0 0);--colors-neutral-100: oklch(97% 0 0);--colors-neutral-200: oklch(92.2% 0 0);--colors-neutral-300: oklch(87% 0 0);--colors-neutral-400: oklch(70.8% 0 0);--colors-neutral-500: oklch(55.6% 0 0);--colors-neutral-600: oklch(43.9% 0 0);--colors-neutral-700: oklch(37.1% 0 0);--colors-neutral-800: oklch(26.9% 0 0);--colors-neutral-900: oklch(20.5% 0 0);--colors-neutral-950: oklch(14.5% 0 0);--colors-neutral-DEFAULT: oklch(70.8% 0 0);--colors-stone-50: oklch(98.5% .001 106.423);--colors-stone-100: oklch(97% .001 106.424);--colors-stone-200: oklch(92.3% .003 48.717);--colors-stone-300: oklch(86.9% .005 56.366);--colors-stone-400: oklch(70.9% .01 56.259);--colors-stone-500: oklch(55.3% .013 58.071);--colors-stone-600: oklch(44.4% .011 73.639);--colors-stone-700: oklch(37.4% .01 67.558);--colors-stone-800: oklch(26.8% .007 34.298);--colors-stone-900: oklch(21.6% .006 56.043);--colors-stone-950: oklch(14.7% .004 49.25);--colors-stone-DEFAULT: oklch(70.9% .01 56.259);--colors-red-50: oklch(97.1% .013 17.38);--colors-red-100: oklch(93.6% .032 17.717);--colors-red-200: oklch(88.5% .062 18.334);--colors-red-300: oklch(80.8% .114 19.571);--colors-red-400: oklch(70.4% .191 22.216);--colors-red-500: oklch(63.7% .237 25.331);--colors-red-600: oklch(57.7% .245 27.325);--colors-red-700: oklch(50.5% .213 27.518);--colors-red-800: oklch(44.4% .177 26.899);--colors-red-900: oklch(39.6% .141 25.723);--colors-red-950: oklch(25.8% .092 26.042);--colors-red-DEFAULT: oklch(70.4% .191 22.216);--colors-orange-50: oklch(98% .016 73.684);--colors-orange-100: oklch(95.4% .038 75.164);--colors-orange-200: oklch(90.1% .076 70.697);--colors-orange-300: oklch(83.7% .128 66.29);--colors-orange-400: oklch(75% .183 55.934);--colors-orange-500: oklch(70.5% .213 47.604);--colors-orange-600: oklch(64.6% .222 41.116);--colors-orange-700: oklch(55.3% .195 38.402);--colors-orange-800: oklch(47% .157 37.304);--colors-orange-900: oklch(40.8% .123 38.172);--colors-orange-950: oklch(26.6% .079 36.259);--colors-orange-DEFAULT: oklch(75% .183 55.934);--colors-amber-50: oklch(98.7% .022 95.277);--colors-amber-100: oklch(96.2% .059 95.617);--colors-amber-200: oklch(92.4% .12 95.746);--colors-amber-300: oklch(87.9% .169 91.605);--colors-amber-400: oklch(82.8% .189 84.429);--colors-amber-500: oklch(76.9% .188 70.08);--colors-amber-600: oklch(66.6% .179 58.318);--colors-amber-700: oklch(55.5% .163 48.998);--colors-amber-800: oklch(47.3% .137 46.201);--colors-amber-900: oklch(41.4% .112 45.904);--colors-amber-950: oklch(27.9% .077 45.635);--colors-amber-DEFAULT: oklch(82.8% .189 84.429);--colors-yellow-50: oklch(98.7% .026 102.212);--colors-yellow-100: oklch(97.3% .071 103.193);--colors-yellow-200: oklch(94.5% .129 101.54);--colors-yellow-300: oklch(90.5% .182 98.111);--colors-yellow-400: oklch(85.2% .199 91.936);--colors-yellow-500: oklch(79.5% .184 86.047);--colors-yellow-600: oklch(68.1% .162 75.834);--colors-yellow-700: oklch(55.4% .135 66.442);--colors-yellow-800: oklch(47.6% .114 61.907);--colors-yellow-900: oklch(42.1% .095 57.708);--colors-yellow-950: oklch(28.6% .066 53.813);--colors-yellow-DEFAULT: oklch(85.2% .199 91.936);--colors-lime-50: oklch(98.6% .031 120.757);--colors-lime-100: oklch(96.7% .067 122.328);--colors-lime-200: oklch(93.8% .127 124.321);--colors-lime-300: oklch(89.7% .196 126.665);--colors-lime-400: oklch(84.1% .238 128.85);--colors-lime-500: oklch(76.8% .233 130.85);--colors-lime-600: oklch(64.8% .2 131.684);--colors-lime-700: oklch(53.2% .157 131.589);--colors-lime-800: oklch(45.3% .124 130.933);--colors-lime-900: oklch(40.5% .101 131.063);--colors-lime-950: oklch(27.4% .072 132.109);--colors-lime-DEFAULT: oklch(84.1% .238 128.85);--colors-green-50: oklch(98.2% .018 155.826);--colors-green-100: oklch(96.2% .044 156.743);--colors-green-200: oklch(92.5% .084 155.995);--colors-green-300: oklch(87.1% .15 154.449);--colors-green-400: oklch(79.2% .209 151.711);--colors-green-500: oklch(72.3% .219 149.579);--colors-green-600: oklch(62.7% .194 149.214);--colors-green-700: oklch(52.7% .154 150.069);--colors-green-800: oklch(44.8% .119 151.328);--colors-green-900: oklch(39.3% .095 152.535);--colors-green-950: oklch(26.6% .065 152.934);--colors-green-DEFAULT: oklch(79.2% .209 151.711);--colors-emerald-50: oklch(97.9% .021 166.113);--colors-emerald-100: oklch(95% .052 163.051);--colors-emerald-200: oklch(90.5% .093 164.15);--colors-emerald-300: oklch(84.5% .143 164.978);--colors-emerald-400: oklch(76.5% .177 163.223);--colors-emerald-500: oklch(69.6% .17 162.48);--colors-emerald-600: oklch(59.6% .145 163.225);--colors-emerald-700: oklch(50.8% .118 165.612);--colors-emerald-800: oklch(43.2% .095 166.913);--colors-emerald-900: oklch(37.8% .077 168.94);--colors-emerald-950: oklch(26.2% .051 172.552);--colors-emerald-DEFAULT: oklch(76.5% .177 163.223);--colors-teal-50: oklch(98.4% .014 180.72);--colors-teal-100: oklch(95.3% .051 180.801);--colors-teal-200: oklch(91% .096 180.426);--colors-teal-300: oklch(85.5% .138 181.071);--colors-teal-400: oklch(77.7% .152 181.912);--colors-teal-500: oklch(70.4% .14 182.503);--colors-teal-600: oklch(60% .118 184.704);--colors-teal-700: oklch(51.1% .096 186.391);--colors-teal-800: oklch(43.7% .078 188.216);--colors-teal-900: oklch(38.6% .063 188.416);--colors-teal-950: oklch(27.7% .046 192.524);--colors-teal-DEFAULT: oklch(77.7% .152 181.912);--colors-cyan-50: oklch(98.4% .019 200.873);--colors-cyan-100: oklch(95.6% .045 203.388);--colors-cyan-200: oklch(91.7% .08 205.041);--colors-cyan-300: oklch(86.5% .127 207.078);--colors-cyan-400: oklch(78.9% .154 211.53);--colors-cyan-500: oklch(71.5% .143 215.221);--colors-cyan-600: oklch(60.9% .126 221.723);--colors-cyan-700: oklch(52% .105 223.128);--colors-cyan-800: oklch(45% .085 224.283);--colors-cyan-900: oklch(39.8% .07 227.392);--colors-cyan-950: oklch(30.2% .056 229.695);--colors-cyan-DEFAULT: oklch(78.9% .154 211.53);--colors-sky-50: oklch(97.7% .013 236.62);--colors-sky-100: oklch(95.1% .026 236.824);--colors-sky-200: oklch(90.1% .058 230.902);--colors-sky-300: oklch(82.8% .111 230.318);--colors-sky-400: oklch(74.6% .16 232.661);--colors-sky-500: oklch(68.5% .169 237.323);--colors-sky-600: oklch(58.8% .158 241.966);--colors-sky-700: oklch(50% .134 242.749);--colors-sky-800: oklch(44.3% .11 240.79);--colors-sky-900: oklch(39.1% .09 240.876);--colors-sky-950: oklch(29.3% .066 243.157);--colors-sky-DEFAULT: oklch(74.6% .16 232.661);--colors-blue-50: oklch(97% .014 254.604);--colors-blue-100: oklch(93.2% .032 255.585);--colors-blue-200: oklch(88.2% .059 254.128);--colors-blue-300: oklch(80.9% .105 251.813);--colors-blue-400: oklch(70.7% .165 254.624);--colors-blue-500: oklch(62.3% .214 259.815);--colors-blue-600: oklch(54.6% .245 262.881);--colors-blue-700: oklch(48.8% .243 264.376);--colors-blue-800: oklch(42.4% .199 265.638);--colors-blue-900: oklch(37.9% .146 265.522);--colors-blue-950: oklch(28.2% .091 267.935);--colors-blue-DEFAULT: oklch(70.7% .165 254.624);--colors-indigo-50: oklch(96.2% .018 272.314);--colors-indigo-100: oklch(93% .034 272.788);--colors-indigo-200: oklch(87% .065 274.039);--colors-indigo-300: oklch(78.5% .115 274.713);--colors-indigo-400: oklch(67.3% .182 276.935);--colors-indigo-500: oklch(58.5% .233 277.117);--colors-indigo-600: oklch(51.1% .262 276.966);--colors-indigo-700: oklch(45.7% .24 277.023);--colors-indigo-800: oklch(39.8% .195 277.366);--colors-indigo-900: oklch(35.9% .144 278.697);--colors-indigo-950: oklch(25.7% .09 281.288);--colors-indigo-DEFAULT: oklch(67.3% .182 276.935);--colors-violet-50: oklch(96.9% .016 293.756);--colors-violet-100: oklch(94.3% .029 294.588);--colors-violet-200: oklch(89.4% .057 293.283);--colors-violet-300: oklch(81.1% .111 293.571);--colors-violet-400: oklch(70.2% .183 293.541);--colors-violet-500: oklch(60.6% .25 292.717);--colors-violet-600: oklch(54.1% .281 293.009);--colors-violet-700: oklch(49.1% .27 292.581);--colors-violet-800: oklch(43.2% .232 292.759);--colors-violet-900: oklch(38% .189 293.745);--colors-violet-950: oklch(28.3% .141 291.089);--colors-violet-DEFAULT: oklch(70.2% .183 293.541);--colors-purple-50: oklch(97.7% .014 308.299);--colors-purple-100: oklch(94.6% .033 307.174);--colors-purple-200: oklch(90.2% .063 306.703);--colors-purple-300: oklch(82.7% .119 306.383);--colors-purple-400: oklch(71.4% .203 305.504);--colors-purple-500: oklch(62.7% .265 303.9);--colors-purple-600: oklch(55.8% .288 302.321);--colors-purple-700: oklch(49.6% .265 301.924);--colors-purple-800: oklch(43.8% .218 303.724);--colors-purple-900: oklch(38.1% .176 304.987);--colors-purple-950: oklch(29.1% .149 302.717);--colors-purple-DEFAULT: oklch(71.4% .203 305.504);--colors-fuchsia-50: oklch(97.7% .017 320.058);--colors-fuchsia-100: oklch(95.2% .037 318.852);--colors-fuchsia-200: oklch(90.3% .076 319.62);--colors-fuchsia-300: oklch(83.3% .145 321.434);--colors-fuchsia-400: oklch(74% .238 322.16);--colors-fuchsia-500: oklch(66.7% .295 322.15);--colors-fuchsia-600: oklch(59.1% .293 322.896);--colors-fuchsia-700: oklch(51.8% .253 323.949);--colors-fuchsia-800: oklch(45.2% .211 324.591);--colors-fuchsia-900: oklch(40.1% .17 325.612);--colors-fuchsia-950: oklch(29.3% .136 325.661);--colors-fuchsia-DEFAULT: oklch(74% .238 322.16);--colors-pink-50: oklch(97.1% .014 343.198);--colors-pink-100: oklch(94.8% .028 342.258);--colors-pink-200: oklch(89.9% .061 343.231);--colors-pink-300: oklch(82.3% .12 346.018);--colors-pink-400: oklch(71.8% .202 349.761);--colors-pink-500: oklch(65.6% .241 354.308);--colors-pink-600: oklch(59.2% .249 .584);--colors-pink-700: oklch(52.5% .223 3.958);--colors-pink-800: oklch(45.9% .187 3.815);--colors-pink-900: oklch(40.8% .153 2.432);--colors-pink-950: oklch(28.4% .109 3.907);--colors-pink-DEFAULT: oklch(71.8% .202 349.761);--colors-rose-50: oklch(96.9% .015 12.422);--colors-rose-100: oklch(94.1% .03 12.58);--colors-rose-200: oklch(89.2% .058 10.001);--colors-rose-300: oklch(81% .117 11.638);--colors-rose-400: oklch(71.2% .194 13.428);--colors-rose-500: oklch(64.5% .246 16.439);--colors-rose-600: oklch(58.6% .253 17.585);--colors-rose-700: oklch(51.4% .222 16.935);--colors-rose-800: oklch(45.5% .188 13.697);--colors-rose-900: oklch(41% .159 10.272);--colors-rose-950: oklch(27.1% .105 12.094);--colors-rose-DEFAULT: oklch(71.2% .194 13.428);--colors-light-50: oklch(99.4% 0 0);--colors-light-100: oklch(99.11% 0 0);--colors-light-200: oklch(98.51% 0 0);--colors-light-300: oklch(98.16% .0017 247.84);--colors-light-400: oklch(97.31% 0 0);--colors-light-500: oklch(96.12% 0 0);--colors-light-600: oklch(96.32% .0034 247.86);--colors-light-700: oklch(94.17% .0052 247.88);--colors-light-800: oklch(91.09% .007 247.9);--colors-light-900: oklch(90.72% .0051 228.82);--colors-light-950: oklch(89.23% .006 239.83);--colors-light-DEFAULT: oklch(97.31% 0 0);--colors-dark-50: oklch(40.91% 0 0);--colors-dark-100: oklch(35.62% 0 0);--colors-dark-200: oklch(31.71% 0 0);--colors-dark-300: oklch(29.72% 0 0);--colors-dark-400: oklch(25.2% 0 0);--colors-dark-500: oklch(23.93% 0 0);--colors-dark-600: oklch(22.73% .0038 286.09);--colors-dark-700: oklch(22.21% 0 0);--colors-dark-800: oklch(20.9% 0 0);--colors-dark-900: oklch(16.84% 0 0);--colors-dark-950: oklch(13.44% 0 0);--colors-dark-DEFAULT: oklch(25.2% 0 0);--colors-primary-50: hsl(198, 100%, 97%);--colors-primary-100: hsl(198, 100%, 92%);--colors-primary-200: hsl(198, 100%, 84%);--colors-primary-300: hsl(198, 100%, 75%);--colors-primary-400: hsl(198, 100%, 66%);--colors-primary-500: hsl(198, 100%, 55%);--colors-primary-600: hsl(198, 100%, 45%);--colors-primary-700: hsl(198, 100%, 35%);--colors-primary-800: hsl(198, 100%, 24%);--colors-primary-900: hsl(198, 100%, 15%);--colors-primary-DEFAULT: hsl(198, 100%, 55%);--colors-secondary-50: hsl(120, 100%, 97%);--colors-secondary-100: hsl(120, 100%, 92%);--colors-secondary-200: hsl(120, 100%, 84%);--colors-secondary-300: hsl(120, 100%, 75%);--colors-secondary-400: hsl(120, 100%, 66%);--colors-secondary-500: hsl(120, 100%, 55%);--colors-secondary-600: hsl(120, 100%, 45%);--colors-secondary-700: hsl(120, 100%, 35%);--colors-secondary-800: hsl(120, 100%, 24%);--colors-secondary-900: hsl(120, 100%, 15%);--colors-secondary-DEFAULT: hsl(120, 100%, 55%);--colors-tertiary-50: hsl(175, 100%, 97%);--colors-tertiary-100: hsl(175, 100%, 92%);--colors-tertiary-200: hsl(175, 100%, 84%);--colors-tertiary-300: hsl(175, 100%, 75%);--colors-tertiary-400: hsl(175, 100%, 66%);--colors-tertiary-500: hsl(175, 100%, 55%);--colors-tertiary-600: hsl(175, 100%, 45%);--colors-tertiary-700: hsl(175, 100%, 35%);--colors-tertiary-800: hsl(175, 100%, 24%);--colors-tertiary-900: hsl(175, 100%, 15%);--colors-tertiary-DEFAULT: hsl(175, 100%, 55%);--colors-success-50: hsl(149, 87%, 97%);--colors-success-100: hsl(149, 87%, 92%);--colors-success-200: hsl(149, 87%, 84%);--colors-success-300: hsl(149, 87%, 75%);--colors-success-400: hsl(149, 87%, 66%);--colors-success-500: hsl(149, 87%, 55%);--colors-success-600: hsl(149, 87%, 45%);--colors-success-700: hsl(149, 87%, 35%);--colors-success-800: hsl(149, 87%, 24%);--colors-success-900: hsl(149, 87%, 15%);--colors-success-DEFAULT: hsl(149, 87%, 55%);--colors-warning-50: hsl(32, 100%, 97%);--colors-warning-100: hsl(32, 100%, 92%);--colors-warning-200: hsl(32, 100%, 84%);--colors-warning-300: hsl(32, 100%, 75%);--colors-warning-400: hsl(32, 100%, 66%);--colors-warning-500: hsl(32, 100%, 55%);--colors-warning-600: hsl(32, 100%, 45%);--colors-warning-700: hsl(32, 100%, 35%);--colors-warning-800: hsl(32, 100%, 24%);--colors-warning-900: hsl(32, 100%, 15%);--colors-warning-DEFAULT: hsl(32, 100%, 55%);--colors-danger-50: hsl(345, 100%, 97%);--colors-danger-100: hsl(345, 100%, 92%);--colors-danger-200: hsl(345, 100%, 84%);--colors-danger-300: hsl(345, 100%, 75%);--colors-danger-400: hsl(345, 100%, 66%);--colors-danger-500: hsl(345, 100%, 55%);--colors-danger-600: hsl(345, 100%, 45%);--colors-danger-700: hsl(345, 100%, 35%);--colors-danger-800: hsl(345, 100%, 24%);--colors-danger-900: hsl(345, 100%, 15%);--colors-danger-DEFAULT: hsl(345, 100%, 55%);--colors-default-50: hsl(0, 0%, 97%);--colors-default-100: hsl(0, 0%, 92%);--colors-default-200: hsl(0, 0%, 84%);--colors-default-300: hsl(0, 0%, 75%);--colors-default-400: hsl(0, 0%, 66%);--colors-default-500: hsl(0, 0%, 55%);--colors-default-600: hsl(0, 0%, 45%);--colors-default-700: hsl(0, 0%, 35%);--colors-default-800: hsl(0, 0%, 24%);--colors-default-900: hsl(0, 0%, 15%);--colors-default-DEFAULT: hsl(0, 0%, 35%);--colors-surface-50: hsl(0, 0%, 97%);--colors-surface-100: hsl(0, 0%, 92%);--colors-surface-200: hsl(0, 0%, 84%);--colors-surface-300: hsl(0, 0%, 75%);--colors-surface-400: hsl(0, 0%, 66%);--colors-surface-500: hsl(0, 0%, 55%);--colors-surface-600: hsl(0, 0%, 45%);--colors-surface-700: hsl(0, 0%, 35%);--colors-surface-800: hsl(0, 0%, 24%);--colors-surface-900: hsl(0, 0%, 15%);--colors-surface-DEFAULT: hsl(0, 0%, 35%);--text-xs-fontSize: .75rem;--text-xs-lineHeight: 1rem;--text-sm-fontSize: .875rem;--text-sm-lineHeight: 1.25rem;--text-base-fontSize: 1rem;--text-base-lineHeight: 1.5rem;--text-lg-fontSize: 1.125rem;--text-lg-lineHeight: 1.75rem;--text-xl-fontSize: 1.25rem;--text-xl-lineHeight: 1.75rem;--text-2xl-fontSize: 1.5rem;--text-2xl-lineHeight: 2rem;--text-3xl-fontSize: 1.875rem;--text-3xl-lineHeight: 2.25rem;--text-4xl-fontSize: 2.25rem;--text-4xl-lineHeight: 2.5rem;--text-5xl-fontSize: 3rem;--text-5xl-lineHeight: 1;--text-6xl-fontSize: 3.75rem;--text-6xl-lineHeight: 1;--text-7xl-fontSize: 4.5rem;--text-7xl-lineHeight: 1;--text-8xl-fontSize: 6rem;--text-8xl-lineHeight: 1;--text-9xl-fontSize: 8rem;--text-9xl-lineHeight: 1;--text-color: var(--color-surface-100);--fontWeight-thin: 100;--fontWeight-extralight: 200;--fontWeight-light: 300;--fontWeight-normal: 400;--fontWeight-medium: 500;--fontWeight-semibold: 600;--fontWeight-bold: 700;--fontWeight-extrabold: 800;--fontWeight-black: 900;--tracking-tighter: -.05em;--tracking-tight: -.025em;--tracking-normal: 0em;--tracking-wide: .025em;--tracking-wider: .05em;--tracking-widest: .1em;--leading-none: 1;--leading-tight: 1.25;--leading-snug: 1.375;--leading-normal: 1.5;--leading-relaxed: 1.625;--leading-loose: 2;--textStrokeWidth-DEFAULT: 1.5rem;--textStrokeWidth-none: 0;--textStrokeWidth-sm: thin;--textStrokeWidth-md: medium;--textStrokeWidth-lg: thick;--radius-DEFAULT: .25rem;--radius-none: 0;--radius-xs: .125rem;--radius-sm: .25rem;--radius-md: .375rem;--radius-lg: .5rem;--radius-xl: .75rem;--radius-2xl: 1rem;--radius-3xl: 1.5rem;--radius-4xl: 2rem;--ease-linear: linear;--ease-in: cubic-bezier(.4, 0, 1, 1);--ease-out: cubic-bezier(0, 0, .2, 1);--ease-in-out: cubic-bezier(.4, 0, .2, 1);--ease-DEFAULT: cubic-bezier(.4, 0, .2, 1);--blur-DEFAULT: 8px;--blur-xs: 4px;--blur-sm: 8px;--blur-md: 12px;--blur-lg: 16px;--blur-xl: 24px;--blur-2xl: 40px;--blur-3xl: 64px;--perspective-dramatic: 100px;--perspective-near: 300px;--perspective-normal: 500px;--perspective-midrange: 800px;--perspective-distant: 1200px;--default-transition-duration: .15s;--default-transition-timingFunction: cubic-bezier(.4, 0, .2, 1);--default-font-family: var(--font-sans);--default-font-featureSettings: var(--font-sans--font-feature-settings);--default-font-variationSettings: var(--font-sans--font-variation-settings);--default-monoFont-family: var(--font-mono);--default-monoFont-featureSettings: var(--font-mono--font-feature-settings);--default-monoFont-variationSettings: var(--font-mono--font-variation-settings);--container-3xs: 16rem;--container-2xs: 18rem;--container-xs: 20rem;--container-sm: 24rem;--container-md: 28rem;--container-lg: 32rem;--container-xl: 36rem;--container-2xl: 42rem;--container-3xl: 48rem;--container-4xl: 56rem;--container-5xl: 64rem;--container-6xl: 72rem;--container-7xl: 80rem;--container-prose: 65ch;--background-color: var(--colors-primary-100);--boxShadow-md: 0 4px 6px -1px rgb(0 0 0 / .1), 0 2px 4px -2px rgb(0 0 0 / .1);--boxShadow-lg: 0 10px 15px -3px rgb(0 0 0 / .1), 0 4px 6px -4px rgb(0 0 0 / .1);--theme-font-family: "Manrope"}*,:after,:before,::backdrop,::file-selector-button{box-sizing:border-box;margin:0;padding:0;border:0 solid}html,:host{line-height:1.5;-webkit-text-size-adjust:100%;tab-size:4;font-family:var( --default-font-family, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" );font-feature-settings:var(--default-font-featureSettings, normal);font-variation-settings:var(--default-font-variationSettings, normal);-webkit-tap-highlight-color:transparent}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;-webkit-text-decoration:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,samp,pre{font-family:var( --default-monoFont-family, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace );font-feature-settings:var(--default-monoFont-featureSettings, normal);font-variation-settings:var(--default-monoFont-variationSettings, normal);font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}:-moz-focusring{outline:auto}progress{vertical-align:baseline}summary{display:list-item}ol,ul,menu{list-style:none}img,svg,video,canvas,audio,iframe,embed,object{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}button,input,select,optgroup,textarea,::file-selector-button{font:inherit;font-feature-settings:inherit;font-variation-settings:inherit;letter-spacing:inherit;color:inherit;border-radius:0;background-color:transparent;opacity:1}:where(select:is([multiple],[size])) optgroup{font-weight:bolder}:where(select:is([multiple],[size])) optgroup option{padding-inline-start:20px}::file-selector-button{margin-inline-end:4px}::placeholder{opacity:1}@supports (not (-webkit-appearance: -apple-pay-button)) or (contain-intrinsic-size: 1px){::placeholder{color:color-mix(in oklab,currentcolor 50%,transparent)}}textarea{resize:vertical}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-date-and-time-value{min-height:1lh;text-align:inherit}::-webkit-datetime-edit{display:inline-flex}::-webkit-datetime-edit-fields-wrapper{padding:0}::-webkit-datetime-edit,::-webkit-datetime-edit-year-field,::-webkit-datetime-edit-month-field,::-webkit-datetime-edit-day-field,::-webkit-datetime-edit-hour-field,::-webkit-datetime-edit-minute-field,::-webkit-datetime-edit-second-field,::-webkit-datetime-edit-millisecond-field,::-webkit-datetime-edit-meridiem-field{padding-block:0}:-moz-ui-invalid{box-shadow:none}button,input:where([type=button],[type=reset],[type=submit]),::file-selector-button{appearance:button}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[hidden]:where(:not([hidden=until-found])){display:none!important}.text-2xl{font-size:var(--text-2xl-fontSize);line-height:var(--un-leading, var(--text-2xl-lineHeight))}.text-3xl{font-size:var(--text-3xl-fontSize);line-height:var(--un-leading, var(--text-3xl-lineHeight))}.text-4xl{font-size:var(--text-4xl-fontSize);line-height:var(--un-leading, var(--text-4xl-lineHeight))}.text-lg{font-size:var(--text-lg-fontSize);line-height:var(--un-leading, var(--text-lg-lineHeight))}.text-sm{font-size:var(--text-sm-fontSize);line-height:var(--un-leading, var(--text-sm-lineHeight))}.text-xl{font-size:var(--text-xl-fontSize);line-height:var(--un-leading, var(--text-xl-lineHeight))}.text-xs{font-size:var(--text-xs-fontSize);line-height:var(--un-leading, var(--text-xs-lineHeight))}.data-\\[active\\=true\\]\\:text-white[data-active=true],.text-white{color:color-mix(in srgb,var(--colors-white) var(--un-text-opacity),transparent)}.text-\\[\\#1d2021\\]{color:color-mix(in oklab,#1d2021 var(--un-text-opacity),transparent)}.text-\\[\\#83a598\\]{color:color-mix(in oklab,#83a598 var(--un-text-opacity),transparent)}.text-\\[\\#928374\\]{color:color-mix(in oklab,#928374 var(--un-text-opacity),transparent)}.text-\\[\\#98971a\\]{color:color-mix(in oklab,#98971a var(--un-text-opacity),transparent)}.text-\\[\\#a89984\\]{color:color-mix(in oklab,#a89984 var(--un-text-opacity),transparent)}.text-\\[\\#bdae93\\]{color:color-mix(in oklab,#bdae93 var(--un-text-opacity),transparent)}.text-\\[\\#cc241d\\]{color:color-mix(in oklab,#cc241d var(--un-text-opacity),transparent)}.text-\\[\\#ebdbb2\\]{color:color-mix(in oklab,#ebdbb2 var(--un-text-opacity),transparent)}.text-\\[\\#fabd2f\\]{color:color-mix(in oklab,#fabd2f var(--un-text-opacity),transparent)}.text-gray-400{color:color-mix(in srgb,var(--colors-gray-400) var(--un-text-opacity),transparent)}.text-gray-500{color:color-mix(in srgb,var(--colors-gray-500) var(--un-text-opacity),transparent)}.text-gray-700{color:color-mix(in srgb,var(--colors-gray-700) var(--un-text-opacity),transparent)}.text-gray-800{color:color-mix(in srgb,var(--colors-gray-800) var(--un-text-opacity),transparent)}.text-gray-900{color:color-mix(in srgb,var(--colors-gray-900) var(--un-text-opacity),transparent)}.text-green-800{color:color-mix(in srgb,var(--colors-green-800) var(--un-text-opacity),transparent)}.text-yellow-800{color:color-mix(in srgb,var(--colors-yellow-800) var(--un-text-opacity),transparent)}.hover\\:text-\\[\\#83a598\\]:hover{color:color-mix(in oklab,#83a598 var(--un-text-opacity),transparent)}.hover\\:text-\\[\\#ebdbb2\\]:hover{color:color-mix(in oklab,#ebdbb2 var(--un-text-opacity),transparent)}.hover\\:text-yellow-300:hover{color:color-mix(in srgb,var(--colors-yellow-300) var(--un-text-opacity),transparent)}.leading-relaxed{--un-leading:var(--leading-relaxed);line-height:var(--leading-relaxed)}.tracking-wide{--un-tracking:var(--tracking-wide);letter-spacing:var(--tracking-wide)}.tracking-wider{--un-tracking:var(--tracking-wider);letter-spacing:var(--tracking-wider)}.tracking-widest{--un-tracking:var(--tracking-widest);letter-spacing:var(--tracking-widest)}.font-bold{--un-font-weight:var(--fontWeight-bold);font-weight:var(--fontWeight-bold)}.font-extrabold{--un-font-weight:var(--fontWeight-extrabold);font-weight:var(--fontWeight-extrabold)}.font-medium{--un-font-weight:var(--fontWeight-medium);font-weight:var(--fontWeight-medium)}.font-mono{font-family:var(--font-mono)}.font-sans{font-family:var(--font-sans)}.font-semibold{--un-font-weight:var(--fontWeight-semibold);font-weight:var(--fontWeight-semibold)}.m10\\.065{margin:calc(var(--spacing) * 10.065)}.m12{margin:calc(var(--spacing) * 12)}.m16{margin:calc(var(--spacing) * 16)}.m21{margin:calc(var(--spacing) * 21)}.m4{margin:calc(var(--spacing) * 4)}.m5{margin:calc(var(--spacing) * 5)}.m6{margin:calc(var(--spacing) * 6)}.m9{margin:calc(var(--spacing) * 9)}.-mb-4{margin-bottom:calc(calc(var(--spacing) * 4) * -1)}.ml-auto{margin-left:auto}.mr-2{margin-right:calc(var(--spacing) * 2)}.mr-3{margin-right:calc(var(--spacing) * 3)}.mt-1\\.5{margin-top:calc(var(--spacing) * 1.5)}.mt-4{margin-top:calc(var(--spacing) * 4)}.mt-auto{margin-top:auto}.p-1{padding:calc(var(--spacing) * 1)}.p-2{padding:calc(var(--spacing) * 2)}.p-4{padding:calc(var(--spacing) * 4)}.p-5{padding:calc(var(--spacing) * 5)}.p-6{padding:calc(var(--spacing) * 6)}.p-8{padding:calc(var(--spacing) * 8)}.\\[\\&\\>a\\]\\:px-5>a{padding-inline:calc(var(--spacing) * 5)}.\\[\\&\\>a\\]\\:py-2\\.5>a{padding-block:calc(var(--spacing) * 2.5)}.px-2{padding-inline:calc(var(--spacing) * 2)}.px-3{padding-inline:calc(var(--spacing) * 3)}.px-4{padding-inline:calc(var(--spacing) * 4)}.py-0\\.5{padding-block:calc(var(--spacing) * .5)}.py-1{padding-block:calc(var(--spacing) * 1)}.py-1\\.5{padding-block:calc(var(--spacing) * 1.5)}.py-2{padding-block:calc(var(--spacing) * 2)}.py-8{padding-block:calc(var(--spacing) * 8)}.pb-2{padding-bottom:calc(var(--spacing) * 2)}.pl-10{padding-left:calc(var(--spacing) * 10)}.pr-2{padding-right:calc(var(--spacing) * 2)}.pr-4{padding-right:calc(var(--spacing) * 4)}.pt-4{padding-top:calc(var(--spacing) * 4)}.text-center{text-align:center}.text-left{text-align:left}.text-right{text-align:right}.focus\\:outline-none:focus{--un-outline-style:none;outline-style:none}.border{border-width:1px}.border-2{border-width:2px}.border-b{border-bottom-width:1px}.border-l{border-left-width:1px}.border-r{border-right-width:1px}.border-t{border-top-width:1px}.border-t-2{border-top-width:2px}.border-\\[\\#3c3836\\]{border-color:color-mix(in oklab,#3c3836 var(--un-border-opacity),transparent)}.border-\\[\\#504945\\]{border-color:color-mix(in oklab,#504945 var(--un-border-opacity),transparent)}.border-\\[\\#98971a\\],.hover\\:border-\\[\\#98971a\\]:hover{border-color:color-mix(in oklab,#98971a var(--un-border-opacity),transparent)}.hover\\:border-\\[\\#cc241d\\]:hover{border-color:color-mix(in oklab,#cc241d var(--un-border-opacity),transparent)}.focus\\:border-\\[\\#83a598\\]:focus{border-color:color-mix(in oklab,#83a598 var(--un-border-opacity),transparent)}.rounded{border-radius:var(--radius-DEFAULT)}.rounded-full{border-radius:calc(infinity * 1px)}.rounded-lg{border-radius:var(--radius-lg)}.rounded-md{border-radius:var(--radius-md)}.border-dashed{--un-border-style:dashed;border-style:dashed}.bg-\\[\\#1d2021\\]{background-color:color-mix(in oklab,#1d2021 var(--un-bg-opacity),transparent)}.bg-\\[\\#282828\\]{background-color:color-mix(in oklab,#282828 var(--un-bg-opacity),transparent)}.bg-\\[\\#3c3836\\]{background-color:color-mix(in oklab,#3c3836 var(--un-bg-opacity),transparent)}.bg-\\[\\#458588\\]{background-color:color-mix(in oklab,#458588 var(--un-bg-opacity),transparent)}.bg-\\[\\#504945\\],.data-\\[active\\=true\\]\\:bg-\\[\\#504945\\][data-active=true]{background-color:color-mix(in oklab,#504945 var(--un-bg-opacity),transparent)}.bg-\\[\\#83a598\\]{background-color:color-mix(in oklab,#83a598 var(--un-bg-opacity),transparent)}.bg-\\[\\#98971a\\]{background-color:color-mix(in oklab,#98971a var(--un-bg-opacity),transparent)}.bg-\\[\\#b16286\\]{background-color:color-mix(in oklab,#b16286 var(--un-bg-opacity),transparent)}.bg-\\[\\#cc241d\\]{background-color:color-mix(in oklab,#cc241d var(--un-bg-opacity),transparent)}.bg-\\[\\#fe8019\\]{background-color:color-mix(in oklab,#fe8019 var(--un-bg-opacity),transparent)}.bg-gray-100{background-color:color-mix(in srgb,var(--colors-gray-100) var(--un-bg-opacity),transparent)}.bg-gray-200{background-color:color-mix(in srgb,var(--colors-gray-200) var(--un-bg-opacity),transparent)}.bg-gray-50{background-color:color-mix(in srgb,var(--colors-gray-50) var(--un-bg-opacity),transparent)}.bg-green-100{background-color:color-mix(in srgb,var(--colors-green-100) var(--un-bg-opacity),transparent)}.bg-red-700{background-color:color-mix(in srgb,var(--colors-red-700) var(--un-bg-opacity),transparent)}.bg-white{background-color:color-mix(in srgb,var(--colors-white) var(--un-bg-opacity),transparent)}.bg-yellow-100{background-color:color-mix(in srgb,var(--colors-yellow-100) var(--un-bg-opacity),transparent)}.hover\\:bg-\\[\\#3c3836\\]:hover{background-color:color-mix(in oklab,#3c3836 var(--un-bg-opacity),transparent)}.hover\\:bg-\\[\\#504945\\]:hover{background-color:color-mix(in oklab,#504945 var(--un-bg-opacity),transparent)}.hover\\:bg-\\[\\#665c54\\]:hover{background-color:color-mix(in oklab,#665c54 var(--un-bg-opacity),transparent)}.hover\\:bg-\\[\\#83a598\\]:hover{background-color:color-mix(in oklab,#83a598 var(--un-bg-opacity),transparent)}.hover\\:bg-gray-700:hover{background-color:color-mix(in srgb,var(--colors-gray-700) var(--un-bg-opacity),transparent)}.disabled\\:opacity-50:disabled{opacity:50%}.hover\\:underline:hover{text-decoration-line:underline}.no-underline{text-decoration:none}.flex{display:flex}.flex-1{flex:1 1 0%}.flex-shrink-0,.shrink-0{flex-shrink:0}.flex-grow{flex-grow:1}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.gap-1\\.5{gap:calc(var(--spacing) * 1.5)}.gap-2{gap:calc(var(--spacing) * 2)}.gap-3{gap:calc(var(--spacing) * 3)}.gap-4{gap:calc(var(--spacing) * 4)}.gap-5{gap:calc(var(--spacing) * 5)}.gap-6{gap:calc(var(--spacing) * 6)}.gap-8{gap:calc(var(--spacing) * 8)}.gap-y-10{row-gap:calc(var(--spacing) * 10)}.grid{display:grid}.grid-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))}.grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.\\[\\&\\>a\\>uix-icon\\]\\:h-5>a>uix-icon,.h-5{height:calc(var(--spacing) * 5)}.\\[\\&\\>a\\>uix-icon\\]\\:h-6>a>uix-icon,.h-6{height:calc(var(--spacing) * 6)}.\\[\\&\\>a\\>uix-icon\\]\\:w-5>a>uix-icon,.w-5{width:calc(var(--spacing) * 5)}.\\[\\&\\>a\\>uix-icon\\]\\:w-6>a>uix-icon,.w-6{width:calc(var(--spacing) * 6)}.h-12{height:calc(var(--spacing) * 12)}.h-15{height:calc(var(--spacing) * 15)}.h-3\\.5{height:calc(var(--spacing) * 3.5)}.h-4{height:calc(var(--spacing) * 4)}.h-8{height:calc(var(--spacing) * 8)}.h-full{height:100%}.h-screen{height:100vh}.min-h-0{min-height:calc(var(--spacing) * 0)}.min-h-screen{min-height:100vh}.min-w-0{min-width:calc(var(--spacing) * 0)}.w-10{width:calc(var(--spacing) * 10)}.w-12{width:calc(var(--spacing) * 12)}.w-3\\.5{width:calc(var(--spacing) * 3.5)}.w-4{width:calc(var(--spacing) * 4)}.w-64{width:calc(var(--spacing) * 64)}.w-8{width:calc(var(--spacing) * 8)}.w-80{width:calc(var(--spacing) * 80)}.w-full{width:100%}.\\[\\&\\>a\\]\\:block>a,.block{display:block}.hidden{display:none}.cursor-pointer{cursor:pointer}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.text-ellipsis{text-overflow:ellipsis}.uppercase{text-transform:uppercase}.capitalize{text-transform:capitalize}.shadow-\\[4px_4px_0px_\\#1d2021\\]{--un-shadow:4px 4px 0px var(--un-shadow-color, rgb(29 32 33));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.shadow-md{--un-shadow:0 4px 6px -1px var(--un-shadow-color, rgb(0 0 0 / .1)),0 2px 4px -2px var(--un-shadow-color, rgb(0 0 0 / .1));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.hover\\:shadow-\\[6px_6px_0px_\\#98971a\\]:hover{--un-shadow:6px 6px 0px var(--un-shadow-color, rgb(152 151 26));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.hover\\:shadow-\\[6px_6px_0px_\\#cc241d\\]:hover{--un-shadow:6px 6px 0px var(--un-shadow-color, rgb(204 36 29));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.focus\\:shadow-\\[2px_2px_0px_\\#1d2021\\]:focus{--un-shadow:2px 2px 0px var(--un-shadow-color, rgb(29 32 33));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.-translate-y-1\\/2{--un-translate-y:-50%;translate:var(--un-translate-x) var(--un-translate-y)}.translate-x-4{--un-translate-x:calc(var(--spacing) * 4);translate:var(--un-translate-x) var(--un-translate-y)}.transform{transform:var(--un-rotate-x) var(--un-rotate-y) var(--un-rotate-z) var(--un-skew-x) var(--un-skew-y)}.transition{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,--un-gradient-from,--un-gradient-via,--un-gradient-to,opacity,box-shadow,transform,translate,scale,rotate,filter,-webkit-backdrop-filter,backdrop-filter;transition-timing-function:var(--un-ease, var(--default-transition-timingFunction));transition-duration:var(--un-duration, var(--default-transition-duration))}.transition-all{transition-property:all;transition-timing-function:var(--un-ease, var(--default-transition-timingFunction));transition-duration:var(--un-duration, var(--default-transition-duration))}.transition-colors{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,--un-gradient-from,--un-gradient-via,--un-gradient-to;transition-timing-function:var(--un-ease, var(--default-transition-timingFunction));transition-duration:var(--un-duration, var(--default-transition-duration))}.transition-transform{transition-property:transform,translate,scale,rotate;transition-timing-function:var(--un-ease, var(--default-transition-timingFunction));transition-duration:var(--un-duration, var(--default-transition-duration))}.duration-200{--un-duration:.2s;transition-duration:.2s}.items-start{align-items:flex-start}.items-center{align-items:center}.self-start{align-self:flex-start}.self-end{align-self:flex-end}.self-center{align-self:center}.left-3{left:calc(var(--spacing) * 3)}.right-3{right:calc(var(--spacing) * 3)}.top-1\\/2{top:50%}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.absolute{position:absolute}.relative{position:relative}.overflow-auto{overflow:auto}.overflow-hidden{overflow:hidden}.overflow-y-auto{overflow-y:auto}.filter{filter:var(--un-blur,) var(--un-brightness,) var(--un-contrast,) var(--un-grayscale,) var(--un-hue-rotate,) var(--un-invert,) var(--un-saturate,) var(--un-sepia,) var(--un-drop-shadow,)}.space-x-2>:not(:last-child){--un-space-x-reverse:0;margin-inline-start:calc(calc(var(--spacing) * 2) * var(--un-space-x-reverse));margin-inline-end:calc(calc(var(--spacing) * 2) * calc(1 - var(--un-space-x-reverse)))}.space-y-1>:not(:last-child){--un-space-y-reverse:0;margin-block-start:calc(calc(var(--spacing) * 1) * var(--un-space-y-reverse));margin-block-end:calc(calc(var(--spacing) * 1) * calc(1 - var(--un-space-y-reverse)))}.space-y-6>:not(:last-child){--un-space-y-reverse:0;margin-block-start:calc(calc(var(--spacing) * 6) * var(--un-space-y-reverse));margin-block-end:calc(calc(var(--spacing) * 6) * calc(1 - var(--un-space-y-reverse)))}@supports (color: color-mix(in lab,red,red)){.data-\\[active\\=true\\]\\:text-white[data-active=true]{color:color-mix(in oklab,var(--colors-white) var(--un-text-opacity),transparent)}.text-gray-400{color:color-mix(in oklab,var(--colors-gray-400) var(--un-text-opacity),transparent)}.text-gray-500{color:color-mix(in oklab,var(--colors-gray-500) var(--un-text-opacity),transparent)}.text-gray-700{color:color-mix(in oklab,var(--colors-gray-700) var(--un-text-opacity),transparent)}.text-gray-800{color:color-mix(in oklab,var(--colors-gray-800) var(--un-text-opacity),transparent)}.text-gray-900{color:color-mix(in oklab,var(--colors-gray-900) var(--un-text-opacity),transparent)}.text-green-800{color:color-mix(in oklab,var(--colors-green-800) var(--un-text-opacity),transparent)}.text-white{color:color-mix(in oklab,var(--colors-white) var(--un-text-opacity),transparent)}.text-yellow-800{color:color-mix(in oklab,var(--colors-yellow-800) var(--un-text-opacity),transparent)}.hover\\:text-yellow-300:hover{color:color-mix(in oklab,var(--colors-yellow-300) var(--un-text-opacity),transparent)}.bg-gray-100{background-color:color-mix(in oklab,var(--colors-gray-100) var(--un-bg-opacity),transparent)}.bg-gray-200{background-color:color-mix(in oklab,var(--colors-gray-200) var(--un-bg-opacity),transparent)}.bg-gray-50{background-color:color-mix(in oklab,var(--colors-gray-50) var(--un-bg-opacity),transparent)}.bg-green-100{background-color:color-mix(in oklab,var(--colors-green-100) var(--un-bg-opacity),transparent)}.bg-red-700{background-color:color-mix(in oklab,var(--colors-red-700) var(--un-bg-opacity),transparent)}.bg-white{background-color:color-mix(in oklab,var(--colors-white) var(--un-bg-opacity),transparent)}.bg-yellow-100{background-color:color-mix(in oklab,var(--colors-yellow-100) var(--un-bg-opacity),transparent)}.hover\\:bg-gray-700:hover{background-color:color-mix(in oklab,var(--colors-gray-700) var(--un-bg-opacity),transparent)}}@media (min-width: 48rem){.md\\:p-8{padding:calc(var(--spacing) * 8)}.md\\:flex-row{flex-direction:row}.md\\:col-span-2{grid-column:span 2/span 2}.md\\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.md\\:w-72{width:calc(var(--spacing) * 72)}.md\\:w-auto{width:auto}.md\\:items-start{align-items:flex-start}.md\\:justify-between{justify-content:space-between}}@media (min-width: 64rem){.lg\\:flex{display:flex}.lg\\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}}@media (min-width: 80rem){.xl\\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}}body{font-family:var(--font-family)}html,body{font-family:var(--theme-font-family);background-color:var(--theme-background-color)!important;color:var(--text-color)!important;width:100%;min-height:100%;height:100%;padding:0;margin:0}body:not(.production) *:not(:defined){border:1px solid red}.dark{filter:invert(1) hue-rotate(180deg)}.dark img,.dark dialog,.dark video,.dark iframe{filter:invert(1) hue-rotate(180deg)}html{font-size:14px}@media (max-width: 768px){html{font-size:18px}}@media (max-width: 480px){html{font-size:20px}}textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;color:inherit;margin:0;padding:0}:root{box-sizing:border-box;-moz-text-size-adjust:none;-webkit-text-size-adjust:none;text-size-adjust:none;line-height:1.2;-webkit-font-smoothing:antialiased}*,*:before,*:after{box-sizing:border-box}*{margin:0}body{-webkit-font-smoothing:antialiased;font-family:var(--font-family)}button,textarea,select{background-color:inherit;border-width:0;color:inherit}img,picture,video,canvas,svg{display:block;max-width:100%}input,button,textarea,select{font:inherit}p,h1,h2,h3,h4,h5,h6{font-family:var(--font-family);overflow-wrap:break-word}dialog::backdrop{background-color:#000c}*::-webkit-scrollbar{width:8px;margin-right:10px}*::-webkit-scrollbar-track{background:transparent}*::-webkit-scrollbar-thumb{&:hover{scrollbar-color:rgba(154,153,150,.8) transparent}border-radius:10px;border:none}*::-webkit-scrollbar-button{background:transparent;color:transparent}*{scrollbar-width:thin;scrollbar-color:transparent transparent;&:hover{scrollbar-color:rgba(154,153,150,.8) transparent}}[full]{width:100%;height:100vh}[w-full]{width:100%}[grow]{flex-grow:1}[hide],.hide{display:none!important}[noscroll]{overflow:hidden}div [container]{display:flex}div [container][horizontal]{display:flex;flex-direction:col}:where(.uix-link){font-weight:var(--uix-link-font-weight, 600);width:var(--uix-link-width, auto);color:var(--uix-link-text-color, var(--colors-default-900));--uix-link-indent: 0;cursor:pointer;&[vertical]{margin:0 auto}a,button{width:inherit;cursor:pointer;padding:var(--uix-link-padding);&:hover{color:var(--uix-link-hover-color, var(--uix-link-text-color))}}.uix-text-icon__element{display:flex;align-items:center;gap:var(--uix-link-icon-gap, .5rem);&[reverse][vertical]{flex-direction:column-reverse}&:not([reverse])[vertical]{flex-direction:column}&[reverse]:not([vertical]){flex-direction:row-reverse}&:not([reverse]):not([vertical]){flex-direction:row}}transition:all .3s ease-in-out;&[indent]{>a,>button{padding-left:var(--uix-link-indent)}}&[active]:hover{color:var(--uix-link-hover-text-color, var(--colors-primary-400))}&[selectable][selected]{background-color:var(--colors-primary-400)}&:hover{[tooltip]{display:flex}}&[tooltip]{display:inline-block;&:hover{[tooltip]{visibility:visible}}[tooltip]{visibility:hidden;width:120px;background-color:#000;color:#fff;text-align:center;border-radius:6px;padding:5px 10px;margin-left:3px;position:absolute;z-index:1000000000;top:50%;left:100%;transform:translateY(-50%)}}&[position~=top] [tooltip]{bottom:100%;left:50%;transform:translate(-50%)}&[position~=bottom] [tooltip]{top:100%;left:50%;transform:translate(-50%)}&[position~=left] [tooltip]{top:50%;right:100%;transform:translateY(-50%)}&[tooltip],&[dropdown],&[context],&[float]{position:relative}&[dropdown],&[accordion]{flex-direction:column}[float],[dropdown],[accordion],[context]{display:none}&[floatopen]>a{display:none}&[floatopen] [float]{display:block;position:relative;bottom:0;right:0}&[context]{z-index:auto}[context][open]{display:flex;flex-direction:column}[dropdown],[context][open]{position:absolute;left:0;top:100%;width:100%;min-width:200px;z-index:1000;background-color:var(--colors-primary-100);box-shadow:0 8px 16px #0003;.uix-link:hover,input{background-color:var(--colors-primary-200)}>.uix-link{width:100%}}[context][open]{display:flex}&[selected]{[dropdown],[accordion]{display:flex;flex-direction:column}}}:where(.uix-button){border:var(--uix-button-borderSize, 0) solid var(--uix-button-borderColor);border-radius:var(--uix-button-borderRadius, var(--radius-md));box-shadow:var(--uix-button-shadow);width:var(--uix-button-width);min-width:fit-content;background-color:var(--uix-button-backgroundColor, black);color:var(--uix-button-textColor, var(--colors-default-100));font-weight:var(--uix-button-fontWeight, 700);display:flex;text-align:center;transition:transform .2s ease-in-out,opacity .2s ease-in-out,background-color .2s ease-in-out;&:hover{opacity:var(--uix-button-hover-opacity, .4)}&:active{transform:scale(.97)}>button,>a,>input{width:max-content;display:block;border-radius:inherit;cursor:var(--uix-button-cursor, pointer);height:calc(var(--spacing) * 10);line-height:calc(var(--spacing) * 5);padding:var( --uix-button-padding, calc(var(--spacing) * 2.5) calc(var(--spacing) * 4) );word-break:keep-all;flex-basis:100%}.uix-icon,button,input,a{cursor:pointer}&[bordered]{--uix-button-border-size: 1px;--uix-button-backgroundColor: transparent;--uix-button-hoverBackgroundColor: var(--_variant-color-300);--uix-button-borderColor: var(--_variant-color-400);--uix-button-textColor: var(--_variant-color-700)}&[ghost]{--uix-button-backgroundColor: transparent;--uix-button-hoverBackgroundColor: var(--_variant-color-300);--uix-button-borderSize: 0px;--uix-button-textColor: var(--_variant-color-700)}&[outline]{--uix-button-backgroundColor: transparent;--uix-button-hoverBackgroundColor: var(--_variant-color-300);--uix-button-textColor: var(--_variant-color-800);--uix-button-borderSize: 1px;--uix-button-borderColor: var(--_variant-color-400)}&[float]{background-color:#000;--uix-button-hoverBackgroundColor: var(--_variant-color-500);--uix-button-textColor: var(--_variant-color-50);--uix-button-borderSize: 0px;--uix-button-borderRadius: 9999px;--uix-button-width: var(--uix-button-height);box-shadow:var(--shadow-md, 0 4px 6px -1px rgb(0 0 0 / .1));--uix-button-padding: .5rem}&[float]:hover{box-shadow:var(--shadow-lg, 0 10px 15px -3px rgb(0 0 0 / .1))}}.uix-list{display:flex;&[vertical]{flex-direction:column}}.uix-navbar{--uix-navbar-text-color: var(--color-default-90);--uix-navbar-hover-text-color: var(--color-surface-80);--uix-navbar-border-radius: 0px;--uix-navbar-border-color: var(--color-default-60);--uix-navbar-border-size: 1px;--uix-navbar-border-style: solid;--uix-navbar-hover-background-color: var(--color-default-40);--uix-container-position: var(--uix-navbar-position);display:flex;flex-direction:column;&[docked]{--uix-list-button-radius: 0;border-bottom:0;position:fixed;bottom:0;background-color:var(--uix-navbar-background-color, var(--color-default-5));>*{border-right:0;border-bottom:0;&:first-child{border-left:0}}}}:where(.uix-input){--uix-input-background-color: var(--colors-surface-100);--uix-input-border-color: var(--colors-gray-900);--uix-input-text-color: var(--colors-gray-900);--uix-input-placeholder-color: var(--colors-default-500);--uix-input-border-radius: var(--border-radius-md);--uix-input-border-width: 2px;--uix-input-padding-x: calc(var(--spacing) * 4);--uix-input-padding-y: calc(var(--spacing) * 2.5);--uix-input-font-size: var(--font-size-base);--uix-input-height: 2.5rem;--uix-input-disabled-opacity: .6;--uix-input-label-font-size: var(--font-size-sm);--uix-input-label-font-weight: var(--font-weight-bold);--uix-input-label-color: var(--colors-default-700);--uix-input-checkbox-size: 1.5rem;--uix-input-checkbox-border-radius: var(--border-radius-sm);--uix-input-checkbox-checked-bg: var(--colors-primary-600);--uix-input-checkbox-check-color: var(--colors-surface-100);width:100%;display:flex;flex-direction:column;input,select,textarea{width:100%;height:var(--uix-input-height);border-radius:var(--uix-input-border-radius);border:var(--uix-input-border-width) solid var(--uix-input-border-color);font-size:var(--uix-input-font-size);background-color:var(--uix-input-background-color);color:var(--uix-input-text-color);transition:var(--uix-transition);outline:none;padding:var(--uix-input-padding-y) var(--uix-input-padding-x)}textarea{resize:vertical}&:has(textarea){height:auto}select{appearance:none;-webkit-appearance:none;cursor:pointer;font-weight:600;padding-block:0;option{font-weight:600;background-color:var(--uix-input-background-color);font-size:1.1rem;line-height:1.5rem;color:#333;padding:50px;border:2px solid red}}.select-container{position:relative;.select-arrow{position:absolute;right:calc(2 * var(--spacing))}}input::placeholder{color:transparent}label{font-weight:var(--uix-input-label-font-weight);color:var(--uix-input-label-color, var(--colors-gray-600));margin-bottom:var(--spacing);font-size:.9rem;padding:0 4px;transition:all .2s ease-in-out;pointer-events:none;&[required]:after{content:"*";color:var(--colors-danger-500);margin-left:2px}}input:not(:placeholder-shown)+label,textarea:not(:placeholder-shown)+label,&:focus-within label,&.has-value label{top:-2px;transform:translateY(0);font-size:var(--uix-input-label-font-size)}&:focus-within input,&:focus-within select,&:focus-within textarea{box-shadow:0 0 var(--uix-input-focus-ring-width, 5px) var(--uix-input-focus-ring-color, rgba(0, 0, 255, .5))}&[disabled]{cursor:not-allowed;opacity:var(--uix-input-disabled-opacity);& label{cursor:not-allowed}}.input-icon,.select-arrow{position:absolute;top:50%;right:var(--spacing);transform:translateY(-50%);pointer-events:none;color:var(--uix-input-label-color);transition:transform .2s ease-in-out}&:has(select:hover:active) .select-arrow{transform:translateY(-50%) rotate(180deg)}&:has(.input-icon:not(.select-arrow))>input{padding-right:calc(var(--uix-input-padding-x) + 1.75em)}&[type=checkbox],&[type=radio]{flex-direction:row;align-items:center;border:0;height:auto;width:auto;background-color:transparent;box-shadow:none;gap:.75rem;cursor:pointer;label{margin:0;line-height:1.5rem;position:static;transform:none;background-color:transparent;padding:0;cursor:pointer;font-weight:var(--font-weight-normal);order:2;pointer-events:auto}input{appearance:none;-webkit-appearance:none;width:var(--uix-input-checkbox-size);height:var(--uix-input-checkbox-size);margin:0;border:var(--uix-input-border-width) solid var(--uix-input-border-color);background-color:var(--uix-input-background-color);cursor:pointer;position:relative;transition:var(--uix-transition);padding:0;&:after{content:"";position:absolute;display:none;left:50%;top:50%}&:checked{background-color:var(--uix-input-checkbox-checked-bg);border-color:var(--uix-input-checkbox-checked-bg);&:after{display:block}}&:focus-visible{box-shadow:0 0 0 var(--uix-input-focus-ring-width) var(--uix-input-focus-ring-color);border-color:var(--uix-input-focus-ring-color)}}}&[type=checkbox] input:after{width:.375rem;height:.75rem;border:solid var(--uix-input-checkbox-check-color);border-width:0 2px 2px 0;transform:translate(-50%,-60%) rotate(45deg)}&[type=radio] input{border-radius:var(--border-radius-full);&:after{width:calc(var(--uix-input-checkbox-size) / 2);height:calc(var(--uix-input-checkbox-size) / 2);border-radius:var(--border-radius-full);background-color:var(--uix-input-checkbox-check-color);transform:translate(-50%,-50%)}}&[ghost]{&:focus-within select{box-shadow:none}.select-arrow{margin-left:5px;padding-left:5px}select{background:inherit;border:0}}}:where(.uix-icon){display:inline-block;vertical-align:middle;width:1rem;height:1rem;svg{height:inherit;width:inherit}&[solid]{stroke:currentColor;fill:currentColor}}.app-template{.uix-card{button{color:#111;cursor:pointer}}}
+`,mimeType:"text/css",skipSW:!1},"/modules/icon-lucide/lucide/square-mouse-pointer.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12.034 12.681a.498.498 0 0 1 .647-.647l9 3.5a.5.5 0 0 1-.033.943l-3.444 1.068a1 1 0 0 0-.66.66l-1.067 3.443a.5.5 0 0 1-.943.033z"/><path d="M21 11V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/cog.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12 20a8 8 0 1 0 0-16a8 8 0 0 0 0 16"/><path d="M12 14a2 2 0 1 0 0-4a2 2 0 0 0 0 4m0-12v2m0 18v-2m5 .66l-1-1.73m-5-8.66L7 3.34M20.66 17l-1.73-1M3.34 7l1.73 1M14 12h8M2 12h2m16.66-5l-1.73 1M3.34 17l1.73-1M17 3.34l-1 1.73m-5 8.66l-4 6.93"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/bot-message-square.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V2H8m0 16l-4 4V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2Zm-6-6h2m5-1v2m6-2v2m5-1h2"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/server-cog.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M4.5 10H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-.5m-15 4H4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2h-.5M6 6h.01M6 18h.01m9.69-4.6l-.9-.3m-5.6-2.2l-.9-.3m2.3 5.1l.3-.9m2.7.9l-.4-1m-2.4-5.4l-.4-1m-2.1 5.3l1-.4m5.4-2.4l1-.4m-2.3-2.1l-.3.9"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/sun.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/chevron-down.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 9l6 6l6-6"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/settings.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2"/><circle cx="12" cy="12" r="3"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/style.css":{content:`@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_P-bnBeA.woff2) format("woff2");unicode-range:U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_G-bnBeA.woff2) format("woff2");unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_B-bnBeA.woff2) format("woff2");unicode-range:U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_N-bnBeA.woff2) format("woff2");unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_M-bnBeA.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_C-bk.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}@supports ((-webkit-hyphens: none) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color:rgb(from red r g b)))){*,:before,:after,::backdrop{--un-bg-opacity:100%;--un-text-opacity:100%;--un-border-opacity:100%;--un-translate-x:initial;--un-translate-y:initial;--un-translate-z:initial;--un-leading:initial;--un-space-x-reverse:initial;--un-space-y-reverse:initial}}@property --un-text-opacity{syntax:"<percentage>";inherits:false;initial-value:100%;}@property --un-leading{syntax:"*";inherits:false;}@property --un-border-opacity{syntax:"<percentage>";inherits:false;initial-value:100%;}@property --un-bg-opacity{syntax:"<percentage>";inherits:false;initial-value:100%;}@property --un-inset-ring-color{syntax:"*";inherits:false;}@property --un-inset-ring-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-inset-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-inset-shadow-color{syntax:"*";inherits:false;}@property --un-ring-color{syntax:"*";inherits:false;}@property --un-ring-inset{syntax:"*";inherits:false;}@property --un-ring-offset-color{syntax:"*";inherits:false;}@property --un-ring-offset-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-ring-offset-width{syntax:"<length>";inherits:false;initial-value:0px;}@property --un-ring-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-shadow-color{syntax:"*";inherits:false;}@property --un-translate-x{syntax:"*";inherits:false;initial-value:0;}@property --un-translate-y{syntax:"*";inherits:false;initial-value:0;}@property --un-translate-z{syntax:"*";inherits:false;initial-value:0;}@property --un-space-x-reverse{syntax:"*";inherits:false;initial-value:0;}@property --un-space-y-reverse{syntax:"*";inherits:false;initial-value:0;}:root,:host{--spacing: .25rem;--font-sans: "Manrope",ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";--font-serif: ui-serif,Georgia,Cambria,"Times New Roman",Times,serif;--font-mono: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;--font-family: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;--font-icon-family: lucide;--colors-black: #000;--colors-white: #fff;--colors-slate-50: oklch(98.4% .003 247.858);--colors-slate-100: oklch(96.8% .007 247.896);--colors-slate-200: oklch(92.9% .013 255.508);--colors-slate-300: oklch(86.9% .022 252.894);--colors-slate-400: oklch(70.4% .04 256.788);--colors-slate-500: oklch(55.4% .046 257.417);--colors-slate-600: oklch(44.6% .043 257.281);--colors-slate-700: oklch(37.2% .044 257.287);--colors-slate-800: oklch(27.9% .041 260.031);--colors-slate-900: oklch(20.8% .042 265.755);--colors-slate-950: oklch(12.9% .042 264.695);--colors-slate-DEFAULT: oklch(70.4% .04 256.788);--colors-gray-50: oklch(98.5% .002 247.839);--colors-gray-100: oklch(96.7% .003 264.542);--colors-gray-200: oklch(92.8% .006 264.531);--colors-gray-300: oklch(87.2% .01 258.338);--colors-gray-400: oklch(70.7% .022 261.325);--colors-gray-500: oklch(55.1% .027 264.364);--colors-gray-600: oklch(44.6% .03 256.802);--colors-gray-700: oklch(37.3% .034 259.733);--colors-gray-800: oklch(27.8% .033 256.848);--colors-gray-900: oklch(21% .034 264.665);--colors-gray-950: oklch(13% .028 261.692);--colors-gray-DEFAULT: oklch(70.7% .022 261.325);--colors-zinc-50: oklch(98.5% 0 0);--colors-zinc-100: oklch(96.7% .001 286.375);--colors-zinc-200: oklch(92% .004 286.32);--colors-zinc-300: oklch(87.1% .006 286.286);--colors-zinc-400: oklch(70.5% .015 286.067);--colors-zinc-500: oklch(55.2% .016 285.938);--colors-zinc-600: oklch(44.2% .017 285.786);--colors-zinc-700: oklch(37% .013 285.805);--colors-zinc-800: oklch(27.4% .006 286.033);--colors-zinc-900: oklch(21% .006 285.885);--colors-zinc-950: oklch(14.1% .005 285.823);--colors-zinc-DEFAULT: oklch(70.5% .015 286.067);--colors-neutral-50: oklch(98.5% 0 0);--colors-neutral-100: oklch(97% 0 0);--colors-neutral-200: oklch(92.2% 0 0);--colors-neutral-300: oklch(87% 0 0);--colors-neutral-400: oklch(70.8% 0 0);--colors-neutral-500: oklch(55.6% 0 0);--colors-neutral-600: oklch(43.9% 0 0);--colors-neutral-700: oklch(37.1% 0 0);--colors-neutral-800: oklch(26.9% 0 0);--colors-neutral-900: oklch(20.5% 0 0);--colors-neutral-950: oklch(14.5% 0 0);--colors-neutral-DEFAULT: oklch(70.8% 0 0);--colors-stone-50: oklch(98.5% .001 106.423);--colors-stone-100: oklch(97% .001 106.424);--colors-stone-200: oklch(92.3% .003 48.717);--colors-stone-300: oklch(86.9% .005 56.366);--colors-stone-400: oklch(70.9% .01 56.259);--colors-stone-500: oklch(55.3% .013 58.071);--colors-stone-600: oklch(44.4% .011 73.639);--colors-stone-700: oklch(37.4% .01 67.558);--colors-stone-800: oklch(26.8% .007 34.298);--colors-stone-900: oklch(21.6% .006 56.043);--colors-stone-950: oklch(14.7% .004 49.25);--colors-stone-DEFAULT: oklch(70.9% .01 56.259);--colors-red-50: oklch(97.1% .013 17.38);--colors-red-100: oklch(93.6% .032 17.717);--colors-red-200: oklch(88.5% .062 18.334);--colors-red-300: oklch(80.8% .114 19.571);--colors-red-400: oklch(70.4% .191 22.216);--colors-red-500: oklch(63.7% .237 25.331);--colors-red-600: oklch(57.7% .245 27.325);--colors-red-700: oklch(50.5% .213 27.518);--colors-red-800: oklch(44.4% .177 26.899);--colors-red-900: oklch(39.6% .141 25.723);--colors-red-950: oklch(25.8% .092 26.042);--colors-red-DEFAULT: oklch(70.4% .191 22.216);--colors-orange-50: oklch(98% .016 73.684);--colors-orange-100: oklch(95.4% .038 75.164);--colors-orange-200: oklch(90.1% .076 70.697);--colors-orange-300: oklch(83.7% .128 66.29);--colors-orange-400: oklch(75% .183 55.934);--colors-orange-500: oklch(70.5% .213 47.604);--colors-orange-600: oklch(64.6% .222 41.116);--colors-orange-700: oklch(55.3% .195 38.402);--colors-orange-800: oklch(47% .157 37.304);--colors-orange-900: oklch(40.8% .123 38.172);--colors-orange-950: oklch(26.6% .079 36.259);--colors-orange-DEFAULT: oklch(75% .183 55.934);--colors-amber-50: oklch(98.7% .022 95.277);--colors-amber-100: oklch(96.2% .059 95.617);--colors-amber-200: oklch(92.4% .12 95.746);--colors-amber-300: oklch(87.9% .169 91.605);--colors-amber-400: oklch(82.8% .189 84.429);--colors-amber-500: oklch(76.9% .188 70.08);--colors-amber-600: oklch(66.6% .179 58.318);--colors-amber-700: oklch(55.5% .163 48.998);--colors-amber-800: oklch(47.3% .137 46.201);--colors-amber-900: oklch(41.4% .112 45.904);--colors-amber-950: oklch(27.9% .077 45.635);--colors-amber-DEFAULT: oklch(82.8% .189 84.429);--colors-yellow-50: oklch(98.7% .026 102.212);--colors-yellow-100: oklch(97.3% .071 103.193);--colors-yellow-200: oklch(94.5% .129 101.54);--colors-yellow-300: oklch(90.5% .182 98.111);--colors-yellow-400: oklch(85.2% .199 91.936);--colors-yellow-500: oklch(79.5% .184 86.047);--colors-yellow-600: oklch(68.1% .162 75.834);--colors-yellow-700: oklch(55.4% .135 66.442);--colors-yellow-800: oklch(47.6% .114 61.907);--colors-yellow-900: oklch(42.1% .095 57.708);--colors-yellow-950: oklch(28.6% .066 53.813);--colors-yellow-DEFAULT: oklch(85.2% .199 91.936);--colors-lime-50: oklch(98.6% .031 120.757);--colors-lime-100: oklch(96.7% .067 122.328);--colors-lime-200: oklch(93.8% .127 124.321);--colors-lime-300: oklch(89.7% .196 126.665);--colors-lime-400: oklch(84.1% .238 128.85);--colors-lime-500: oklch(76.8% .233 130.85);--colors-lime-600: oklch(64.8% .2 131.684);--colors-lime-700: oklch(53.2% .157 131.589);--colors-lime-800: oklch(45.3% .124 130.933);--colors-lime-900: oklch(40.5% .101 131.063);--colors-lime-950: oklch(27.4% .072 132.109);--colors-lime-DEFAULT: oklch(84.1% .238 128.85);--colors-green-50: oklch(98.2% .018 155.826);--colors-green-100: oklch(96.2% .044 156.743);--colors-green-200: oklch(92.5% .084 155.995);--colors-green-300: oklch(87.1% .15 154.449);--colors-green-400: oklch(79.2% .209 151.711);--colors-green-500: oklch(72.3% .219 149.579);--colors-green-600: oklch(62.7% .194 149.214);--colors-green-700: oklch(52.7% .154 150.069);--colors-green-800: oklch(44.8% .119 151.328);--colors-green-900: oklch(39.3% .095 152.535);--colors-green-950: oklch(26.6% .065 152.934);--colors-green-DEFAULT: oklch(79.2% .209 151.711);--colors-emerald-50: oklch(97.9% .021 166.113);--colors-emerald-100: oklch(95% .052 163.051);--colors-emerald-200: oklch(90.5% .093 164.15);--colors-emerald-300: oklch(84.5% .143 164.978);--colors-emerald-400: oklch(76.5% .177 163.223);--colors-emerald-500: oklch(69.6% .17 162.48);--colors-emerald-600: oklch(59.6% .145 163.225);--colors-emerald-700: oklch(50.8% .118 165.612);--colors-emerald-800: oklch(43.2% .095 166.913);--colors-emerald-900: oklch(37.8% .077 168.94);--colors-emerald-950: oklch(26.2% .051 172.552);--colors-emerald-DEFAULT: oklch(76.5% .177 163.223);--colors-teal-50: oklch(98.4% .014 180.72);--colors-teal-100: oklch(95.3% .051 180.801);--colors-teal-200: oklch(91% .096 180.426);--colors-teal-300: oklch(85.5% .138 181.071);--colors-teal-400: oklch(77.7% .152 181.912);--colors-teal-500: oklch(70.4% .14 182.503);--colors-teal-600: oklch(60% .118 184.704);--colors-teal-700: oklch(51.1% .096 186.391);--colors-teal-800: oklch(43.7% .078 188.216);--colors-teal-900: oklch(38.6% .063 188.416);--colors-teal-950: oklch(27.7% .046 192.524);--colors-teal-DEFAULT: oklch(77.7% .152 181.912);--colors-cyan-50: oklch(98.4% .019 200.873);--colors-cyan-100: oklch(95.6% .045 203.388);--colors-cyan-200: oklch(91.7% .08 205.041);--colors-cyan-300: oklch(86.5% .127 207.078);--colors-cyan-400: oklch(78.9% .154 211.53);--colors-cyan-500: oklch(71.5% .143 215.221);--colors-cyan-600: oklch(60.9% .126 221.723);--colors-cyan-700: oklch(52% .105 223.128);--colors-cyan-800: oklch(45% .085 224.283);--colors-cyan-900: oklch(39.8% .07 227.392);--colors-cyan-950: oklch(30.2% .056 229.695);--colors-cyan-DEFAULT: oklch(78.9% .154 211.53);--colors-sky-50: oklch(97.7% .013 236.62);--colors-sky-100: oklch(95.1% .026 236.824);--colors-sky-200: oklch(90.1% .058 230.902);--colors-sky-300: oklch(82.8% .111 230.318);--colors-sky-400: oklch(74.6% .16 232.661);--colors-sky-500: oklch(68.5% .169 237.323);--colors-sky-600: oklch(58.8% .158 241.966);--colors-sky-700: oklch(50% .134 242.749);--colors-sky-800: oklch(44.3% .11 240.79);--colors-sky-900: oklch(39.1% .09 240.876);--colors-sky-950: oklch(29.3% .066 243.157);--colors-sky-DEFAULT: oklch(74.6% .16 232.661);--colors-blue-50: oklch(97% .014 254.604);--colors-blue-100: oklch(93.2% .032 255.585);--colors-blue-200: oklch(88.2% .059 254.128);--colors-blue-300: oklch(80.9% .105 251.813);--colors-blue-400: oklch(70.7% .165 254.624);--colors-blue-500: oklch(62.3% .214 259.815);--colors-blue-600: oklch(54.6% .245 262.881);--colors-blue-700: oklch(48.8% .243 264.376);--colors-blue-800: oklch(42.4% .199 265.638);--colors-blue-900: oklch(37.9% .146 265.522);--colors-blue-950: oklch(28.2% .091 267.935);--colors-blue-DEFAULT: oklch(70.7% .165 254.624);--colors-indigo-50: oklch(96.2% .018 272.314);--colors-indigo-100: oklch(93% .034 272.788);--colors-indigo-200: oklch(87% .065 274.039);--colors-indigo-300: oklch(78.5% .115 274.713);--colors-indigo-400: oklch(67.3% .182 276.935);--colors-indigo-500: oklch(58.5% .233 277.117);--colors-indigo-600: oklch(51.1% .262 276.966);--colors-indigo-700: oklch(45.7% .24 277.023);--colors-indigo-800: oklch(39.8% .195 277.366);--colors-indigo-900: oklch(35.9% .144 278.697);--colors-indigo-950: oklch(25.7% .09 281.288);--colors-indigo-DEFAULT: oklch(67.3% .182 276.935);--colors-violet-50: oklch(96.9% .016 293.756);--colors-violet-100: oklch(94.3% .029 294.588);--colors-violet-200: oklch(89.4% .057 293.283);--colors-violet-300: oklch(81.1% .111 293.571);--colors-violet-400: oklch(70.2% .183 293.541);--colors-violet-500: oklch(60.6% .25 292.717);--colors-violet-600: oklch(54.1% .281 293.009);--colors-violet-700: oklch(49.1% .27 292.581);--colors-violet-800: oklch(43.2% .232 292.759);--colors-violet-900: oklch(38% .189 293.745);--colors-violet-950: oklch(28.3% .141 291.089);--colors-violet-DEFAULT: oklch(70.2% .183 293.541);--colors-purple-50: oklch(97.7% .014 308.299);--colors-purple-100: oklch(94.6% .033 307.174);--colors-purple-200: oklch(90.2% .063 306.703);--colors-purple-300: oklch(82.7% .119 306.383);--colors-purple-400: oklch(71.4% .203 305.504);--colors-purple-500: oklch(62.7% .265 303.9);--colors-purple-600: oklch(55.8% .288 302.321);--colors-purple-700: oklch(49.6% .265 301.924);--colors-purple-800: oklch(43.8% .218 303.724);--colors-purple-900: oklch(38.1% .176 304.987);--colors-purple-950: oklch(29.1% .149 302.717);--colors-purple-DEFAULT: oklch(71.4% .203 305.504);--colors-fuchsia-50: oklch(97.7% .017 320.058);--colors-fuchsia-100: oklch(95.2% .037 318.852);--colors-fuchsia-200: oklch(90.3% .076 319.62);--colors-fuchsia-300: oklch(83.3% .145 321.434);--colors-fuchsia-400: oklch(74% .238 322.16);--colors-fuchsia-500: oklch(66.7% .295 322.15);--colors-fuchsia-600: oklch(59.1% .293 322.896);--colors-fuchsia-700: oklch(51.8% .253 323.949);--colors-fuchsia-800: oklch(45.2% .211 324.591);--colors-fuchsia-900: oklch(40.1% .17 325.612);--colors-fuchsia-950: oklch(29.3% .136 325.661);--colors-fuchsia-DEFAULT: oklch(74% .238 322.16);--colors-pink-50: oklch(97.1% .014 343.198);--colors-pink-100: oklch(94.8% .028 342.258);--colors-pink-200: oklch(89.9% .061 343.231);--colors-pink-300: oklch(82.3% .12 346.018);--colors-pink-400: oklch(71.8% .202 349.761);--colors-pink-500: oklch(65.6% .241 354.308);--colors-pink-600: oklch(59.2% .249 .584);--colors-pink-700: oklch(52.5% .223 3.958);--colors-pink-800: oklch(45.9% .187 3.815);--colors-pink-900: oklch(40.8% .153 2.432);--colors-pink-950: oklch(28.4% .109 3.907);--colors-pink-DEFAULT: oklch(71.8% .202 349.761);--colors-rose-50: oklch(96.9% .015 12.422);--colors-rose-100: oklch(94.1% .03 12.58);--colors-rose-200: oklch(89.2% .058 10.001);--colors-rose-300: oklch(81% .117 11.638);--colors-rose-400: oklch(71.2% .194 13.428);--colors-rose-500: oklch(64.5% .246 16.439);--colors-rose-600: oklch(58.6% .253 17.585);--colors-rose-700: oklch(51.4% .222 16.935);--colors-rose-800: oklch(45.5% .188 13.697);--colors-rose-900: oklch(41% .159 10.272);--colors-rose-950: oklch(27.1% .105 12.094);--colors-rose-DEFAULT: oklch(71.2% .194 13.428);--colors-light-50: oklch(99.4% 0 0);--colors-light-100: oklch(99.11% 0 0);--colors-light-200: oklch(98.51% 0 0);--colors-light-300: oklch(98.16% .0017 247.84);--colors-light-400: oklch(97.31% 0 0);--colors-light-500: oklch(96.12% 0 0);--colors-light-600: oklch(96.32% .0034 247.86);--colors-light-700: oklch(94.17% .0052 247.88);--colors-light-800: oklch(91.09% .007 247.9);--colors-light-900: oklch(90.72% .0051 228.82);--colors-light-950: oklch(89.23% .006 239.83);--colors-light-DEFAULT: oklch(97.31% 0 0);--colors-dark-50: oklch(40.91% 0 0);--colors-dark-100: oklch(35.62% 0 0);--colors-dark-200: oklch(31.71% 0 0);--colors-dark-300: oklch(29.72% 0 0);--colors-dark-400: oklch(25.2% 0 0);--colors-dark-500: oklch(23.93% 0 0);--colors-dark-600: oklch(22.73% .0038 286.09);--colors-dark-700: oklch(22.21% 0 0);--colors-dark-800: oklch(20.9% 0 0);--colors-dark-900: oklch(16.84% 0 0);--colors-dark-950: oklch(13.44% 0 0);--colors-dark-DEFAULT: oklch(25.2% 0 0);--colors-primary-50: hsl(198, 100%, 97%);--colors-primary-100: hsl(198, 100%, 92%);--colors-primary-200: hsl(198, 100%, 84%);--colors-primary-300: hsl(198, 100%, 75%);--colors-primary-400: hsl(198, 100%, 66%);--colors-primary-500: hsl(198, 100%, 55%);--colors-primary-600: hsl(198, 100%, 45%);--colors-primary-700: hsl(198, 100%, 35%);--colors-primary-800: hsl(198, 100%, 24%);--colors-primary-900: hsl(198, 100%, 15%);--colors-primary-DEFAULT: hsl(198, 100%, 55%);--colors-secondary-50: hsl(120, 100%, 97%);--colors-secondary-100: hsl(120, 100%, 92%);--colors-secondary-200: hsl(120, 100%, 84%);--colors-secondary-300: hsl(120, 100%, 75%);--colors-secondary-400: hsl(120, 100%, 66%);--colors-secondary-500: hsl(120, 100%, 55%);--colors-secondary-600: hsl(120, 100%, 45%);--colors-secondary-700: hsl(120, 100%, 35%);--colors-secondary-800: hsl(120, 100%, 24%);--colors-secondary-900: hsl(120, 100%, 15%);--colors-secondary-DEFAULT: hsl(120, 100%, 55%);--colors-tertiary-50: hsl(175, 100%, 97%);--colors-tertiary-100: hsl(175, 100%, 92%);--colors-tertiary-200: hsl(175, 100%, 84%);--colors-tertiary-300: hsl(175, 100%, 75%);--colors-tertiary-400: hsl(175, 100%, 66%);--colors-tertiary-500: hsl(175, 100%, 55%);--colors-tertiary-600: hsl(175, 100%, 45%);--colors-tertiary-700: hsl(175, 100%, 35%);--colors-tertiary-800: hsl(175, 100%, 24%);--colors-tertiary-900: hsl(175, 100%, 15%);--colors-tertiary-DEFAULT: hsl(175, 100%, 55%);--colors-success-50: hsl(149, 87%, 97%);--colors-success-100: hsl(149, 87%, 92%);--colors-success-200: hsl(149, 87%, 84%);--colors-success-300: hsl(149, 87%, 75%);--colors-success-400: hsl(149, 87%, 66%);--colors-success-500: hsl(149, 87%, 55%);--colors-success-600: hsl(149, 87%, 45%);--colors-success-700: hsl(149, 87%, 35%);--colors-success-800: hsl(149, 87%, 24%);--colors-success-900: hsl(149, 87%, 15%);--colors-success-DEFAULT: hsl(149, 87%, 55%);--colors-warning-50: hsl(32, 100%, 97%);--colors-warning-100: hsl(32, 100%, 92%);--colors-warning-200: hsl(32, 100%, 84%);--colors-warning-300: hsl(32, 100%, 75%);--colors-warning-400: hsl(32, 100%, 66%);--colors-warning-500: hsl(32, 100%, 55%);--colors-warning-600: hsl(32, 100%, 45%);--colors-warning-700: hsl(32, 100%, 35%);--colors-warning-800: hsl(32, 100%, 24%);--colors-warning-900: hsl(32, 100%, 15%);--colors-warning-DEFAULT: hsl(32, 100%, 55%);--colors-danger-50: hsl(345, 100%, 97%);--colors-danger-100: hsl(345, 100%, 92%);--colors-danger-200: hsl(345, 100%, 84%);--colors-danger-300: hsl(345, 100%, 75%);--colors-danger-400: hsl(345, 100%, 66%);--colors-danger-500: hsl(345, 100%, 55%);--colors-danger-600: hsl(345, 100%, 45%);--colors-danger-700: hsl(345, 100%, 35%);--colors-danger-800: hsl(345, 100%, 24%);--colors-danger-900: hsl(345, 100%, 15%);--colors-danger-DEFAULT: hsl(345, 100%, 55%);--colors-default-50: hsl(0, 0%, 97%);--colors-default-100: hsl(0, 0%, 92%);--colors-default-200: hsl(0, 0%, 84%);--colors-default-300: hsl(0, 0%, 75%);--colors-default-400: hsl(0, 0%, 66%);--colors-default-500: hsl(0, 0%, 55%);--colors-default-600: hsl(0, 0%, 45%);--colors-default-700: hsl(0, 0%, 35%);--colors-default-800: hsl(0, 0%, 24%);--colors-default-900: hsl(0, 0%, 15%);--colors-default-DEFAULT: hsl(0, 0%, 35%);--colors-surface-50: hsl(0, 0%, 97%);--colors-surface-100: hsl(0, 0%, 92%);--colors-surface-200: hsl(0, 0%, 84%);--colors-surface-300: hsl(0, 0%, 75%);--colors-surface-400: hsl(0, 0%, 66%);--colors-surface-500: hsl(0, 0%, 55%);--colors-surface-600: hsl(0, 0%, 45%);--colors-surface-700: hsl(0, 0%, 35%);--colors-surface-800: hsl(0, 0%, 24%);--colors-surface-900: hsl(0, 0%, 15%);--colors-surface-DEFAULT: hsl(0, 0%, 35%);--text-xs-fontSize: .75rem;--text-xs-lineHeight: 1rem;--text-sm-fontSize: .875rem;--text-sm-lineHeight: 1.25rem;--text-base-fontSize: 1rem;--text-base-lineHeight: 1.5rem;--text-lg-fontSize: 1.125rem;--text-lg-lineHeight: 1.75rem;--text-xl-fontSize: 1.25rem;--text-xl-lineHeight: 1.75rem;--text-2xl-fontSize: 1.5rem;--text-2xl-lineHeight: 2rem;--text-3xl-fontSize: 1.875rem;--text-3xl-lineHeight: 2.25rem;--text-4xl-fontSize: 2.25rem;--text-4xl-lineHeight: 2.5rem;--text-5xl-fontSize: 3rem;--text-5xl-lineHeight: 1;--text-6xl-fontSize: 3.75rem;--text-6xl-lineHeight: 1;--text-7xl-fontSize: 4.5rem;--text-7xl-lineHeight: 1;--text-8xl-fontSize: 6rem;--text-8xl-lineHeight: 1;--text-9xl-fontSize: 8rem;--text-9xl-lineHeight: 1;--text-color: var(--color-surface-100);--fontWeight-thin: 100;--fontWeight-extralight: 200;--fontWeight-light: 300;--fontWeight-normal: 400;--fontWeight-medium: 500;--fontWeight-semibold: 600;--fontWeight-bold: 700;--fontWeight-extrabold: 800;--fontWeight-black: 900;--tracking-tighter: -.05em;--tracking-tight: -.025em;--tracking-normal: 0em;--tracking-wide: .025em;--tracking-wider: .05em;--tracking-widest: .1em;--leading-none: 1;--leading-tight: 1.25;--leading-snug: 1.375;--leading-normal: 1.5;--leading-relaxed: 1.625;--leading-loose: 2;--textStrokeWidth-DEFAULT: 1.5rem;--textStrokeWidth-none: 0;--textStrokeWidth-sm: thin;--textStrokeWidth-md: medium;--textStrokeWidth-lg: thick;--radius-DEFAULT: .25rem;--radius-none: 0;--radius-xs: .125rem;--radius-sm: .25rem;--radius-md: .375rem;--radius-lg: .5rem;--radius-xl: .75rem;--radius-2xl: 1rem;--radius-3xl: 1.5rem;--radius-4xl: 2rem;--ease-linear: linear;--ease-in: cubic-bezier(.4, 0, 1, 1);--ease-out: cubic-bezier(0, 0, .2, 1);--ease-in-out: cubic-bezier(.4, 0, .2, 1);--ease-DEFAULT: cubic-bezier(.4, 0, .2, 1);--blur-DEFAULT: 8px;--blur-xs: 4px;--blur-sm: 8px;--blur-md: 12px;--blur-lg: 16px;--blur-xl: 24px;--blur-2xl: 40px;--blur-3xl: 64px;--perspective-dramatic: 100px;--perspective-near: 300px;--perspective-normal: 500px;--perspective-midrange: 800px;--perspective-distant: 1200px;--default-transition-duration: .15s;--default-transition-timingFunction: cubic-bezier(.4, 0, .2, 1);--default-font-family: var(--font-sans);--default-font-featureSettings: var(--font-sans--font-feature-settings);--default-font-variationSettings: var(--font-sans--font-variation-settings);--default-monoFont-family: var(--font-mono);--default-monoFont-featureSettings: var(--font-mono--font-feature-settings);--default-monoFont-variationSettings: var(--font-mono--font-variation-settings);--container-3xs: 16rem;--container-2xs: 18rem;--container-xs: 20rem;--container-sm: 24rem;--container-md: 28rem;--container-lg: 32rem;--container-xl: 36rem;--container-2xl: 42rem;--container-3xl: 48rem;--container-4xl: 56rem;--container-5xl: 64rem;--container-6xl: 72rem;--container-7xl: 80rem;--container-prose: 65ch;--background-color: var(--colors-primary-100);--boxShadow-md: 0 4px 6px -1px rgb(0 0 0 / .1), 0 2px 4px -2px rgb(0 0 0 / .1);--boxShadow-lg: 0 10px 15px -3px rgb(0 0 0 / .1), 0 4px 6px -4px rgb(0 0 0 / .1);--theme-font-family: "Manrope"}*,:after,:before,::backdrop,::file-selector-button{box-sizing:border-box;margin:0;padding:0;border:0 solid}html,:host{line-height:1.5;-webkit-text-size-adjust:100%;tab-size:4;font-family:var( --default-font-family, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" );font-feature-settings:var(--default-font-featureSettings, normal);font-variation-settings:var(--default-font-variationSettings, normal);-webkit-tap-highlight-color:transparent}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;-webkit-text-decoration:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,samp,pre{font-family:var( --default-monoFont-family, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace );font-feature-settings:var(--default-monoFont-featureSettings, normal);font-variation-settings:var(--default-monoFont-variationSettings, normal);font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}:-moz-focusring{outline:auto}progress{vertical-align:baseline}summary{display:list-item}ol,ul,menu{list-style:none}img,svg,video,canvas,audio,iframe,embed,object{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}button,input,select,optgroup,textarea,::file-selector-button{font:inherit;font-feature-settings:inherit;font-variation-settings:inherit;letter-spacing:inherit;color:inherit;border-radius:0;background-color:transparent;opacity:1}:where(select:is([multiple],[size])) optgroup{font-weight:bolder}:where(select:is([multiple],[size])) optgroup option{padding-inline-start:20px}::file-selector-button{margin-inline-end:4px}::placeholder{opacity:1}@supports (not (-webkit-appearance: -apple-pay-button)) or (contain-intrinsic-size: 1px){::placeholder{color:color-mix(in oklab,currentcolor 50%,transparent)}}textarea{resize:vertical}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-date-and-time-value{min-height:1lh;text-align:inherit}::-webkit-datetime-edit{display:inline-flex}::-webkit-datetime-edit-fields-wrapper{padding:0}::-webkit-datetime-edit,::-webkit-datetime-edit-year-field,::-webkit-datetime-edit-month-field,::-webkit-datetime-edit-day-field,::-webkit-datetime-edit-hour-field,::-webkit-datetime-edit-minute-field,::-webkit-datetime-edit-second-field,::-webkit-datetime-edit-millisecond-field,::-webkit-datetime-edit-meridiem-field{padding-block:0}:-moz-ui-invalid{box-shadow:none}button,input:where([type=button],[type=reset],[type=submit]),::file-selector-button{appearance:button}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[hidden]:where(:not([hidden=until-found])){display:none!important}.text-2xl{font-size:var(--text-2xl-fontSize);line-height:var(--un-leading, var(--text-2xl-lineHeight))}.text-3xl{font-size:var(--text-3xl-fontSize);line-height:var(--un-leading, var(--text-3xl-lineHeight))}.text-4xl{font-size:var(--text-4xl-fontSize);line-height:var(--un-leading, var(--text-4xl-lineHeight))}.text-lg{font-size:var(--text-lg-fontSize);line-height:var(--un-leading, var(--text-lg-lineHeight))}.text-sm{font-size:var(--text-sm-fontSize);line-height:var(--un-leading, var(--text-sm-lineHeight))}.text-xl{font-size:var(--text-xl-fontSize);line-height:var(--un-leading, var(--text-xl-lineHeight))}.text-xs{font-size:var(--text-xs-fontSize);line-height:var(--un-leading, var(--text-xs-lineHeight))}.data-\\[active\\=true\\]\\:text-white[data-active=true],.text-white{color:color-mix(in srgb,var(--colors-white) var(--un-text-opacity),transparent)}.text-\\[\\#1d2021\\]{color:color-mix(in oklab,#1d2021 var(--un-text-opacity),transparent)}.text-\\[\\#83a598\\]{color:color-mix(in oklab,#83a598 var(--un-text-opacity),transparent)}.text-\\[\\#928374\\]{color:color-mix(in oklab,#928374 var(--un-text-opacity),transparent)}.text-\\[\\#98971a\\]{color:color-mix(in oklab,#98971a var(--un-text-opacity),transparent)}.text-\\[\\#a89984\\]{color:color-mix(in oklab,#a89984 var(--un-text-opacity),transparent)}.text-\\[\\#bdae93\\]{color:color-mix(in oklab,#bdae93 var(--un-text-opacity),transparent)}.text-\\[\\#cc241d\\]{color:color-mix(in oklab,#cc241d var(--un-text-opacity),transparent)}.text-\\[\\#ebdbb2\\]{color:color-mix(in oklab,#ebdbb2 var(--un-text-opacity),transparent)}.text-\\[\\#fabd2f\\]{color:color-mix(in oklab,#fabd2f var(--un-text-opacity),transparent)}.text-gray-400{color:color-mix(in srgb,var(--colors-gray-400) var(--un-text-opacity),transparent)}.text-gray-500{color:color-mix(in srgb,var(--colors-gray-500) var(--un-text-opacity),transparent)}.text-gray-700{color:color-mix(in srgb,var(--colors-gray-700) var(--un-text-opacity),transparent)}.text-gray-800{color:color-mix(in srgb,var(--colors-gray-800) var(--un-text-opacity),transparent)}.text-gray-900{color:color-mix(in srgb,var(--colors-gray-900) var(--un-text-opacity),transparent)}.text-green-800{color:color-mix(in srgb,var(--colors-green-800) var(--un-text-opacity),transparent)}.text-yellow-800{color:color-mix(in srgb,var(--colors-yellow-800) var(--un-text-opacity),transparent)}.hover\\:text-\\[\\#83a598\\]:hover{color:color-mix(in oklab,#83a598 var(--un-text-opacity),transparent)}.hover\\:text-\\[\\#ebdbb2\\]:hover{color:color-mix(in oklab,#ebdbb2 var(--un-text-opacity),transparent)}.hover\\:text-yellow-300:hover{color:color-mix(in srgb,var(--colors-yellow-300) var(--un-text-opacity),transparent)}.leading-relaxed{--un-leading:var(--leading-relaxed);line-height:var(--leading-relaxed)}.tracking-wide{--un-tracking:var(--tracking-wide);letter-spacing:var(--tracking-wide)}.tracking-wider{--un-tracking:var(--tracking-wider);letter-spacing:var(--tracking-wider)}.tracking-widest{--un-tracking:var(--tracking-widest);letter-spacing:var(--tracking-widest)}.font-bold{--un-font-weight:var(--fontWeight-bold);font-weight:var(--fontWeight-bold)}.font-extrabold{--un-font-weight:var(--fontWeight-extrabold);font-weight:var(--fontWeight-extrabold)}.font-medium{--un-font-weight:var(--fontWeight-medium);font-weight:var(--fontWeight-medium)}.font-mono{font-family:var(--font-mono)}.font-sans{font-family:var(--font-sans)}.font-semibold{--un-font-weight:var(--fontWeight-semibold);font-weight:var(--fontWeight-semibold)}.m10\\.065{margin:calc(var(--spacing) * 10.065)}.m12{margin:calc(var(--spacing) * 12)}.m16{margin:calc(var(--spacing) * 16)}.m21{margin:calc(var(--spacing) * 21)}.m4{margin:calc(var(--spacing) * 4)}.m5{margin:calc(var(--spacing) * 5)}.m6{margin:calc(var(--spacing) * 6)}.m9{margin:calc(var(--spacing) * 9)}.-mb-4{margin-bottom:calc(calc(var(--spacing) * 4) * -1)}.ml-auto{margin-left:auto}.mr-2{margin-right:calc(var(--spacing) * 2)}.mr-3{margin-right:calc(var(--spacing) * 3)}.mt-1\\.5{margin-top:calc(var(--spacing) * 1.5)}.mt-4{margin-top:calc(var(--spacing) * 4)}.mt-auto{margin-top:auto}.p-1{padding:calc(var(--spacing) * 1)}.p-2{padding:calc(var(--spacing) * 2)}.p-4{padding:calc(var(--spacing) * 4)}.p-5{padding:calc(var(--spacing) * 5)}.p-6{padding:calc(var(--spacing) * 6)}.p-8{padding:calc(var(--spacing) * 8)}.\\[\\&\\>a\\]\\:px-5>a{padding-inline:calc(var(--spacing) * 5)}.\\[\\&\\>a\\]\\:py-2\\.5>a{padding-block:calc(var(--spacing) * 2.5)}.px-2{padding-inline:calc(var(--spacing) * 2)}.px-3{padding-inline:calc(var(--spacing) * 3)}.px-4{padding-inline:calc(var(--spacing) * 4)}.py-0\\.5{padding-block:calc(var(--spacing) * .5)}.py-1{padding-block:calc(var(--spacing) * 1)}.py-1\\.5{padding-block:calc(var(--spacing) * 1.5)}.py-2{padding-block:calc(var(--spacing) * 2)}.py-8{padding-block:calc(var(--spacing) * 8)}.pb-2{padding-bottom:calc(var(--spacing) * 2)}.pl-10{padding-left:calc(var(--spacing) * 10)}.pr-2{padding-right:calc(var(--spacing) * 2)}.pr-4{padding-right:calc(var(--spacing) * 4)}.pt-4{padding-top:calc(var(--spacing) * 4)}.text-center{text-align:center}.text-left{text-align:left}.text-right{text-align:right}.focus\\:outline-none:focus{--un-outline-style:none;outline-style:none}.border{border-width:1px}.border-2{border-width:2px}.border-b{border-bottom-width:1px}.border-l{border-left-width:1px}.border-r{border-right-width:1px}.border-t{border-top-width:1px}.border-t-2{border-top-width:2px}.border-\\[\\#3c3836\\]{border-color:color-mix(in oklab,#3c3836 var(--un-border-opacity),transparent)}.border-\\[\\#504945\\]{border-color:color-mix(in oklab,#504945 var(--un-border-opacity),transparent)}.border-\\[\\#98971a\\],.hover\\:border-\\[\\#98971a\\]:hover{border-color:color-mix(in oklab,#98971a var(--un-border-opacity),transparent)}.hover\\:border-\\[\\#cc241d\\]:hover{border-color:color-mix(in oklab,#cc241d var(--un-border-opacity),transparent)}.focus\\:border-\\[\\#83a598\\]:focus{border-color:color-mix(in oklab,#83a598 var(--un-border-opacity),transparent)}.rounded{border-radius:var(--radius-DEFAULT)}.rounded-full{border-radius:calc(infinity * 1px)}.rounded-lg{border-radius:var(--radius-lg)}.rounded-md{border-radius:var(--radius-md)}.border-dashed{--un-border-style:dashed;border-style:dashed}.bg-\\[\\#1d2021\\]{background-color:color-mix(in oklab,#1d2021 var(--un-bg-opacity),transparent)}.bg-\\[\\#282828\\]{background-color:color-mix(in oklab,#282828 var(--un-bg-opacity),transparent)}.bg-\\[\\#3c3836\\]{background-color:color-mix(in oklab,#3c3836 var(--un-bg-opacity),transparent)}.bg-\\[\\#458588\\]{background-color:color-mix(in oklab,#458588 var(--un-bg-opacity),transparent)}.bg-\\[\\#504945\\],.data-\\[active\\=true\\]\\:bg-\\[\\#504945\\][data-active=true]{background-color:color-mix(in oklab,#504945 var(--un-bg-opacity),transparent)}.bg-\\[\\#83a598\\]{background-color:color-mix(in oklab,#83a598 var(--un-bg-opacity),transparent)}.bg-\\[\\#98971a\\]{background-color:color-mix(in oklab,#98971a var(--un-bg-opacity),transparent)}.bg-\\[\\#b16286\\]{background-color:color-mix(in oklab,#b16286 var(--un-bg-opacity),transparent)}.bg-\\[\\#cc241d\\]{background-color:color-mix(in oklab,#cc241d var(--un-bg-opacity),transparent)}.bg-\\[\\#fe8019\\]{background-color:color-mix(in oklab,#fe8019 var(--un-bg-opacity),transparent)}.bg-gray-100{background-color:color-mix(in srgb,var(--colors-gray-100) var(--un-bg-opacity),transparent)}.bg-gray-200{background-color:color-mix(in srgb,var(--colors-gray-200) var(--un-bg-opacity),transparent)}.bg-gray-50{background-color:color-mix(in srgb,var(--colors-gray-50) var(--un-bg-opacity),transparent)}.bg-green-100{background-color:color-mix(in srgb,var(--colors-green-100) var(--un-bg-opacity),transparent)}.bg-red-700{background-color:color-mix(in srgb,var(--colors-red-700) var(--un-bg-opacity),transparent)}.bg-white{background-color:color-mix(in srgb,var(--colors-white) var(--un-bg-opacity),transparent)}.bg-yellow-100{background-color:color-mix(in srgb,var(--colors-yellow-100) var(--un-bg-opacity),transparent)}.hover\\:bg-\\[\\#3c3836\\]:hover{background-color:color-mix(in oklab,#3c3836 var(--un-bg-opacity),transparent)}.hover\\:bg-\\[\\#504945\\]:hover{background-color:color-mix(in oklab,#504945 var(--un-bg-opacity),transparent)}.hover\\:bg-\\[\\#665c54\\]:hover{background-color:color-mix(in oklab,#665c54 var(--un-bg-opacity),transparent)}.hover\\:bg-\\[\\#83a598\\]:hover{background-color:color-mix(in oklab,#83a598 var(--un-bg-opacity),transparent)}.hover\\:bg-gray-700:hover{background-color:color-mix(in srgb,var(--colors-gray-700) var(--un-bg-opacity),transparent)}.disabled\\:opacity-50:disabled{opacity:50%}.hover\\:underline:hover{text-decoration-line:underline}.no-underline{text-decoration:none}.flex{display:flex}.flex-1{flex:1 1 0%}.flex-shrink-0,.shrink-0{flex-shrink:0}.flex-grow{flex-grow:1}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.gap-1\\.5{gap:calc(var(--spacing) * 1.5)}.gap-2{gap:calc(var(--spacing) * 2)}.gap-3{gap:calc(var(--spacing) * 3)}.gap-4{gap:calc(var(--spacing) * 4)}.gap-5{gap:calc(var(--spacing) * 5)}.gap-6{gap:calc(var(--spacing) * 6)}.gap-8{gap:calc(var(--spacing) * 8)}.gap-y-10{row-gap:calc(var(--spacing) * 10)}.grid{display:grid}.grid-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))}.grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.\\[\\&\\>a\\>uix-icon\\]\\:h-5>a>uix-icon,.h-5{height:calc(var(--spacing) * 5)}.\\[\\&\\>a\\>uix-icon\\]\\:h-6>a>uix-icon,.h-6{height:calc(var(--spacing) * 6)}.\\[\\&\\>a\\>uix-icon\\]\\:w-5>a>uix-icon,.w-5{width:calc(var(--spacing) * 5)}.\\[\\&\\>a\\>uix-icon\\]\\:w-6>a>uix-icon,.w-6{width:calc(var(--spacing) * 6)}.h-12{height:calc(var(--spacing) * 12)}.h-15{height:calc(var(--spacing) * 15)}.h-3\\.5{height:calc(var(--spacing) * 3.5)}.h-4{height:calc(var(--spacing) * 4)}.h-8{height:calc(var(--spacing) * 8)}.h-full{height:100%}.h-screen{height:100vh}.min-h-0{min-height:calc(var(--spacing) * 0)}.min-h-screen{min-height:100vh}.min-w-0{min-width:calc(var(--spacing) * 0)}.w-10{width:calc(var(--spacing) * 10)}.w-12{width:calc(var(--spacing) * 12)}.w-3\\.5{width:calc(var(--spacing) * 3.5)}.w-4{width:calc(var(--spacing) * 4)}.w-64{width:calc(var(--spacing) * 64)}.w-8{width:calc(var(--spacing) * 8)}.w-80{width:calc(var(--spacing) * 80)}.w-full{width:100%}.\\[\\&\\>a\\]\\:block>a,.block{display:block}.hidden{display:none}.cursor-pointer{cursor:pointer}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.text-ellipsis{text-overflow:ellipsis}.uppercase{text-transform:uppercase}.capitalize{text-transform:capitalize}.shadow-\\[4px_4px_0px_\\#1d2021\\]{--un-shadow:4px 4px 0px var(--un-shadow-color, rgb(29 32 33));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.shadow-md{--un-shadow:0 4px 6px -1px var(--un-shadow-color, rgb(0 0 0 / .1)),0 2px 4px -2px var(--un-shadow-color, rgb(0 0 0 / .1));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.hover\\:shadow-\\[6px_6px_0px_\\#98971a\\]:hover{--un-shadow:6px 6px 0px var(--un-shadow-color, rgb(152 151 26));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.hover\\:shadow-\\[6px_6px_0px_\\#cc241d\\]:hover{--un-shadow:6px 6px 0px var(--un-shadow-color, rgb(204 36 29));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.focus\\:shadow-\\[2px_2px_0px_\\#1d2021\\]:focus{--un-shadow:2px 2px 0px var(--un-shadow-color, rgb(29 32 33));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.-translate-y-1\\/2{--un-translate-y:-50%;translate:var(--un-translate-x) var(--un-translate-y)}.translate-x-4{--un-translate-x:calc(var(--spacing) * 4);translate:var(--un-translate-x) var(--un-translate-y)}.transform{transform:var(--un-rotate-x) var(--un-rotate-y) var(--un-rotate-z) var(--un-skew-x) var(--un-skew-y)}.transition{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,--un-gradient-from,--un-gradient-via,--un-gradient-to,opacity,box-shadow,transform,translate,scale,rotate,filter,-webkit-backdrop-filter,backdrop-filter;transition-timing-function:var(--un-ease, var(--default-transition-timingFunction));transition-duration:var(--un-duration, var(--default-transition-duration))}.transition-all{transition-property:all;transition-timing-function:var(--un-ease, var(--default-transition-timingFunction));transition-duration:var(--un-duration, var(--default-transition-duration))}.transition-colors{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,--un-gradient-from,--un-gradient-via,--un-gradient-to;transition-timing-function:var(--un-ease, var(--default-transition-timingFunction));transition-duration:var(--un-duration, var(--default-transition-duration))}.transition-transform{transition-property:transform,translate,scale,rotate;transition-timing-function:var(--un-ease, var(--default-transition-timingFunction));transition-duration:var(--un-duration, var(--default-transition-duration))}.duration-200{--un-duration:.2s;transition-duration:.2s}.items-start{align-items:flex-start}.items-center{align-items:center}.self-start{align-self:flex-start}.self-end{align-self:flex-end}.self-center{align-self:center}.left-3{left:calc(var(--spacing) * 3)}.right-3{right:calc(var(--spacing) * 3)}.top-1\\/2{top:50%}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.absolute{position:absolute}.relative{position:relative}.overflow-auto{overflow:auto}.overflow-hidden{overflow:hidden}.overflow-y-auto{overflow-y:auto}.filter{filter:var(--un-blur,) var(--un-brightness,) var(--un-contrast,) var(--un-grayscale,) var(--un-hue-rotate,) var(--un-invert,) var(--un-saturate,) var(--un-sepia,) var(--un-drop-shadow,)}.space-x-2>:not(:last-child){--un-space-x-reverse:0;margin-inline-start:calc(calc(var(--spacing) * 2) * var(--un-space-x-reverse));margin-inline-end:calc(calc(var(--spacing) * 2) * calc(1 - var(--un-space-x-reverse)))}.space-y-1>:not(:last-child){--un-space-y-reverse:0;margin-block-start:calc(calc(var(--spacing) * 1) * var(--un-space-y-reverse));margin-block-end:calc(calc(var(--spacing) * 1) * calc(1 - var(--un-space-y-reverse)))}.space-y-6>:not(:last-child){--un-space-y-reverse:0;margin-block-start:calc(calc(var(--spacing) * 6) * var(--un-space-y-reverse));margin-block-end:calc(calc(var(--spacing) * 6) * calc(1 - var(--un-space-y-reverse)))}@supports (color: color-mix(in lab,red,red)){.data-\\[active\\=true\\]\\:text-white[data-active=true]{color:color-mix(in oklab,var(--colors-white) var(--un-text-opacity),transparent)}.text-gray-400{color:color-mix(in oklab,var(--colors-gray-400) var(--un-text-opacity),transparent)}.text-gray-500{color:color-mix(in oklab,var(--colors-gray-500) var(--un-text-opacity),transparent)}.text-gray-700{color:color-mix(in oklab,var(--colors-gray-700) var(--un-text-opacity),transparent)}.text-gray-800{color:color-mix(in oklab,var(--colors-gray-800) var(--un-text-opacity),transparent)}.text-gray-900{color:color-mix(in oklab,var(--colors-gray-900) var(--un-text-opacity),transparent)}.text-green-800{color:color-mix(in oklab,var(--colors-green-800) var(--un-text-opacity),transparent)}.text-white{color:color-mix(in oklab,var(--colors-white) var(--un-text-opacity),transparent)}.text-yellow-800{color:color-mix(in oklab,var(--colors-yellow-800) var(--un-text-opacity),transparent)}.hover\\:text-yellow-300:hover{color:color-mix(in oklab,var(--colors-yellow-300) var(--un-text-opacity),transparent)}.bg-gray-100{background-color:color-mix(in oklab,var(--colors-gray-100) var(--un-bg-opacity),transparent)}.bg-gray-200{background-color:color-mix(in oklab,var(--colors-gray-200) var(--un-bg-opacity),transparent)}.bg-gray-50{background-color:color-mix(in oklab,var(--colors-gray-50) var(--un-bg-opacity),transparent)}.bg-green-100{background-color:color-mix(in oklab,var(--colors-green-100) var(--un-bg-opacity),transparent)}.bg-red-700{background-color:color-mix(in oklab,var(--colors-red-700) var(--un-bg-opacity),transparent)}.bg-white{background-color:color-mix(in oklab,var(--colors-white) var(--un-bg-opacity),transparent)}.bg-yellow-100{background-color:color-mix(in oklab,var(--colors-yellow-100) var(--un-bg-opacity),transparent)}.hover\\:bg-gray-700:hover{background-color:color-mix(in oklab,var(--colors-gray-700) var(--un-bg-opacity),transparent)}}@media (min-width: 48rem){.md\\:p-8{padding:calc(var(--spacing) * 8)}.md\\:flex-row{flex-direction:row}.md\\:col-span-2{grid-column:span 2/span 2}.md\\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.md\\:w-72{width:calc(var(--spacing) * 72)}.md\\:w-auto{width:auto}.md\\:items-start{align-items:flex-start}.md\\:justify-between{justify-content:space-between}}@media (min-width: 64rem){.lg\\:flex{display:flex}.lg\\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}}@media (min-width: 80rem){.xl\\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}}body{font-family:var(--font-family)}html,body{font-family:var(--theme-font-family);background-color:var(--theme-background-color)!important;color:var(--text-color)!important;width:100%;min-height:100%;height:100%;padding:0;margin:0}body:not(.production) *:not(:defined){border:1px solid red}.dark{filter:invert(1) hue-rotate(180deg)}.dark img,.dark dialog,.dark video,.dark iframe{filter:invert(1) hue-rotate(180deg)}html{font-size:14px}@media (max-width: 768px){html{font-size:18px}}@media (max-width: 480px){html{font-size:20px}}textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;color:inherit;margin:0;padding:0}:root{box-sizing:border-box;-moz-text-size-adjust:none;-webkit-text-size-adjust:none;text-size-adjust:none;line-height:1.2;-webkit-font-smoothing:antialiased}*,*:before,*:after{box-sizing:border-box}*{margin:0}body{-webkit-font-smoothing:antialiased;font-family:var(--font-family)}button,textarea,select{background-color:inherit;border-width:0;color:inherit}img,picture,video,canvas,svg{display:block;max-width:100%}input,button,textarea,select{font:inherit}p,h1,h2,h3,h4,h5,h6{font-family:var(--font-family);overflow-wrap:break-word}dialog::backdrop{background-color:#000c}*::-webkit-scrollbar{width:8px;margin-right:10px}*::-webkit-scrollbar-track{background:transparent}*::-webkit-scrollbar-thumb{&:hover{scrollbar-color:rgba(154,153,150,.8) transparent}border-radius:10px;border:none}*::-webkit-scrollbar-button{background:transparent;color:transparent}*{scrollbar-width:thin;scrollbar-color:transparent transparent;&:hover{scrollbar-color:rgba(154,153,150,.8) transparent}}[full]{width:100%;height:100vh}[w-full]{width:100%}[grow]{flex-grow:1}[hide],.hide{display:none!important}[noscroll]{overflow:hidden}div [container]{display:flex}div [container][horizontal]{display:flex;flex-direction:col}.uix-list{display:flex;&[vertical]{flex-direction:column}}.uix-navbar{--uix-navbar-text-color: var(--color-default-90);--uix-navbar-hover-text-color: var(--color-surface-80);--uix-navbar-border-radius: 0px;--uix-navbar-border-color: var(--color-default-60);--uix-navbar-border-size: 1px;--uix-navbar-border-style: solid;--uix-navbar-hover-background-color: var(--color-default-40);--uix-container-position: var(--uix-navbar-position);display:flex;flex-direction:column;&[docked]{--uix-list-button-radius: 0;border-bottom:0;position:fixed;bottom:0;background-color:var(--uix-navbar-background-color, var(--color-default-5));>*{border-right:0;border-bottom:0;&:first-child{border-left:0}}}}:where(.uix-link){font-weight:var(--uix-link-font-weight, 600);width:var(--uix-link-width, auto);color:var(--uix-link-text-color, var(--colors-default-900));--uix-link-indent: 0;cursor:pointer;&[vertical]{margin:0 auto}a,button{width:inherit;cursor:pointer;padding:var(--uix-link-padding);&:hover{color:var(--uix-link-hover-color, var(--uix-link-text-color))}}.uix-text-icon__element{display:flex;align-items:center;gap:var(--uix-link-icon-gap, .5rem);&[reverse][vertical]{flex-direction:column-reverse}&:not([reverse])[vertical]{flex-direction:column}&[reverse]:not([vertical]){flex-direction:row-reverse}&:not([reverse]):not([vertical]){flex-direction:row}}transition:all .3s ease-in-out;&[indent]{>a,>button{padding-left:var(--uix-link-indent)}}&[active]:hover{color:var(--uix-link-hover-text-color, var(--colors-primary-400))}&[selectable][selected]{background-color:var(--colors-primary-400)}&:hover{[tooltip]{display:flex}}&[tooltip]{display:inline-block;&:hover{[tooltip]{visibility:visible}}[tooltip]{visibility:hidden;width:120px;background-color:#000;color:#fff;text-align:center;border-radius:6px;padding:5px 10px;margin-left:3px;position:absolute;z-index:1000000000;top:50%;left:100%;transform:translateY(-50%)}}&[position~=top] [tooltip]{bottom:100%;left:50%;transform:translate(-50%)}&[position~=bottom] [tooltip]{top:100%;left:50%;transform:translate(-50%)}&[position~=left] [tooltip]{top:50%;right:100%;transform:translateY(-50%)}&[tooltip],&[dropdown],&[context],&[float]{position:relative}&[dropdown],&[accordion]{flex-direction:column}[float],[dropdown],[accordion],[context]{display:none}&[floatopen]>a{display:none}&[floatopen] [float]{display:block;position:relative;bottom:0;right:0}&[context]{z-index:auto}[context][open]{display:flex;flex-direction:column}[dropdown],[context][open]{position:absolute;left:0;top:100%;width:100%;min-width:200px;z-index:1000;background-color:var(--colors-primary-100);box-shadow:0 8px 16px #0003;.uix-link:hover,input{background-color:var(--colors-primary-200)}>.uix-link{width:100%}}[context][open]{display:flex}&[selected]{[dropdown],[accordion]{display:flex;flex-direction:column}}}:where(.uix-button){border:var(--uix-button-borderSize, 0) solid var(--uix-button-borderColor);border-radius:var(--uix-button-borderRadius, var(--radius-md));box-shadow:var(--uix-button-shadow);width:var(--uix-button-width);min-width:fit-content;background-color:var(--uix-button-backgroundColor, black);color:var(--uix-button-textColor, var(--colors-default-100));font-weight:var(--uix-button-fontWeight, 700);display:flex;text-align:center;transition:transform .2s ease-in-out,opacity .2s ease-in-out,background-color .2s ease-in-out;&:hover{opacity:var(--uix-button-hover-opacity, .4)}&:active{transform:scale(.97)}>button,>a,>input{width:max-content;display:block;border-radius:inherit;cursor:var(--uix-button-cursor, pointer);height:calc(var(--spacing) * 10);line-height:calc(var(--spacing) * 5);padding:var( --uix-button-padding, calc(var(--spacing) * 2.5) calc(var(--spacing) * 4) );word-break:keep-all;flex-basis:100%}.uix-icon,button,input,a{cursor:pointer}&[bordered]{--uix-button-border-size: 1px;--uix-button-backgroundColor: transparent;--uix-button-hoverBackgroundColor: var(--_variant-color-300);--uix-button-borderColor: var(--_variant-color-400);--uix-button-textColor: var(--_variant-color-700)}&[ghost]{--uix-button-backgroundColor: transparent;--uix-button-hoverBackgroundColor: var(--_variant-color-300);--uix-button-borderSize: 0px;--uix-button-textColor: var(--_variant-color-700)}&[outline]{--uix-button-backgroundColor: transparent;--uix-button-hoverBackgroundColor: var(--_variant-color-300);--uix-button-textColor: var(--_variant-color-800);--uix-button-borderSize: 1px;--uix-button-borderColor: var(--_variant-color-400)}&[float]{background-color:#000;--uix-button-hoverBackgroundColor: var(--_variant-color-500);--uix-button-textColor: var(--_variant-color-50);--uix-button-borderSize: 0px;--uix-button-borderRadius: 9999px;--uix-button-width: var(--uix-button-height);box-shadow:var(--shadow-md, 0 4px 6px -1px rgb(0 0 0 / .1));--uix-button-padding: .5rem}&[float]:hover{box-shadow:var(--shadow-lg, 0 10px 15px -3px rgb(0 0 0 / .1))}}:where(.uix-input){--uix-input-background-color: var(--colors-surface-100);--uix-input-border-color: var(--colors-gray-900);--uix-input-text-color: var(--colors-gray-900);--uix-input-placeholder-color: var(--colors-default-500);--uix-input-border-radius: var(--border-radius-md);--uix-input-border-width: 2px;--uix-input-padding-x: calc(var(--spacing) * 4);--uix-input-padding-y: calc(var(--spacing) * 2.5);--uix-input-font-size: var(--font-size-base);--uix-input-height: 2.5rem;--uix-input-disabled-opacity: .6;--uix-input-label-font-size: var(--font-size-sm);--uix-input-label-font-weight: var(--font-weight-bold);--uix-input-label-color: var(--colors-default-700);--uix-input-checkbox-size: 1.5rem;--uix-input-checkbox-border-radius: var(--border-radius-sm);--uix-input-checkbox-checked-bg: var(--colors-primary-600);--uix-input-checkbox-check-color: var(--colors-surface-100);width:100%;display:flex;flex-direction:column;input,select,textarea{width:100%;height:var(--uix-input-height);border-radius:var(--uix-input-border-radius);border:var(--uix-input-border-width) solid var(--uix-input-border-color);font-size:var(--uix-input-font-size);background-color:var(--uix-input-background-color);color:var(--uix-input-text-color);transition:var(--uix-transition);outline:none;padding:var(--uix-input-padding-y) var(--uix-input-padding-x)}textarea{resize:vertical}&:has(textarea){height:auto}select{appearance:none;-webkit-appearance:none;cursor:pointer;font-weight:600;padding-block:0;option{font-weight:600;background-color:var(--uix-input-background-color);font-size:1.1rem;line-height:1.5rem;color:#333;padding:50px;border:2px solid red}}.select-container{position:relative;.select-arrow{position:absolute;right:calc(2 * var(--spacing))}}input::placeholder{color:transparent}label{font-weight:var(--uix-input-label-font-weight);color:var(--uix-input-label-color, var(--colors-gray-600));margin-bottom:var(--spacing);font-size:.9rem;padding:0 4px;transition:all .2s ease-in-out;pointer-events:none;&[required]:after{content:"*";color:var(--colors-danger-500);margin-left:2px}}input:not(:placeholder-shown)+label,textarea:not(:placeholder-shown)+label,&:focus-within label,&.has-value label{top:-2px;transform:translateY(0);font-size:var(--uix-input-label-font-size)}&:focus-within input,&:focus-within select,&:focus-within textarea{box-shadow:0 0 var(--uix-input-focus-ring-width, 5px) var(--uix-input-focus-ring-color, rgba(0, 0, 255, .5))}&[disabled]{cursor:not-allowed;opacity:var(--uix-input-disabled-opacity);& label{cursor:not-allowed}}.input-icon,.select-arrow{position:absolute;top:50%;right:var(--spacing);transform:translateY(-50%);pointer-events:none;color:var(--uix-input-label-color);transition:transform .2s ease-in-out}&:has(select:hover:active) .select-arrow{transform:translateY(-50%) rotate(180deg)}&:has(.input-icon:not(.select-arrow))>input{padding-right:calc(var(--uix-input-padding-x) + 1.75em)}&[type=checkbox],&[type=radio]{flex-direction:row;align-items:center;border:0;height:auto;width:auto;background-color:transparent;box-shadow:none;gap:.75rem;cursor:pointer;label{margin:0;line-height:1.5rem;position:static;transform:none;background-color:transparent;padding:0;cursor:pointer;font-weight:var(--font-weight-normal);order:2;pointer-events:auto}input{appearance:none;-webkit-appearance:none;width:var(--uix-input-checkbox-size);height:var(--uix-input-checkbox-size);margin:0;border:var(--uix-input-border-width) solid var(--uix-input-border-color);background-color:var(--uix-input-background-color);cursor:pointer;position:relative;transition:var(--uix-transition);padding:0;&:after{content:"";position:absolute;display:none;left:50%;top:50%}&:checked{background-color:var(--uix-input-checkbox-checked-bg);border-color:var(--uix-input-checkbox-checked-bg);&:after{display:block}}&:focus-visible{box-shadow:0 0 0 var(--uix-input-focus-ring-width) var(--uix-input-focus-ring-color);border-color:var(--uix-input-focus-ring-color)}}}&[type=checkbox] input:after{width:.375rem;height:.75rem;border:solid var(--uix-input-checkbox-check-color);border-width:0 2px 2px 0;transform:translate(-50%,-60%) rotate(45deg)}&[type=radio] input{border-radius:var(--border-radius-full);&:after{width:calc(var(--uix-input-checkbox-size) / 2);height:calc(var(--uix-input-checkbox-size) / 2);border-radius:var(--border-radius-full);background-color:var(--uix-input-checkbox-check-color);transform:translate(-50%,-50%)}}&[ghost]{&:focus-within select{box-shadow:none}.select-arrow{margin-left:5px;padding-left:5px}select{background:inherit;border:0}}}:where(.uix-icon){display:inline-block;vertical-align:middle;width:1rem;height:1rem;svg{height:inherit;width:inherit}&[solid]{stroke:currentColor;fill:currentColor}}.app-template{.uix-card{button{color:#111;cursor:pointer}}}
 `,metaType:"text/css"}};self.addEventListener("install",t=>t.waitUntil(self.skipWaiting())),self.addEventListener("activate",t=>t.waitUntil(self.clients.claim())),self.addEventListener("fetch",t=>{const e=new URL(t.request.url),n=FILE_BUNDLE[e.pathname];n&&t.respondWith(new Response(n.content,{headers:{"Content-Type":n.metaType||"application/javascript"}}))});
