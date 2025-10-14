@@ -127,1899 +127,47 @@ const FILE_BUNDLE={"/views/github-callback.js":{content:`export default ({ T, ht
 		},
 	};
 };
-`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/navigation/tabs.js":{content:`export default ({ T, html }) => ({
-	tag: "uix-tabs",
-	style: true,
-	class: "overflow-auto",
-	properties: {
-		tabs: T.array(),
-		selectTab: T.function(),
-		removeTab: T.function(),
-		activeTab: T.number({ defaultValue: 0 }),
-		toggle: T.boolean(false),
-	},
-
-	async __selectTab(_tabId) {
-		const newActiveTab = this.toggle && this.activeTab === _tabId ? -1 : _tabId;
-
-		if (this.selectTab) {
-			await this.selectTab(newActiveTab);
+`,mimeType:"application/javascript",skipSW:!1},"/modules/icon-lucide/lucide/git-branch-plus.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M6 3v12m12-6a3 3 0 1 0 0-6a3 3 0 0 0 0 6M6 21a3 3 0 1 0 0-6a3 3 0 0 0 0 6"/><path d="M15 6a9 9 0 0 0-9 9m12 0v6m3-3h-6"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/key.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m15.5 7.5l2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4m2-2l-9.6 9.6"/><circle cx="7.5" cy="15.5" r="5.5"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/main.js":{content:`const ensureSWController = () => {
+	const timeoutPromise = new Promise((_, reject) => {
+		setTimeout(() => reject(new Error("Service Worker timed out.")), 100);
+	});
+	const controllerPromise = new Promise((resolve) => {
+		if (navigator.serviceWorker.controller) {
+			return resolve();
 		}
-
-		this.activeTab = newActiveTab;
-	},
-
-	_removeTab(tabId, e) {
-		e.stopPropagation();
-		if (this.removeTab) {
-			this.removeTab(tabId);
-		}
-	},
-
-	render() {
-		if (!this.tabs || this.tabs.length === 0) {
-			return null;
-		}
-
-		return html\`
-            <div class="tab-headers" role="tablist">
-                \${this.tabs.map(
-									([name], tabId) => html\`
-                    <uix-link
-                        role="tab"
-                        @click=\${() => this.__selectTab(tabId)}
-                        .label=\${name}
-                        ?selected=\${tabId === this.activeTab}
-                        ?closable=\${!!this.closeTab}
-                        @close=\${(e) => this.__closeTab(e, tabId)}
-                        skipRoute
-                        padding=\${this.padding}
-                        text="center"
-												class="py-1 text-lg"
-                    >								
-									\${!this.removeTab ? null : html\`<uix-icon name="x" class="w-3 close" @click=\${((e) => this._removeTab(tabId, e)).bind(this)}></uix-icon>\`}
-									</uix-link>
-                \`,
-								)}
-            </div>
-
-            <div class="flex flex-1 overflow-auto" role="tabpanel">
-                \${this.tabs[this.activeTab] ? this.tabs[this.activeTab][1] : ""}
-            </div>
-        \`;
-	},
-});
-`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/navigation/tabs.css":{content:`.uix-tabs {
-	display: flex;
-	flex-direction: column;
-	flex-grow: 1;
-
-	.tab-headers {
-		display: flex;
-		flex-direction: row;
-		flex-shrink: 0;
-		background-color: var(--uix-tabs-background-color, #2a2a2a);
-		border-bottom: 2px solid var(--uix-tabs-border-color, #005a99);
-	}
-
-	.tab-headers > uix-link {
-		flex: 1;
-		text-align: center;
-		cursor: pointer;
-		line-height: var(--uix-tabs-line-height, 2rem);
-		font-size: var(--uix-tabs-font-size, 0.75rem);
-		border-radius: var(--uix-tabs-border-radius, 0);
-		color: var(--uix-tabs-text, #eee);
-		transition:
-			background-color 0.2s ease-in-out,
-			color 0.2s ease-in-out;
-		.close {
-			visibility: hidden;
-		}
-	}
-	.tab-headers > uix-link:hover {
-		background-color: var(--uix-tabs-active-background-color, #007acc);
-		a {
-			color: #fff;
-		}
-		.close {
-			visibility: visible;
-		}
-	}
-	.tab-headers > uix-link[selected] {
-		font-weight: var(--uix-tabs-font-weight, 600);
-		background-color: var(--uix-tabs-active-background-color, #007acc);
-		color: var(--uix-tabs-active-text, #fff);
-	}
-}
-`,mimeType:"text/css",skipSW:!1},"/modules/apps/mcp/views/dashboard.js":{content:`export default ({ html, T }) => ({
-	style: true,
-	properties: {
-		selectedHistoryItem: T.object(null),
-		onDeselectHistoryItem: T.function(),
-	},
-
-	_renderCard(title, content) {
-		return html\`
-                <uix-card class="flex flex-col min-h-[200px]">
-                    <h3 class="font-semibold mb-3">\${title}</h3>
-                    <div class="flex-grow overflow-y-auto pr-2">\${content}</div>
-                </uix-card>
-            \`;
-	},
-
-	render() {
-		return html\`
-              <div class="space-y-6">
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <mcp-tools viewMode="flow" class="block h-60"></mcp-tools>
-        <mcp-prompts viewMode="flow" class="block h-60"></mcp-prompts>
-    </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <mcp-resources viewMode="flow" resourceType="resources" class="block h-60"></mcp-resources>
-        <mcp-resources viewMode="flow" resourceType="templates" class="block h-60"></mcp-resources>
-    </div>
-</div>
-
-            \`;
-	},
-});
-`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/mcp/views/dashboard.css":{content:`.mcp-dashboard {
-	.uix-card {
-		button {
-			color: #111;
-			cursor: pointer;
-		}
-	}
-}
-`,mimeType:"text/css",skipSW:!1},"/modules/apps/mcp/views/prompts.js":{content:`export default ({ html, AI, T }) => {
-	return {
-		tag: "mcp-prompts",
-		properties: {
-			prompts: T.array([]),
-			selectedPrompt: T.object(null),
-			promptArgs: T.object({}),
-			isExecuting: T.boolean(false),
-			isLoading: T.boolean(true),
-			viewMode: T.string({ defaultValue: "side-by-side" }),
-			promptResponse: T.any(null),
-		},
-		connected() {
-			this.loadPrompts();
-		},
-		async loadPrompts() {
-			this.isLoading = true;
-			try {
-				const servers = AI.listClients();
-				if (servers && servers.length > 0) {
-					const { prompts } = await AI.listPrompts({ servers });
-					console.log({ prompts });
-					this.prompts = prompts || [];
-				}
-			} catch (error) {
-				console.error("Error loading prompts:", error);
-				this.prompts = [];
-			} finally {
-				this.isLoading = false;
-			}
-		},
-		selectPrompt(prompt) {
-			this.selectedPrompt = prompt;
-			this.promptArgs = {};
-			this.promptResponse = null;
-		},
-		clearSelectedPrompt() {
-			this.selectedPrompt = null;
-			this.promptResponse = null;
-		},
-		handleArgInput(paramName, event) {
-			this.promptArgs = {
-				...this.promptArgs,
-				[paramName]: event.target.value,
-			};
-		},
-		async handleGetPrompt() {
-			if (!this.selectedPrompt) return;
-
-			this.isExecuting = true;
-			this.promptResponse = null;
-			try {
-				const { name } = this.selectedPrompt;
-				const args = this.promptArgs;
-
-				const response = await AI.getPrompt({ name, arguments: args });
-				this.promptResponse = response;
-			} catch (error) {
-				console.error("Error executing prompt:", error);
-				this.promptResponse = {
-					error: error.message || "An unknown error occurred.",
-				};
-			} finally {
-				this.isExecuting = false;
-			}
-		},
-
-		// Shared rendering methods
-		_renderPromptList(showBackButton = false) {
-			if (this.isLoading) {
-				return html\`<div class="flex items-center justify-center h-full"><p class="text-xs text-gray-500">Loading...</p></div>\`;
-			}
-			if (!this.prompts.length) {
-				return html\`<div class="flex items-center justify-center h-full"><p class="text-xs text-gray-500">No prompts found.</p></div>\`;
-			}
-			return html\`
-				<div class="flex-1 overflow-y-auto p-2">
-					<h3 class="font-semibold text-sm p-2 text-gray-800">Prompts</h3>
-					<ul>
-						\${this.prompts.map(
-							(prompt) => html\`
-								<li>
-									<button 
-										@click=\${() => this.selectPrompt(prompt)} 
-										class="w-full text-left p-2 rounded text-sm hover:bg-gray-100 \${
-											this.selectedPrompt?.name === prompt.name
-												? "bg-blue-50 font-semibold text-blue-700"
-												: ""
-										}"
-									>
-										<p class="font-mono text-xs">\${prompt.name}</p>
-										<p class="text-xs text-gray-500 truncate">\${prompt.description}</p>
-									</button>
-								</li>
-							\`,
-						)}
-					</ul>
-				</div>
-			\`;
-		},
-
-		_renderResponseView() {
-			if (!this.promptResponse) return "";
-
-			if (this.promptResponse.error) {
-				return html\`
-					<div class="mt-6 border-t pt-4">
-						<h4 class="font-semibold text-sm mb-3">Response</h4>
-						<div class="bg-red-50 text-red-700 rounded p-3 text-sm font-mono">
-							\${this.promptResponse.error}
-						</div>
-					</div>
-				\`;
-			}
-
-			return html\`
-				<div class="mt-6 border-t pt-4">
-					<h4 class="font-semibold text-sm mb-3">Response</h4>
-					<div class="space-y-4">
-						\${this.promptResponse.messages.map(
-							(msg) => html\`
-								<div class="dark bg-gray-100  text-gray-800 rounded p-3">
-									<div class="text-xs font-bold uppercase text-gray-500 mb-1">\${msg.role}</div>
-									\${
-										msg.content.type === "text"
-											? html\`<p class="text-sm whitespace-pre-wrap font-mono">\${msg.content.text}</p>\`
-											: html\`<div class="text-sm font-mono">Resource: \${msg.content.uri}</div>\`
-									}
-								</div>
-							\`,
-						)}
-					</div>
-				</div>
-			\`;
-		},
-
-		_renderPromptExecutor(showBackButton = false) {
-			if (!this.selectedPrompt) {
-				return html\`<div class="text-center text-gray-500 h-full flex items-center justify-center">Select a prompt to view details.</div>\`;
-			}
-
-			return html\`
-				<div class="dark \${showBackButton ? "p-6 overflow-y-auto w-full" : ""}">
-					\${
-						showBackButton
-							? html\`
-						<button @click=\${this.clearSelectedPrompt.bind(this)} class="dark flex items-center text-sm text-blue-600 hover:underline mb-4">
-							<uix-icon name="arrow-left" class="w-4 h-4 mr-2"></uix-icon>
-							Back to list
-						</button>
-					\`
-							: ""
-					}
-					<h3 class="font-bold text-lg mb-2">\${this.selectedPrompt.name}</h3>
-					<p class="text-xs text-gray-200 mb-6">\${this.selectedPrompt.description}</p>
-					
-					\${
-						this.promptResponse
-							? this._renderResponseView()
-							: html\`<h4 class="font-semibold text-sm mb-3">Parameters</h4>
-					<div class="space-y-4">
-						\${
-							Array.isArray(this.selectedPrompt.arguments) &&
-							this.selectedPrompt.arguments.length
-								? this.selectedPrompt.arguments.map(
-										(arg) =>
-											!console.log(arg) &&
-											html\`
-											<uix-input
-												label=\${arg.name}
-                        type=\${arg.enum ? "select" : { boolean: "checkbox", enum: "select" }[arg.type] || "text"}
-												value=\${this.promptArgs[arg.name] || ""}
-												@input=\${(e) => this.handleArgInput(arg.name, e)}
-												placeholder=\${arg.description || arg.name}
-												class="font-mono text-xs"
-											></uix-input>
-										\`,
-									)
-								: html\`<p class="text-xs text-gray-300">This prompt has no parameters.</p>\`
-						}
-					</div>
-					<div class="mt-8 border-t pt-6">
-						<uix-button
-							label=\${this.isExecuting ? "Executing..." : "Get Prompt"}
-							class="is-primary"
-							@click=\${this.handleGetPrompt.bind(this)}
-							?disabled=\${this.isExecuting}
-						></uix-button>
-					</div>\`
-					}
-				</div>
-			\`;
-		},
-		_renderFlowView() {
-			if (this.selectedPrompt) {
-				return this._renderPromptExecutor(true);
-			}
-			return this._renderPromptList();
-		},
-
-		_renderSideBySideView() {
-			return html\`
-				<div class="w-1/3 flex flex-col border-r border-gray-200">
-					\${this._renderPromptList()}
-				</div>
-				<div class="w-2/3 p-6 overflow-y-auto">
-					\${this._renderPromptExecutor(false)}
-				</div>
-			\`;
-		},
-
-		render() {
-			return html\`
-				<uix-card class="bg-[#3c3836] h-full overflow-y-auto">
-					<div class="dark">
-						\${this.viewMode === "flow" ? this._renderFlowView() : this._renderSideBySideView()}
-					</div>
-				</uix-card>
-			\`;
-		},
-	};
-};
-`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/mcp/views/tools.js":{content:`export default ({ html, AI, T }) => {
-	return {
-		tag: "mcp-tools",
-		properties: {
-			tools: T.array([]),
-			selectedTool: T.object(null),
-			toolArgs: T.object({}),
-			isExecuting: T.boolean(false),
-			isLoading: T.boolean(true),
-			viewMode: T.string({ defaultValue: "side-by-side" }), // 'side-by-side' or 'flow'
-			toolResponse: T.any(null),
-		},
-
-		connected() {
-			this.loadTools();
-		},
-
-		async loadTools() {
-			this.isLoading = true;
-			try {
-				const servers = AI.listClients();
-				if (servers && servers.length > 0) {
-					const { tools } = await AI.listTools({ servers });
-					this.tools = tools || [];
-				}
-			} catch (error) {
-				console.error("Error loading tools:", error);
-				this.tools = [];
-			} finally {
-				this.isLoading = false;
-			}
-		},
-
-		selectTool(tool) {
-			this.selectedTool = tool;
-			this.toolArgs = {};
-			this.toolResponse = null;
-		},
-
-		clearSelectedTool() {
-			this.selectedTool = null;
-			this.toolResponse = null;
-		},
-
-		handleArgInput(paramName, event, schema) {
-			this.toolArgs = {
-				...this.toolArgs,
-				[paramName]:
-					schema.type === "number"
-						? Number(event.target.value)
-						: schema.type === "boolean"
-							? !!event.target.checked
-							: event.target.value,
-			};
-		},
-
-		async handleExecuteTool() {
-			if (!this.selectedTool) return;
-
-			this.isExecuting = true;
-			this.toolResponse = null;
-			try {
-				const { name } = this.selectedTool;
-				const args = this.toolArgs;
-				const response = await AI.callTool(name, args);
-				this.toolResponse = response;
-			} catch (e) {
-				console.error(\`Failed to execute tool \${this.selectedTool.name}:\`, e);
-				this.toolResponse = {
-					error: e.message || "An unknown error occurred.",
-				};
-			} finally {
-				this.isExecuting = false;
-			}
-		},
-
-		// Rendering methods for 'flow' view
-		_renderFlowView() {
-			if (this.selectedTool) {
-				return this._renderToolExecutorFlow();
-			}
-			return this._renderToolListFlow();
-		},
-		_renderToolListFlow() {
-			if (this.isLoading) {
-				return html\`<div class="flex items-center justify-center h-full"><p class="text-xs text-gray-500">Loading...</p></div>\`;
-			}
-			if (!this.tools.length) {
-				return html\`<div class="flex items-center justify-center h-full"><p class="text-xs text-gray-500">No tools found.</p></div>\`;
-			}
-			return html\`
-                <div class="flex-1 overflow-y-auto p-2">
-                    <h3 class="font-semibold text-sm p-2 text-gray-800">Tools</h3>
-                    <ul>
-                        \${this.tools.map(
-													(tool) => html\`
-                                <li>
-                                    <button @click=\${() => this.selectTool(tool)} class="w-full text-left p-2 rounded text-sm hover:bg-gray-100">
-                                        <p class="font-mono text-sm">\${tool.name}</p>
-                                        <p class="text-xs text-gray-500 truncate">\${tool.description}</p>
-                                    </button>
-                                </li>
-                            \`,
-												)}
-                    </ul>
-                </div>
-            \`;
-		},
-
-		_renderToolExecutorFlow() {
-			const responseView = this.toolResponse
-				? html\`
-                <div class="mt-6 border-t pt-4 dark">
-									<h4 class="font-semibold text-sm mb-3">Response</h4>
-                    \${
-											this.toolResponse.error
-												? html\`<div class="bg-red-50 text-red-700 rounded p-3 text-sm font-mono">\${this.toolResponse.error}</div>\`
-												: html\`<pre class="text-xs whitespace-pre-wrap bg-gray-800 text-gray-200 p-2 rounded-lg font-mono overflow-auto">\${this.toolResponse?.content?.[0]?.text}</pre>\`
-										}
-                </div>
-            \`
-				: "";
-
-			return html\`
-                <div class="p-6 overflow-y-auto w-full">
-                     <button @click=\${this.clearSelectedTool.bind(this)} class="flex items-center text-sm text-blue-600 hover:underline mb-4">
-                        <uix-icon name="arrow-left" class="w-4 h-4 mr-2"></uix-icon>
-                        Back to list
-                    </button>
-                    \${this.toolResponse ? responseView : this._renderToolExecutorContent()}                    
-                </div>
-            \`;
-		},
-		_renderSideBySideView() {
-			const toolList = () => {
-				if (this.isLoading) {
-					return html\`<div class="flex items-center justify-center h-full"><p class="text-xs text-gray-500">Loading...</p></div>\`;
-				}
-				if (!this.tools.length) {
-					return html\`<div class="flex items-center justify-center h-full"><p class="text-xs text-gray-500">No tools found.</p></div>\`;
-				}
-				return html\`
-                    <div class="flex-1 overflow-y-auto p-2">
-                        <h3 class="font-semibold text-sm p-2 text-gray-800">Tools</h3>
-                        <ul>
-                            \${this.tools.map(
-															(tool) => html\`
-                                    <li>
-                                        <button @click=\${() => this.selectTool(tool)} class="w-full text-left p-2 rounded text-sm hover:bg-gray-100 \${this.selectedTool?.name === tool.name ? "bg-blue-50 font-semibold text-blue-700" : ""}">
-                                            <p class="font-mono text-xs">\${tool.name}</p>
-                                            <p class="text-xs text-gray-500 truncate">\${tool.description}</p>
-                                        </button>
-                                    </li>
-                                \`,
-														)}
-                        </ul>
-                    </div>
-                \`;
-			};
-
-			const toolExecutor = () => {
-				if (!this.selectedTool) {
-					return html\`<div class="text-center text-gray-500 h-full flex items-center justify-center">Select a tool to view details.</div>\`;
-				}
-				const responseView = this.toolResponse
-					? html\`
-                    <div class="mt-6 border-t pt-4">
-                        \${
-													this.toolResponse.error
-														? html\`<div class="bg-red-50 text-red-700 rounded p-3 text-sm font-mono">\${this.toolResponse.error}</div>\`
-														: html\`<pre class="text-xs whitespace-pre-wrap bg-gray-800 text-gray-200 p-2 rounded-lg font-mono overflow-auto">\${this.toolResponse?.contents?.[0]?.text}</pre>\`
-												}
-                    </div>
-                \`
-					: "";
-
-				return html\`
-                    <div>
-                        \${this._renderToolExecutorContent()}
-                        \${responseView}
-                    </div>
-                \`;
-			};
-
-			return html\`
-                <div class="w-1/3 flex flex-col border-r border-gray-200">
-                    \${toolList()}
-                </div>
-                <div class="w-2/3 p-6 overflow-y-auto">
-                    \${toolExecutor()}
-                </div>
-            \`;
-		},
-
-		_renderToolExecutorContent() {
-			if (!this.selectedTool) return "";
-			return html\`
-                <h3 class="font-bold text-lg mb-2  dark">\${this.selectedTool.name}</h3>
-                <p class="text-xs text-gray-600 mb-6">\${this.selectedTool.description}</p>
-                <h4 class="font-semibold text-sm mb-3 dark">Parameters</h4>
-                <div class="space-y-4">
-                    \${
-											this.selectedTool.inputSchema &&
-											Object.keys(this.selectedTool.inputSchema.properties)
-												.length > 0
-												? Object.entries(
-														this.selectedTool.inputSchema.properties,
-													).map(
-														([paramName, paramSchema]) =>
-															html\`<uix-input
-                                        label=\${paramName}
-                                        type=\${paramSchema.enum ? "select" : { boolean: "checkbox", enum: "select" }[paramSchema.type] || "text"}
-                                        .options=\${paramSchema.enum}
-                                        value=\${this.toolArgs[paramName] || ""}
-                                        @input=\${(e) => this.handleArgInput(paramName, e, paramSchema)}
-                                        placeholder=\${paramSchema.description || paramName}
-                                        class="font-mono text-xs"
-                                    ></uix-input>\`,
-													)
-												: html\`<p class="text-xs text-gray-500">This tool has no parameters.</p>\`
-										}
-                </div>
-                <div class="mt-8 border-t pt-6">
-                    <uix-button
-                        label=\${this.isExecuting ? "Executing..." : "Execute"}
-                        class="is-primary"
-                        @click=\${this.handleExecuteTool.bind(this)}
-                        ?disabled=\${this.isExecuting}
-                    ></uix-button>
-                </div>
-            \`;
-		},
-
-		render() {
-			return html\`<uix-card class="bg-[#3c3836] h-full overflow-y-auto pb-2">
-                    <div class="dark">\${this.viewMode === "flow" ? this._renderFlowView() : this._renderSideBySideView()}</div>
-								</uix-card>
-            \`;
-		},
-	};
-};
-`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/mcp/views/resources.js":{content:`export default ({ html, AI, T }) => {
-	return {
-		tag: "mcp-resources",
-		properties: {
-			resourceType: T.string(),
-			viewMode: T.string({ defaultValue: "side-by-side" }),
-			resources: T.array([]),
-			resourceTemplates: T.array([]),
-			isLoading: T.boolean(true),
-			selectedResource: T.object(null),
-			selectedTemplate: T.object(null),
-			resourceArgs: T.object({}),
-			isExecuting: T.boolean(false),
-			resourceResponse: T.any(null),
-		},
-		connected() {
-			this.loadData();
-		},
-		async loadData() {
-			this.isLoading = true;
-			try {
-				const servers = AI.listClients();
-				if (servers && servers.length > 0) {
-					const [{ resources }, { resourceTemplates }] = await Promise.all([
-						AI.listResources({ servers }),
-						AI.listResourceTemplates({ servers }),
-					]);
-					this.resources = resources || [];
-					this.resourceTemplates = resourceTemplates || [];
-				}
-			} catch (error) {
-				console.error("Error loading resources:", error);
-				this.resources = [];
-				this.resourceTemplates = [];
-			} finally {
-				this.isLoading = false;
-			}
-		},
-		async handleReadResource() {
-			const resource = this.selectedResource || this.selectedTemplate;
-			const isTemplate = !!this.selectedTemplate;
-			const uriTemplate = isTemplate ? resource.uriTemplate : resource.uri;
-
-			const uri = Object.entries(this.resourceArgs).reduce(
-				(acc, [key, value]) => acc.replace(\`{\${key}}\`, value),
-				uriTemplate,
-			);
-
-			this.isExecuting = true;
-			this.resourceResponse = null;
-			try {
-				const response = await AI.readResource({ uri });
-				this.resourceResponse = response;
-				console.log({ response });
-			} catch (e) {
-				console.error(\`Failed to read resource \${uri}:\`, e);
-				this.resourceResponse = {
-					error: e.message || "An unknown error occurred.",
-				};
-			} finally {
-				this.isExecuting = false;
-			}
-		},
-		selectResource(res) {
-			this.selectedResource = res;
-			this.selectedTemplate = null;
-			this.resourceArgs = {};
-			this.resourceResponse = null;
-		},
-		selectTemplate(template) {
-			this.selectedTemplate = template;
-			this.selectedResource = null;
-			this.resourceArgs = {};
-			this.resourceResponse = null;
-		},
-		deselectReaderView() {
-			this.selectedResource = null;
-			this.selectedTemplate = null;
-			this.resourceResponse = null;
-		},
-		handleResourceArgInput(paramName, event) {
-			this.resourceArgs = {
-				...this.resourceArgs,
-				[paramName]: event.target.value,
-			};
-		},
-		_extractUriParams(uri) {
-			const regex = /\\{(.+?)\\}/g;
-			return [...uri.matchAll(regex)].map((match) => match[1]);
-		},
-
-		_renderReaderContent() {
-			const resource = this.selectedResource || this.selectedTemplate;
-			if (!resource) return "";
-
-			const isTemplate = !!this.selectedTemplate;
-			const uri = isTemplate ? resource.uriTemplate : resource.uri;
-			const uriParams = isTemplate ? this._extractUriParams(uri) : [];
-
-			return html\`
-                <div>
-                    <h4 class="font-bold text-sm mb-1 dark font-mono">\${uri}</h4>
-                    <p class="text-xs text-gray-600 mb-4">\${resource.description || "No description provided."}</p>
-                    
-                    \${
-											!isTemplate
-												? null
-												: html\`<div class="space-y-3">
-                        \${
-													uriParams.length > 0
-														? uriParams.map(
-																(paramName) => html\`
-                                        <div>
-                                            <label class="block text-xs font-medium text-gray-600 mb-1">\${paramName}</label>
-                                            <uix-input
-                                                .value=\${this.resourceArgs[paramName] || ""}
-                                                @input=\${(e) => this.handleResourceArgInput(paramName, e)}
-                                                placeholder="Enter value for \${paramName}"
-                                                class="font-mono text-xs"
-                                            ></uix-input>
-                                        </div>
-                                    \`,
-															)
-														: html\`<p class="text-xs text-gray-500">This resource takes no parameters.</p>\`
-												}
-                    </div>\`
-										}
-                    <div class="mt-4 border-t pt-4">
-                        <uix-button
-                            label=\${this.isExecuting ? "Reading..." : "Read Resource"}
-                            class="is-primary w-full"
-                            @click=\${this.handleReadResource.bind(this)}
-                            ?disabled=\${this.isExecuting}
-                        ></uix-button>
-                    </div>
-                </div>
-            \`;
-		},
-
-		_renderResponseView() {
-			if (!this.resourceResponse) return "";
-			return html\`
-                <div class="mt-6 border-t pt-4 dark">
-									<h4 class="font-semibold text-sm mb-3">Response</h4>
-                    \${
-											this.resourceResponse.error
-												? html\`<div class="bg-red-50 text-red-700 rounded p-3 text-sm font-mono">\${this.resourceResponse.error}</div>\`
-												: html\`<pre class="text-xs whitespace-pre-wrap bg-gray-800 text-gray-200 p-2 rounded-lg font-mono overflow-auto">\${this.resourceResponse?.contents?.[0]?.text}</pre>\`
-										}
-                </div>
-            \`;
-		},
-
-		_renderList() {
-			return html\`
-                <ul class="text-xs font-mono space-y-1">
-                    \${
-											this.resourceType === "resources" || !this.resourceType
-												? this.resources.map(
-														(
-															res,
-														) => html\`<li><button @click=\${() => this.selectResource(res)} class="w-full text-left p-2 rounded text-sm hover:bg-gray-100 \${this.selectedResource?.uri === res.uri ? "bg-blue-50 font-semibold text-blue-700" : ""}">
-                        <p class="font-mono text-sm flex items-center"><uix-icon name="file-text" class="w-4 h-4 mr-2 text-gray-500"></uix-icon>\${res.uri}</p>
-                    </button></li>\`,
-													)
-												: null
-										}
-                    \${
-											this.resourceType === "templates" || !this.resourceType
-												? this.resourceTemplates.map(
-														(
-															template,
-														) => html\`<li><button @click=\${() => this.selectTemplate(template)} class="w-full text-left p-2 rounded text-sm hover:bg-gray-100 \${this.selectedTemplate?.uriTemplate === template.uriTemplate ? "bg-blue-50 font-semibold text-blue-700" : ""}">
-                        <p class="font-mono text-sm flex items-center"><uix-icon name="file-code-2" class="w-4 h-4 mr-2 text-blue-600"></uix-icon>\${template.uriTemplate}</p>
-                    </button></li>\`,
-													)
-												: null
-										}
-                </ul>
-             \`;
-		},
-		_generateTitle() {
-			const titles = {
-				resources: "Resources",
-				templates: "Templates",
-			};
-			const title = titles[this.resourceType] || "Resources & Templates";
-			return html\`<h3 class="font-semibold text-sm p-2 text-gray-800">\${title}</h3>\`;
-		},
-		_renderFlowView() {
-			if (this.isLoading) {
-				return html\`<div class="flex items-center justify-center h-full"><p class="text-xs text-gray-500">Loading...</p></div>\`;
-			}
-			if (this.selectedResource || this.selectedTemplate) {
-				return html\`
-                    <div class="p-6 overflow-y-auto w-full">
-                        <button @click=\${() => this.deselectReaderView()} class="flex items-center text-sm text-blue-600 hover:underline mb-4">
-                            <uix-icon name="arrow-left" class="w-4 h-4 mr-2"></uix-icon>
-                            Back to list
-                        </button>
-                        \${this.resourceResponse ? this._renderResponseView() : this._renderReaderContent()}                        
-                    </div>
-                \`;
-			}
-			return html\`
-                <div class="flex-1 overflow-y-auto p-2">
-									\${this._generateTitle()}
-                  \${this._renderList()}
-                </div>
-            \`;
-		},
-
-		_renderSideBySideView() {
-			if (this.isLoading) {
-				return html\`<div class="flex items-center justify-center h-full"><p class="text-xs text-gray-500">Loading...</p></div>\`;
-			}
-			return html\`
-                <div class="w-1/3 flex flex-col border-r border-gray-200 p-2 overflow-y-auto">
-									\${this._generateTitle()}
-                    \${this._renderList()}
-                </div>
-                <div class="w-2/3 p-6 overflow-y-auto">
-                    \${
-											this.selectedResource || this.selectedTemplate
-												? html\`
-                            \${this._renderReaderContent()}
-                            \${this._renderResponseView()}
-                        \`
-												: html\`<div class="text-center text-gray-500 h-full flex items-center justify-center">Select an item to view details.</div>\`
-										}
-                </div>
-            \`;
-		},
-
-		render() {
-			return html\`
-                <uix-card class="h-full bg-[#3c3836] overflow-y-auto">
-									<div class="dark">\${this.viewMode === "flow" ? this._renderFlowView() : this._renderSideBySideView()}</div>
-								</uix-card>
-            \`;
-		},
-	};
-};
-`,mimeType:"application/javascript",skipSW:!1},"/modules/icon-lucide/lucide/git-branch-plus.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M6 3v12m12-6a3 3 0 1 0 0-6a3 3 0 0 0 0 6M6 21a3 3 0 1 0 0-6a3 3 0 0 0 0 6"/><path d="M15 6a9 9 0 0 0-9 9m12 0v6m3-3h-6"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/key.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m15.5 7.5l2.3 2.3a1 1 0 0 0 1.4 0l2.1-2.1a1 1 0 0 0 0-1.4L19 4m2-2l-9.6 9.6"/><circle cx="7.5" cy="15.5" r="5.5"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/uix/display/card.js":{content:`export default {
-	tag: "uix-card",
-	style: true,
-};
-`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/display/card.css":{content:`:where(.uix-card) {
-	display: flex;
-	flex-direction: column;
-	padding: var(--uix-card-padding, 10px);
-	border-width: var(--uix-card-border-size);
-	border-radius: var(--uix-card-border-radius, var(--radius-md));
-	background-color: var(--uix-card-background-color, #fff);
-	border-color: var(--uix-card-border-color, transparent);
-	box-shadow: var(--uix-card-shadow, 0 4px 6px rgba(0, 0, 0, 0.1));
-	list-style-type: var(--uix-card-list-style-type);
-	color: var(--uix-card-text-color);
-
-	&[clickable],
-	&[clickable] * {
-		cursor: pointer;
-	}
-}
-`,mimeType:"text/css",skipSW:!1},"/modules/icon-lucide/lucide/file-text.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4M10 9H8m8 4H8m8 4H8"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/file-code-2.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v4"/><path d="M14 2v4a2 2 0 0 0 2 2h4M5 12l-3 3l3 3m4 0l3-3l-3-3"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/layout-dashboard.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/database.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/wrench.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/index.html":{content:`<!DOCTYPE html>
-<html lang="en">
-<head>
-  <script type="importmap">
-			{
-				"imports": {
-					"@modelcontextprotocol/sdk/": "https://cdn.jsdelivr.net/npm/@modelcontextprotocol/sdk@1.18.1/dist/esm/",
-					"zod": "https://esm.sh/zod@3.23.8",
-					"eventsource-parser/stream": "https://esm.sh/eventsource-parser/stream",
-					"pkce-challenge": "https://esm.sh/pkce-challenge",
-          "zod-to-json-schema": "https://esm.sh/zod-to-json-schema@3.24.5",          
-					"ajv": "https://esm.sh/ajv@6.12.6"
-				}
-			}
-		<\/script>
-  <meta charset="utf-8" />
-  <title>meetuprio</title>
-  <base href="/" />
-  
-  <meta name="viewport"
-    content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
-  <meta name="description" content="This is a meetuprio app" />
-  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#181818" />
-  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f3f3f3" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="mobile-web-app-title" content="meetuprio" />
-  <meta name="mobile-web-app-status-bar-style" content="black" />
-  <link id="favicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLW1vdW50YWluIj48cGF0aCBkPSJtOCAzIDQgOCA1LTUgNSAxNUgyTDggM3oiLz48L3N2Zz4="/>
-  <link rel="manifest" href="manifest.json" /> 
-	<script>
-		const ensureSWController = () => {
-			const timeoutPromise = new Promise((_, reject) => {
-				setTimeout(() => reject(new Error("Service Worker timed out.")), 100);
-			});
-			const controllerPromise = new Promise((resolve) => {
-				if (navigator.serviceWorker.controller) {
-					return resolve();
-				}
-				navigator.serviceWorker.addEventListener("controllerchange", () => {
-					return resolve();
-				});
-			});
-			return Promise.race([controllerPromise, timeoutPromise]);
-		};
-		const startApp = async () => {
-			if (!("serviceWorker" in navigator)) {
-				console.warn("Service Worker not supported.");
-				throw new Error("Platform not supported");
-			}
-			await navigator.serviceWorker.register("/sw.js", {
-				scope: "/",
-				type: "module",
-			});
-			try {
-				console.log("Waiting for Service Worker to take control...");
-				await ensureSWController();
-				console.log("\u2705 Service Worker is in control!");
-				const { default: $APP } = await import("/bootstrap.js");
-				await $APP.loadApp();
-			} catch (error) {
-				console.warn("Service Worker did not take control in time. Reloading...");
-				window.location.reload();
-			}
-		};
-		startApp();
-	<\/script>
-</head>
-<body>
-  <app-container></app-container>
-</body>
-</html>
-`,mimeType:"text/html",skipSW:!1},"/modules/apps/mcp/views/dev.js":{content:`export default ({ $APP, html, AI, T }) => {
-	return {
-		tag: "mcp-dev",
-		class: "w-full bg-[#282828] text-[#ebdbb2] flex font-sans text-sm",
-		properties: {
-			// Core Editor Properties
-			content: T.string(""),
-			language: T.string({ sync: "local", defaultValue: "javascript" }),
-			filePath: T.string({ sync: "local" }),
-			isDirty: T.boolean(false),
-			isSaving: T.boolean(false),
-			lastSaved: T.object(null),
-			compilerErrors: T.array({ defaultValue: [], sync: "local" }),
-			// Server Management Properties
-			availableServers: T.array([]),
-			selectedServer: T.string({ sync: "local", defaultValue: "default" }),
-			isServerConnected: T.boolean({ sync: "local", defaultValue: false }),
-			transportType: T.string({ sync: "local", defaultValue: "JavaScript" }),
-			command: T.string({ sync: "local" }),
-			args: T.string({ sync: "local" }),
-
-			// UI State
-			activeTab: T.string(),
-			history: T.array([]),
-			selectedHistoryItem: T.object(null),
-			validationTimeout: T.object(null),
-			worker: T.object(null),
-			transpilePromises: T.object({ defaultValue: {} }),
-		},
-
-		async connected() {
-			this.initializeWorker();
-			await this.initializeAI();
-			// Load initial server content based on saved selection or default
-			const server =
-				this.availableServers.find((s) => s.id === this.selectedServer) ||
-				this.availableServers[0];
-			if (server) {
-				// If the selectedServer wasn't found, update it to the default
-				if (server.id !== this.selectedServer) {
-					this.selectedServer = server.id;
-				}
-				await this.loadServerContent(server.path);
-			} else {
-				console.warn("No available servers found to load.");
-			}
-		},
-
-		disconnected() {
-			if (this.validationTimeout) clearTimeout(this.validationTimeout);
-			if (this.worker) this.worker.terminate();
-		},
-
-		// Fetches available servers from the AI service
-		async initializeAI() {
-			try {
-				if (!AI.isInitialized) {
-					await AI.init({
-						/* Your AI config here */
-					});
-				}
-				this.isServerConnected = AI.listClients().some(
-					(c) => c.alias === "dev_server",
-				);
-				this.availableServers = AI.listServers();
-			} catch (error) {
-				console.error("Error initializing AI service:", error);
-				this.isServerConnected = false;
-				this.availableServers = [];
-			}
-		},
-
-		async onServerChange(newServerKey) {
-			if (this.isDirty) {
-				console.warn(
-					"Switching server templates with unsaved changes. The changes will be lost.",
-				);
-			}
-			this.selectedServer = newServerKey;
-			const server = this.availableServers.find((s) => s.id === newServerKey);
-			if (server) {
-				await this.loadServerContent(server.path);
-				if (this.isServerConnected) {
-					await this.disconnectFromServer();
-				}
-			} else {
-				console.error(\`Server with key \${newServerKey} not found.\`);
-			}
-		},
-
-		async loadServerContent(path) {
-			this.filePath = path;
-			this.command = path.replace(/\\.ts$/, ".js");
-			try {
-				const response = await fetch(path);
-				if (!response.ok)
-					throw new Error(\`HTTP error! status: \${response.status}\`);
-				const fileContent = await response.text();
-				this.content = fileContent;
-				this.isDirty = false;
-				this.validateCode();
-			} catch (error) {
-				this.isDirty = true;
-				this.content = \`// Failed to load file: \${path}\\n// You can start editing here to create it.\`;
-				console.log(
-					\`File \${path} couldn't be loaded, starting with placeholder content.\`,
-					error,
-				);
-				this.validateCode();
-			}
-		},
-
-		initializeWorker() {
-			this.worker = new Worker("/modules/apps/mcp/worker.js", {
-				type: "module",
-			});
-			this.worker.onmessage = (e) => {
-				const { type, payload } = e.data;
-				switch (type) {
-					case "validationComplete":
-						this.compilerErrors = payload.errors;
-						break;
-					case "transpileComplete": {
-						const promise = this.transpilePromises[payload.requestId];
-						if (promise) {
-							promise.resolve(payload.transpiledCode);
-							delete this.transpilePromises[payload.requestId];
-						}
-						break;
-					}
-				}
-			};
-			this.worker.onerror = (event) => console.error("Error in worker:", event);
-			this.worker.postMessage({ type: "init" });
-		},
-
-		validateCode() {
-			if (!this.worker) {
-				this.compilerErrors = [];
-				return;
-			}
-			this.worker.postMessage({
-				type: "validate",
-				payload: { code: this.content, filePath: this.filePath },
-			});
-		},
-
-		getTranspiledContent() {
-			if (this.language !== "typescript") {
-				return Promise.resolve(this.content);
-			}
-			return new Promise((resolve, reject) => {
-				const requestId = \`req_\${Date.now()}_\${Math.random()}\`;
-				this.transpilePromises[requestId] = { resolve, reject };
-				this.worker.postMessage({
-					type: "transpile",
-					payload: { code: this.content, requestId },
-				});
-				setTimeout(() => {
-					if (this.transpilePromises[requestId]) {
-						reject(new Error("Transpilation timed out."));
-						delete this.transpilePromises[requestId];
-					}
-				}, 10000);
-			});
-		},
-
-		async applyCodeChanges() {
-			if (!$APP.fs || !$APP.fs.writeFile) {
-				console.warn("File system not available");
-				return;
-			}
-			this.isSaving = true;
-			try {
-				await this.validateCode();
-				if (this.compilerErrors.length > 0) {
-					console.warn(
-						"Applying changes with errors. The resulting code may not run correctly.",
-					);
-				}
-				await $APP.fs.writeFile(this.filePath, this.content);
-				if (this.language === "typescript") {
-					const executableCode = await this.getTranspiledContent();
-					const executablePath = this.filePath.replace(/\\.ts$/, ".js");
-					await $APP.fs.writeFile(executablePath, executableCode);
-					this.command = executablePath;
-				} else {
-					this.command = this.filePath;
-				}
-
-				this.lastSaved = new Date();
-				this.isDirty = false;
-			} catch (error) {
-				console.error("Failed to apply code changes:", error);
-			} finally {
-				this.isSaving = false;
-			}
-		},
-
-		onEditorUpdate(newContent) {
-			this.content = newContent;
-			this.isDirty = true;
-			if (this.validationTimeout) clearTimeout(this.validationTimeout);
-			this.validationTimeout = setTimeout(() => this.validateCode(), 500);
-		},
-
-		async connectToServer() {
-			await this.applyCodeChanges();
-			if (!this.command) {
-				console.error("Connection command/URL cannot be empty.");
-				return;
-			}
-			try {
-				const transportConfig = {
-					type: this.transportType,
-					command: this.command,
-					args: this.args ? this.args.split(" ").filter(Boolean) : [],
-				};
-				await AI.connect(transportConfig, { alias: "dev_server" });
-				this.isServerConnected = true;
-			} catch (e) {
-				console.error("Failed to connect:", e);
-				this.isServerConnected = false;
-			}
-		},
-
-		async disconnectFromServer() {
-			try {
-				await AI.disconnect("dev_server");
-				this.isServerConnected = false;
-			} catch (e) {
-				console.error("Failed to disconnect:", e);
-			}
-		},
-
-		async reconnectToServer() {
-			if (this.isServerConnected) {
-				await this.disconnectFromServer();
-				// Brief pause to ensure full disconnect before reconnecting
-				setTimeout(() => {
-					this.connectToServer();
-				}, 200);
-			}
-		},
-
-		// Combined handler for the connect/disconnect button
-		async handleConnectionToggle() {
-			if (this.isServerConnected) {
-				await this.disconnectFromServer();
-			} else {
-				await this.connectToServer();
-			}
-		},
-
-		// Handler for the reload/refresh button
-		async handleReload() {
-			if (this.isDirty) {
-				await this.applyCodeChanges();
-			}
-			if (this.isServerConnected) {
-				await this.reconnectToServer();
-			}
-		},
-
-		selectTab(tabKey) {
-			this.activeTab = tabKey;
-		},
-
-		// RENDER METHODS
-		renderErrorPanel() {
-			return html\`<div class="flex flex-col h-full bg-[#1d2021]">
-                <div class="p-2 border-b border-[#504945] flex items-center">
-                    <uix-icon name="triangle-alert" class="w-4 h-4 mr-2 text-red-400"></uix-icon>
-                    <h3 class="text-md font-semibold text-[#ebdbb2]">Problems (\${this.compilerErrors.length})</h3>
-                </div>
-                <div class="flex-1 overflow-auto font-mono text-xs">
-                    \${this.compilerErrors.map(
-											(error) => html\`
-                            <div class="p-2 border-b border-[#3c3836] hover:bg-[#3c3836]">
-                                <span class="text-red-400">Error:</span>
-                                <span class="text-[#bdae93]">(\${error.line}:\${error.character})</span>
-                                <span class="text-white ml-2">\${error.message}</span>
-                            </div>
-                        \`,
-										)}
-                </div>
-            </div>\`;
-		},
-
-		render() {
-			const tabs = [
-				{ key: "dashboard", label: "Dashboard", icon: "layout-dashboard" },
-				{ key: "tools", label: "Tools", icon: "wrench" },
-				{ key: "resources", label: "Resources", icon: "database" },
-				{ key: "prompts", label: "Prompts", icon: "terminal" },
-			];
-
-			const renderTabContent = (tab) => {
-				switch (tab.key) {
-					case "dashboard":
-						return html\`<mcp-dashboard></mcp-dashboard>\`;
-					case "tools":
-						return html\`<mcp-tools></mcp-tools>\`;
-					case "resources":
-						return html\`<mcp-resources></mcp-resources>\`;
-					case "prompts":
-						return html\`<mcp-prompts></mcp-prompts>\`;
-					default:
-						return html\`<div class="text-center p-8 text-gray-500">View not implemented: \${tab.key}</div>\`;
-				}
-			};
-
-			const availableServersForSelect = this.availableServers.map((val) => ({
-				value: val.id,
-				label: val.name,
-			}));
-
-			return html\`
-                <!-- Left Panel: Editor -->
-                <div class="flex-1 h-full flex flex-col min-w-0">
-                     <div class="h-15 bg-[#3c3836] border-b border-[#504945] p-2 flex items-center justify-between">
-                         <div class="flex items-center space-x-2">
-                             <uix-input
-                                 ghost
-                                 class="dark w-3xs"
-                                 type="select"
-                                 .options=\${availableServersForSelect}
-                                 .value=\${this.selectedServer}
-                                 @change=\${(e) => this.onServerChange(e.target.value)}
-                             ></uix-input>
-                         </div>
-                         <div class="flex items-center space-x-2 gap-2">
-                             \${
-																this.isServerConnected && this.isDirty
-																	? html\`<uix-link
-                                     @click=\${this.handleReload.bind(this)}
-                                     class="dark"
-                                     size="small"
-                                     label="Refresh"
-                                     icon="refresh-cw"
-                                 ></uix-link>\`
-																	: ""
-															}
-                             <uix-button
-                                 .label=\${this.isServerConnected ? "Disconnect" : "Connect"}
-                                 class=\${this.isServerConnected ? "bg-red-700" : "bg-green-700"}
-                                 @click=\${this.handleConnectionToggle.bind(this)}
-                                 size="small"
-                             ></uix-button>
-                         </div>
-                    </div>
-                    <uix-code
-                        .content=\${this.content}
-                        .language=\${this.language}
-                        .onUpdate=\${this.onEditorUpdate.bind(this)}
-                        class="flex-1 overflow-y-auto"
-                    ></uix-code>
-                </div>
-
-                <uix-divider vertical resizable style="--uix-divider-color: #3c3836;"></uix-divider>
-
-                <!-- Right Panel: Dashboard/Tools -->
-                <div class="flex-1 h-full flex flex-col min-w-0">
-                    \${
-											this.isServerConnected
-												? html\`<div class="flex-1 flex flex-col min-h-0">
-                            <uix-tabs
-                                style="--uix-tabs-font-size: 1rem; --uix-tabs-active-background-color: var(--colors-red-700); --uix-tabs-border-color: var(--colors-red-800); --uix-tabs-text: #ebdbb2; --uix-tabs-active-text: #ebdbb2;"
-                                class="flex flex-col flex-grow"
-                                activeTab=\${this.activeTab}
-                                .selectTab=\${this.selectTab.bind(this)}
-                                .tabs=\${tabs.map((tab) => [
-																	html\`<uix-icon name=\${tab.icon} class="mr-2 w-5"></uix-icon> \${tab.label}\`,
-																	html\`<div class="p-4 flex-grow overflow-auto">\${renderTabContent(tab)}</div>\`,
-																])}
-                            ></uix-tabs>
-                          </div>\`
-												: html\`
-                          <div class="flex-1 flex items-center justify-center bg-[#282828]">
-                              <div class="text-center max-w-md p-4">
-                                  <uix-icon name="server-off" class="w-16 h-16 text-[#928374] mx-auto mb-4"></uix-icon>
-                                  <h3 class="text-lg font-semibold text-[#ebdbb2] mb-2">Server Not Connected</h3>
-                                  <p class="text-[#bdae93] mb-6">Edit your server code, then click Connect to run it.</p>
-                                  <uix-button
-                                      label="Connect"
-                                      @click=\${this.connectToServer.bind(this)}
-                                      size="small"
-                                  ></uix-button>
-                              </div>
-                          </div>
-                        \`
-										}
-                    <mcp-requests></mcp-requests>
-                    \${
-											this.compilerErrors.length > 0
-												? html\`
-                            <uix-divider resizable></uix-divider>
-                            <div class="flex-shrink-0 h-50 overflow-auto">
-                                \${this.renderErrorPanel()}
-                            </div>
-                          \`
-												: ""
-										}
-                </div>
-            \`;
-		},
-	};
-};
-`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/form/code.js":{content:`const cm = {
-	core: () => import("https://esm.sh/@codemirror/state"),
-	view: () => import("https://esm.sh/@codemirror/view"),
-	commands: () => import("https://esm.sh/@codemirror/commands"),
-	language: () => import("https://esm.sh/@codemirror/language"),
-	theme: () => import("https://esm.sh/@fsegurai/codemirror-theme-gruvbox-dark"),
-	lang: {
-		typescript: () => import("https://esm.sh/@codemirror/lang-javascript"),
-		javascript: () => import("https://esm.sh/@codemirror/lang-javascript"),
-		css: () => import("https://esm.sh/@codemirror/lang-css"),
-		html: () => import("https://esm.sh/@codemirror/lang-html"),
-	},
-};
-
-export default ({ T }) => ({
-	tag: "textarea",
-	class: "flex flex-grow",
-	style: true,
-	properties: {
-		content: T.string(),
-		language: T.string(),
-		onUpdate: T.function(),
-	},
-
-	view: null,
-	isUpdatingFromOutside: false,
-
-	async connected() {
-		const parent = this;
-		if (!parent || this.view) return;
-
-		const [
-			{ EditorState },
-			{ EditorView, keymap, lineNumbers, highlightSpecialChars },
-			{ defaultKeymap, history, historyKeymap, indentWithTab },
-			{ indentUnit },
-			{ gruvboxDark }, // Import the new theme
-		] = await Promise.all([
-			cm.core(),
-			cm.view(),
-			cm.commands(),
-			cm.language(),
-			cm.theme(),
-		]);
-
-		const langExtension = [];
-		if (this.language && cm.lang[this.language]) {
-			const langModule = await cm.lang[this.language]();
-			const langFunc = langModule[this.language];
-			console.log({ langFunc, langModule });
-			if (typeof langFunc === "function") {
-				langExtension.push(langFunc());
-			} else {
-				console.warn(
-					\`CodeMirror language function for "\${this.language}" not found.\`,
-				);
-			}
-		}
-
-		const updateListener = EditorView.updateListener.of((update) => {
-			if (update.docChanged && this.onUpdate) {
-				const newContent = update.state.doc.toString();
-				this.isUpdatingFromOutside = true;
-				this.onUpdate(newContent);
-				queueMicrotask(() => {
-					this.isUpdatingFromOutside = false;
-				});
-			}
+		navigator.serviceWorker.addEventListener("controllerchange", () => {
+			return resolve();
 		});
-
-		const customFontSize = EditorView.theme({
-			".cm-editor": {
-				fontSize: "12px",
-			},
-		});
-
-		const state = EditorState.create({
-			doc: this.content || "",
-			extensions: [
-				lineNumbers(),
-				highlightSpecialChars(),
-				history(),
-				keymap.of([...defaultKeymap, ...historyKeymap, indentWithTab]),
-				gruvboxDark, // Use the gruvbox dark theme
-				customFontSize,
-				EditorView.lineWrapping,
-				...langExtension,
-				updateListener,
-				indentUnit.of("  "),
-				EditorState.tabSize.of(2),
-			],
-		});
-
-		this.view = new EditorView({ state, parent });
-	},
-
-	updated(changedProperties) {
-		if (
-			this.view &&
-			Object.hasOwn(changedProperties, "content") &&
-			!this.isUpdatingFromOutside
-		) {
-			const currentDoc = this.view.state.doc.toString();
-			if (currentDoc !== this.content) {
-				this.view.dispatch({
-					changes: {
-						from: 0,
-						to: currentDoc.length,
-						insert: this.content || "",
-					},
-				});
-			}
-		}
-	},
-
-	disconnected() {
-		if (this.view) {
-			this.view.destroy();
-			this.view = null;
-		}
-	},
-
-	render() {
-		return null;
-	},
-});
-`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/mcp/views/requests.js":{content:`export default ({ html, AI, T }) => {
-	return {
-		properties: {
-			pendingRequests: T.array([]),
-			isLoading: T.boolean(true),
-			isExpanded: T.boolean(false),
-			formValues: T.object({}),
-			requestUnsubscribe: T.object(null),
-		},
-
-		async connected() {
-			this.requestUnsubscribe = AI.onRequestChange(
-				this.loadAllPendingRequests.bind(this),
-			);
-			// Initial load
-			await this.loadAllPendingRequests();
-		},
-
-		disconnected() {
-			if (this.requestUnsubscribe) {
-				this.requestUnsubscribe();
-			}
-		},
-
-		async loadAllPendingRequests() {
-			// Store the count before fetching to detect new requests.
-			const previousRequestCount = this.pendingRequests.length;
-
-			if (!AI.isInitialized || AI.listClients().length === 0) {
-				this.pendingRequests = [];
-				this.isLoading = false;
-				return;
-			}
-
-			this.isLoading = true;
-			try {
-				const [samplings, elicitations] = await Promise.all([
-					AI.listSamplingRequests(),
-					AI.listElicitationRequests(),
-				]);
-
-				// Tag each request with its type ('elicitation' or 'sampling').
-				const elicitationReqs = (elicitations.elicitationRequests || []).map(
-					(req) => ({ ...req, type: "elicitation" }),
-				);
-				const samplingReqs = (samplings.samplingRequests || []).map((req) => ({
-					...req,
-					type: "sampling",
-				}));
-
-				// Combine into a single list.
-				this.pendingRequests = [...elicitationReqs, ...samplingReqs];
-
-				// Automatically expand if new requests have arrived.
-				if (this.pendingRequests.length > previousRequestCount) {
-					this.isExpanded = true;
-				}
-			} catch (error) {
-				console.error("Error loading pending requests:", error);
-				this.pendingRequests = [];
-			} finally {
-				this.isLoading = false;
-			}
-		},
-
-		toggleExpanded() {
-			this.isExpanded = !this.isExpanded;
-		},
-
-		// --- Event Handlers ---
-		// Sampling handlers
-		async handleSamplingResponse(request, action) {
-			try {
-				if (action === "approve") {
-					await AI.approveSamplingRequest({
-						id: request.id,
-						server: request.server,
-					});
-				} else {
-					await AI.rejectSamplingRequest({
-						id: request.id,
-						server: request.server,
-					});
-				}
-			} catch (e) {
-				console.error(\`Failed to \${action} sampling request:\`, e);
-			}
-		},
-
-		// Elicitation handlers
-		handleInput(requestId, fieldName, event, schema) {
-			const newValues = {
-				...(this.formValues?.[requestId] || {}),
-				[fieldName]:
-					schema.type === "boolean"
-						? !!event.target.checked
-						: event.target.value,
-			};
-			this.formValues = { ...this.formValues, [requestId]: newValues };
-		},
-
-		async handleElicitationSubmit(request) {
-			const response = this.formValues[request.id] || {};
-			try {
-				await AI.respondToElicitation({
-					id: request.id,
-					response,
-					server: request.server,
-				});
-				const newFormValues = { ...this.formValues };
-				delete newFormValues[request.id];
-				this.formValues = newFormValues;
-			} catch (e) {
-				console.error("Failed to respond to elicitation:", e);
-			}
-		},
-
-		async handleElicitationDecline(request) {
-			try {
-				await AI.respondToElicitation({
-					id: request.id,
-					response: {},
-					server: request.server,
-					action: "decline",
-				});
-				const newFormValues = { ...this.formValues };
-				delete newFormValues[request.id];
-				this.formValues = newFormValues;
-			} catch (e) {
-				console.error("Failed to decline elicitation:", e);
-			}
-		},
-
-		// --- Render Methods (Updated for unified list) ---
-		renderFormField(req, fieldName, schema) {
-			const value = this.formValues?.[req.id]?.[fieldName] || "";
-			return html\`
-                 <uix-input
-                     label=\${fieldName}
-                     value=\${value}
-                     type=\${schema.enum ? "select" : { boolean: "checkbox", enum: "select" }[schema.type] || "text"}
-                     .options=\${schema.enum}
-                     placeholder=\${schema.description}
-                     @input=\${(e) => this.handleInput(req.id, fieldName, e, schema)}
-                     class="font-mono text-sm w-full"
-                 ></uix-input>
-             \`;
-		},
-
-		renderSamplingRequest(req) {
-			return html\`
-                 <div class="bg-white border border-gray-200 rounded-lg shadow-sm mb-4">
-                     <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-                         <div>
-                             <h5 class="font-semibold text-sm mb-2 text-gray-700">Request</h5>
-                             <pre class="text-xs whitespace-pre-wrap bg-gray-800 text-gray-200 p-3 rounded-lg font-mono overflow-auto max-h-48">\${JSON.stringify(req.request, null, 2)}</pre>
-                         </div>
-                         <div>
-                             <h5 class="font-semibold text-sm mb-2 text-gray-700">Response Preview</h5>
-                             <pre class="text-xs whitespace-pre-wrap bg-gray-100 text-gray-800 p-3 rounded-lg font-mono overflow-auto max-h-48">\${JSON.stringify(req.responseStub, null, 2)}</pre>
-                         </div>
-                     </div>
-                     <div class="flex justify-end gap-3 p-3 bg-gray-50 border-t border-gray-200 rounded-b-lg">
-                         <uix-button @click=\${() => this.handleSamplingResponse(req, "reject")} label="Reject" size="small" class="is-danger"></uix-button>
-                         <uix-button @click=\${() => this.handleSamplingResponse(req, "approve")} label="Approve" size="small" class="is-primary"></uix-button>
-                     </div>
-                 </div>
-             \`;
-		},
-
-		renderElicitationRequest(req) {
-			return html\`
-                 <div class="bg-white border border-gray-200 rounded-lg shadow-sm mb-4">
-                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
-                         <div class="pr-4 border-r border-gray-200">
-                             <h5 class="font-semibold text-sm mb-2 text-gray-700">Information Request</h5>
-                             <p class="text-sm text-gray-800 mb-4">\${req.requestText}</p>
-                             <h6 class="font-mono text-xs font-bold text-gray-600 mb-2">Schema</h6>
-                             <pre class="text-xs whitespace-pre-wrap bg-gray-800 text-gray-200 p-3 rounded-lg font-mono overflow-auto max-h-32">\${JSON.stringify(req.schema, null, 2)}</pre>
-                         </div>
-                         <div>
-                             <h5 class="font-semibold text-sm mb-3 text-gray-700">Response Form</h5>
-                             <div class="space-y-3">
-                                 \${Object.entries(req.schema.properties).map(
-																		([fieldName, fieldSchema]) =>
-																			this.renderFormField(
-																				req,
-																				fieldName,
-																				fieldSchema,
-																			),
-																	)}
-                             </div>
-                         </div>
-                     </div>
-                     <div class="flex justify-end gap-3 p-3 bg-gray-50 border-t border-gray-200 rounded-b-lg">
-                         <uix-button @click=\${() => (this.formValues[req.id] = {})} label="Reset" size="small"></uix-button>
-                         <uix-button @click=\${() => this.handleElicitationDecline(req)} label="Decline" size="small" class="is-danger"></uix-button>
-                         <uix-button @click=\${() => this.handleElicitationSubmit(req)} label="Submit" size="small" class="is-primary"></uix-button>
-                     </div>
-                 </div>
-             \`;
-		},
-
-		renderCollapsedBanner() {
-			return html\`
-                <div class="bg-amber-50 border-b-2 border-amber-400 px-4 py-2 flex items-center justify-between cursor-pointer hover:bg-amber-100 transition-colors" @click=\${this.toggleExpanded.bind(this)}>
-                    <div class="flex items-center space-x-3">
-                        <uix-icon name="bell" class="w-5 h-5 text-amber-600 animate-pulse"></uix-icon>
-                        <div>
-                            <!-- SIMPLIFIED: Display total count directly. -->
-                            <span class="font-semibold text-amber-900">
-                                \${this.pendingRequests.length} Pending Request\${this.pendingRequests.length !== 1 ? "s" : ""}
-                            </span>
-                        </div>
-                    </div>
-                    <uix-icon name="chevron-down" class="w-5 h-5 text-amber-600"></uix-icon>
-                </div>
-            \`;
-		},
-
-		renderExpandedPanel() {
-			return html\`
-                <div class="flex flex-col bg-white border-b-2 border-amber-400">
-                    <!-- Header -->
-                    <div class="bg-amber-50 px-4 py-2 flex items-center justify-between border-b border-amber-200">
-                        <div class="flex items-center space-x-3">
-                            <uix-icon name="bell" class="w-5 h-5 text-amber-600"></uix-icon>
-                            <span class="font-semibold text-amber-900">Pending Requests</span>
-                        </div>
-                        <uix-button @click=\${this.toggleExpanded} size="small" ghost>
-                            <uix-icon name="chevron-up" class="w-4 h-4"></uix-icon>
-                        </uix-button>
-                    </div>
-
-                    <!-- Content -->
-                    <div class="flex-1 overflow-auto p-4">
-                        \${
-													this.pendingRequests.length > 0
-														? this.pendingRequests.map((req) =>
-																// Conditionally render based on the request 'type'.
-																req.type === "sampling"
-																	? this.renderSamplingRequest(req)
-																	: this.renderElicitationRequest(req),
-															)
-														: html\`<div class="text-center text-gray-500 py-8">No pending requests</div>\`
-												}
-                    </div>
-                </div>
-            \`;
-		},
-
-		render() {
-			// SIMPLIFIED: Check the length of the unified pendingRequests array.
-			if (this.isLoading || this.pendingRequests.length === 0) {
-				return html\`\`;
-			}
-			return this.isExpanded
-				? this.renderExpandedPanel()
-				: this.renderCollapsedBanner();
-		},
-	};
+	});
+	return Promise.race([controllerPromise, timeoutPromise]);
 };
-`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/layout/divider.js":{content:`let throttleTimeout = null;
-let lastEvent = null;
 
-export default ({ html, T }) => ({
-	tag: "uix-divider",
-	style: true,
-	properties: {
-		label: T.string(),
-		vertical: T.boolean(),
-		resizable: T.boolean({ defaultValue: false }),
-	},
-	firstUpdated() {
-		if (this.resizable) {
-			window.addEventListener("pointerdown", this.pointerDown.bind(this));
-		}
-	},
-
-	pointerDown(e) {
-		if (e.target !== this) return;
-		e.preventDefault();
-		this.setPointerCapture(e.pointerId);
-
-		this._startX = e.clientX;
-		this._startY = e.clientY;
-
-		this._prevElem = this.previousElementSibling;
-		this._nextElem = this.nextElementSibling;
-
-		this._prevElemStartWidth = this._prevElem ? this._prevElem.offsetWidth : 0;
-		this._nextElemStartWidth = this._nextElem ? this._nextElem.offsetWidth : 0;
-		this._prevElemStartHeight = this._prevElem
-			? this._prevElem.offsetHeight
-			: 0;
-		this._nextElemStartHeight = this._nextElem
-			? this._nextElem.offsetHeight
-			: 0;
-
-		window.addEventListener("pointermove", this.pointerMove.bind(this));
-		window.addEventListener("pointerup", this.pointerUp.bind(this));
-	},
-	pointerMove(e) {
-		lastEvent = e;
-		if (throttleTimeout) return;
-
-		throttleTimeout = setTimeout(() => {
-			throttleTimeout = null;
-			this.handleMouseMove(lastEvent);
-		}, 15);
-	},
-
-	handleMouseMove(e) {
-		if (!this._prevElem || !this._nextElem) return;
-
-		if (this.vertical) {
-			let dx = e.clientX - this._startX;
-			if (dx > 0) dx += 20;
-			const newPrevWidth = this._prevElemStartWidth + dx;
-			const newNextWidth = this._nextElemStartWidth - dx;
-
-			if (newPrevWidth > 0 && newNextWidth > 0) {
-				this._prevElem.style.flexBasis = \`\${newPrevWidth}px\`;
-				this._nextElem.style.flexBasis = \`\${newNextWidth}px\`;
-			}
-		} else {
-			const dy = e.clientY - this._startY;
-			const newPrevHeight = this._prevElemStartHeight + dy;
-			const newNextHeight = this._nextElemStartHeight - dy;
-
-			if (newPrevHeight > 0 && newNextHeight > 0) {
-				this._prevElem.style.flexBasis = \`\${newPrevHeight}px\`;
-				this._nextElem.style.flexBasis = \`\${newNextHeight}px\`;
-			}
-		}
-	},
-
-	pointerUp(e) {
-		this.releasePointerCapture(e.pointerId);
-		this._startX = null;
-		this._startY = null;
-
-		this._prevElem = null;
-		this._nextElem = null;
-
-		this._prevElemStartWidth = null;
-		this._nextElemStartWidth = null;
-		this._prevElemStartHeight = null;
-		this._nextElemStartHeight = null;
-		window.removeEventListener("pointermove", this.pointerMove.bind(this));
-		window.removeEventListener("pointerup", this.pointerUp.bind(this));
-	},
-
-	render() {
-		return !this.label ? null : html\`<span>\${this.label}</span>\`;
-	},
-});
-`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/form/code.css":{content:`.cm-scroller {
-	overflow: auto !important;
-}
-
-.cm-editor {
-	width: 100%;
-}
-`,mimeType:"text/css",skipSW:!1},"/modules/uix/layout/divider.css":{content:`.uix-divider {
-	--uix-divider-color: rgba(0, 0, 0, 0.05);
-	--uix-divider-size: 2px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	position: relative;
-	padding: 0;
-	width: 100%;
-	height: var(--uix-divider-size);
-	span {
-		padding: 0 0.75rem;
-		font-weight: bold;
-		font-size: var(--uix-divider-font-size, 1.5rem);
+const startApp = async () => {
+	if (!("serviceWorker" in navigator)) {
+		console.warn("Service Worker not supported.");
+		throw new Error("Platform not supported");
 	}
 
-	&[resizable] {
-		cursor: row-resize;
-		&[vertical] {
-			cursor: col-resize;
-		}
+	await navigator.serviceWorker.register("/sw.js", {
+		scope: "/",
+		type: "module",
+	});
+
+	try {
+		console.log("Waiting for Service Worker to take control...");
+		await ensureSWController();
+		console.log("\u2705 Service Worker is in control!");
+		const { default: $APP } = await import("/bootstrap.js");
+		await $APP.loadApp();
+	} catch (error) {
+		console.log({ error });
+		console.warn("Service Worker did not take control in time. Reloading...");
+		window.location.reload();
 	}
-	&::before,
-	&::after {
-		content: "";
-		flex-grow: 1;
-		height: var(--uix-divider-size);
-		background-color: var(--uix-divider-color);
-	}
-	&[label] {
-		padding: var(--uix-divider-padding, 1rem) 0;
-	}
-	&[label]::before,
-	&[label]::after {
-		flex-grow: 1;
-	}
-	&[vertical] {
-		flex-direction: column;
-		width: 1px;
-		height: 100%;
-		background-color: transparent;
-		&::before,
-		&::after {
-			width: 1px;
-			height: auto;
-		}
-		&[label] {
-			padding: 0 var(--uix-divider-padding, 1rem);
-		}
-	}
-}
-`,mimeType:"text/css",skipSW:!1},"/modules/apps/mcp/views/chat.js":{content:`export default ({ $APP, html, AI, T, Model }) => {
+};
+
+startApp();
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/mcp/views/chat.js":{content:`export default ({ $APP, html, AI, T, Model }) => {
 	let currentConversationId = null;
 
 	// *****************************************************************
@@ -2983,7 +1131,7 @@ export default ({ html, T }) => ({
 		},
 	};
 };
-`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/mcp/views/inspector.js":{content:`export default ({ $APP, html, AI, T }) => {
+`,mimeType:"application/javascript",skipSW:!1},"/modules/icon-lucide/lucide/plus.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7-7v14"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/send.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m22 2l-7 20l-4-9l-9-4Zm0 0L11 13"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/trash-2.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2m-6 5v6m4-6v6"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/apps/mcp/views/inspector.js":{content:`export default ({ $APP, html, AI, T }) => {
 	$APP.define("mcp-inspector-sidebar", {
 		class: "w-80 bg-[#3c3836] border-r border-[#504945] flex flex-col shrink-0",
 		properties: {
@@ -3465,7 +1613,1333 @@ export default ({ html, T }) => ({
 		},
 	};
 };
-`,mimeType:"application/javascript",skipSW:!1},"/modules/icon-lucide/lucide/trash-2.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2m-6 5v6m4-6v6"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/plus.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14m-7-7v14"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/send.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m22 2l-7 20l-4-9l-9-4Zm0 0L11 13"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/templates/servers/basic.js":{content:`import {
+`,mimeType:"application/javascript",skipSW:!1},"/templates/servers/react-agent.js":{content:"404 Not Found",mimeType:"application/javascript",skipSW:!0},"/templates/servers/eval.js":{content:`import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import z from "zod";
+
+const server = new McpServer(
+	{
+		name: "javascript-executor",
+		version: "0.1.0",
+	},
+	{
+		capabilities: {
+			tools: {},
+			resources: {},
+			logging: {},
+		},
+	},
+);
+
+// In-memory storage for execution history
+const executionHistory = [];
+
+// Execute JavaScript code
+server.registerTool(
+	"execute_js",
+	{
+		title: "Execute JavaScript",
+		description:
+			"Execute JavaScript code in a sandboxed iframe and return the result",
+		inputSchema: {
+			code: z.string().describe("JavaScript code to execute"),
+		},
+	},
+	async ({ code }) => {
+		const startTime = Date.now();
+
+		try {
+			await server.sendLoggingMessage({
+				level: "info",
+				data: "Executing JavaScript code",
+			});
+
+			// Create sandboxed iframe execution
+			const iframe = \`
+					<iframe 
+						sandbox="allow-scripts" 
+						style="display: none;"
+						srcdoc="
+							<script>
+								try {
+									const result = eval(\\\`\${code.replace(/\`/g, "\\\\\`")}\\\`);
+									window.parent.postMessage({ success: true, result: String(result) }, '*');
+								} catch (error) {
+									window.parent.postMessage({ success: false, error: error.message }, '*');
+								}
+							<\/script>
+						">
+					</iframe>
+				\`;
+
+			const executionTime = Date.now() - startTime;
+
+			// Add to history
+			executionHistory.push({
+				timestamp: new Date().toISOString(),
+				code,
+				executionTime,
+			});
+
+			// Keep only last 100 executions
+			if (executionHistory.length > 100) {
+				executionHistory.shift();
+			}
+
+			return {
+				content: [
+					{
+						type: "text",
+						text: \`Code will be executed in sandboxed iframe:\\n\\n\\\`\\\`\\\`javascript\\n\${code}\\n\\\`\\\`\\\`\\n\\nExecution queued (\${executionTime}ms)\`,
+					},
+				],
+			};
+		} catch (error) {
+			await server.sendLoggingMessage({
+				level: "error",
+				data: \`Execution failed: \${error.message}\`,
+			});
+
+			return {
+				content: [
+					{
+						type: "text",
+						text: \`Error: \${error.message}\`,
+					},
+				],
+				isError: true,
+			};
+		}
+	},
+);
+
+server.registerResource(
+	"exec_history",
+	"exec://history",
+	{
+		title: "Execution History",
+		description: "History of JavaScript executions",
+		mimeType: "application/json",
+	},
+	async (uri) => ({
+		contents: [
+			{
+				uri: uri.href,
+				mimeType: "application/json",
+				text: JSON.stringify(executionHistory, null, 2),
+			},
+		],
+	}),
+);
+
+export default server;
+`,mimeType:"application/javascript",skipSW:!0},"/templates/servers/cot-reasoner.js":{content:"404 Not Found",mimeType:"application/javascript",skipSW:!0},"/templates/servers/tot-explorer.js":{content:"404 Not Found",mimeType:"application/javascript",skipSW:!0},"/templates/servers/reflexion-agent.js":{content:"404 Not Found",mimeType:"application/javascript",skipSW:!0},"/templates/servers/self-consistency.js":{content:"404 Not Found",mimeType:"application/javascript",skipSW:!0},"/templates/servers/plan-solve-agent.js":{content:"404 Not Found",mimeType:"application/javascript",skipSW:!0},"/templates/servers/frontend-agent.js":{content:"404 Not Found",mimeType:"application/javascript",skipSW:!0},"/templates/servers/metacognitive-controller.js":{content:"404 Not Found",mimeType:"application/javascript",skipSW:!0},"/templates/servers/ui-generator.js":{content:"404 Not Found",mimeType:"application/javascript",skipSW:!0},"/templates/servers/viz-generator.js":{content:"404 Not Found",mimeType:"application/javascript",skipSW:!0},"/templates/servers/game-generator.js":{content:"404 Not Found",mimeType:"application/javascript",skipSW:!0},"/templates/servers/landing-generator.js":{content:"404 Not Found",mimeType:"application/javascript",skipSW:!0},"/templates/servers/code-transformer.js":{content:"404 Not Found",mimeType:"application/javascript",skipSW:!0},"/templates/servers/data-processor.js":{content:"404 Not Found",mimeType:"application/javascript",skipSW:!0},"/templates/servers/virtual-fs.js":{content:"404 Not Found",mimeType:"application/javascript",skipSW:!0},"/templates/servers/http-client.js":{content:"404 Not Found",mimeType:"application/javascript",skipSW:!0},"/templates/servers/github-api.js":{content:"404 Not Found",mimeType:"application/javascript",skipSW:!0},"/templates/servers/games.js":{content:"404 Not Found",mimeType:"application/javascript",skipSW:!0},"/templates/servers/canvas-studio.js":{content:"404 Not Found",mimeType:"application/javascript",skipSW:!0},"/manifest.json":{content:`{
+	"name": "MCPiQuant.com",
+	"short_name": "MCPiQuant.com",
+	"start_url": "/",
+	"scope": "/",
+	"display": "standalone",
+	"background_color": "#ffffff",
+	"theme_color": "#000000",
+	"description": "MCPiQuant",
+	"icons": [
+		{
+			"src": "/assets/icons/icon-192x192.png",
+			"sizes": "192x192",
+			"type": "image/png"
+		},
+		{
+			"src": "/assets/icons/icon-512x512.png",
+			"sizes": "512x512",
+			"type": "image/png"
+		}
+	]
+}
+`,mimeType:"application/json",skipSW:!1},"/modules/apps/mcp/views/dev.js":{content:`export default ({ $APP, html, AI, T }) => {
+	return {
+		tag: "mcp-dev",
+		class: "w-full bg-[#282828] text-[#ebdbb2] flex font-sans text-sm",
+		properties: {
+			// Core Editor Properties
+			content: T.string(""),
+			language: T.string({ sync: "local", defaultValue: "javascript" }),
+			filePath: T.string({ sync: "local" }),
+			isDirty: T.boolean(false),
+			isSaving: T.boolean(false),
+			lastSaved: T.object(null),
+			compilerErrors: T.array({ defaultValue: [], sync: "local" }),
+			// Server Management Properties
+			availableServers: T.array([]),
+			selectedServer: T.string({ sync: "local", defaultValue: "default" }),
+			isServerConnected: T.boolean({ sync: "local", defaultValue: false }),
+			transportType: T.string({ sync: "local", defaultValue: "JavaScript" }),
+			command: T.string({ sync: "local" }),
+			args: T.string({ sync: "local" }),
+
+			// UI State
+			activeTab: T.string(),
+			history: T.array([]),
+			selectedHistoryItem: T.object(null),
+			validationTimeout: T.object(null),
+			worker: T.object(null),
+			transpilePromises: T.object({ defaultValue: {} }),
+		},
+
+		async connected() {
+			this.initializeWorker();
+			await this.initializeAI();
+			// Load initial server content based on saved selection or default
+			const server =
+				this.availableServers.find((s) => s.id === this.selectedServer) ||
+				this.availableServers[0];
+			if (server) {
+				// If the selectedServer wasn't found, update it to the default
+				if (server.id !== this.selectedServer) {
+					this.selectedServer = server.id;
+				}
+				await this.loadServerContent(server.path);
+			} else {
+				console.warn("No available servers found to load.");
+			}
+		},
+
+		disconnected() {
+			if (this.validationTimeout) clearTimeout(this.validationTimeout);
+			if (this.worker) this.worker.terminate();
+		},
+
+		// Fetches available servers from the AI service
+		async initializeAI() {
+			try {
+				if (!AI.isInitialized) {
+					await AI.init({
+						/* Your AI config here */
+					});
+				}
+				this.isServerConnected = AI.listClients().some(
+					(c) => c.alias === "dev_server",
+				);
+				this.availableServers = AI.listServers();
+			} catch (error) {
+				console.error("Error initializing AI service:", error);
+				this.isServerConnected = false;
+				this.availableServers = [];
+			}
+		},
+
+		async onServerChange(newServerKey) {
+			if (this.isDirty) {
+				console.warn(
+					"Switching server templates with unsaved changes. The changes will be lost.",
+				);
+			}
+			this.selectedServer = newServerKey;
+			const server = this.availableServers.find((s) => s.id === newServerKey);
+			if (server) {
+				await this.loadServerContent(server.path);
+				if (this.isServerConnected) {
+					await this.disconnectFromServer();
+				}
+			} else {
+				console.error(\`Server with key \${newServerKey} not found.\`);
+			}
+		},
+
+		async loadServerContent(path) {
+			this.filePath = path;
+			this.command = path.replace(/\\.ts$/, ".js");
+			try {
+				const response = await fetch(path);
+				if (!response.ok)
+					throw new Error(\`HTTP error! status: \${response.status}\`);
+				const fileContent = await response.text();
+				this.content = fileContent;
+				this.isDirty = false;
+				this.validateCode();
+			} catch (error) {
+				this.isDirty = true;
+				this.content = \`// Failed to load file: \${path}\\n// You can start editing here to create it.\`;
+				console.log(
+					\`File \${path} couldn't be loaded, starting with placeholder content.\`,
+					error,
+				);
+				this.validateCode();
+			}
+		},
+
+		initializeWorker() {
+			this.worker = new Worker("/modules/apps/mcp/worker.js", {
+				type: "module",
+			});
+			this.worker.onmessage = (e) => {
+				const { type, payload } = e.data;
+				switch (type) {
+					case "validationComplete":
+						this.compilerErrors = payload.errors;
+						break;
+					case "transpileComplete": {
+						const promise = this.transpilePromises[payload.requestId];
+						if (promise) {
+							promise.resolve(payload.transpiledCode);
+							delete this.transpilePromises[payload.requestId];
+						}
+						break;
+					}
+				}
+			};
+			this.worker.onerror = (event) => console.error("Error in worker:", event);
+			this.worker.postMessage({ type: "init" });
+		},
+
+		validateCode() {
+			if (!this.worker) {
+				this.compilerErrors = [];
+				return;
+			}
+			this.worker.postMessage({
+				type: "validate",
+				payload: { code: this.content, filePath: this.filePath },
+			});
+		},
+
+		getTranspiledContent() {
+			if (this.language !== "typescript") {
+				return Promise.resolve(this.content);
+			}
+			return new Promise((resolve, reject) => {
+				const requestId = \`req_\${Date.now()}_\${Math.random()}\`;
+				this.transpilePromises[requestId] = { resolve, reject };
+				this.worker.postMessage({
+					type: "transpile",
+					payload: { code: this.content, requestId },
+				});
+				setTimeout(() => {
+					if (this.transpilePromises[requestId]) {
+						reject(new Error("Transpilation timed out."));
+						delete this.transpilePromises[requestId];
+					}
+				}, 10000);
+			});
+		},
+
+		async applyCodeChanges() {
+			if (!$APP.fs || !$APP.fs.writeFile) {
+				console.warn("File system not available");
+				return;
+			}
+			this.isSaving = true;
+			try {
+				await this.validateCode();
+				if (this.compilerErrors.length > 0) {
+					console.warn(
+						"Applying changes with errors. The resulting code may not run correctly.",
+					);
+				}
+				await $APP.fs.writeFile(this.filePath, this.content);
+				if (this.language === "typescript") {
+					const executableCode = await this.getTranspiledContent();
+					const executablePath = this.filePath.replace(/\\.ts$/, ".js");
+					await $APP.fs.writeFile(executablePath, executableCode);
+					this.command = executablePath;
+				} else {
+					this.command = this.filePath;
+				}
+
+				this.lastSaved = new Date();
+				this.isDirty = false;
+			} catch (error) {
+				console.error("Failed to apply code changes:", error);
+			} finally {
+				this.isSaving = false;
+			}
+		},
+
+		onEditorUpdate(newContent) {
+			this.content = newContent;
+			this.isDirty = true;
+			if (this.validationTimeout) clearTimeout(this.validationTimeout);
+			this.validationTimeout = setTimeout(() => this.validateCode(), 500);
+		},
+
+		async connectToServer() {
+			await this.applyCodeChanges();
+			if (!this.command) {
+				console.error("Connection command/URL cannot be empty.");
+				return;
+			}
+			try {
+				const transportConfig = {
+					type: this.transportType,
+					command: this.command,
+					args: this.args ? this.args.split(" ").filter(Boolean) : [],
+				};
+				await AI.connect(transportConfig, { alias: "dev_server" });
+				this.isServerConnected = true;
+			} catch (e) {
+				console.error("Failed to connect:", e);
+				this.isServerConnected = false;
+			}
+		},
+
+		async disconnectFromServer() {
+			try {
+				await AI.disconnect("dev_server");
+				this.isServerConnected = false;
+			} catch (e) {
+				console.error("Failed to disconnect:", e);
+			}
+		},
+
+		async reconnectToServer() {
+			if (this.isServerConnected) {
+				await this.disconnectFromServer();
+				// Brief pause to ensure full disconnect before reconnecting
+				setTimeout(() => {
+					this.connectToServer();
+				}, 200);
+			}
+		},
+
+		// Combined handler for the connect/disconnect button
+		async handleConnectionToggle() {
+			if (this.isServerConnected) {
+				await this.disconnectFromServer();
+			} else {
+				await this.connectToServer();
+			}
+		},
+
+		// Handler for the reload/refresh button
+		async handleReload() {
+			if (this.isDirty) {
+				await this.applyCodeChanges();
+			}
+			if (this.isServerConnected) {
+				await this.reconnectToServer();
+			}
+		},
+
+		selectTab(tabKey) {
+			this.activeTab = tabKey;
+		},
+
+		// RENDER METHODS
+		renderErrorPanel() {
+			return html\`<div class="flex flex-col h-full bg-[#1d2021]">
+                <div class="p-2 border-b border-[#504945] flex items-center">
+                    <uix-icon name="triangle-alert" class="w-4 h-4 mr-2 text-red-400"></uix-icon>
+                    <h3 class="text-md font-semibold text-[#ebdbb2]">Problems (\${this.compilerErrors.length})</h3>
+                </div>
+                <div class="flex-1 overflow-auto font-mono text-xs">
+                    \${this.compilerErrors.map(
+											(error) => html\`
+                            <div class="p-2 border-b border-[#3c3836] hover:bg-[#3c3836]">
+                                <span class="text-red-400">Error:</span>
+                                <span class="text-[#bdae93]">(\${error.line}:\${error.character})</span>
+                                <span class="text-white ml-2">\${error.message}</span>
+                            </div>
+                        \`,
+										)}
+                </div>
+            </div>\`;
+		},
+
+		render() {
+			const tabs = [
+				{ key: "dashboard", label: "Dashboard", icon: "layout-dashboard" },
+				{ key: "tools", label: "Tools", icon: "wrench" },
+				{ key: "resources", label: "Resources", icon: "database" },
+				{ key: "prompts", label: "Prompts", icon: "terminal" },
+			];
+
+			const renderTabContent = (tab) => {
+				switch (tab.key) {
+					case "dashboard":
+						return html\`<mcp-dashboard></mcp-dashboard>\`;
+					case "tools":
+						return html\`<mcp-tools></mcp-tools>\`;
+					case "resources":
+						return html\`<mcp-resources></mcp-resources>\`;
+					case "prompts":
+						return html\`<mcp-prompts></mcp-prompts>\`;
+					default:
+						return html\`<div class="text-center p-8 text-gray-500">View not implemented: \${tab.key}</div>\`;
+				}
+			};
+
+			const availableServersForSelect = this.availableServers.map((val) => ({
+				value: val.id,
+				label: val.name,
+			}));
+
+			return html\`
+                <!-- Left Panel: Editor -->
+                <div class="flex-1 h-full flex flex-col min-w-0">
+                     <div class="h-15 bg-[#3c3836] border-b border-[#504945] p-2 flex items-center justify-between">
+                         <div class="flex items-center space-x-2">
+                             <uix-input
+                                 ghost
+                                 class="dark w-3xs"
+                                 type="select"
+                                 .options=\${availableServersForSelect}
+                                 .value=\${this.selectedServer}
+                                 @change=\${(e) => this.onServerChange(e.target.value)}
+                             ></uix-input>
+                         </div>
+                         <div class="flex items-center space-x-2 gap-2">
+                             \${
+																this.isServerConnected && this.isDirty
+																	? html\`<uix-link
+                                     @click=\${this.handleReload.bind(this)}
+                                     class="dark"
+                                     size="small"
+                                     label="Refresh"
+                                     icon="refresh-cw"
+                                 ></uix-link>\`
+																	: ""
+															}
+                             <uix-button
+                                 .label=\${this.isServerConnected ? "Disconnect" : "Connect"}
+                                 class=\${this.isServerConnected ? "bg-red-700" : "bg-green-700"}
+                                 @click=\${this.handleConnectionToggle.bind(this)}
+                                 size="small"
+                             ></uix-button>
+                         </div>
+                    </div>
+                    <uix-code
+                        .content=\${this.content}
+                        .language=\${this.language}
+                        .onUpdate=\${this.onEditorUpdate.bind(this)}
+                        class="flex-1 overflow-y-auto"
+                    ></uix-code>
+                </div>
+
+                <uix-divider vertical resizable style="--uix-divider-color: #3c3836;"></uix-divider>
+
+                <!-- Right Panel: Dashboard/Tools -->
+                <div class="flex-1 h-full flex flex-col min-w-0">
+                    \${
+											this.isServerConnected
+												? html\`<div class="flex-1 flex flex-col min-h-0">
+                            <uix-tabs
+                                style="--uix-tabs-font-size: 1rem; --uix-tabs-active-background-color: var(--colors-red-700); --uix-tabs-border-color: var(--colors-red-800); --uix-tabs-text: #ebdbb2; --uix-tabs-active-text: #ebdbb2;"
+                                class="flex flex-col flex-grow"
+                                activeTab=\${this.activeTab}
+                                .selectTab=\${this.selectTab.bind(this)}
+                                .tabs=\${tabs.map((tab) => [
+																	html\`<uix-icon name=\${tab.icon} class="mr-2 w-5"></uix-icon> \${tab.label}\`,
+																	html\`<div class="p-4 flex-grow overflow-auto">\${renderTabContent(tab)}</div>\`,
+																])}
+                            ></uix-tabs>
+                          </div>\`
+												: html\`
+                          <div class="flex-1 flex items-center justify-center bg-[#282828]">
+                              <div class="text-center max-w-md p-4">
+                                  <uix-icon name="server-off" class="w-16 h-16 text-[#928374] mx-auto mb-4"></uix-icon>
+                                  <h3 class="text-lg font-semibold text-[#ebdbb2] mb-2">Server Not Connected</h3>
+                                  <p class="text-[#bdae93] mb-6">Edit your server code, then click Connect to run it.</p>
+                                  <uix-button
+                                      label="Connect"
+                                      @click=\${this.connectToServer.bind(this)}
+                                      size="small"
+                                  ></uix-button>
+                              </div>
+                          </div>
+                        \`
+										}
+                    <mcp-requests></mcp-requests>
+                    \${
+											this.compilerErrors.length > 0
+												? html\`
+                            <uix-divider resizable></uix-divider>
+                            <div class="flex-shrink-0 h-50 overflow-auto">
+                                \${this.renderErrorPanel()}
+                            </div>
+                          \`
+												: ""
+										}
+                </div>
+            \`;
+		},
+	};
+};
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/mcp/worker.js":{content:`let ts;
+let tsLibCache = {};
+async function loadCjsModule(url) {
+	try {
+		const response = await fetch(url);
+		if (!response.ok) {
+			throw new Error(\`HTTP error! status: \${response.status}\`);
+		}
+		const scriptText = await response.text();
+
+		// Prepare a fake CJS environment
+		const module = { exports: {} };
+		const exports = module.exports;
+
+		// Wrap the script text in a function and execute it
+		const scriptFunc = new Function("module", "exports", scriptText);
+		scriptFunc(module, exports);
+
+		// If the module uses \`module.exports = ...\`, it will be on module.exports.
+		// If it just uses \`exports.foo = ...\`, it will be on exports.
+		// We check \`module.exports\` first.
+		const exportedModule = module.exports;
+
+		// Sometimes the main export isn't \`default\`, we check if the object is empty.
+		if (Object.keys(exportedModule).length === 0) {
+			return exports;
+		}
+
+		return exportedModule;
+	} catch (error) {
+		console.error(\`Failed to load module from \${url}:\`, error);
+		throw error;
+	}
+}
+
+const loadTypeScript = async () => {
+	if (ts) return;
+	try {
+		const tsModule = await loadCjsModule(
+			"https://unpkg.com/typescript@latest/lib/typescript.js",
+		);
+		ts = tsModule;
+		self.ts = ts;
+		console.log({ ts }, self.ts);
+	} catch (error) {
+		console.error("Failed to load TypeScript:", error);
+	}
+};
+
+const loadTypeScriptLibs = async () => {
+	if (Object.keys(tsLibCache).length > 0) return;
+	const libsToFetch = [
+		"lib.es2020.d.ts",
+		"lib.es2018.d.ts",
+		"lib.es2019.d.ts",
+		"lib.es2019.string.d.ts",
+		"lib.es2019.array.d.ts",
+		"lib.es2019.object.d.ts",
+		"lib.es2020.bigint.d.ts",
+		"lib.es2020.date.d.ts",
+		"lib.es2020.number.d.ts",
+		"lib.es2020.promise.d.ts",
+		"lib.es2020.sharedmemory.d.ts",
+		"lib.es2020.string.d.ts",
+		"lib.es2020.symbol.wellknown.d.ts",
+		"lib.es2015.symbol.d.ts",
+		"lib.es2019.symbol.d.ts",
+		"lib.es2019.intl.d.ts",
+		"lib.es2015.iterable.d.ts",
+		"lib.es2018.intl.d.ts",
+		"lib.es2020.intl.d.ts",
+		"lib.es5.d.ts",
+		"lib.dom.d.ts",
+		"lib.es2017.d.ts",
+		"lib.es2018.asynciterable.d.ts",
+		"lib.es2018.asyncgenerator.d.ts",
+		"lib.es2018.promise.d.ts",
+		"lib.es2018.regexp.d.ts",
+		"lib.es2016.d.ts",
+		"lib.es2017.arraybuffer.d.ts",
+		"lib.es2017.date.d.ts",
+		"lib.es2017.intl.d.ts",
+		"lib.es2017.object.d.ts",
+		"lib.es2017.sharedmemory.d.ts",
+		"lib.es2017.string.d.ts",
+		"lib.es2017.typedarrays.d.ts",
+		"lib.es2015.d.ts",
+		"lib.es2016.array.include.d.ts",
+		"lib.es2016.intl.d.ts",
+		"lib.es2015.symbol.wellknown.d.ts",
+		"lib.es2015.core.d.ts",
+		"lib.es2015.collection.d.ts",
+		"lib.es2015.generator.d.ts",
+		"lib.es2015.promise.d.ts",
+		"lib.es2015.proxy.d.ts",
+		"lib.es2015.reflect.d.ts",
+		"lib.decorators.d.ts",
+		"lib.decorators.legacy.d.ts",
+	];
+
+	try {
+		const promises = libsToFetch.map((lib) =>
+			fetch(\`https://unpkg.com/typescript@latest/lib/\${lib}\`).then((res) => {
+				if (!res.ok) throw new Error(\`Failed to fetch \${lib}\`);
+				return res.text();
+			}),
+		);
+		const contents = await Promise.all(promises);
+		const newCache = {};
+		libsToFetch.forEach((lib, index) => {
+			newCache[lib] = contents[index];
+		});
+
+		return newCache;
+	} catch (e) {
+		console.error(
+			"Could not fetch TypeScript library definitions. Type checking will be less accurate.",
+			e,
+		);
+	}
+};
+
+self.onmessage = async (e) => {
+	const { type, payload } = e.data;
+	switch (type) {
+		case "init":
+			await loadTypeScript();
+			tsLibCache = await loadTypeScriptLibs();
+			break;
+		case "validate": {
+			if (!ts) return;
+			const validationErrors = validate(payload.code, payload.filePath);
+			self.postMessage({
+				type: "validationComplete",
+				payload: { errors: validationErrors },
+			});
+			break;
+		}
+		case "transpile": {
+			if (!ts) {
+				// Fallback if TS isn't loaded yet
+				self.postMessage({
+					type: "transpileComplete",
+					payload: {
+						transpiledCode: payload.code,
+						requestId: payload.requestId,
+					},
+				});
+				return;
+			}
+			const transpiledResult = transpile(payload.code);
+			self.postMessage({
+				type: "transpileComplete",
+				payload: {
+					transpiledCode: transpiledResult,
+					requestId: payload.requestId,
+				},
+			});
+			break;
+		}
+	}
+};
+
+const validate = (code, filePath) => {
+	try {
+		const defaultLibFileName = "lib.es2020.d.ts";
+		const compilerOptions = {
+			target: ts.ScriptTarget.ES2020,
+			module: ts.ModuleKind.CommonJS,
+			allowJs: true,
+			esModuleInterop: true,
+			noEmit: true,
+		};
+
+		const host = {
+			getSourceFile: (fileName, languageVersion) => {
+				const sourceText =
+					tsLibCache[fileName] || (fileName === filePath ? code : undefined);
+				return sourceText !== undefined
+					? ts.createSourceFile(fileName, sourceText, languageVersion)
+					: undefined;
+			},
+			writeFile: () => {},
+			getDefaultLibFileName: () => defaultLibFileName,
+			useCaseSensitiveFileNames: () => false,
+			getCanonicalFileName: (fileName) => fileName,
+			getCurrentDirectory: () => "/",
+			getNewLine: () => "\\n",
+			fileExists: (fileName) => fileName === filePath || !!tsLibCache[fileName],
+			readFile: (fileName) =>
+				fileName === filePath ? code : tsLibCache[fileName],
+		};
+
+		const program = ts.createProgram([filePath], compilerOptions, host);
+		const diagnostics = ts.getPreEmitDiagnostics(program);
+
+		return diagnostics.map((diagnostic) => {
+			const message = ts.flattenDiagnosticMessageText(
+				diagnostic.messageText,
+				"\\n",
+			);
+			if (diagnostic.file && diagnostic.start) {
+				const { line, character } = ts.getLineAndCharacterOfPosition(
+					diagnostic.file,
+					diagnostic.start,
+				);
+				return { line: line + 1, character: character + 1, message };
+			}
+			return { line: 0, character: 0, message };
+		});
+	} catch (error) {
+		console.error("Error during code validation in worker:", error);
+		return [
+			{
+				line: 0,
+				character: 0,
+				message: "An unexpected error occurred during validation.",
+			},
+		];
+	}
+};
+
+const transpile = (code) => {
+	try {
+		const jsResult = ts.transpileModule(code, {
+			compilerOptions: {
+				module: ts.ModuleKind.CommonJS,
+				target: ts.ScriptTarget.ES2020,
+			},
+		});
+		return jsResult.outputText;
+	} catch (error) {
+		console.error("TypeScript compilation failed in worker:", error);
+		return code;
+	}
+};
+`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/form/code.js":{content:`const cm = {
+	core: () => import("https://esm.sh/@codemirror/state"),
+	view: () => import("https://esm.sh/@codemirror/view"),
+	commands: () => import("https://esm.sh/@codemirror/commands"),
+	language: () => import("https://esm.sh/@codemirror/language"),
+	theme: () => import("https://esm.sh/@fsegurai/codemirror-theme-gruvbox-dark"),
+	lang: {
+		typescript: () => import("https://esm.sh/@codemirror/lang-javascript"),
+		javascript: () => import("https://esm.sh/@codemirror/lang-javascript"),
+		css: () => import("https://esm.sh/@codemirror/lang-css"),
+		html: () => import("https://esm.sh/@codemirror/lang-html"),
+	},
+};
+
+export default ({ T }) => ({
+	tag: "textarea",
+	class: "flex flex-grow",
+	style: true,
+	properties: {
+		content: T.string(),
+		language: T.string(),
+		onUpdate: T.function(),
+	},
+
+	view: null,
+	isUpdatingFromOutside: false,
+
+	async connected() {
+		const parent = this;
+		if (!parent || this.view) return;
+
+		const [
+			{ EditorState },
+			{ EditorView, keymap, lineNumbers, highlightSpecialChars },
+			{ defaultKeymap, history, historyKeymap, indentWithTab },
+			{ indentUnit },
+			{ gruvboxDark }, // Import the new theme
+		] = await Promise.all([
+			cm.core(),
+			cm.view(),
+			cm.commands(),
+			cm.language(),
+			cm.theme(),
+		]);
+
+		const langExtension = [];
+		if (this.language && cm.lang[this.language]) {
+			const langModule = await cm.lang[this.language]();
+			const langFunc = langModule[this.language];
+			console.log({ langFunc, langModule });
+			if (typeof langFunc === "function") {
+				langExtension.push(langFunc());
+			} else {
+				console.warn(
+					\`CodeMirror language function for "\${this.language}" not found.\`,
+				);
+			}
+		}
+
+		const updateListener = EditorView.updateListener.of((update) => {
+			if (update.docChanged && this.onUpdate) {
+				const newContent = update.state.doc.toString();
+				this.isUpdatingFromOutside = true;
+				this.onUpdate(newContent);
+				queueMicrotask(() => {
+					this.isUpdatingFromOutside = false;
+				});
+			}
+		});
+
+		const customFontSize = EditorView.theme({
+			".cm-editor": {
+				fontSize: "12px",
+			},
+		});
+
+		const state = EditorState.create({
+			doc: this.content || "",
+			extensions: [
+				lineNumbers(),
+				highlightSpecialChars(),
+				history(),
+				keymap.of([...defaultKeymap, ...historyKeymap, indentWithTab]),
+				gruvboxDark, // Use the gruvbox dark theme
+				customFontSize,
+				EditorView.lineWrapping,
+				...langExtension,
+				updateListener,
+				indentUnit.of("  "),
+				EditorState.tabSize.of(2),
+			],
+		});
+
+		this.view = new EditorView({ state, parent });
+	},
+
+	updated(changedProperties) {
+		if (
+			this.view &&
+			Object.hasOwn(changedProperties, "content") &&
+			!this.isUpdatingFromOutside
+		) {
+			const currentDoc = this.view.state.doc.toString();
+			if (currentDoc !== this.content) {
+				this.view.dispatch({
+					changes: {
+						from: 0,
+						to: currentDoc.length,
+						insert: this.content || "",
+					},
+				});
+			}
+		}
+	},
+
+	disconnected() {
+		if (this.view) {
+			this.view.destroy();
+			this.view = null;
+		}
+	},
+
+	render() {
+		return null;
+	},
+});
+`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/layout/divider.js":{content:`let throttleTimeout = null;
+let lastEvent = null;
+
+export default ({ html, T }) => ({
+	tag: "uix-divider",
+	style: true,
+	properties: {
+		label: T.string(),
+		vertical: T.boolean(),
+		resizable: T.boolean({ defaultValue: false }),
+	},
+	firstUpdated() {
+		if (this.resizable) {
+			window.addEventListener("pointerdown", this.pointerDown.bind(this));
+		}
+	},
+
+	pointerDown(e) {
+		if (e.target !== this) return;
+		e.preventDefault();
+		this.setPointerCapture(e.pointerId);
+
+		this._startX = e.clientX;
+		this._startY = e.clientY;
+
+		this._prevElem = this.previousElementSibling;
+		this._nextElem = this.nextElementSibling;
+
+		this._prevElemStartWidth = this._prevElem ? this._prevElem.offsetWidth : 0;
+		this._nextElemStartWidth = this._nextElem ? this._nextElem.offsetWidth : 0;
+		this._prevElemStartHeight = this._prevElem
+			? this._prevElem.offsetHeight
+			: 0;
+		this._nextElemStartHeight = this._nextElem
+			? this._nextElem.offsetHeight
+			: 0;
+
+		window.addEventListener("pointermove", this.pointerMove.bind(this));
+		window.addEventListener("pointerup", this.pointerUp.bind(this));
+	},
+	pointerMove(e) {
+		lastEvent = e;
+		if (throttleTimeout) return;
+
+		throttleTimeout = setTimeout(() => {
+			throttleTimeout = null;
+			this.handleMouseMove(lastEvent);
+		}, 15);
+	},
+
+	handleMouseMove(e) {
+		if (!this._prevElem || !this._nextElem) return;
+
+		if (this.vertical) {
+			let dx = e.clientX - this._startX;
+			if (dx > 0) dx += 20;
+			const newPrevWidth = this._prevElemStartWidth + dx;
+			const newNextWidth = this._nextElemStartWidth - dx;
+
+			if (newPrevWidth > 0 && newNextWidth > 0) {
+				this._prevElem.style.flexBasis = \`\${newPrevWidth}px\`;
+				this._nextElem.style.flexBasis = \`\${newNextWidth}px\`;
+			}
+		} else {
+			const dy = e.clientY - this._startY;
+			const newPrevHeight = this._prevElemStartHeight + dy;
+			const newNextHeight = this._nextElemStartHeight - dy;
+
+			if (newPrevHeight > 0 && newNextHeight > 0) {
+				this._prevElem.style.flexBasis = \`\${newPrevHeight}px\`;
+				this._nextElem.style.flexBasis = \`\${newNextHeight}px\`;
+			}
+		}
+	},
+
+	pointerUp(e) {
+		this.releasePointerCapture(e.pointerId);
+		this._startX = null;
+		this._startY = null;
+
+		this._prevElem = null;
+		this._nextElem = null;
+
+		this._prevElemStartWidth = null;
+		this._nextElemStartWidth = null;
+		this._prevElemStartHeight = null;
+		this._nextElemStartHeight = null;
+		window.removeEventListener("pointermove", this.pointerMove.bind(this));
+		window.removeEventListener("pointerup", this.pointerUp.bind(this));
+	},
+
+	render() {
+		return !this.label ? null : html\`<span>\${this.label}</span>\`;
+	},
+});
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/mcp/views/requests.js":{content:`export default ({ html, AI, T }) => {
+	return {
+		properties: {
+			pendingRequests: T.array([]),
+			isLoading: T.boolean(true),
+			isExpanded: T.boolean(false),
+			formValues: T.object({}),
+			requestUnsubscribe: T.object(null),
+		},
+
+		async connected() {
+			this.requestUnsubscribe = AI.onRequestChange(
+				this.loadAllPendingRequests.bind(this),
+			);
+			// Initial load
+			await this.loadAllPendingRequests();
+		},
+
+		disconnected() {
+			if (this.requestUnsubscribe) {
+				this.requestUnsubscribe();
+			}
+		},
+
+		async loadAllPendingRequests() {
+			// Store the count before fetching to detect new requests.
+			const previousRequestCount = this.pendingRequests.length;
+
+			if (!AI.isInitialized || AI.listClients().length === 0) {
+				this.pendingRequests = [];
+				this.isLoading = false;
+				return;
+			}
+
+			this.isLoading = true;
+			try {
+				const [samplings, elicitations] = await Promise.all([
+					AI.listSamplingRequests(),
+					AI.listElicitationRequests(),
+				]);
+
+				// Tag each request with its type ('elicitation' or 'sampling').
+				const elicitationReqs = (elicitations.elicitationRequests || []).map(
+					(req) => ({ ...req, type: "elicitation" }),
+				);
+				const samplingReqs = (samplings.samplingRequests || []).map((req) => ({
+					...req,
+					type: "sampling",
+				}));
+
+				// Combine into a single list.
+				this.pendingRequests = [...elicitationReqs, ...samplingReqs];
+
+				// Automatically expand if new requests have arrived.
+				if (this.pendingRequests.length > previousRequestCount) {
+					this.isExpanded = true;
+				}
+			} catch (error) {
+				console.error("Error loading pending requests:", error);
+				this.pendingRequests = [];
+			} finally {
+				this.isLoading = false;
+			}
+		},
+
+		toggleExpanded() {
+			this.isExpanded = !this.isExpanded;
+		},
+
+		// --- Event Handlers ---
+		// Sampling handlers
+		async handleSamplingResponse(request, action) {
+			try {
+				if (action === "approve") {
+					await AI.approveSamplingRequest({
+						id: request.id,
+						server: request.server,
+					});
+				} else {
+					await AI.rejectSamplingRequest({
+						id: request.id,
+						server: request.server,
+					});
+				}
+			} catch (e) {
+				console.error(\`Failed to \${action} sampling request:\`, e);
+			}
+		},
+
+		// Elicitation handlers
+		handleInput(requestId, fieldName, event, schema) {
+			const newValues = {
+				...(this.formValues?.[requestId] || {}),
+				[fieldName]:
+					schema.type === "boolean"
+						? !!event.target.checked
+						: event.target.value,
+			};
+			this.formValues = { ...this.formValues, [requestId]: newValues };
+		},
+
+		async handleElicitationSubmit(request) {
+			const response = this.formValues[request.id] || {};
+			try {
+				await AI.respondToElicitation({
+					id: request.id,
+					response,
+					server: request.server,
+				});
+				const newFormValues = { ...this.formValues };
+				delete newFormValues[request.id];
+				this.formValues = newFormValues;
+			} catch (e) {
+				console.error("Failed to respond to elicitation:", e);
+			}
+		},
+
+		async handleElicitationDecline(request) {
+			try {
+				await AI.respondToElicitation({
+					id: request.id,
+					response: {},
+					server: request.server,
+					action: "decline",
+				});
+				const newFormValues = { ...this.formValues };
+				delete newFormValues[request.id];
+				this.formValues = newFormValues;
+			} catch (e) {
+				console.error("Failed to decline elicitation:", e);
+			}
+		},
+
+		// --- Render Methods (Updated for unified list) ---
+		renderFormField(req, fieldName, schema) {
+			const value = this.formValues?.[req.id]?.[fieldName] || "";
+			return html\`
+                 <uix-input
+                     label=\${fieldName}
+                     value=\${value}
+                     type=\${schema.enum ? "select" : { boolean: "checkbox", enum: "select" }[schema.type] || "text"}
+                     .options=\${schema.enum}
+                     placeholder=\${schema.description}
+                     @input=\${(e) => this.handleInput(req.id, fieldName, e, schema)}
+                     class="font-mono text-sm w-full"
+                 ></uix-input>
+             \`;
+		},
+
+		renderSamplingRequest(req) {
+			return html\`
+                 <div class="bg-white border border-gray-200 rounded-lg shadow-sm mb-4">
+                     <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+                         <div>
+                             <h5 class="font-semibold text-sm mb-2 text-gray-700">Request</h5>
+                             <pre class="text-xs whitespace-pre-wrap bg-gray-800 text-gray-200 p-3 rounded-lg font-mono overflow-auto max-h-48">\${JSON.stringify(req.request, null, 2)}</pre>
+                         </div>
+                         <div>
+                             <h5 class="font-semibold text-sm mb-2 text-gray-700">Response Preview</h5>
+                             <pre class="text-xs whitespace-pre-wrap bg-gray-100 text-gray-800 p-3 rounded-lg font-mono overflow-auto max-h-48">\${JSON.stringify(req.responseStub, null, 2)}</pre>
+                         </div>
+                     </div>
+                     <div class="flex justify-end gap-3 p-3 bg-gray-50 border-t border-gray-200 rounded-b-lg">
+                         <uix-button @click=\${() => this.handleSamplingResponse(req, "reject")} label="Reject" size="small" class="is-danger"></uix-button>
+                         <uix-button @click=\${() => this.handleSamplingResponse(req, "approve")} label="Approve" size="small" class="is-primary"></uix-button>
+                     </div>
+                 </div>
+             \`;
+		},
+
+		renderElicitationRequest(req) {
+			return html\`
+                 <div class="bg-white border border-gray-200 rounded-lg shadow-sm mb-4">
+                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+                         <div class="pr-4 border-r border-gray-200">
+                             <h5 class="font-semibold text-sm mb-2 text-gray-700">Information Request</h5>
+                             <p class="text-sm text-gray-800 mb-4">\${req.requestText}</p>
+                             <h6 class="font-mono text-xs font-bold text-gray-600 mb-2">Schema</h6>
+                             <pre class="text-xs whitespace-pre-wrap bg-gray-800 text-gray-200 p-3 rounded-lg font-mono overflow-auto max-h-32">\${JSON.stringify(req.schema, null, 2)}</pre>
+                         </div>
+                         <div>
+                             <h5 class="font-semibold text-sm mb-3 text-gray-700">Response Form</h5>
+                             <div class="space-y-3">
+                                 \${Object.entries(req.schema.properties).map(
+																		([fieldName, fieldSchema]) =>
+																			this.renderFormField(
+																				req,
+																				fieldName,
+																				fieldSchema,
+																			),
+																	)}
+                             </div>
+                         </div>
+                     </div>
+                     <div class="flex justify-end gap-3 p-3 bg-gray-50 border-t border-gray-200 rounded-b-lg">
+                         <uix-button @click=\${() => (this.formValues[req.id] = {})} label="Reset" size="small"></uix-button>
+                         <uix-button @click=\${() => this.handleElicitationDecline(req)} label="Decline" size="small" class="is-danger"></uix-button>
+                         <uix-button @click=\${() => this.handleElicitationSubmit(req)} label="Submit" size="small" class="is-primary"></uix-button>
+                     </div>
+                 </div>
+             \`;
+		},
+
+		renderCollapsedBanner() {
+			return html\`
+                <div class="bg-amber-50 border-b-2 border-amber-400 px-4 py-2 flex items-center justify-between cursor-pointer hover:bg-amber-100 transition-colors" @click=\${this.toggleExpanded.bind(this)}>
+                    <div class="flex items-center space-x-3">
+                        <uix-icon name="bell" class="w-5 h-5 text-amber-600 animate-pulse"></uix-icon>
+                        <div>
+                            <!-- SIMPLIFIED: Display total count directly. -->
+                            <span class="font-semibold text-amber-900">
+                                \${this.pendingRequests.length} Pending Request\${this.pendingRequests.length !== 1 ? "s" : ""}
+                            </span>
+                        </div>
+                    </div>
+                    <uix-icon name="chevron-down" class="w-5 h-5 text-amber-600"></uix-icon>
+                </div>
+            \`;
+		},
+
+		renderExpandedPanel() {
+			return html\`
+                <div class="flex flex-col bg-white border-b-2 border-amber-400">
+                    <!-- Header -->
+                    <div class="bg-amber-50 px-4 py-2 flex items-center justify-between border-b border-amber-200">
+                        <div class="flex items-center space-x-3">
+                            <uix-icon name="bell" class="w-5 h-5 text-amber-600"></uix-icon>
+                            <span class="font-semibold text-amber-900">Pending Requests</span>
+                        </div>
+                        <uix-button @click=\${this.toggleExpanded} size="small" ghost>
+                            <uix-icon name="chevron-up" class="w-4 h-4"></uix-icon>
+                        </uix-button>
+                    </div>
+
+                    <!-- Content -->
+                    <div class="flex-1 overflow-auto p-4">
+                        \${
+													this.pendingRequests.length > 0
+														? this.pendingRequests.map((req) =>
+																// Conditionally render based on the request 'type'.
+																req.type === "sampling"
+																	? this.renderSamplingRequest(req)
+																	: this.renderElicitationRequest(req),
+															)
+														: html\`<div class="text-center text-gray-500 py-8">No pending requests</div>\`
+												}
+                    </div>
+                </div>
+            \`;
+		},
+
+		render() {
+			// SIMPLIFIED: Check the length of the unified pendingRequests array.
+			if (this.isLoading || this.pendingRequests.length === 0) {
+				return html\`\`;
+			}
+			return this.isExpanded
+				? this.renderExpandedPanel()
+				: this.renderCollapsedBanner();
+		},
+	};
+};
+`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/form/code.css":{content:`.cm-scroller {
+	overflow: auto !important;
+}
+
+.cm-editor {
+	width: 100%;
+}
+`,mimeType:"text/css",skipSW:!1},"/modules/uix/layout/divider.css":{content:`.uix-divider {
+	--uix-divider-color: rgba(0, 0, 0, 0.05);
+	--uix-divider-size: 2px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	position: relative;
+	padding: 0;
+	width: 100%;
+	height: var(--uix-divider-size);
+	span {
+		padding: 0 0.75rem;
+		font-weight: bold;
+		font-size: var(--uix-divider-font-size, 1.5rem);
+	}
+
+	&[resizable] {
+		cursor: row-resize;
+		&[vertical] {
+			cursor: col-resize;
+		}
+	}
+	&::before,
+	&::after {
+		content: "";
+		flex-grow: 1;
+		height: var(--uix-divider-size);
+		background-color: var(--uix-divider-color);
+	}
+	&[label] {
+		padding: var(--uix-divider-padding, 1rem) 0;
+	}
+	&[label]::before,
+	&[label]::after {
+		flex-grow: 1;
+	}
+	&[vertical] {
+		flex-direction: column;
+		width: 1px;
+		height: 100%;
+		background-color: transparent;
+		&::before,
+		&::after {
+			width: 1px;
+			height: auto;
+		}
+		&[label] {
+			padding: 0 var(--uix-divider-padding, 1rem);
+		}
+	}
+}
+`,mimeType:"text/css",skipSW:!1},"/modules/icon-lucide/lucide/server-off.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-5m-5 0L2.5 2.5C2 2 2 2.5 2 5v3a2 2 0 0 0 2 2zm12 7v-1a2 2 0 0 0-2-2h-1M4 14a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h16.5l1-.5l.5.5l-8-8zm2 4h.01M2 2l20 20"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/triangle-alert.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21.73 18l-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3M12 9v4m0 4h.01"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/templates/servers/basic.js":{content:`import {
 	McpServer,
 	ResourceTemplate,
 } from "@modelcontextprotocol/sdk/server/mcp.js";
@@ -4259,917 +3733,144 @@ server.registerPrompt(
 );
 
 export default server;
-`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/mcp/worker.js":{content:`let ts;
-let tsLibCache = {};
-async function loadCjsModule(url) {
-	try {
-		const response = await fetch(url);
-		if (!response.ok) {
-			throw new Error(\`HTTP error! status: \${response.status}\`);
-		}
-		const scriptText = await response.text();
-
-		// Prepare a fake CJS environment
-		const module = { exports: {} };
-		const exports = module.exports;
-
-		// Wrap the script text in a function and execute it
-		const scriptFunc = new Function("module", "exports", scriptText);
-		scriptFunc(module, exports);
-
-		// If the module uses \`module.exports = ...\`, it will be on module.exports.
-		// If it just uses \`exports.foo = ...\`, it will be on exports.
-		// We check \`module.exports\` first.
-		const exportedModule = module.exports;
-
-		// Sometimes the main export isn't \`default\`, we check if the object is empty.
-		if (Object.keys(exportedModule).length === 0) {
-			return exports;
-		}
-
-		return exportedModule;
-	} catch (error) {
-		console.error(\`Failed to load module from \${url}:\`, error);
-		throw error;
-	}
-}
-
-const loadTypeScript = async () => {
-	if (ts) return;
-	try {
-		const tsModule = await loadCjsModule(
-			"https://unpkg.com/typescript@latest/lib/typescript.js",
-		);
-		ts = tsModule;
-		self.ts = ts;
-		console.log({ ts }, self.ts);
-	} catch (error) {
-		console.error("Failed to load TypeScript:", error);
-	}
-};
-
-const loadTypeScriptLibs = async () => {
-	if (Object.keys(tsLibCache).length > 0) return;
-	const libsToFetch = [
-		"lib.es2020.d.ts",
-		"lib.es2018.d.ts",
-		"lib.es2019.d.ts",
-		"lib.es2019.string.d.ts",
-		"lib.es2019.array.d.ts",
-		"lib.es2019.object.d.ts",
-		"lib.es2020.bigint.d.ts",
-		"lib.es2020.date.d.ts",
-		"lib.es2020.number.d.ts",
-		"lib.es2020.promise.d.ts",
-		"lib.es2020.sharedmemory.d.ts",
-		"lib.es2020.string.d.ts",
-		"lib.es2020.symbol.wellknown.d.ts",
-		"lib.es2015.symbol.d.ts",
-		"lib.es2019.symbol.d.ts",
-		"lib.es2019.intl.d.ts",
-		"lib.es2015.iterable.d.ts",
-		"lib.es2018.intl.d.ts",
-		"lib.es2020.intl.d.ts",
-		"lib.es5.d.ts",
-		"lib.dom.d.ts",
-		"lib.es2017.d.ts",
-		"lib.es2018.asynciterable.d.ts",
-		"lib.es2018.asyncgenerator.d.ts",
-		"lib.es2018.promise.d.ts",
-		"lib.es2018.regexp.d.ts",
-		"lib.es2016.d.ts",
-		"lib.es2017.arraybuffer.d.ts",
-		"lib.es2017.date.d.ts",
-		"lib.es2017.intl.d.ts",
-		"lib.es2017.object.d.ts",
-		"lib.es2017.sharedmemory.d.ts",
-		"lib.es2017.string.d.ts",
-		"lib.es2017.typedarrays.d.ts",
-		"lib.es2015.d.ts",
-		"lib.es2016.array.include.d.ts",
-		"lib.es2016.intl.d.ts",
-		"lib.es2015.symbol.wellknown.d.ts",
-		"lib.es2015.core.d.ts",
-		"lib.es2015.collection.d.ts",
-		"lib.es2015.generator.d.ts",
-		"lib.es2015.promise.d.ts",
-		"lib.es2015.proxy.d.ts",
-		"lib.es2015.reflect.d.ts",
-		"lib.decorators.d.ts",
-		"lib.decorators.legacy.d.ts",
-	];
-
-	try {
-		const promises = libsToFetch.map((lib) =>
-			fetch(\`https://unpkg.com/typescript@latest/lib/\${lib}\`).then((res) => {
-				if (!res.ok) throw new Error(\`Failed to fetch \${lib}\`);
-				return res.text();
-			}),
-		);
-		const contents = await Promise.all(promises);
-		const newCache = {};
-		libsToFetch.forEach((lib, index) => {
-			newCache[lib] = contents[index];
-		});
-
-		return newCache;
-	} catch (e) {
-		console.error(
-			"Could not fetch TypeScript library definitions. Type checking will be less accurate.",
-			e,
-		);
-	}
-};
-
-self.onmessage = async (e) => {
-	const { type, payload } = e.data;
-	switch (type) {
-		case "init":
-			await loadTypeScript();
-			tsLibCache = await loadTypeScriptLibs();
-			break;
-		case "validate": {
-			if (!ts) return;
-			const validationErrors = validate(payload.code, payload.filePath);
-			self.postMessage({
-				type: "validationComplete",
-				payload: { errors: validationErrors },
-			});
-			break;
-		}
-		case "transpile": {
-			if (!ts) {
-				// Fallback if TS isn't loaded yet
-				self.postMessage({
-					type: "transpileComplete",
-					payload: {
-						transpiledCode: payload.code,
-						requestId: payload.requestId,
-					},
-				});
-				return;
-			}
-			const transpiledResult = transpile(payload.code);
-			self.postMessage({
-				type: "transpileComplete",
-				payload: {
-					transpiledCode: transpiledResult,
-					requestId: payload.requestId,
-				},
-			});
-			break;
-		}
-	}
-};
-
-const validate = (code, filePath) => {
-	try {
-		const defaultLibFileName = "lib.es2020.d.ts";
-		const compilerOptions = {
-			target: ts.ScriptTarget.ES2020,
-			module: ts.ModuleKind.CommonJS,
-			allowJs: true,
-			esModuleInterop: true,
-			noEmit: true,
-		};
-
-		const host = {
-			getSourceFile: (fileName, languageVersion) => {
-				const sourceText =
-					tsLibCache[fileName] || (fileName === filePath ? code : undefined);
-				return sourceText !== undefined
-					? ts.createSourceFile(fileName, sourceText, languageVersion)
-					: undefined;
-			},
-			writeFile: () => {},
-			getDefaultLibFileName: () => defaultLibFileName,
-			useCaseSensitiveFileNames: () => false,
-			getCanonicalFileName: (fileName) => fileName,
-			getCurrentDirectory: () => "/",
-			getNewLine: () => "\\n",
-			fileExists: (fileName) => fileName === filePath || !!tsLibCache[fileName],
-			readFile: (fileName) =>
-				fileName === filePath ? code : tsLibCache[fileName],
-		};
-
-		const program = ts.createProgram([filePath], compilerOptions, host);
-		const diagnostics = ts.getPreEmitDiagnostics(program);
-
-		return diagnostics.map((diagnostic) => {
-			const message = ts.flattenDiagnosticMessageText(
-				diagnostic.messageText,
-				"\\n",
-			);
-			if (diagnostic.file && diagnostic.start) {
-				const { line, character } = ts.getLineAndCharacterOfPosition(
-					diagnostic.file,
-					diagnostic.start,
-				);
-				return { line: line + 1, character: character + 1, message };
-			}
-			return { line: 0, character: 0, message };
-		});
-	} catch (error) {
-		console.error("Error during code validation in worker:", error);
-		return [
-			{
-				line: 0,
-				character: 0,
-				message: "An unexpected error occurred during validation.",
-			},
-		];
-	}
-};
-
-const transpile = (code) => {
-	try {
-		const jsResult = ts.transpileModule(code, {
-			compilerOptions: {
-				module: ts.ModuleKind.CommonJS,
-				target: ts.ScriptTarget.ES2020,
-			},
-		});
-		return jsResult.outputText;
-	} catch (error) {
-		console.error("TypeScript compilation failed in worker:", error);
-		return code;
-	}
-};
-`,mimeType:"application/javascript",skipSW:!1},"/modules/icon-lucide/lucide/server-off.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 2h13a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-5m-5 0L2.5 2.5C2 2 2 2.5 2 5v3a2 2 0 0 0 2 2zm12 7v-1a2 2 0 0 0-2-2h-1M4 14a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h16.5l1-.5l.5.5l-8-8zm2 4h.01M2 2l20 20"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/triangle-alert.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m21.73 18l-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3M12 9v4m0 4h.01"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/chevron-down.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 9l6 6l6-6"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/monitor.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="20" height="14" x="2" y="3" rx="2"/><path d="M8 21h8m-4-4v4"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/pie-chart.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/bell-ring.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9m4.3 13a1.94 1.94 0 0 0 3.4 0M4 2C2.8 3.7 2 5.7 2 8m20 0c0-2.3-.8-4.3-2-6"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/views/templates/app.js":{content:`export default ({ html, AI, T }) => {
-	return {
-		style: true,
-		class: "w-full h-screen bg-[#282828] text-[#ebdbb2] flex font-sans text-sm",
-		properties: {
-			currentRoute: T.object({ sync: "ram" }),
-			isServerConnected: T.boolean({ sync: "local" }),
-		},
-		async connected() {
-			await this.initializeAI();
-		},
-		async initializeAI() {
-			try {
-				if (!AI.isInitialized) {
-					await AI.init({
-						geminiApiKey: "",
-						localAIEndpoint: "http://localhost:1234/v1/chat/completions",
-						openrouterApiKey:
-							"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",
-						defaultRoots: [
-							{
-								uri: "file:///",
-								name: "Root Filesystem",
-								description: "Full filesystem access",
-							},
-						],
-					});
-				}
-				this.isServerConnected = AI.listClients().length > 0;
-			} catch (error) {
-				console.error("Error initializing AI service:", error);
-				this.isServerConnected = false;
-			}
-		},
-		render() {
-			return html\`
-				<mcp-sidebar></mcp-sidebar>
-				<div class="flex-1 h-full flex flex-col min-w-0">
-					<div
-						class="h-15 bg-[#3c3836] border-b border-[#504945] p-2 flex items-center justify-between"
-					>
-					
-					</div>
-					<div class="flex-1 overflow-auto flex">
-            \${this.component}
-					</div>
-				</div>
-			\`;
-		},
-	};
-};
-`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/mcp/views/sidebar.js":{content:`export default ({ html, T }) => ({
-	class:
-		"w-64 bg-[#3c3836] text-[#ebdbb2] flex flex-col h-screen shrink-0 border-r border-[#504945]",
+`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/navigation/tabs.js":{content:`export default ({ T, html }) => ({
+	tag: "uix-tabs",
+	style: true,
+	class: "overflow-auto",
 	properties: {
-		currentRoute: T.object({ sync: "ram" }),
-		onSelectHistory: T.function(),
-		isDarkMode: T.boolean({ defaultValue: true, sync: "local" }),
+		tabs: T.array(),
+		selectTab: T.function(),
+		removeTab: T.function(),
+		activeTab: T.number({ defaultValue: 0 }),
+		toggle: T.boolean(false),
 	},
 
-	_renderLink(link) {
-		const isActive = this.currentRoute.name === link.key;
-		return html\`
-            <uix-link href=\${link.key}
-          icon=\${link.icon}
-          label=\${link.label}
-          data-active=\${isActive}
-          class="
-            relative flex items-center text-sm font-bold p-2 rounded-md transition-colors w-full
-            text-[#ebdbb2] hover:bg-[#504945]
-            data-[active=true]:bg-[#504945] data-[active=true]:text-white
-          ">
-                \${
-									link.isComingSoon
-										? html\`<span class="ml-auto bg-[#b16286] text-xs font-bold text-white px-2 py-0.5 rounded-full absolute right-3">soon</span>\`
-										: ""
-								}
-            </uix-link>
-        \`;
+	async __selectTab(_tabId) {
+		const newActiveTab = this.toggle && this.activeTab === _tabId ? -1 : _tabId;
+
+		if (this.selectTab) {
+			await this.selectTab(newActiveTab);
+		}
+
+		this.activeTab = newActiveTab;
 	},
-	toggleDarkMode() {
-		document.body.classList.toggle("dark", this.isDarkMode);
-		this.isDarkMode = !this.isDarkMode;
+
+	_removeTab(tabId, e) {
+		e.stopPropagation();
+		if (this.removeTab) {
+			this.removeTab(tabId);
+		}
 	},
 
 	render() {
-		const mainLinks = [
-			{ key: "discover", label: "Discover", icon: "telescope" },
-			{ key: "dev", label: "Develop", icon: "code" },
-			{ key: "chat", label: "Chat", icon: "message-circle" },
-			{ key: "inspector", label: "Inspector", icon: "search" },
-			{ key: "servers", label: "Servers", icon: "server" },
-			{ key: "agents", label: "Agents", icon: "bot", isComingSoon: true },
-			{ key: "apps", label: "Apps", icon: "layout-grid", isComingSoon: true },
-			{ key: "learn", label: "Learn", icon: "book", isComingSoon: true },
-			{
-				key: "vibecoding",
-				label: "Vibecoding",
-				icon: "zap",
-				isComingSoon: true,
-			},
-		];
+		if (!this.tabs || this.tabs.length === 0) {
+			return null;
+		}
 
-		return html\`<div class="h-15 p-4 border-b border-[#504945] flex items-center space-x-2 shrink-0">
-            <h2 class="text-xl font-semibold text-[#ebdbb2]"><a href="/">\u{1F336}\uFE0F MCPiQuant</a></h2>
-        </div>
-        <div class="flex-grow flex flex-col min-h-0">
-            <nav class="p-2 space-y-1 shrink-0">
-                \${mainLinks.map((link) => this._renderLink(link))}
-            </nav>
-            <div class="flex-grow flex flex-col border-t border-[#504945] min-h-0">
-                <h3 class="p-2 text-xs font-semibold text-[#928374] uppercase tracking-wider shrink-0">History</h3>
-                <div class="flex-1 overflow-y-auto">
-                    <mcp-history .onSelect=\${this.onSelectHistory} listOnly></mcp-history>
-                </div>
+		return html\`
+            <div class="tab-headers" role="tablist">
+                \${this.tabs.map(
+									([name], tabId) => html\`
+                    <uix-link
+                        role="tab"
+                        @click=\${() => this.__selectTab(tabId)}
+                        .label=\${name}
+                        ?selected=\${tabId === this.activeTab}
+                        ?closable=\${!!this.closeTab}
+                        @close=\${(e) => this.__closeTab(e, tabId)}
+                        skipRoute
+                        padding=\${this.padding}
+                        text="center"
+												class="py-1 text-lg"
+                    >								
+									\${!this.removeTab ? null : html\`<uix-icon name="x" class="w-3 close" @click=\${((e) => this._removeTab(tabId, e)).bind(this)}></uix-icon>\`}
+									</uix-link>
+                \`,
+								)}
             </div>
-            <div class="p-2 border-t border-[#504945] shrink-0">
-                \${this._renderLink({
-									key: "settings",
-									label: "Settings",
-									icon: "settings",
-								})}
-                \${this._renderLink({
-									key: "feedback",
-									label: "Feedback",
-									icon: "message-square-heart",
-								})}
-                <button @click=\${this.toggleDarkMode.bind(this)} class="w-full flex items-center p-2 rounded-md hover:bg-[#504945] text-left text-sm">
-                    <uix-icon name=\${
-											this.isDarkMode ? "sun" : "moon"
-										} class="w-5 h-5 mr-3 shrink-0"></uix-icon>
-                    <span>\${this.isDarkMode ? "Light Mode" : "Dark Mode"}</span>
-                    <div class="ml-auto w-10 h-5 \${
-											this.isDarkMode ? "bg-red-700" : "bg-gray-600"
-										} rounded-full flex items-center p-1 transition-colors">
-                        <div class="w-4 h-4 bg-white rounded-full transform transition-transform \${
-													this.isDarkMode ? "translate-x-4" : ""
-												}"></div>
-                    </div>
-                </button>
+
+            <div class="flex flex-1 overflow-auto" role="tabpanel">
+                \${this.tabs[this.activeTab] ? this.tabs[this.activeTab][1] : ""}
             </div>
-        </div>
-      \`;
+        \`;
 	},
 });
-`,mimeType:"application/javascript",skipSW:!1},"/views/templates/discover.js":{content:`export default ({ html, T, $APP, Model }) => {
-	$APP.define("mcp-discover-all", {
-		extends: "mcp-artifact-grid",
-		async connected() {
-			const servers = await Model.servers.getAll();
-			const clients = await Model.clients.getAll();
-			const agents = await Model.agents.getAll();
-			this.artifacts = [...servers, ...clients, ...agents];
-		},
-	});
+`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/navigation/tabs.css":{content:`.uix-tabs {
+	display: flex;
+	flex-direction: column;
+	flex-grow: 1;
 
-	$APP.define("mcp-discover-header", {
-		properties: {
-			searchQuery: T.string(""),
-			activeView: T.string("All"),
-			activeTags: T.array([]),
-			availableTags: T.array([]),
-			onSearchChange: T.function(),
-			onViewChange: T.function(),
-			onToggleTag: T.function(),
-			currentRoute: T.object({ sync: "ram" }),
-		},
-		render() {
-			const navItems = ["All", "Servers", "Clients", "Agents", "Discussion"];
-			return html\`
-				<div class="flex flex-col gap-6">
-					<div
-						class="flex flex-col md:flex-row md:items-start md:justify-between gap-4"
-					>
-						<div>
-							<h1 class="font-bold text-3xl text-[#ebdbb2]">Discover</h1>
-							<p class="text-[#bdae93]">
-								Browse, connect, and discuss MCP artifacts.
-							</p>
-						</div>
-						<div class="relative">
-							<input
-								type="text"
-								.value=\${this.searchQuery}
-								@input=\${(e) => this.onSearchChange(e.target.value)}
-								placeholder="Search ..."
-								class="w-full md:w-72 bg-[#282828] border-2 border-[#3c3836] font-semibold text-[#ebdbb2] rounded-lg py-2 pl-10 pr-4 focus:outline-none focus:shadow-[2px_2px_0px_#1d2021] focus:border-[#83a598] transition"
-							/>
-							<uix-icon
-								name="search"
-								class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#928374]"
-							></uix-icon>
-						</div>
-					</div>
+	.tab-headers {
+		display: flex;
+		flex-direction: row;
+		flex-shrink: 0;
+		background-color: var(--uix-tabs-background-color, #2a2a2a);
+		border-bottom: 2px solid var(--uix-tabs-border-color, #005a99);
+	}
 
-					<div class="flex flex-col gap-4">
-						<div
-							class="flex items-center border border-[#3c3836] rounded-lg bg-[#282828] w-full md:w-auto self-start"
-						>
-							\${navItems.map((item) => {
-								const tab = item.toLowerCase();
-								const url = \`/discover/\${tab}\`;
-								const isActive =
-									tab === "all"
-										? !this.currentRoute.path.startsWith("/discover/")
-										: this.currentRoute.path.startsWith(url);
-								return html\`
-									<uix-link
-										href=\${url}
-										label=\${item}
-										class="block [&>a]:px-5 [&>a]:py-2.5 [&>a]:block rounded-md text-sm font-semibold transition-colors \${
-											isActive
-												? "bg-[#458588] text-[#ebdbb2]"
-												: "text-[#bdae93] hover:bg-[#3c3836]"
-										}"
-									>
-									</uix-link>
-								\`;
-							})}
-						</div>
-						<div>
-							<div class="flex flex-wrap gap-2">
-								<span
-									class="text-[#a89984] font-bold text-xs self-center pr-2"
-									>TAGS:</span
-								>
-								\${this.availableTags.map((tag) => {
-									const isActive = this.activeTags.includes(tag.id);
-									return html\`
-										<button
-											@click=\${() => this.onToggleTag(tag.id)}
-											class="text-xs font-bold px-2 py-1 rounded transition-colors \${
-												isActive
-													? "bg-[#83a598] text-[#1d2021]"
-													: "bg-[#504945] text-[#ebdbb2] hover:bg-[#665c54]"
-											}"
-										>
-											\${tag.name}
-										</button>
-									\`;
-								})}
-							</div>
-						</div>
-					</div>
-				</div>
-			\`;
-		},
-	});
+	.tab-headers > uix-link {
+		flex: 1;
+		text-align: center;
+		cursor: pointer;
+		line-height: var(--uix-tabs-line-height, 2rem);
+		font-size: var(--uix-tabs-font-size, 0.75rem);
+		border-radius: var(--uix-tabs-border-radius, 0);
+		color: var(--uix-tabs-text, #eee);
+		transition:
+			background-color 0.2s ease-in-out,
+			color 0.2s ease-in-out;
+		.close {
+			visibility: hidden;
+		}
+	}
+	.tab-headers > uix-link:hover {
+		background-color: var(--uix-tabs-active-background-color, #007acc);
+		a {
+			color: #fff;
+		}
+		.close {
+			visibility: visible;
+		}
+	}
+	.tab-headers > uix-link[selected] {
+		font-weight: var(--uix-tabs-font-weight, 600);
+		background-color: var(--uix-tabs-active-background-color, #007acc);
+		color: var(--uix-tabs-active-text, #fff);
+	}
+}
+`,mimeType:"text/css",skipSW:!1},"/modules/apps/mcp/views/dashboard.js":{content:`export default ({ html, T }) => ({
+	style: true,
+	properties: {
+		selectedHistoryItem: T.object(null),
+		onDeselectHistoryItem: T.function(),
+	},
 
-	$APP.define("mcp-artifact-card", {
-		properties: {
-			artifact: T.object(),
-			type: T.string("server"),
-			onToggleFavorite: T.function(),
-			onToggleHot: T.function(),
-			isDetailView: T.boolean(false),
-		},
-		render() {
-			const { artifact } = this;
-			if (!artifact) return html\`\`;
-			const isFavorited = artifact.favorite;
-			const starClass = isFavorited ? "text-[#fabd2f]" : "text-[#a89984]";
+	_renderCard(title, content) {
+		return html\`
+                <uix-card class="flex flex-col min-h-[200px]">
+                    <h3 class="font-semibold mb-3">\${title}</h3>
+                    <div class="flex-grow overflow-y-auto pr-2">\${content}</div>
+                </uix-card>
+            \`;
+	},
 
-			return html\`
-				<uix-link
-				href=\${\`/discover/\${this.type}/\${artifact.id}\`}
-					class="bg-[#282828] w-full h-full flex-1 [&>a]:flex [&>a]:w-full border-2 border-[#3c3836] rounded-lg p-4 flex gap-4 font-semibold transition-all duration-200 shadow-[4px_4px_0px_#1d2021] \${
-						this.isDetailView
-							? ""
-							: "hover:shadow-[6px_6px_0px_#83a598] hover:border-[#83a598] cursor-pointer"
-					}"
-					.label=\${html\`<div class="flex flex-col justify-between items-start w-full">
-						<div class="flex items-center gap-4 w-full">
-							<div
-								class="w-12 h-12 rounded-md flex-shrink-0 flex items-center justify-center bg-[#1d2021] text-[#83a598]"
-							>
-								<uix-icon name=\${artifact.icon} class="w-6 h-6"></uix-icon>
-							</div>
-							<div class="flex gap-3 items-center w-full">
-								<h3 class="font-bold flex-1 text-md text-[#ebdbb2]">
-									\${artifact.name}
-								</h3>
-								\${
-									artifact.isConnected
-										? html\`<span
-											class="text-xs text-[#b8bb26] font-medium"
-											>Currently connected</span
-									  >\`
-										: ""
-								}
-									<uix-link
-										@click=\${() => this.onToggleFavorite(artifact)}
-										icon="star"
-										class="w-6 h-6 \${starClass} pointer hover:text-blue transition-colors"
-										fill=\${isFavorited ? "currentColor" : "none"}
-									></uix-link>
-							</div>
-						</div>
-						<p class="text-sm text-[#bdae93] font-medium min-h-[2.5rem] flex-grow pb-5">
-						\${artifact.description}
-					</p>
+	render() {
+		return html\`
+              <div class="space-y-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <mcp-tools viewMode="flow" class="block h-60"></mcp-tools>
+        <mcp-prompts viewMode="flow" class="block h-60"></mcp-prompts>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <mcp-resources viewMode="flow" resourceType="resources" class="block h-60"></mcp-resources>
+        <mcp-resources viewMode="flow" resourceType="templates" class="block h-60"></mcp-resources>
+    </div>
+</div>
 
-					<div
-						class="flex flex-col gap-4 pt-4 border-t-2 border-dashed border-[#504945] w-full"
-					>
-						<div class="flex flex-wrap gap-2">
-							<span
-								class="text-xs font-bold px-2 py-1 rounded bg-[#504945] text-[#d3869b]"
-								>\${this.type.toUpperCase()}</span
-							>
-							\${artifact.tags.map(
-								(tag) =>
-									html\`<span
-										class="text-xs font-bold px-2 py-1 rounded bg-[#504945] text-[#ebdbb2]"
-										>\${tag}</span
-									>\`,
-							)}
-						</div>
-						<div class="flex items-center justify-between">
-							<div class="flex items-center gap-4">
-								<button
-									@click=\${() => this.onToggleHot(artifact)}
-									class="flex items-center gap-1.5 px-2 py-1 rounded-md transition-colors font-bold text-sm \${
-										artifact.hasBeenHotted
-											? "bg-[#fe8019] text-[#1d2021]"
-											: "bg-[#504945] text-[#ebdbb2] hover:bg-[#665c54]"
-									}"
-								>
-									<uix-icon name="flame" class="w-4 h-4"></uix-icon>
-									<span>\${artifact.hots}</span>
-								</button>
-								<div
-									class="flex items-center gap-1.5 text-[#a89984] font-bold text-sm"
-									title="Comments"
-								>
-									<uix-icon
-										name="message-circle"
-										class="w-4 h-4"
-									></uix-icon>
-									<span>\${artifact.commentsCount}</span>
-								</div>
-							</div>
-							\${
-								artifact.isConnected
-									? html\`<uix-button
-										label="Disconnect"
-										class="bg-[#fb4934] text-[#ebdbb2] font-bold"
-										size="small"
-								  ></uix-button>\`
-									: html\`<uix-button
-										label="Connect"
-										class="bg-[#458588] text-[#ebdbb2] font-bold"
-										size="small"
-								  ></uix-button>\`
-							}
-						</div>
-					</div>
-				</div>\`}
-				>
-					
-							</uix-link>
-
-					
-			\`;
-		},
-	});
-
-	$APP.define("mcp-artifact-grid", {
-		properties: {
-			artifacts: T.array(),
-			type: T.string("server"),
-			activeView: T.string("All"),
-			onArtifactClick: T.function(),
-			onToggleFavorite: T.function(),
-			onToggleHot: T.function(),
-			onClearFilters: T.function(),
-		},
-		render() {
-			if (this.activeView === "Discussion") {
-				return html\`
-					<div
-						class="w-full h-full flex items-center justify-center text-center text-[#928374] p-8 bg-[#282828] border-2 border-dashed border-[#3c3836] rounded-lg"
-					>
-						<div>
-							<h3 class="font-bold text-2xl text-[#ebdbb2]">
-								Discussion Board
-							</h3>
-							<p>This feature is coming soon!</p>
-						</div>
-					</div>
-				\`;
-			}
-
-			const { artifacts = [] } = this;
-
-			const favoriteArtifacts = artifacts.filter((a) => a.favorite);
-			const otherArtifacts = artifacts.filter((a) => !a.favorite);
-			return html\`<div class="flex-grow">						
-				\${
-					artifacts.length === 0
-						? html\`
-							<div
-								class="w-full text-center text-[#928374] p-8 bg-[#282828] border-2 border-dashed border-[#3c3836] rounded-lg"
-							>
-								<h3 class="font-bold text-lg text-[#ebdbb2]">
-									No Artifacts Found
-								</h3>
-								<p>
-									Your search and filter combination did not match any
-									artifacts.
-								</p>
-								<button
-									@click=\${() => this.onClearFilters()}
-									class="mt-4 text-sm font-bold text-[#83a598] hover:underline"
-								>
-									Clear all filters
-								</button>
-							</div>
-					  \`
-						: html\`
-							\${
-								favoriteArtifacts.length > 0
-									? html\`
-										<div class="mb-8">
-											<h2
-												class="font-semibold text-xl text-[#ebdbb2] mb-4 flex items-center gap-2"
-											>
-												<uix-icon
-													name="star"
-													class="w-5 h-5 text-[#fabd2f]"
-													fill="currentColor"
-												></uix-icon>
-												Favorites
-											</h2>
-											<div
-												class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 grid-rows-[1fr_auto] grid-cols-[1fr_auto]"
-											>
-												\${favoriteArtifacts.map(
-													(artifact) => html\`
-														<mcp-artifact-card
-															.artifact=\${artifact}
-															type=\${this.type}
-														></mcp-artifact-card>
-													\`,
-												)}
-											</div>
-										</div>
-								  \`
-									: ""
-							}
-
-							<div>
-								<h2 class="font-semibold text-xl text-[#ebdbb2] mb-4">
-									\${
-										favoriteArtifacts.length > 0
-											? \`Other \${this.activeView}\`
-											: \`\${this.activeView} Artifacts\`
-									}
-								</h2>
-								<div
-									class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 grid-rows-[1fr_auto] grid-cols-[1fr_auto]"
-								>
-									\${otherArtifacts.map(
-										(artifact) => html\`
-											<mcp-artifact-card
-												.artifact=\${artifact}
-											></mcp-artifact-card>
-										\`,
-									)}
-								</div>
-							</div>
-					  \`
-				}
-			</div>\`;
-		},
-	});
-
-	$APP.define("mcp-trending-discussions", {
-		class:
-			"w-80 bg-[#282828] p-6 flex-col space-y-6 flex-shrink-0 hidden lg:flex border-l border-[#3c3836]",
-		properties: {
-			discussions: T.array([]),
-		},
-		render() {
-			return html\`<h2 class="font-semibold text-lg text-[#ebdbb2]">
-						Trending Discussions
-					</h2>
-					<div class="flex flex-col gap-y-10">
-						\${this.discussions.map(
-							(d) => html\`
-								<div class="flex items-start gap-3 text-[#bdae93]">
-									<div
-										class="w-8 h-8 flex-shrink-0 bg-[#3c3836] rounded-md flex items-center justify-center text-[#928374]"
-									>
-										<uix-icon name=\${d.icon} class="w-5 h-5"></uix-icon>
-									</div>
-									<div>
-										<p
-											class="font-semibold text-[#ebdbb2] hover:text-[#83a598] cursor-pointer leading"
-										>
-											\${d.title}
-										</p>
-										<div
-											class="text-xs text-[#928374] flex items-center gap-4 mt-1.5"
-										>
-											<span>\${d.category}</span>
-											<div class="flex items-center gap-1.5" title="Upvotes">
-												<uix-icon
-													name="arrow-up"
-													class="w-3.5 h-3.5"
-												></uix-icon>
-												<span>\${d.upvotes}</span>
-											</div>
-											<div class="flex items-center gap-1.5" title="Comments">
-												<uix-icon
-													name="message-circle"
-													class="w-3.5 h-3.5"
-												></uix-icon>
-												<span>\${d.comments}</span>
-											</div>
-										</div>
-									</div>
-							\`,
-						)}
-					</div>
-					<uix-button
-						label="View all discussions"
-						class="w-full mt-auto bg-[#3c3836]"
-						size="small"
-					></uix-button>\`;
-		},
-	});
-
-	$APP.define("mcp-artifact-detail", {
-		class: "flex-grow gap-8 flex flex-col overflow-y-auto",
-		properties: {
-			artifact: T.object(),
-			onToggleFavorite: T.function(),
-			onToggleHot: T.function(),
-		},
-		render() {
-			const { artifact } = this;
-			if (!artifact) return html\`\`;
-
-			return html\`
-						<uix-link
-							class="flex items-center gap-2 text-[#bdae93] hover:text-[#ebdbb2] font-semibold self-start -mb-4"
-							label="Back to Discover"
-							icon="arrow-left"
-							href="/discover"
-						>		
-						</uix-link>
-						<mcp-artifact-card
-							.artifact=\${artifact}
-						>
-						</mcp-artifact-card>
-						<div class="flex flex-col gap-y-10">
-							<view-github-comments
-									owner="mcpiquanthq"
-									repo="githubcomments"
-									title=\${artifact.name}>
-							</view-github-comments>
-						</div>
-					</div>\`;
-		},
-	});
-
-	return {
-		tag: "mcp-main",
-		class:
-			"w-full h-full bg-[#1d2021] text-[#ebdbb2] flex font-sans text-sm overflow-hidden",
-		properties: {
-			searchQuery: T.string(""),
-			activeView: T.string("All"),
-			activeTags: T.array([]),
-			allArtifacts: T.array([]),
-			availableTags: T.array([]),
-			trendingDiscussions: T.array([]),
-			activeArtifact: T.object(null),
-			component: T.object(),
-			currentRoute: T.object({ sync: "ram", attribute: false, reflect: false }),
-		},
-
-		async connected() {
-			const servers = await Model.servers.getAll();
-			const clients = await Model.clients.getAll();
-			const agents = await Model.agents.getAll();
-
-			const allArtifacts = [
-				...servers.map((s) => ({ ...s, type: "Server" })),
-				...clients.map((c) => ({ ...c, type: "Client" })),
-				...agents.map((a) => ({ ...a, type: "Agent" })),
-			];
-
-			const connectedServerId = "default-feature-rich";
-			this.allArtifacts = allArtifacts.map((a) => ({
-				...a,
-				isConnected: a.id === connectedServerId,
-			}));
-
-			const allTags = await Model.tags.getAll();
-			this.availableTags = [...new Set(allTags)];
-			const response = await Model.discussions.getAll({
-				orderBy: "-upvotes",
-				limit: 5,
-			});
-			this.trendingDiscussions = response.items;
-		},
-		async selectArtifact(artifact) {
-			const modelName = \`\${artifact.type.toLowerCase()}s\`;
-			if (Model[modelName]) {
-				const fullArtifact = await Model[modelName].get(artifact.id, {
-					includes: ["comments"],
-				});
-				this.activeArtifact = { ...fullArtifact, type: artifact.type };
-				this.update();
-			}
-		},
-		deselectArtifact() {
-			this.activeArtifact = null;
-			this.update();
-		},
-		toggleTag(tagToToggle) {
-			const tagIndex = this.activeTags.indexOf(tagToToggle);
-			if (tagIndex > -1) {
-				this.activeTags.splice(tagIndex, 1);
-			} else {
-				this.activeTags.push(tagToToggle);
-			}
-			this.update();
-		},
-		clearFilters() {
-			this.activeTags = [];
-			this.searchQuery = "";
-			this.update();
-		},
-		render() {
-			if (this.activeArtifact) {
-				return html\`
-					<mcp-artifact-detail
-						.artifact=\${this.activeArtifact}						
-					></mcp-artifact-detail>
-					<mcp-trending-discussions
-						.discussions=\${this.trendingDiscussions}
-					></mcp-trending-discussions>
-				\`;
-			}
-
-			return html\`
-				<main
-					class="flex-grow p-6 md:p-8 flex flex-col gap-8 overflow-y-auto"
-				>
-						<mcp-discover-header
-						.searchQuery=\${this.searchQuery}
-						.activeView=\${this.activeView}
-						.activeTags=\${this.activeTags}
-						.availableTags=\${this.availableTags}
-						.onSearchChange=\${(q) => {
-							this.searchQuery = q;
-						}}
-						.onViewChange=\${(v) => {
-							this.activeView = v;
-						}}
-					>
-					</mcp-discover-header>
-					\${this.currentRoute?.matched?.component}					
-				</main>
-				<mcp-trending-discussions
-					.discussions=\${this.trendingDiscussions}
-				></mcp-trending-discussions>
-			\`;
-		},
-	};
-};
-`,mimeType:"application/javascript",skipSW:!1},"/views/templates/app.css":{content:`.app-template {
+            \`;
+	},
+});
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/mcp/views/dashboard.css":{content:`.mcp-dashboard {
 	.uix-card {
 		button {
 			color: #111;
@@ -5177,99 +3878,734 @@ const transpile = (code) => {
 		}
 	}
 }
-`,mimeType:"text/css",skipSW:!1},"/modules/apps/mcp/views/history.js":{content:`export default ({ html, AI, T }) => {
-	$APP.define("mcp-history-view", {
+`,mimeType:"text/css",skipSW:!1},"/modules/apps/mcp/views/tools.js":{content:`export default ({ html, AI, T }) => {
+	return {
+		tag: "mcp-tools",
 		properties: {
-			item: T.object(null),
-			onBack: T.function(),
+			tools: T.array([]),
+			selectedTool: T.object(null),
+			toolArgs: T.object({}),
+			isExecuting: T.boolean(false),
+			isLoading: T.boolean(true),
+			viewMode: T.string({ defaultValue: "side-by-side" }), // 'side-by-side' or 'flow'
+			toolResponse: T.any(null),
 		},
 
-		handleBack() {
-			if (this.onBack) {
-				this.onBack();
+		connected() {
+			this.loadTools();
+		},
+
+		async loadTools() {
+			this.isLoading = true;
+			try {
+				const servers = AI.listClients();
+				if (servers && servers.length > 0) {
+					const { tools } = await AI.listTools({ servers });
+					this.tools = tools || [];
+				}
+			} catch (error) {
+				console.error("Error loading tools:", error);
+				this.tools = [];
+			} finally {
+				this.isLoading = false;
 			}
 		},
 
-		render() {
-			if (!this.item) {
-				return html\`<div class="text-center text-gray-500 h-full flex items-center justify-center">Select a history item to view details.</div>\`;
+		selectTool(tool) {
+			this.selectedTool = tool;
+			this.toolArgs = {};
+			this.toolResponse = null;
+		},
+
+		clearSelectedTool() {
+			this.selectedTool = null;
+			this.toolResponse = null;
+		},
+
+		handleArgInput(paramName, event, schema) {
+			this.toolArgs = {
+				...this.toolArgs,
+				[paramName]:
+					schema.type === "number"
+						? Number(event.target.value)
+						: schema.type === "boolean"
+							? !!event.target.checked
+							: event.target.value,
+			};
+		},
+
+		async handleExecuteTool() {
+			if (!this.selectedTool) return;
+
+			this.isExecuting = true;
+			this.toolResponse = null;
+			try {
+				const { name } = this.selectedTool;
+				const args = this.toolArgs;
+				const response = await AI.callTool(name, args);
+				this.toolResponse = response;
+			} catch (e) {
+				console.error(\`Failed to execute tool \${this.selectedTool.name}:\`, e);
+				this.toolResponse = {
+					error: e.message || "An unknown error occurred.",
+				};
+			} finally {
+				this.isExecuting = false;
 			}
+		},
 
-			const { item } = this;
-
+		// Rendering methods for 'flow' view
+		_renderFlowView() {
+			if (this.selectedTool) {
+				return this._renderToolExecutorFlow();
+			}
+			return this._renderToolListFlow();
+		},
+		_renderToolListFlow() {
+			if (this.isLoading) {
+				return html\`<div class="flex items-center justify-center h-full"><p class="text-xs text-gray-500">Loading...</p></div>\`;
+			}
+			if (!this.tools.length) {
+				return html\`<div class="flex items-center justify-center h-full"><p class="text-xs text-gray-500">No tools found.</p></div>\`;
+			}
 			return html\`
-                <div class="text-sm">
-                    <uix-link label="Back" icon="arrow-left" reverse @click=\${this.handleBack.bind(this)} class="text-xs text-blue-600 hover:underline mb-3 flex items-center"></uix-link>
-                    <div class="space-y-4">
-                        <div>
-                            <h4 class="font-mono text-xs font-bold text-gray-700 mb-1">REQUEST</h4>
-                            <pre class="text-xs whitespace-pre-wrap bg-gray-800 text-gray-200 p-2 rounded-lg font-mono overflow-auto">\${JSON.stringify({ tool: item.toolName, args: item.args || item.params }, null, 2)}</pre>
-                        </div>
-                        <div>
-                            <h4 class="font-mono text-xs font-bold text-gray-700 mb-1">RESPONSE</h4>
-                            \${
-															item.status === "success"
-																? html\`<pre class="text-xs whitespace-pre-wrap bg-gray-900 text-green-400 p-2 rounded-lg font-mono overflow-auto">\${JSON.stringify(item.result, null, 2)}</pre>\`
-																: item.status === "error"
-																	? html\`<pre class="text-xs whitespace-pre-wrap bg-red-100 text-red-700 p-2 rounded-lg font-mono overflow-auto">\${item.error}</pre>\`
-																	: html\`<p class="text-xs text-gray-500">Request is still pending...</p>\`
-														}
-                        </div>
-                    </div>
+                <div class="flex-1 overflow-y-auto p-2">
+                    <h3 class="font-semibold text-sm p-2 text-gray-800">Tools</h3>
+                    <ul>
+                        \${this.tools.map(
+													(tool) => html\`
+                                <li>
+                                    <button @click=\${() => this.selectTool(tool)} class="w-full text-left p-2 rounded text-sm hover:bg-gray-100">
+                                        <p class="font-mono text-sm">\${tool.name}</p>
+                                        <p class="text-xs text-gray-500 truncate">\${tool.description}</p>
+                                    </button>
+                                </li>
+                            \`,
+												)}
+                    </ul>
                 </div>
             \`;
 		},
-	});
 
-	return {
-		properties: {
-			history: T.array([]),
-			selectedHistoryId: T.string(null),
-			onSelect: T.function(),
-			listOnly: T.boolean(),
-		},
-		selectHistoryItem(item) {
-			this.selectedHistoryId = item ? item.id : undefined;
-			if (this.onHistorySelect) this.onSelect(item);
-		},
-		connected() {
-			this.historyUnsubscribe = AI.onHistoryChange((event) => {
-				this.history = event.history;
-			});
-			this.history = AI.getHistory();
-		},
-		render() {
-			if (this.history.length === 0)
-				return html\`<p class="text-center text-xs text-gray-400 p-4">No history yet</p>\`;
-			const selectedHistoryItem = this.history.find(
-				(h) => h.id === this.selectedHistoryId,
-			);
+		_renderToolExecutorFlow() {
+			const responseView = this.toolResponse
+				? html\`
+                <div class="mt-6 border-t pt-4 dark">
+									<h4 class="font-semibold text-sm mb-3">Response</h4>
+                    \${
+											this.toolResponse.error
+												? html\`<div class="bg-red-50 text-red-700 rounded p-3 text-sm font-mono">\${this.toolResponse.error}</div>\`
+												: html\`<pre class="text-xs whitespace-pre-wrap bg-gray-800 text-gray-200 p-2 rounded-lg font-mono overflow-auto">\${this.toolResponse?.content?.[0]?.text}</pre>\`
+										}
+                </div>
+            \`
+				: "";
 
 			return html\`
-                <ul class="text-xs space-y-1 font-mono">
-                    \${this.history.map(
-											(item) => html\`
-                            <li
-                                class="flex flex-col \${this.selectedHistoryId === item.id ? "font-semibold text-blue-100 p-2" : item.status === "error" ? "text-red-100" : "text-white"}">
-                                <div 
-																 @click=\${() => this.selectHistoryItem(item)}
-																class="cursor-pointer flex items-center justify-between p-2 rounded hover:bg-gray-700">
-																<span class="text-ellipsis">\${item.toolName}</span>
-                                <div class="flex items-center">
-                                    <span class="text-gray-500 mr-2">\${item.status}</span>
-                                    <uix-icon name="chevron-right" class="h-4 w-4 text-gray-400"></uix-icon>
-                                </div>
-																</div>
-																\${!this.listOnly || !selectedHistoryItem || selectedHistoryItem.id !== item.id ? null : html\`<mcp-history-view .item=\${selectedHistoryItem} .onBack=\${() => this.selectHistoryItem(null)}></mcp-history-view>\`}
-                            </li>
-                        \`,
-										)}
-                </ul>
+                <div class="p-6 overflow-y-auto w-full">
+                     <button @click=\${this.clearSelectedTool.bind(this)} class="flex items-center text-sm text-blue-600 hover:underline mb-4">
+                        <uix-icon name="arrow-left" class="w-4 h-4 mr-2"></uix-icon>
+                        Back to list
+                    </button>
+                    \${this.toolResponse ? responseView : this._renderToolExecutorContent()}                    
+                </div>
+            \`;
+		},
+		_renderSideBySideView() {
+			const toolList = () => {
+				if (this.isLoading) {
+					return html\`<div class="flex items-center justify-center h-full"><p class="text-xs text-gray-500">Loading...</p></div>\`;
+				}
+				if (!this.tools.length) {
+					return html\`<div class="flex items-center justify-center h-full"><p class="text-xs text-gray-500">No tools found.</p></div>\`;
+				}
+				return html\`
+                    <div class="flex-1 overflow-y-auto p-2">
+                        <h3 class="font-semibold text-sm p-2 text-gray-800">Tools</h3>
+                        <ul>
+                            \${this.tools.map(
+															(tool) => html\`
+                                    <li>
+                                        <button @click=\${() => this.selectTool(tool)} class="w-full text-left p-2 rounded text-sm hover:bg-gray-100 \${this.selectedTool?.name === tool.name ? "bg-blue-50 font-semibold text-blue-700" : ""}">
+                                            <p class="font-mono text-xs">\${tool.name}</p>
+                                            <p class="text-xs text-gray-500 truncate">\${tool.description}</p>
+                                        </button>
+                                    </li>
+                                \`,
+														)}
+                        </ul>
+                    </div>
+                \`;
+			};
+
+			const toolExecutor = () => {
+				if (!this.selectedTool) {
+					return html\`<div class="text-center text-gray-500 h-full flex items-center justify-center">Select a tool to view details.</div>\`;
+				}
+				const responseView = this.toolResponse
+					? html\`
+                    <div class="mt-6 border-t pt-4">
+                        \${
+													this.toolResponse.error
+														? html\`<div class="bg-red-50 text-red-700 rounded p-3 text-sm font-mono">\${this.toolResponse.error}</div>\`
+														: html\`<pre class="text-xs whitespace-pre-wrap bg-gray-800 text-gray-200 p-2 rounded-lg font-mono overflow-auto">\${this.toolResponse?.contents?.[0]?.text}</pre>\`
+												}
+                    </div>
+                \`
+					: "";
+
+				return html\`
+                    <div>
+                        \${this._renderToolExecutorContent()}
+                        \${responseView}
+                    </div>
+                \`;
+			};
+
+			return html\`
+                <div class="w-1/3 flex flex-col border-r border-gray-200">
+                    \${toolList()}
+                </div>
+                <div class="w-2/3 p-6 overflow-y-auto">
+                    \${toolExecutor()}
+                </div>
+            \`;
+		},
+
+		_renderToolExecutorContent() {
+			if (!this.selectedTool) return "";
+			return html\`
+                <h3 class="font-bold text-lg mb-2  dark">\${this.selectedTool.name}</h3>
+                <p class="text-xs text-gray-600 mb-6">\${this.selectedTool.description}</p>
+                <h4 class="font-semibold text-sm mb-3 dark">Parameters</h4>
+                <div class="space-y-4">
+                    \${
+											this.selectedTool.inputSchema &&
+											Object.keys(this.selectedTool.inputSchema.properties)
+												.length > 0
+												? Object.entries(
+														this.selectedTool.inputSchema.properties,
+													).map(
+														([paramName, paramSchema]) =>
+															html\`<uix-input
+                                        label=\${paramName}
+                                        type=\${paramSchema.enum ? "select" : { boolean: "checkbox", enum: "select" }[paramSchema.type] || "text"}
+                                        .options=\${paramSchema.enum}
+                                        value=\${this.toolArgs[paramName] || ""}
+                                        @input=\${(e) => this.handleArgInput(paramName, e, paramSchema)}
+                                        placeholder=\${paramSchema.description || paramName}
+                                        class="font-mono text-xs"
+                                    ></uix-input>\`,
+													)
+												: html\`<p class="text-xs text-gray-500">This tool has no parameters.</p>\`
+										}
+                </div>
+                <div class="mt-8 border-t pt-6">
+                    <uix-button
+                        label=\${this.isExecuting ? "Executing..." : "Execute"}
+                        class="is-primary"
+                        @click=\${this.handleExecuteTool.bind(this)}
+                        ?disabled=\${this.isExecuting}
+                    ></uix-button>
+                </div>
+            \`;
+		},
+
+		render() {
+			return html\`<uix-card class="bg-[#3c3836] h-full overflow-y-auto pb-2">
+                    <div class="dark">\${this.viewMode === "flow" ? this._renderFlowView() : this._renderSideBySideView()}</div>
+								</uix-card>
             \`;
 		},
 	};
 };
-`,mimeType:"application/javascript",skipSW:!1},"/views/github-comments.js":{content:`export default ({ T, html }) => {
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/mcp/views/prompts.js":{content:`export default ({ html, AI, T }) => {
+	return {
+		tag: "mcp-prompts",
+		properties: {
+			prompts: T.array([]),
+			selectedPrompt: T.object(null),
+			promptArgs: T.object({}),
+			isExecuting: T.boolean(false),
+			isLoading: T.boolean(true),
+			viewMode: T.string({ defaultValue: "side-by-side" }),
+			promptResponse: T.any(null),
+		},
+		connected() {
+			this.loadPrompts();
+		},
+		async loadPrompts() {
+			this.isLoading = true;
+			try {
+				const servers = AI.listClients();
+				if (servers && servers.length > 0) {
+					const { prompts } = await AI.listPrompts({ servers });
+					console.log({ prompts });
+					this.prompts = prompts || [];
+				}
+			} catch (error) {
+				console.error("Error loading prompts:", error);
+				this.prompts = [];
+			} finally {
+				this.isLoading = false;
+			}
+		},
+		selectPrompt(prompt) {
+			this.selectedPrompt = prompt;
+			this.promptArgs = {};
+			this.promptResponse = null;
+		},
+		clearSelectedPrompt() {
+			this.selectedPrompt = null;
+			this.promptResponse = null;
+		},
+		handleArgInput(paramName, event) {
+			this.promptArgs = {
+				...this.promptArgs,
+				[paramName]: event.target.value,
+			};
+		},
+		async handleGetPrompt() {
+			if (!this.selectedPrompt) return;
+
+			this.isExecuting = true;
+			this.promptResponse = null;
+			try {
+				const { name } = this.selectedPrompt;
+				const args = this.promptArgs;
+
+				const response = await AI.getPrompt({ name, arguments: args });
+				this.promptResponse = response;
+			} catch (error) {
+				console.error("Error executing prompt:", error);
+				this.promptResponse = {
+					error: error.message || "An unknown error occurred.",
+				};
+			} finally {
+				this.isExecuting = false;
+			}
+		},
+
+		// Shared rendering methods
+		_renderPromptList(showBackButton = false) {
+			if (this.isLoading) {
+				return html\`<div class="flex items-center justify-center h-full"><p class="text-xs text-gray-500">Loading...</p></div>\`;
+			}
+			if (!this.prompts.length) {
+				return html\`<div class="flex items-center justify-center h-full"><p class="text-xs text-gray-500">No prompts found.</p></div>\`;
+			}
+			return html\`
+				<div class="flex-1 overflow-y-auto p-2">
+					<h3 class="font-semibold text-sm p-2 text-gray-800">Prompts</h3>
+					<ul>
+						\${this.prompts.map(
+							(prompt) => html\`
+								<li>
+									<button 
+										@click=\${() => this.selectPrompt(prompt)} 
+										class="w-full text-left p-2 rounded text-sm hover:bg-gray-100 \${
+											this.selectedPrompt?.name === prompt.name
+												? "bg-blue-50 font-semibold text-blue-700"
+												: ""
+										}"
+									>
+										<p class="font-mono text-xs">\${prompt.name}</p>
+										<p class="text-xs text-gray-500 truncate">\${prompt.description}</p>
+									</button>
+								</li>
+							\`,
+						)}
+					</ul>
+				</div>
+			\`;
+		},
+
+		_renderResponseView() {
+			if (!this.promptResponse) return "";
+
+			if (this.promptResponse.error) {
+				return html\`
+					<div class="mt-6 border-t pt-4">
+						<h4 class="font-semibold text-sm mb-3">Response</h4>
+						<div class="bg-red-50 text-red-700 rounded p-3 text-sm font-mono">
+							\${this.promptResponse.error}
+						</div>
+					</div>
+				\`;
+			}
+
+			return html\`
+				<div class="mt-6 border-t pt-4">
+					<h4 class="font-semibold text-sm mb-3">Response</h4>
+					<div class="space-y-4">
+						\${this.promptResponse.messages.map(
+							(msg) => html\`
+								<div class="dark bg-gray-100  text-gray-800 rounded p-3">
+									<div class="text-xs font-bold uppercase text-gray-500 mb-1">\${msg.role}</div>
+									\${
+										msg.content.type === "text"
+											? html\`<p class="text-sm whitespace-pre-wrap font-mono">\${msg.content.text}</p>\`
+											: html\`<div class="text-sm font-mono">Resource: \${msg.content.uri}</div>\`
+									}
+								</div>
+							\`,
+						)}
+					</div>
+				</div>
+			\`;
+		},
+
+		_renderPromptExecutor(showBackButton = false) {
+			if (!this.selectedPrompt) {
+				return html\`<div class="text-center text-gray-500 h-full flex items-center justify-center">Select a prompt to view details.</div>\`;
+			}
+
+			return html\`
+				<div class="dark \${showBackButton ? "p-6 overflow-y-auto w-full" : ""}">
+					\${
+						showBackButton
+							? html\`
+						<button @click=\${this.clearSelectedPrompt.bind(this)} class="dark flex items-center text-sm text-blue-600 hover:underline mb-4">
+							<uix-icon name="arrow-left" class="w-4 h-4 mr-2"></uix-icon>
+							Back to list
+						</button>
+					\`
+							: ""
+					}
+					<h3 class="font-bold text-lg mb-2">\${this.selectedPrompt.name}</h3>
+					<p class="text-xs text-gray-200 mb-6">\${this.selectedPrompt.description}</p>
+					
+					\${
+						this.promptResponse
+							? this._renderResponseView()
+							: html\`<h4 class="font-semibold text-sm mb-3">Parameters</h4>
+					<div class="space-y-4">
+						\${
+							Array.isArray(this.selectedPrompt.arguments) &&
+							this.selectedPrompt.arguments.length
+								? this.selectedPrompt.arguments.map(
+										(arg) =>
+											!console.log(arg) &&
+											html\`
+											<uix-input
+												label=\${arg.name}
+                        type=\${arg.enum ? "select" : { boolean: "checkbox", enum: "select" }[arg.type] || "text"}
+												value=\${this.promptArgs[arg.name] || ""}
+												@input=\${(e) => this.handleArgInput(arg.name, e)}
+												placeholder=\${arg.description || arg.name}
+												class="font-mono text-xs"
+											></uix-input>
+										\`,
+									)
+								: html\`<p class="text-xs text-gray-300">This prompt has no parameters.</p>\`
+						}
+					</div>
+					<div class="mt-8 border-t pt-6">
+						<uix-button
+							label=\${this.isExecuting ? "Executing..." : "Get Prompt"}
+							class="is-primary"
+							@click=\${this.handleGetPrompt.bind(this)}
+							?disabled=\${this.isExecuting}
+						></uix-button>
+					</div>\`
+					}
+				</div>
+			\`;
+		},
+		_renderFlowView() {
+			if (this.selectedPrompt) {
+				return this._renderPromptExecutor(true);
+			}
+			return this._renderPromptList();
+		},
+
+		_renderSideBySideView() {
+			return html\`
+				<div class="w-1/3 flex flex-col border-r border-gray-200">
+					\${this._renderPromptList()}
+				</div>
+				<div class="w-2/3 p-6 overflow-y-auto">
+					\${this._renderPromptExecutor(false)}
+				</div>
+			\`;
+		},
+
+		render() {
+			return html\`
+				<uix-card class="bg-[#3c3836] h-full overflow-y-auto">
+					<div class="dark">
+						\${this.viewMode === "flow" ? this._renderFlowView() : this._renderSideBySideView()}
+					</div>
+				</uix-card>
+			\`;
+		},
+	};
+};
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/mcp/views/resources.js":{content:`export default ({ html, AI, T }) => {
+	return {
+		tag: "mcp-resources",
+		properties: {
+			resourceType: T.string(),
+			viewMode: T.string({ defaultValue: "side-by-side" }),
+			resources: T.array([]),
+			resourceTemplates: T.array([]),
+			isLoading: T.boolean(true),
+			selectedResource: T.object(null),
+			selectedTemplate: T.object(null),
+			resourceArgs: T.object({}),
+			isExecuting: T.boolean(false),
+			resourceResponse: T.any(null),
+		},
+		connected() {
+			this.loadData();
+		},
+		async loadData() {
+			this.isLoading = true;
+			try {
+				const servers = AI.listClients();
+				if (servers && servers.length > 0) {
+					const [{ resources }, { resourceTemplates }] = await Promise.all([
+						AI.listResources({ servers }),
+						AI.listResourceTemplates({ servers }),
+					]);
+					this.resources = resources || [];
+					this.resourceTemplates = resourceTemplates || [];
+				}
+			} catch (error) {
+				console.error("Error loading resources:", error);
+				this.resources = [];
+				this.resourceTemplates = [];
+			} finally {
+				this.isLoading = false;
+			}
+		},
+		async handleReadResource() {
+			const resource = this.selectedResource || this.selectedTemplate;
+			const isTemplate = !!this.selectedTemplate;
+			const uriTemplate = isTemplate ? resource.uriTemplate : resource.uri;
+
+			const uri = Object.entries(this.resourceArgs).reduce(
+				(acc, [key, value]) => acc.replace(\`{\${key}}\`, value),
+				uriTemplate,
+			);
+
+			this.isExecuting = true;
+			this.resourceResponse = null;
+			try {
+				const response = await AI.readResource({ uri });
+				this.resourceResponse = response;
+				console.log({ response });
+			} catch (e) {
+				console.error(\`Failed to read resource \${uri}:\`, e);
+				this.resourceResponse = {
+					error: e.message || "An unknown error occurred.",
+				};
+			} finally {
+				this.isExecuting = false;
+			}
+		},
+		selectResource(res) {
+			this.selectedResource = res;
+			this.selectedTemplate = null;
+			this.resourceArgs = {};
+			this.resourceResponse = null;
+		},
+		selectTemplate(template) {
+			this.selectedTemplate = template;
+			this.selectedResource = null;
+			this.resourceArgs = {};
+			this.resourceResponse = null;
+		},
+		deselectReaderView() {
+			this.selectedResource = null;
+			this.selectedTemplate = null;
+			this.resourceResponse = null;
+		},
+		handleResourceArgInput(paramName, event) {
+			this.resourceArgs = {
+				...this.resourceArgs,
+				[paramName]: event.target.value,
+			};
+		},
+		_extractUriParams(uri) {
+			const regex = /\\{(.+?)\\}/g;
+			return [...uri.matchAll(regex)].map((match) => match[1]);
+		},
+
+		_renderReaderContent() {
+			const resource = this.selectedResource || this.selectedTemplate;
+			if (!resource) return "";
+
+			const isTemplate = !!this.selectedTemplate;
+			const uri = isTemplate ? resource.uriTemplate : resource.uri;
+			const uriParams = isTemplate ? this._extractUriParams(uri) : [];
+
+			return html\`
+                <div>
+                    <h4 class="font-bold text-sm mb-1 dark font-mono">\${uri}</h4>
+                    <p class="text-xs text-gray-600 mb-4">\${resource.description || "No description provided."}</p>
+                    
+                    \${
+											!isTemplate
+												? null
+												: html\`<div class="space-y-3">
+                        \${
+													uriParams.length > 0
+														? uriParams.map(
+																(paramName) => html\`
+                                        <div>
+                                            <label class="block text-xs font-medium text-gray-600 mb-1">\${paramName}</label>
+                                            <uix-input
+                                                .value=\${this.resourceArgs[paramName] || ""}
+                                                @input=\${(e) => this.handleResourceArgInput(paramName, e)}
+                                                placeholder="Enter value for \${paramName}"
+                                                class="font-mono text-xs"
+                                            ></uix-input>
+                                        </div>
+                                    \`,
+															)
+														: html\`<p class="text-xs text-gray-500">This resource takes no parameters.</p>\`
+												}
+                    </div>\`
+										}
+                    <div class="mt-4 border-t pt-4">
+                        <uix-button
+                            label=\${this.isExecuting ? "Reading..." : "Read Resource"}
+                            class="is-primary w-full"
+                            @click=\${this.handleReadResource.bind(this)}
+                            ?disabled=\${this.isExecuting}
+                        ></uix-button>
+                    </div>
+                </div>
+            \`;
+		},
+
+		_renderResponseView() {
+			if (!this.resourceResponse) return "";
+			return html\`
+                <div class="mt-6 border-t pt-4 dark">
+									<h4 class="font-semibold text-sm mb-3">Response</h4>
+                    \${
+											this.resourceResponse.error
+												? html\`<div class="bg-red-50 text-red-700 rounded p-3 text-sm font-mono">\${this.resourceResponse.error}</div>\`
+												: html\`<pre class="text-xs whitespace-pre-wrap bg-gray-800 text-gray-200 p-2 rounded-lg font-mono overflow-auto">\${this.resourceResponse?.contents?.[0]?.text}</pre>\`
+										}
+                </div>
+            \`;
+		},
+
+		_renderList() {
+			return html\`
+                <ul class="text-xs font-mono space-y-1">
+                    \${
+											this.resourceType === "resources" || !this.resourceType
+												? this.resources.map(
+														(
+															res,
+														) => html\`<li><button @click=\${() => this.selectResource(res)} class="w-full text-left p-2 rounded text-sm hover:bg-gray-100 \${this.selectedResource?.uri === res.uri ? "bg-blue-50 font-semibold text-blue-700" : ""}">
+                        <p class="font-mono text-sm flex items-center"><uix-icon name="file-text" class="w-4 h-4 mr-2 text-gray-500"></uix-icon>\${res.uri}</p>
+                    </button></li>\`,
+													)
+												: null
+										}
+                    \${
+											this.resourceType === "templates" || !this.resourceType
+												? this.resourceTemplates.map(
+														(
+															template,
+														) => html\`<li><button @click=\${() => this.selectTemplate(template)} class="w-full text-left p-2 rounded text-sm hover:bg-gray-100 \${this.selectedTemplate?.uriTemplate === template.uriTemplate ? "bg-blue-50 font-semibold text-blue-700" : ""}">
+                        <p class="font-mono text-sm flex items-center"><uix-icon name="file-code-2" class="w-4 h-4 mr-2 text-blue-600"></uix-icon>\${template.uriTemplate}</p>
+                    </button></li>\`,
+													)
+												: null
+										}
+                </ul>
+             \`;
+		},
+		_generateTitle() {
+			const titles = {
+				resources: "Resources",
+				templates: "Templates",
+			};
+			const title = titles[this.resourceType] || "Resources & Templates";
+			return html\`<h3 class="font-semibold text-sm p-2 text-gray-800">\${title}</h3>\`;
+		},
+		_renderFlowView() {
+			if (this.isLoading) {
+				return html\`<div class="flex items-center justify-center h-full"><p class="text-xs text-gray-500">Loading...</p></div>\`;
+			}
+			if (this.selectedResource || this.selectedTemplate) {
+				return html\`
+                    <div class="p-6 overflow-y-auto w-full">
+                        <button @click=\${() => this.deselectReaderView()} class="flex items-center text-sm text-blue-600 hover:underline mb-4">
+                            <uix-icon name="arrow-left" class="w-4 h-4 mr-2"></uix-icon>
+                            Back to list
+                        </button>
+                        \${this.resourceResponse ? this._renderResponseView() : this._renderReaderContent()}                        
+                    </div>
+                \`;
+			}
+			return html\`
+                <div class="flex-1 overflow-y-auto p-2">
+									\${this._generateTitle()}
+                  \${this._renderList()}
+                </div>
+            \`;
+		},
+
+		_renderSideBySideView() {
+			if (this.isLoading) {
+				return html\`<div class="flex items-center justify-center h-full"><p class="text-xs text-gray-500">Loading...</p></div>\`;
+			}
+			return html\`
+                <div class="w-1/3 flex flex-col border-r border-gray-200 p-2 overflow-y-auto">
+									\${this._generateTitle()}
+                    \${this._renderList()}
+                </div>
+                <div class="w-2/3 p-6 overflow-y-auto">
+                    \${
+											this.selectedResource || this.selectedTemplate
+												? html\`
+                            \${this._renderReaderContent()}
+                            \${this._renderResponseView()}
+                        \`
+												: html\`<div class="text-center text-gray-500 h-full flex items-center justify-center">Select an item to view details.</div>\`
+										}
+                </div>
+            \`;
+		},
+
+		render() {
+			return html\`
+                <uix-card class="h-full bg-[#3c3836] overflow-y-auto">
+									<div class="dark">\${this.viewMode === "flow" ? this._renderFlowView() : this._renderSideBySideView()}</div>
+								</uix-card>
+            \`;
+		},
+	};
+};
+`,mimeType:"application/javascript",skipSW:!1},"/modules/icon-lucide/lucide/database.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/wrench.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/layout-dashboard.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/uix/display/card.js":{content:`export default {
+	tag: "uix-card",
+	style: true,
+};
+`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/display/card.css":{content:`:where(.uix-card) {
+	display: flex;
+	flex-direction: column;
+	padding: var(--uix-card-padding, 10px);
+	border-width: var(--uix-card-border-size);
+	border-radius: var(--uix-card-border-radius, var(--radius-md));
+	background-color: var(--uix-card-background-color, #fff);
+	border-color: var(--uix-card-border-color, transparent);
+	box-shadow: var(--uix-card-shadow, 0 4px 6px rgba(0, 0, 0, 0.1));
+	list-style-type: var(--uix-card-list-style-type);
+	color: var(--uix-card-text-color);
+
+	&[clickable],
+	&[clickable] * {
+		cursor: pointer;
+	}
+}
+`,mimeType:"text/css",skipSW:!1},"/modules/icon-lucide/lucide/file-text.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4M10 9H8m8 4H8m8 4H8"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/file-code-2.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v4"/><path d="M14 2v4a2 2 0 0 0 2 2h4M5 12l-3 3l3 3m4 0l3-3l-3-3"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/views/github-comments.js":{content:`export default ({ T, html }) => {
 	// Helper function to make GraphQL API calls to GitHub
 	const callGraphQL = async (token, query, variables) => {
 		const headers = {
@@ -5757,69 +5093,761 @@ const transpile = (code) => {
 		},
 	};
 };
-`,mimeType:"application/javascript",skipSW:!1},"/modules/icon-lucide/lucide/chevron-right.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 18l6-6l-6-6"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/code.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m16 18l6-6l-6-6M8 6l-6 6l6 6"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/telescope.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m10.065 12.493l-6.18 1.318a.934.934 0 0 1-1.108-.702l-.537-2.15a1.07 1.07 0 0 1 .691-1.265l13.504-4.44m-2.875 6.493l4.332-.924M16 21l-3.105-6.21"/><path d="M16.485 5.94a2 2 0 0 1 1.455-2.425l1.09-.272a1 1 0 0 1 1.212.727l1.515 6.06a1 1 0 0 1-.727 1.213l-1.09.272a2 2 0 0 1-2.425-1.455zM6.158 8.633l1.114 4.456M8 21l3.105-6.21"/><circle cx="12" cy="13" r="2"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/search.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21l-4.3-4.3"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/server.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><path d="M6 6h.01M6 18h.01"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/bot.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2m16 0h2m-7-1v2m-6-2v2"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/layout-grid.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/book.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/zap.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/message-square-heart.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M14.8 7.5a1.84 1.84 0 0 0-2.6 0l-.2.3l-.3-.3a1.84 1.84 0 1 0-2.4 2.8L12 13l2.7-2.7c.9-.9.8-2.1.1-2.8"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/flame.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3c-1.072-2.143-.224-4.054 2-6c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/arrow-left.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m12 19l-7-7l7-7m7 7H5"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/star.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m12 2l3.09 6.26L22 9.27l-5 4.87l1.18 6.88L12 17.77l-6.18 3.25L7 14.14L2 9.27l6.91-1.01z"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/atom.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="1"/><path d="M20.2 20.2c2.04-2.03.02-7.36-4.5-11.9c-4.54-4.52-9.87-6.54-11.9-4.5c-2.04 2.03-.02 7.36 4.5 11.9c4.54 4.52 9.87 6.54 11.9 4.5"/><path d="M15.7 15.7c4.52-4.54 6.54-9.87 4.5-11.9c-2.03-2.04-7.36-.02-11.9 4.5c-4.52 4.54-6.54 9.87-4.5 11.9c2.03 2.04 7.36.02 11.9-4.5"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/workflow.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="8" height="8" x="3" y="3" rx="2"/><path d="M7 11v4a2 2 0 0 0 2 2h4"/><rect width="8" height="8" x="13" y="13" rx="2"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/users.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87m-3-12a4 4 0 0 1 0 7.75"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/terminal.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m4 17l6-6l-6-6m8 14h8"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/gem.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M6 3h12l4 6l-10 13L2 9Z"/><path d="M11 3L8 9l4 13l4-13l-3-6M2 9h20"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/arrow-up.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 12l7-7l7 7m-7 7V5"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/message-circle.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/main.js":{content:`const ensureSWController = () => {
-	const timeoutPromise = new Promise((_, reject) => {
-		setTimeout(() => reject(new Error("Service Worker timed out.")), 100);
-	});
-	const controllerPromise = new Promise((resolve) => {
-		if (navigator.serviceWorker.controller) {
-			return resolve();
-		}
-		navigator.serviceWorker.addEventListener("controllerchange", () => {
-			return resolve();
-		});
-	});
-	return Promise.race([controllerPromise, timeoutPromise]);
-};
-
-const startApp = async () => {
-	if (!("serviceWorker" in navigator)) {
-		console.warn("Service Worker not supported.");
-		throw new Error("Platform not supported");
-	}
-
-	await navigator.serviceWorker.register("/sw.js", {
-		scope: "/",
-		type: "module",
-	});
-
-	try {
-		console.log("Waiting for Service Worker to take control...");
-		await ensureSWController();
-		console.log("\u2705 Service Worker is in control!");
-		const { default: $APP } = await import("/bootstrap.js");
-		await $APP.loadApp();
-	} catch (error) {
-		console.log({ error });
-		console.warn("Service Worker did not take control in time. Reloading...");
-		window.location.reload();
-	}
-};
-
-startApp();
-`,mimeType:"application/javascript",skipSW:!1},"/manifest.json":{content:`{
-	"name": "MCPiQuant.com",
-	"short_name": "MCPiQuant.com",
-	"short_url": "/",
-	"scope": "/",
-	"display": "standalone",
-	"background_color": "#ffffff",
-	"theme_color": "#000000",
-	"description": "A PWA for Meetup Rio.",
-	"icons": [
-		{
-			"src": "/assets/icons/icon-192x192.png",
-			"sizes": "192x192",
-			"type": "image/png"
+`,mimeType:"application/javascript",skipSW:!1},"/modules/icon-lucide/lucide/arrow-left.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m12 19l-7-7l7-7m7 7H5"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/index.html":{content:`<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script type="importmap">
+			{
+				"imports": {
+					"@modelcontextprotocol/sdk/": "https://cdn.jsdelivr.net/npm/@modelcontextprotocol/sdk@1.18.1/dist/esm/",
+					"zod": "https://esm.sh/zod@3.23.8",
+					"eventsource-parser/stream": "https://esm.sh/eventsource-parser/stream",
+					"pkce-challenge": "https://esm.sh/pkce-challenge",
+          "zod-to-json-schema": "https://esm.sh/zod-to-json-schema@3.24.5",          
+					"ajv": "https://esm.sh/ajv@6.12.6"
+				}
+			}
+		<\/script>
+  <meta charset="utf-8" />
+  <title>meetuprio</title>
+  <base href="/" />
+  
+  <meta name="viewport"
+    content="viewport-fit=cover, width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
+  <meta name="description" content="This is a meetuprio app" />
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#181818" />
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f3f3f3" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-title" content="meetuprio" />
+  <meta name="mobile-web-app-status-bar-style" content="black" />
+  <link id="favicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLW1vdW50YWluIj48cGF0aCBkPSJtOCAzIDQgOCA1LTUgNSAxNUgyTDggM3oiLz48L3N2Zz4="/>
+  <link rel="manifest" href="manifest.json" /> 
+	<script>
+		const ensureSWController = () => {
+			const timeoutPromise = new Promise((_, reject) => {
+				setTimeout(() => reject(new Error("Service Worker timed out.")), 100);
+			});
+			const controllerPromise = new Promise((resolve) => {
+				if (navigator.serviceWorker.controller) {
+					return resolve();
+				}
+				navigator.serviceWorker.addEventListener("controllerchange", () => {
+					return resolve();
+				});
+			});
+			return Promise.race([controllerPromise, timeoutPromise]);
+		};
+		const startApp = async () => {
+			if (!("serviceWorker" in navigator)) {
+				console.warn("Service Worker not supported.");
+				throw new Error("Platform not supported");
+			}
+			await navigator.serviceWorker.register("/sw.js", {
+				scope: "/",
+				type: "module",
+			});
+			try {
+				console.log("Waiting for Service Worker to take control...");
+				await ensureSWController();
+				console.log("\u2705 Service Worker is in control!");
+				const { default: $APP } = await import("/bootstrap.js");
+				await $APP.loadApp();
+			} catch (error) {
+				console.warn("Service Worker did not take control in time. Reloading...");
+				window.location.reload();
+			}
+		};
+		startApp();
+	<\/script>
+</head>
+<body>
+  <app-container></app-container>
+</body>
+</html>
+`,mimeType:"text/html",skipSW:!1},"/modules/icon-lucide/lucide/pie-chart.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/monitor.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="20" height="14" x="2" y="3" rx="2"/><path d="M8 21h8m-4-4v4"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/views/templates/app.js":{content:`export default ({ html, AI, T }) => {
+	return {
+		style: true,
+		class: "w-full h-screen bg-[#282828] text-[#ebdbb2] flex font-sans text-sm",
+		properties: {
+			currentRoute: T.object({ sync: "ram" }),
+			isServerConnected: T.boolean({ sync: "local" }),
 		},
-		{
-			"src": "/assets/icons/icon-512x512.png",
-			"sizes": "512x512",
-			"type": "image/png"
+		async connected() {
+			await this.initializeAI();
+		},
+		async initializeAI() {
+			try {
+				if (!AI.isInitialized) {
+					await AI.init({
+						geminiApiKey: "",
+						localAIEndpoint: "http://localhost:1234/v1/chat/completions",
+						openrouterApiKey:
+							"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",
+						defaultRoots: [
+							{
+								uri: "file:///",
+								name: "Root Filesystem",
+								description: "Full filesystem access",
+							},
+						],
+					});
+				}
+				this.isServerConnected = AI.listClients().length > 0;
+			} catch (error) {
+				console.error("Error initializing AI service:", error);
+				this.isServerConnected = false;
+			}
+		},
+		render() {
+			return html\`
+				<mcp-sidebar></mcp-sidebar>
+				<div class="flex-1 h-full flex flex-col min-w-0">
+					<div
+						class="h-15 bg-[#3c3836] border-b border-[#504945] p-2 flex items-center justify-between"
+					>
+					
+					</div>
+					<div class="flex-1 overflow-auto flex">
+            \${this.component}
+					</div>
+				</div>
+			\`;
+		},
+	};
+};
+`,mimeType:"application/javascript",skipSW:!1},"/views/templates/app.css":{content:`.app-template {
+	.uix-card {
+		button {
+			color: #111;
+			cursor: pointer;
 		}
-	]
+	}
 }
-`,mimeType:"application/json",skipSW:!1},"/package.json":{content:`{
+`,mimeType:"text/css",skipSW:!1},"/modules/apps/mcp/views/sidebar.js":{content:`export default ({ html, T }) => ({
+	class:
+		"w-64 bg-[#3c3836] text-[#ebdbb2] flex flex-col h-screen shrink-0 border-r border-[#504945]",
+	properties: {
+		currentRoute: T.object({ sync: "ram" }),
+		onSelectHistory: T.function(),
+		isDarkMode: T.boolean({ defaultValue: true, sync: "local" }),
+	},
+
+	_renderLink(link) {
+		const isActive = this.currentRoute.name === link.key;
+		return html\`
+            <uix-link href=\${link.key}
+          icon=\${link.icon}
+          label=\${link.label}
+          data-active=\${isActive}
+          class="
+            relative flex items-center text-sm font-bold p-2 rounded-md transition-colors w-full
+            text-[#ebdbb2] hover:bg-[#504945]
+            data-[active=true]:bg-[#504945] data-[active=true]:text-white
+          ">
+                \${
+									link.isComingSoon
+										? html\`<span class="ml-auto bg-[#b16286] text-xs font-bold text-white px-2 py-0.5 rounded-full absolute right-3">soon</span>\`
+										: ""
+								}
+            </uix-link>
+        \`;
+	},
+	toggleDarkMode() {
+		document.body.classList.toggle("dark", this.isDarkMode);
+		this.isDarkMode = !this.isDarkMode;
+	},
+
+	render() {
+		const mainLinks = [
+			{ key: "discover", label: "Discover", icon: "telescope" },
+			{ key: "dev", label: "Develop", icon: "code" },
+			{ key: "chat", label: "Chat", icon: "message-circle" },
+			{ key: "inspector", label: "Inspector", icon: "search" },
+			{ key: "servers", label: "Servers", icon: "server" },
+			{ key: "agents", label: "Agents", icon: "bot", isComingSoon: true },
+			{ key: "apps", label: "Apps", icon: "layout-grid", isComingSoon: true },
+			{ key: "learn", label: "Learn", icon: "book", isComingSoon: true },
+			{
+				key: "vibecoding",
+				label: "Vibecoding",
+				icon: "zap",
+				isComingSoon: true,
+			},
+		];
+
+		return html\`<div class="h-15 p-4 border-b border-[#504945] flex items-center space-x-2 shrink-0">
+            <h2 class="text-xl text-[#ebdbb2] tracking-widest font-bold"><a href="/">\u{1F336}\uFE0F MCPiquant</a></h2>
+        </div>
+        <div class="flex-grow flex flex-col min-h-0">
+            <nav class="p-2 space-y-1 shrink-0">
+                \${mainLinks.map((link) => this._renderLink(link))}
+            </nav>
+            <div class="flex-grow flex flex-col border-t border-[#504945] min-h-0">
+                <h3 class="p-2 text-xs font-semibold text-[#928374] uppercase tracking-wider shrink-0">History</h3>
+                <div class="flex-1 overflow-y-auto">
+                    <mcp-history .onSelect=\${this.onSelectHistory} listOnly></mcp-history>
+                </div>
+            </div>
+            <div class="p-2 border-t border-[#504945] shrink-0">
+                \${this._renderLink({
+									key: "settings",
+									label: "Settings",
+									icon: "settings",
+								})}
+                \${this._renderLink({
+									key: "feedback",
+									label: "Feedback",
+									icon: "message-square-heart",
+								})}
+                <button @click=\${this.toggleDarkMode.bind(this)} class="w-full flex items-center p-2 rounded-md hover:bg-[#504945] text-left text-sm">
+                    <uix-icon name=\${
+											this.isDarkMode ? "sun" : "moon"
+										} class="w-5 h-5 mr-3 shrink-0"></uix-icon>
+                    <span>\${this.isDarkMode ? "Light Mode" : "Dark Mode"}</span>
+                    <div class="ml-auto w-10 h-5 \${
+											this.isDarkMode ? "bg-red-700" : "bg-gray-600"
+										} rounded-full flex items-center p-1 transition-colors">
+                        <div class="w-4 h-4 bg-white rounded-full transform transition-transform \${
+													this.isDarkMode ? "translate-x-4" : ""
+												}"></div>
+                    </div>
+                </button>
+            </div>
+        </div>
+      \`;
+	},
+});
+`,mimeType:"application/javascript",skipSW:!1},"/views/templates/discover.js":{content:`export default ({ html, T, $APP, Model }) => {
+	$APP.define("mcp-discover-header", {
+		properties: {
+			searchQuery: T.string(""),
+			activeTags: T.array([]),
+			availableTags: T.array([]),
+			onSearchChange: T.function(),
+			onToggleTag: T.function(),
+			currentRoute: T.object({ sync: "ram" }),
+		},
+		render() {
+			const navItems = ["Servers", "Clients", "Agents"];
+			return html\`
+        <div class="flex flex-col gap-6">
+          <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+            <div>
+              <h1 class="font-bold text-3xl text-[#ebdbb2]">Discover</h1>
+              <p class="text-[#bdae93]">
+                Browse, experiment, develop, and discuss all things MCP
+              </p>
+            </div>
+            <div class="relative">
+              <input
+                type="text"
+                value=\${this.searchQuery}
+                @input=\${(e) => this.onSearchChange(e.target.value)}
+                placeholder="Search ..."
+                class="w-full md:w-72 bg-[#282828] border-2 border-[#3c3836] font-semibold text-[#ebdbb2] rounded-lg py-2 pl-10 pr-4 focus:outline-none focus:shadow-[2px_2px_0px_#1d2021] focus:border-[#83a598] transition"
+              />
+              <uix-icon
+                name="search"
+                class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#928374]"
+              ></uix-icon>
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-4">
+            <div class="flex items-center border border-[#3c3836] rounded-lg bg-[#282828] w-full md:w-auto self-start">
+              \${navItems.map((item) => {
+								const tab = item.toLowerCase();
+								const url = \`/discover/\${tab}\`;
+								const isActive =
+									tab === "servers"
+										? !this.currentRoute.path.startsWith("/discover/")
+										: this.currentRoute.path.startsWith(url);
+								return html\`
+                  <uix-link
+                    href=\${url}
+                    label=\${item}
+                    class="block [&>a]:px-5 [&>a]:py-2.5 [&>a]:block rounded-md text-sm font-semibold transition-colors \${
+											isActive
+												? "bg-[#458588] text-[#ebdbb2]"
+												: "text-[#bdae93] hover:bg-[#3c3836]"
+										}"
+                  >
+                  </uix-link>
+                \`;
+							})}
+            </div>
+            <div>
+              <div class="flex flex-wrap gap-2">
+                <span class="text-[#a89984] font-bold text-xs self-center pr-2">TAGS:</span>
+                \${this.availableTags.map((tag) => {
+									const isActive = this.activeTags.includes(tag.id);
+									return html\`
+                    <button
+                      @click=\${() => this.onToggleTag(tag.id)}
+                      class="text-xs font-bold px-2 py-1 rounded transition-colors \${
+												isActive
+													? "bg-[#83a598] text-[#1d2021]"
+													: "bg-[#504945] text-[#ebdbb2] hover:bg-[#665c54]"
+											}"
+                    >
+                      \${tag.name}
+                    </button>
+                  \`;
+								})}
+              </div>
+            </div>
+          </div>
+        </div>
+      \`;
+		},
+	});
+
+	$APP.define("mcp-artifact-card", {
+		properties: {
+			artifact: T.object(),
+			type: T.string("server"),
+			isDetailView: T.boolean(false),
+		},
+		onToggleHot(e) {
+			e.stopPropagation();
+			e.preventDefault();
+			Model[\`\${this.type.toLowerCase()}s\`].edit({
+				id: this.artifact.id,
+				hots: (this.artifact.hots ?? 0) + (this.artifact.hotted ? -1 : 1),
+				hotted: !this.artifact.hotted,
+			});
+		},
+		onToggleFavorite(e) {
+			e.stopPropagation();
+			e.preventDefault();
+			Model[\`\${this.type.toLowerCase()}s\`].edit({
+				id: this.artifact.id,
+				favorite: !this.artifact.favorite,
+			});
+		},
+		render() {
+			const { artifact } = this;
+			if (!artifact) return html\`\`;
+			const isFavorited = artifact.favorite;
+			const starClass = isFavorited ? "text-[#fabd2f]" : "text-[#a89984]";
+
+			return html\`
+        <div
+          class="hover:shadow-[6px_6px_0px_#83a598] hover:border-[#83a598] bg-[#282828] 
+									w-full h-full flex-1 [&>a]:flex [&>a]:w-full border-2 border-[#3c3836] rounded-lg p-4 flex gap-4 
+									font-semibold transition-all duration-200 shadow-[4px_4px_0px_#1d2021]">
+					<div class="flex flex-col justify-between items-start w-full">
+            <div class="flex items-center gap-4 w-full">
+              <div class="w-12 h-12 text-xl rounded-md flex-shrink-0 flex items-center justify-center bg-[#1d2021] text-[#83a598]">
+                \${artifact.icon ? html\`<uix-icon name=\${artifact.icon} class="w-6 h-6"></uix-icon>\` : artifact.name[0].toUpperCase()}
+              </div>
+              <div class="flex gap-3 items-center w-full">
+                <h3 class="font-bold flex-1 text-md">
+                  <uix-link class="text-[#ebdbb2]" href=\${\`/discover/\${this.type}/\${encodeURIComponent(artifact.id)}\`} label=\${artifact.name}></uix-link>
+                </h3>
+                \${
+									artifact.isConnected
+										? html\`<span class="text-xs text-[#b8bb26] font-medium"
+                      >Currently connected</span
+                    >\`
+										: ""
+								}
+                <uix-link
+                  @click=\${this.onToggleFavorite.bind(this)}
+                  icon="star"
+                  class="w-6 h-6 \${starClass} pointer transition-colors hover:text-yellow-300"
+                  fill=\${isFavorited ? "currentColor" : "none"}
+                ></uix-link>
+              </div>
+            </div>
+            <uix-link
+          		href=\${\`/discover/\${this.type}/\${encodeURIComponent(artifact.id)}\`}
+              class="text-sm text-[#bdae93] font-medium min-h-[2.5rem] flex-grow pb-5"
+							label=\${artifact.description}
+            ></uix-link>
+
+            <div class="flex flex-col gap-4 pt-4 border-t-2 border-dashed border-[#504945] w-full">
+              <div class="flex flex-wrap gap-2">
+                <span class="text-xs font-bold px-2 py-1 rounded bg-[#504945] text-[#d3869b]">\${this.type.toUpperCase()}</span>
+                \${artifact.tags.map(
+									(tag) =>
+										html\`<span
+                      class="text-xs font-bold px-2 py-1 rounded bg-[#504945] text-[#ebdbb2]"
+                      >\${tag}</span
+                    >\`,
+								)}
+              </div>
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                  <button
+                    @click=\${this.onToggleHot.bind(this)}
+                    class="flex items-center gap-1.5 px-2 py-1 rounded-md transition-colors font-bold text-sm \${
+											artifact.hotted
+												? "bg-[#fe8019] text-[#1d2021]"
+												: "bg-[#504945] text-[#ebdbb2] hover:bg-[#665c54]"
+										}"
+                  >
+                    <uix-icon name="flame" class="w-4 h-4"></uix-icon>
+                    <span>\${artifact.hots ?? 0}</span>
+                  </button>
+                  <div class="flex items-center gap-1.5 text-[#a89984] font-bold text-sm" title="Comments">
+                    <uix-icon name="message-circle" class="w-4 h-4"></uix-icon>
+                    <span>\${artifact.commentsCount}</span>
+                  </div>
+                </div>
+                \${
+									artifact.isConnected
+										? html\`<uix-button
+                      label="Disconnect"
+                      class="bg-[#fb4934] text-[#ebdbb2] font-bold"
+                      size="small"
+                    ></uix-button>\`
+										: html\`<uix-button
+                      label="Connect"
+                      class="bg-[#458588] text-[#ebdbb2] font-bold"
+                      size="small"
+                    ></uix-button>\`
+								}
+              </div>
+            </div>
+          </div>
+				</div>
+      \`;
+		},
+	});
+
+	$APP.define("mcp-artifact-grid", {
+		properties: {
+			artifacts: T.array(),
+			type: T.string("server"),
+			onClearFilters: T.function(),
+		},
+		render() {
+			const { artifacts = [] } = this;
+
+			const favoriteArtifacts = artifacts.filter((a) => a.favorite);
+			const otherArtifacts = artifacts.filter((a) => !a.favorite);
+			return html\`<div class="flex-grow">
+        \${
+					artifacts.length === 0
+						? html\`
+              <div class="w-full text-center text-[#928374] p-8 bg-[#282828] border-2 border-dashed border-[#3c3836] rounded-lg">
+                <h3 class="font-bold text-lg text-[#ebdbb2]">
+                  No Artifacts Found
+                </h3>
+                <p>
+                  Your search and filter combination did not match any
+                  artifacts.
+                </p>
+                <button
+                  @click=\${() => this.onClearFilters()}
+                  class="mt-4 text-sm font-bold text-[#83a598] hover:underline"
+                >
+                  Clear all filters
+                </button>
+              </div>
+            \`
+						: html\`
+              \${
+								favoriteArtifacts.length > 0
+									? html\`
+                    <div class="mb-8">
+                      <h2 class="font-semibold text-xl text-[#ebdbb2] mb-4 flex items-center gap-2">
+                        <uix-icon
+                          name="star"
+                          class="w-5 h-5 text-[#fabd2f]"
+                          fill="currentColor"
+                        ></uix-icon>
+                        Favorites
+                      </h2>
+                      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 grid-rows-[1fr_auto] grid-cols-[1fr_auto]">
+                        \${favoriteArtifacts.map(
+													(artifact) => html\`
+                            <mcp-artifact-card
+                              .artifact=\${artifact}
+                              type=\${artifact.type ?? this.type}
+                            ></mcp-artifact-card>
+                          \`,
+												)}
+                      </div>
+                    </div>
+                  \`
+									: ""
+							}
+              <div>
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 grid-rows-[1fr_auto] grid-cols-[1fr_auto]">
+                  \${otherArtifacts.map(
+										(artifact) => html\`
+                      <mcp-artifact-card
+                        .artifact=\${artifact}
+                        type=\${artifact.type ?? this.type}
+                      ></mcp-artifact-card>
+                    \`,
+									)}
+                </div>
+              </div>
+            \`
+				}
+      </div>\`;
+		},
+	});
+
+	$APP.define("mcp-trending-discussions", {
+		class:
+			"w-80 bg-[#282828] p-6 flex-col space-y-6 flex-shrink-0 hidden lg:flex border-l border-[#3c3836]",
+		properties: {
+			discussions: T.object(),
+		},
+		render() {
+			return html\`<h2 class="font-semibold text-lg text-[#ebdbb2]">
+          Trending Discussions
+        </h2>
+        <div class="flex flex-col gap-y-10">
+          \${this.discussions?.map(
+						(d) => html\`
+              <div class="flex items-start gap-3 text-[#bdae93]">
+                <div class="w-8 h-8 flex-shrink-0 bg-[#3c3836] rounded-md flex items-center justify-center text-[#928374]">
+                  <uix-icon name=\${d.icon} class="w-5 h-5"></uix-icon>
+                </div>
+                <div>
+                  <p class="font-semibold text-[#ebdbb2] hover:text-[#83a598] cursor-pointer leading">
+                    \${d.title}
+                  </p>
+                  <div class="text-xs text-[#928374] flex items-center gap-4 mt-1.5">
+                    <span>\${d.category}</span>
+                    <div class="flex items-center gap-1.5" title="Upvotes">
+                      <uix-icon name="arrow-up" class="w-3.5 h-3.5"></uix-icon>
+                      <span>\${d.upvotes}</span>
+                    </div>
+                    <div class="flex items-center gap-1.5" title="Comments">
+                      <uix-icon name="message-circle" class="w-3.5 h-3.5"></uix-icon>
+                      <span>\${d.comments}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            \`,
+					)}
+        </div>
+        <uix-button
+          label="View all discussions"
+          class="w-full mt-auto bg-[#3c3836]"
+          size="small"
+        ></uix-button>\`;
+		},
+	});
+
+	$APP.define("mcp-artifact-detail", {
+		class: "flex-grow gap-8 flex flex-col overflow-y-auto",
+		properties: {
+			type: T.string("server"),
+			artifact: T.object(),
+		},
+		render() {
+			const { artifact } = this;
+			if (!artifact) return html\`\`;
+
+			return html\`
+        <uix-link
+          class="flex items-center gap-2 text-[#bdae93] hover:text-[#ebdbb2] font-semibold self-start -mb-4"
+          label="Back to Discover"
+          icon="arrow-left"
+          href="/discover"
+        >
+        </uix-link>
+        <mcp-artifact-card
+          .artifact=\${artifact}
+          type=\${this.type}
+          isDetailView="true"
+        >
+        </mcp-artifact-card>
+        <div class="flex flex-col gap-y-10">
+          <view-github-comments
+            owner="mcpiquanthq"
+            repo="githubcomments"
+            title=\${artifact.name}
+          >
+          </view-github-comments>
+        </div>
+        </div>
+      \`;
+		},
+	});
+
+	return {
+		tag: "mcp-main",
+		class:
+			"w-full h-full bg-[#1d2021] text-[#ebdbb2] flex font-sans text-sm overflow-hidden",
+		properties: {
+			searchQuery: T.string(""),
+			activeTags: T.array([]),
+			availableTags: T.array([]),
+			component: T.object(),
+			currentRoute: T.object({
+				sync: "ram",
+				attribute: false,
+				reflect: false,
+			}),
+		},
+		async connected() {
+			this._currentArtifactType = undefined; // Used to track route changes for tag fetching.
+		},
+		async _fetchTagsForType(type) {
+			if (this._currentArtifactType === type) return; // Avoid refetching for the same type.
+			this._currentArtifactType = type;
+
+			if (!type) {
+				this.availableTags = [];
+				return;
+			}
+
+			const tags = await Model.tags.getAll();
+			this.availableTags = [...new Set(tags)];
+		},
+		_getArtifactTypeFromRoute() {
+			const path = this.currentRoute?.path || "";
+			const parts = path.split("/").filter((p) => p);
+			if (
+				parts[0] === "discover" &&
+				parts.length > 1 &&
+				["servers", "clients", "agents"].includes(parts[1])
+			) {
+				return parts[1];
+			}
+			return null;
+		},
+		toggleTag(tagToToggle) {
+			const tagIndex = this.activeTags.indexOf(tagToToggle);
+			if (tagIndex > -1) {
+				this.activeTags.splice(tagIndex, 1);
+			} else {
+				this.activeTags.push(tagToToggle);
+			}
+			this.update();
+		},
+		clearFilters() {
+			this.activeTags = [];
+			this.searchQuery = "";
+			this.update();
+		},
+		render() {
+			const artifactType = this._getArtifactTypeFromRoute();
+			this._fetchTagsForType(artifactType);
+
+			return html\`
+        <main class="flex-grow p-6 md:p-8 flex flex-col gap-8 overflow-y-auto">
+          <mcp-discover-header
+            .searchQuery=\${this.searchQuery}
+            .activeTags=\${this.activeTags}
+            .availableTags=\${this.availableTags}
+            .onSearchChange=\${(q) => {
+							this.searchQuery = q;
+						}}
+            .onToggleTag=\${this.toggleTag.bind(this)}
+          >
+          </mcp-discover-header>
+          \${this.currentRoute?.matched?.component}
+        </main>
+        <mcp-trending-discussions
+					.data-query=\${{ model: "discussions", limit: 5, key: "discussions" }}
+        ></mcp-trending-discussions>
+      \`;
+		},
+	};
+};
+`,mimeType:"application/javascript",skipSW:!1},"/modules/apps/mcp/views/history.js":{content:`export default ({ html, AI, T }) => {
+	$APP.define("mcp-history-view", {
+		properties: {
+			item: T.object(null),
+			onBack: T.function(),
+		},
+
+		handleBack() {
+			if (this.onBack) {
+				this.onBack();
+			}
+		},
+
+		render() {
+			if (!this.item) {
+				return html\`<div class="text-center text-gray-500 h-full flex items-center justify-center">Select a history item to view details.</div>\`;
+			}
+
+			const { item } = this;
+
+			return html\`
+                <div class="text-sm">
+                    <uix-link label="Back" icon="arrow-left" reverse @click=\${this.handleBack.bind(this)} class="text-xs text-blue-600 hover:underline mb-3 flex items-center"></uix-link>
+                    <div class="space-y-4">
+                        <div>
+                            <h4 class="font-mono text-xs font-bold text-gray-700 mb-1">REQUEST</h4>
+                            <pre class="text-xs whitespace-pre-wrap bg-gray-800 text-gray-200 p-2 rounded-lg font-mono overflow-auto">\${JSON.stringify({ tool: item.toolName, args: item.args || item.params }, null, 2)}</pre>
+                        </div>
+                        <div>
+                            <h4 class="font-mono text-xs font-bold text-gray-700 mb-1">RESPONSE</h4>
+                            \${
+															item.status === "success"
+																? html\`<pre class="text-xs whitespace-pre-wrap bg-gray-900 text-green-400 p-2 rounded-lg font-mono overflow-auto">\${JSON.stringify(item.result, null, 2)}</pre>\`
+																: item.status === "error"
+																	? html\`<pre class="text-xs whitespace-pre-wrap bg-red-100 text-red-700 p-2 rounded-lg font-mono overflow-auto">\${item.error}</pre>\`
+																	: html\`<p class="text-xs text-gray-500">Request is still pending...</p>\`
+														}
+                        </div>
+                    </div>
+                </div>
+            \`;
+		},
+	});
+
+	return {
+		properties: {
+			history: T.array([]),
+			selectedHistoryId: T.string(null),
+			onSelect: T.function(),
+			listOnly: T.boolean(),
+		},
+		selectHistoryItem(item) {
+			this.selectedHistoryId = item ? item.id : undefined;
+			if (this.onHistorySelect) this.onSelect(item);
+		},
+		connected() {
+			this.historyUnsubscribe = AI.onHistoryChange((event) => {
+				this.history = event.history;
+			});
+			this.history = AI.getHistory();
+		},
+		render() {
+			if (this.history.length === 0)
+				return html\`<p class="text-center text-xs text-gray-400 p-4">No history yet</p>\`;
+			const selectedHistoryItem = this.history.find(
+				(h) => h.id === this.selectedHistoryId,
+			);
+
+			return html\`
+                <ul class="text-xs space-y-1 font-mono">
+                    \${this.history.map(
+											(item) => html\`
+                            <li
+                                class="flex flex-col \${this.selectedHistoryId === item.id ? "font-semibold text-blue-100 p-2" : item.status === "error" ? "text-red-100" : "text-white"}">
+                                <div 
+																 @click=\${() => this.selectHistoryItem(item)}
+																class="cursor-pointer flex items-center justify-between p-2 rounded hover:bg-gray-700">
+																<span class="text-ellipsis">\${item.toolName}</span>
+                                <div class="flex items-center">
+                                    <span class="text-gray-500 mr-2">\${item.status}</span>
+                                    <uix-icon name="chevron-right" class="h-4 w-4 text-gray-400"></uix-icon>
+                                </div>
+																</div>
+																\${!this.listOnly || !selectedHistoryItem || selectedHistoryItem.id !== item.id ? null : html\`<mcp-history-view .item=\${selectedHistoryItem} .onBack=\${() => this.selectHistoryItem(null)}></mcp-history-view>\`}
+                            </li>
+                        \`,
+										)}
+                </ul>
+            \`;
+		},
+	};
+};
+`,mimeType:"application/javascript",skipSW:!1},"/modules/icon-lucide/lucide/atom.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="1"/><path d="M20.2 20.2c2.04-2.03.02-7.36-4.5-11.9c-4.54-4.52-9.87-6.54-11.9-4.5c-2.04 2.03-.02 7.36 4.5 11.9c4.54 4.52 9.87 6.54 11.9 4.5"/><path d="M15.7 15.7c4.52-4.54 6.54-9.87 4.5-11.9c-2.03-2.04-7.36-.02-11.9 4.5c-4.52 4.54-6.54 9.87-4.5 11.9c2.03 2.04 7.36.02 11.9-4.5"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/gem.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M6 3h12l4 6l-10 13L2 9Z"/><path d="M11 3L8 9l4 13l4-13l-3-6M2 9h20"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/bell-ring.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9m4.3 13a1.94 1.94 0 0 0 3.4 0M4 2C2.8 3.7 2 5.7 2 8m20 0c0-2.3-.8-4.3-2-6"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/users.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87m-3-12a4 4 0 0 1 0 7.75"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/terminal.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m4 17l6-6l-6-6m8 14h8"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/chevron-right.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 18l6-6l-6-6"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/telescope.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m10.065 12.493l-6.18 1.318a.934.934 0 0 1-1.108-.702l-.537-2.15a1.07 1.07 0 0 1 .691-1.265l13.504-4.44m-2.875 6.493l4.332-.924M16 21l-3.105-6.21"/><path d="M16.485 5.94a2 2 0 0 1 1.455-2.425l1.09-.272a1 1 0 0 1 1.212.727l1.515 6.06a1 1 0 0 1-.727 1.213l-1.09.272a2 2 0 0 1-2.425-1.455zM6.158 8.633l1.114 4.456M8 21l3.105-6.21"/><circle cx="12" cy="13" r="2"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/server.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><path d="M6 6h.01M6 18h.01"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/code.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m16 18l6-6l-6-6M8 6l-6 6l6 6"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/bot.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2m16 0h2m-7-1v2m-6-2v2"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/layout-grid.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/book.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/zap.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/message-square-heart.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M14.8 7.5a1.84 1.84 0 0 0-2.6 0l-.2.3l-.3-.3a1.84 1.84 0 1 0-2.4 2.8L12 13l2.7-2.7c.9-.9.8-2.1.1-2.8"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/search.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21l-4.3-4.3"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/workflow.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><rect width="8" height="8" x="3" y="3" rx="2"/><path d="M7 11v4a2 2 0 0 0 2 2h4"/><rect width="8" height="8" x="13" y="13" rx="2"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/flame.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3c-1.072-2.143-.224-4.054 2-6c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/star.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m12 2l3.09 6.26L22 9.27l-5 4.87l1.18 6.88L12 17.77l-6.18 3.25L7 14.14L2 9.27l6.91-1.01z"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/arrow-up.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m5 12l7-7l7 7m-7 7V5"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/message-circle.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/package.json":{content:`{
 	"name": "mcpiquant",
 	"version": "1",
 	"dependencies": {
@@ -5831,7 +5859,7 @@ startApp();
 		"icon-lucide": "/modules/icon-lucide/index.js"
 	},
 	"settings": {
-		"name": "MCPiQuant.com"
+		"name": "MCPiquant.com"
 	},
 	"theme": {
 		"font": {
@@ -5840,6 +5868,8 @@ startApp();
 	}
 }
 `,mimeType:"application/json",skipSW:!1},"/modules/mvc/index.js":{content:`export const dependencies = {
+	T: "/modules/types/index.js",
+	html: "/modules/mvc/view/html/index.js",
 	fs: "/modules/mvc/helpers/filesystem.js",
 	View: "/modules/mvc/view/index.js",
 	ThemeManager: "/modules/theme/index.js",
@@ -5855,352 +5885,6 @@ startApp();
 export default ({ $APP }) => {
 	$APP.addModule({ name: "template", path: "views/templates", root: true });
 	$APP.addModule({ name: "view", path: "views", root: true });
-};
-`,mimeType:"application/javascript",skipSW:!1},"/modules/mvc/helpers/filesystem.js":{content:`export default ({ $APP }) => {
-	$APP.addModule({ name: "fs" });
-	const context = $APP.fs;
-
-	const fs = {
-		async import(path, { tag, module } = {}) {
-			try {
-				const content = await import(path);
-				context[path] = {
-					tag,
-					path,
-					module,
-					extension: tag ? "component" : "js",
-				};
-				return content;
-			} catch (err) {
-				console.error(\`Failed to import \${path}:\`, err);
-				return { error: true };
-			}
-		},
-		async fetchResource(path, handleResponse, extension) {
-			try {
-				const response = await fetch(path);
-				context[path] = {
-					path,
-					extension,
-				};
-				if (response.ok) return await handleResponse(response);
-			} catch (error) {
-				console.warn(\`Resource not found at: \${path}\`, error);
-			}
-			return null;
-		},
-		list() {
-			const list = {};
-			Object.values(context).forEach((file) => {
-				const { extension } = file;
-				if (!list[file.extension]) list[extension] = [];
-				list[extension].push(file);
-			});
-			return list;
-		},
-		assets() {
-			return Object.values(context).filter(
-				({ extension }) => !["js", "component"].includes(extension),
-			);
-		},
-		components() {
-			return Object.values(context).filter(
-				({ tag, extension }) => extension === "js" && !!tag,
-			);
-		},
-		json(path) {
-			return fs.fetchResource(path, (res) => res.json(), "json");
-		},
-		css: async (file, addToStyle = false) => {
-			const cssContent = await fs.fetchResource(
-				file,
-				async (response) => await response.text(),
-				"css",
-			);
-			if (!addToStyle) return cssContent;
-			const style = document.createElement("style");
-			style.textContent = cssContent;
-			document.head.appendChild(style);
-			return cssContent;
-		},
-		getFilePath(file) {
-			if ($APP.settings.mv3Injected) return chrome.runtime.getURL(file);
-			return \`\${$APP.settings.basePath}\${file.startsWith("/") ? file : \`/\${file}\`}\`;
-		},
-		getRequestPath(urlString) {
-			const url = new URL(urlString);
-			return url.pathname + url.search;
-		},
-	};
-	return fs;
-};
-`,mimeType:"application/javascript",skipSW:!1},"/modules/mvc/view/index.js":{content:`window.$ = (element) => document.querySelector(element);
-window.$$ = (element) => document.querySelectorAll(element);
-
-export const dependencies = {
-	html: "/modules/mvc/view/html/index.js",
-	T: "/modules/types/index.js",
-};
-
-export default ({ T, html }) => {
-	const _data = T.object({
-		properties: {
-			model: T.string(),
-			id: T.string(),
-			method: T.string(),
-			filter: T.object(),
-			includes: T.string(),
-			order: T.string(),
-			limit: T.number(),
-			offset: T.number(),
-			count: T.number(),
-		},
-	});
-
-	function addClassTags(instance, proto) {
-		if (proto?.constructor) {
-			addClassTags(instance, Object.getPrototypeOf(proto));
-			if (proto.constructor.tag) {
-				instance.classList.add(proto.constructor.tag);
-			}
-		}
-	}
-
-	class View extends HTMLElement {
-		static get observedAttributes() {
-			return Object.keys(this.properties).filter(
-				(key) => this.properties[key].attribute !== false,
-			);
-		}
-
-		static properties = { _data };
-		static _attrs = {};
-		static plugins = [];
-		state = {};
-		_hasUpdated = false;
-		_ignoreAttributeChange = false;
-		_changedProps = {};
-
-		on(eventName, listener) {
-			if (typeof listener !== "function") {
-				console.error(
-					\`Error adding listener to \${eventName}: callback is not a function.\`,
-				);
-				return;
-			}
-			listener.bind(this);
-			const wrapper = ({ detail }) => listener(detail);
-			this.addEventListener(eventName, wrapper);
-			return wrapper;
-		}
-
-		off(eventName, listener) {
-			this.removeEventListener(eventName, listener);
-		}
-
-		emit(eventName, data) {
-			const event = new CustomEvent(eventName, {
-				detail: data,
-			});
-			this.dispatchEvent(event);
-		}
-
-		connectedCallback() {
-			if (this.constructor.properties) this.initProps();
-			addClassTags(this, Object.getPrototypeOf(this));
-			for (const plugin of this.constructor.plugins) {
-				const { events } = plugin;
-				Object.entries(events).map(
-					([event, fn]) => fn && this.on(event, fn.bind(this)),
-				);
-			}
-			this.emit("connected", {
-				instance: this,
-				component: this.constructor,
-			});
-			this.requestUpdate();
-		}
-
-		disconnectedCallback() {
-			this.emit("disconnected", {
-				instance: this,
-				component: this.constructor,
-			});
-		}
-
-		defer(fn) {
-			requestAnimationFrame(fn.bind(this));
-		}
-
-		q(element) {
-			return this.querySelector(element);
-		}
-
-		qa(element) {
-			return this.querySelectorAll(element);
-		}
-
-		prop(prop) {
-			return {
-				value: this[prop],
-				setValue: ((newValue) => (this[prop] = newValue)).bind(this),
-				instance: this,
-				prop,
-			};
-		}
-
-		initProps() {
-			for (const attr of this.attributes) {
-				const key = this.constructor._attrs[attr.name];
-				const prop = this.constructor.properties[key];
-				if (prop && prop.type !== "boolean" && attr.value === "") {
-					this.removeAttribute(attr.name);
-					continue;
-				}
-				this.state[key] = prop
-					? T.stringToType(attr.value, {
-							...prop,
-							attribute: true,
-						})
-					: attr.value;
-			}
-			for (const [key, prop] of Object.entries(this.constructor.properties)) {
-				const {
-					type,
-					sync,
-					defaultValue,
-					attribute = true,
-					setter,
-					getter,
-				} = prop;
-				if (sync) continue;
-				this.state[key] ??= this[key] ?? defaultValue;
-				Object.defineProperty(this, key, {
-					get: getter ? getter.bind(this) : () => this.state[key],
-					set: setter
-						? setter.bind(this)
-						: (value) => {
-								const oldValue = this.state[key];
-								if (oldValue === value) return;
-								this.state[key] = value;
-								if (attribute)
-									this.updateAttribute({
-										key,
-										value,
-										skipPropUpdate: true,
-										type,
-									});
-								this.requestUpdate(key, oldValue);
-							},
-				});
-
-				const value = this.state[key];
-				if (!attribute || this.hasAttribute(key) || value === undefined)
-					continue;
-
-				this.updateAttribute({
-					key,
-					value,
-					skipPropUpdate: true,
-					type,
-				});
-
-				this._changedProps[key] = undefined;
-			}
-		}
-
-		requestUpdate(key, oldValue) {
-			if (key) this._changedProps[key] = oldValue;
-			if (this.updateComplete) clearTimeout(this.updateComplete);
-			this.updateComplete = setTimeout(() => {
-				this.performUpdate(key === undefined);
-			}, 0);
-			return this.updateComplete;
-		}
-
-		performUpdate(forceUpdate) {
-			const changedProps = this._changedProps;
-			this.updateComplete = null;
-			if (this._hasUpdated && !forceUpdate && !this.shouldUpdate(changedProps))
-				return;
-			this.emit("willUpdate", changedProps);
-			this.update(changedProps);
-			if (!this._hasUpdated) {
-				this._hasUpdated = true;
-				this.emit("firstUpdated", changedProps);
-			}
-			this.emit("updated", changedProps);
-			this._changedProps = {};
-		}
-
-		shouldUpdate(_changedProps) {
-			const changedProps = { ..._changedProps };
-			if (!this._hasUpdated) return true;
-			for (const [key, oldValue] of Object.entries(changedProps)) {
-				const newValue = this[key];
-				const prop = this.constructor.properties[key];
-				const hasChanged = prop?.hasChanged
-					? prop.hasChanged(newValue, oldValue)
-					: oldValue !== newValue;
-				if (!hasChanged) delete changedProps[key];
-				else
-					this.emit(\`\${key}Changed\`, {
-						oldValue,
-						value: newValue,
-						instance: this,
-						component: this.constructor,
-					});
-			}
-			this._changedProps = {};
-			return Object.keys(changedProps).length > 0;
-		}
-
-		update() {
-			html.render(this.render(), this);
-		}
-
-		render() {
-			return null;
-		}
-
-		attributeChangedCallback(key, oldValue, value) {
-			if (oldValue === value) return;
-			this.emit("attributeChangedCallback", {
-				instance: this,
-				component: this.constructor,
-				key,
-				value,
-				oldValue,
-			});
-
-			if (this._ignoreAttributeChange) return;
-			this.state[key] = T.stringToType(value, this.constructor.properties[key]);
-			if (this._hasUpdated) this.requestUpdate(key, oldValue);
-		}
-
-		updateAttribute({ key, value, type, skipPropUpdate = false }) {
-			if (!type) return;
-			this._ignoreAttributeChange = skipPropUpdate;
-			if (type === "function" && typeof value === "function") {
-				this.setAttribute(key, value.toString());
-			} else if (type === "boolean") {
-				if (value) this.setAttribute(key, "");
-				else this.removeAttribute(key);
-			} else {
-				if (value === undefined) this.removeAttribute(key);
-				else {
-					if (["array", "object"].includes(type))
-						this.setAttribute(key, JSON.stringify(value));
-					else this.setAttribute(key, value);
-				}
-			}
-
-			if (skipPropUpdate) this._ignoreAttributeChange = false;
-			else this[key] = value;
-		}
-	}
-
-	return View;
 };
 `,mimeType:"application/javascript",skipSW:!1},"/modules/mvc/view/html/index.js":{content:`const DEV_MODE = false;
 const ENABLE_EXTRA_SECURITY_HOOKS = false;
@@ -8172,6 +7856,329 @@ Object.assign(html, helpers);
 
 export const component = html;
 export default html;
+`,mimeType:"application/javascript",skipSW:!1},"/modules/mvc/helpers/filesystem.js":{content:`export default ({ $APP }) => {
+	$APP.addModule({ name: "fs" });
+	const context = $APP.fs;
+
+	const fs = {
+		async import(path, { tag, module } = {}) {
+			try {
+				const content = await import(path);
+				context[path] = {
+					tag,
+					path,
+					module,
+					extension: tag ? "component" : "js",
+				};
+				return content;
+			} catch (err) {
+				console.error(\`Failed to import \${path}:\`, err);
+				return { error: true };
+			}
+		},
+		async fetchResource(path, handleResponse, extension) {
+			try {
+				const response = await fetch(path);
+				context[path] = {
+					path,
+					extension,
+				};
+				if (response.ok) return await handleResponse(response);
+			} catch (error) {
+				console.warn(\`Resource not found at: \${path}\`, error);
+			}
+			return null;
+		},
+		list() {
+			const list = {};
+			Object.values(context).forEach((file) => {
+				const { extension } = file;
+				if (!list[file.extension]) list[extension] = [];
+				list[extension].push(file);
+			});
+			return list;
+		},
+		assets() {
+			return Object.values(context).filter(
+				({ extension }) => !["js", "component"].includes(extension),
+			);
+		},
+		components() {
+			return Object.values(context).filter(
+				({ tag, extension }) => extension === "js" && !!tag,
+			);
+		},
+		json(path) {
+			return fs.fetchResource(path, (res) => res.json(), "json");
+		},
+		css: async (file, addToStyle = false) => {
+			const cssContent = await fs.fetchResource(
+				file,
+				async (response) => await response.text(),
+				"css",
+			);
+			if (!addToStyle) return cssContent;
+			const style = document.createElement("style");
+			style.textContent = cssContent;
+			document.head.appendChild(style);
+			return cssContent;
+		},
+		getFilePath(file) {
+			if ($APP.settings.mv3Injected) return chrome.runtime.getURL(file);
+			return \`\${$APP.settings.basePath}\${file.startsWith("/") ? file : \`/\${file}\`}\`;
+		},
+		getRequestPath(urlString) {
+			const url = new URL(urlString);
+			return url.pathname + url.search;
+		},
+	};
+	return fs;
+};
+`,mimeType:"application/javascript",skipSW:!1},"/modules/mvc/view/index.js":{content:`export default ({ T, html }) => {
+	function addClassTags(instance, proto) {
+		if (proto?.constructor) {
+			addClassTags(instance, Object.getPrototypeOf(proto));
+			if (proto.constructor.tag) {
+				instance.classList.add(proto.constructor.tag);
+			}
+		}
+	}
+
+	class View extends HTMLElement {
+		static get observedAttributes() {
+			return Object.keys(this.properties).filter(
+				(key) => this.properties[key].attribute !== false,
+			);
+		}
+
+		static properties = {};
+		static _attrs = {};
+		static plugins = [];
+		state = {};
+		_hasUpdated = false;
+		_ignoreAttributeChange = false;
+		_changedProps = {};
+
+		on(eventName, listener) {
+			if (typeof listener !== "function") {
+				console.error(
+					\`Error adding listener to \${eventName}: callback is not a function.\`,
+				);
+				return;
+			}
+			listener.bind(this);
+			const wrapper = ({ detail }) => listener(detail);
+			this.addEventListener(eventName, wrapper);
+			return wrapper;
+		}
+
+		off(eventName, listener) {
+			this.removeEventListener(eventName, listener);
+		}
+
+		emit(eventName, data) {
+			const event = new CustomEvent(eventName, {
+				detail: data,
+			});
+			this.dispatchEvent(event);
+		}
+
+		connectedCallback() {
+			if (this.constructor.properties) this.initProps();
+			addClassTags(this, Object.getPrototypeOf(this));
+			for (const plugin of this.constructor.plugins) {
+				const { events } = plugin;
+				Object.entries(events).map(
+					([event, fn]) => fn && this.on(event, fn.bind(this)),
+				);
+			}
+			this.emit("connected", {
+				instance: this,
+				component: this.constructor,
+			});
+			this.requestUpdate();
+		}
+
+		disconnectedCallback() {
+			this.emit("disconnected", {
+				instance: this,
+				component: this.constructor,
+			});
+		}
+
+		defer(fn) {
+			requestAnimationFrame(fn.bind(this));
+		}
+
+		q(element) {
+			return this.querySelector(element);
+		}
+
+		qa(element) {
+			return this.querySelectorAll(element);
+		}
+
+		prop(prop) {
+			return {
+				value: this[prop],
+				setValue: ((newValue) => (this[prop] = newValue)).bind(this),
+				instance: this,
+				prop,
+			};
+		}
+
+		initProps() {
+			for (const attr of this.attributes) {
+				const key = this.constructor._attrs[attr.name];
+				const prop = this.constructor.properties[key];
+				if (prop && prop.type !== "boolean" && attr.value === "") {
+					this.removeAttribute(attr.name);
+					continue;
+				}
+				this.state[key] = prop
+					? T.stringToType(attr.value, {
+							...prop,
+							attribute: true,
+						})
+					: attr.value;
+			}
+			for (const [key, prop] of Object.entries(this.constructor.properties)) {
+				const {
+					type,
+					sync,
+					defaultValue,
+					attribute = true,
+					setter,
+					getter,
+				} = prop;
+				if (sync) continue;
+				this.state[key] ??= this[key] ?? defaultValue;
+				Object.defineProperty(this, key, {
+					get: getter ? getter.bind(this) : () => this.state[key],
+					set: setter
+						? setter.bind(this)
+						: (value) => {
+								const oldValue = this.state[key];
+								if (oldValue === value) return;
+								this.state[key] = value;
+								if (attribute)
+									this.updateAttribute({
+										key,
+										value,
+										skipPropUpdate: true,
+										type,
+									});
+								this.requestUpdate(key, oldValue);
+							},
+				});
+
+				const value = this.state[key];
+				if (!attribute || this.hasAttribute(key) || value === undefined)
+					continue;
+
+				this.updateAttribute({
+					key,
+					value,
+					skipPropUpdate: true,
+					type,
+				});
+
+				this._changedProps[key] = undefined;
+			}
+		}
+
+		requestUpdate(key, oldValue) {
+			if (key) this._changedProps[key] = oldValue;
+			if (this.updateComplete) clearTimeout(this.updateComplete);
+			this.updateComplete = setTimeout(() => {
+				this.performUpdate(key === undefined);
+			}, 0);
+			return this.updateComplete;
+		}
+
+		performUpdate(forceUpdate) {
+			const changedProps = this._changedProps;
+			this.updateComplete = null;
+			if (this._hasUpdated && !forceUpdate && !this.shouldUpdate(changedProps))
+				return;
+			this.emit("willUpdate", changedProps);
+			this.update(changedProps);
+			if (!this._hasUpdated) {
+				this._hasUpdated = true;
+				this.emit("firstUpdated", changedProps);
+			}
+			this.emit("updated", changedProps);
+			this._changedProps = {};
+		}
+
+		shouldUpdate(_changedProps) {
+			const changedProps = { ..._changedProps };
+			if (!this._hasUpdated) return true;
+			for (const [key, oldValue] of Object.entries(changedProps)) {
+				const newValue = this[key];
+				const prop = this.constructor.properties[key];
+				const hasChanged = prop?.hasChanged
+					? prop.hasChanged(newValue, oldValue)
+					: oldValue !== newValue;
+				if (!hasChanged) delete changedProps[key];
+				else
+					this.emit(\`\${key}Changed\`, {
+						oldValue,
+						value: newValue,
+						instance: this,
+						component: this.constructor,
+					});
+			}
+			this._changedProps = {};
+			return Object.keys(changedProps).length > 0;
+		}
+
+		update() {
+			html.render(this.render(), this);
+		}
+
+		render() {
+			return null;
+		}
+
+		attributeChangedCallback(key, oldValue, value) {
+			if (oldValue === value) return;
+			this.emit("attributeChangedCallback", {
+				instance: this,
+				component: this.constructor,
+				key,
+				value,
+				oldValue,
+			});
+			if (this._ignoreAttributeChange) return;
+			this.state[key] = T.stringToType(value, this.constructor.properties[key]);
+			if (this._hasUpdated) this.requestUpdate(key, oldValue);
+		}
+
+		updateAttribute({ key, value, type, skipPropUpdate = false }) {
+			if (!type) return;
+			this._ignoreAttributeChange = skipPropUpdate;
+			if (type === "function" && typeof value === "function") {
+				this.setAttribute(key, value.toString());
+			} else if (type === "boolean") {
+				if (value) this.setAttribute(key, "");
+				else this.removeAttribute(key);
+			} else {
+				if (value === undefined) this.removeAttribute(key);
+				else {
+					if (["array", "object"].includes(type))
+						this.setAttribute(key, JSON.stringify(value));
+					else this.setAttribute(key, value);
+				}
+			}
+
+			if (skipPropUpdate) this._ignoreAttributeChange = false;
+			else this[key] = value;
+		}
+	}
+
+	return View;
+};
 `,mimeType:"application/javascript",skipSW:!1},"/modules/theme/index.js":{content:`import presetWebFonts from "https://cdn.jsdelivr.net/npm/@unocss/preset-web-fonts/+esm";
 import presetWind4 from "https://cdn.jsdelivr.net/npm/@unocss/preset-wind4@66.3.3/+esm";
 
@@ -8322,15 +8329,14 @@ export default async ({ $APP }) => {
 
 		const BaseClass = extendsTag ? await getComponent(extendsTag) : View;
 		if (extendsTag) BaseClass.plugins = [...View.plugins, ...BaseClass.plugins];
+
 		const component = class extends BaseClass {
 			static icons = icons;
 			static css = css;
 			static formAssociated = formAssociated;
 			constructor() {
 				super();
-				if (klass) {
-					this.classList.add(...klass.split(" "));
-				}
+				if (klass) this.classList.add(...klass.split(" "));
 			}
 
 			static properties = (() => {
@@ -8380,6 +8386,12 @@ export default async ({ $APP }) => {
 		if (style)
 			ThemeManager.loadComponentCSS(\`\${$APP.components[tag].path}.css\`);
 		componentConstructors.set(tag, component);
+		//TODO: optin for plugins
+		BaseClass.plugins
+			.filter(({ init }) => init && typeof init === "function")
+			.map(({ init }) => {
+				init({ View, component, definition, tag });
+			});
 		return component;
 	}
 
@@ -8580,7 +8592,7 @@ export default async ({ $APP }) => {
 
 	return { postMessage: postMessageToSW, request: requestToSW };
 };
-`,mimeType:"application/javascript",skipSW:!1},"/modules/mvc/controller/backend/index.js":{content:`export default ({ View, $APP }) => {
+`,mimeType:"application/javascript",skipSW:!1},"/modules/mvc/controller/backend/index.js":{content:`export default ({ View, T, $APP }) => {
 	let appWorker;
 	let wwPort;
 	const pendingRequests = {};
@@ -8657,6 +8669,8 @@ export default async ({ $APP }) => {
 	$APP.hooks.on("init", initBackend);
 
 	const requestDataSync = ({ instance }) => {
+		const query = instance["data-query"];
+		if (!query) return;
 		const {
 			id,
 			model,
@@ -8665,21 +8679,20 @@ export default async ({ $APP }) => {
 			includes,
 			recursive,
 			order,
-			filter,
+			where,
 			key,
-		} = instance._data;
-		const method = instance._data.method ?? (id ? "get" : "getMany");
-		const isMany = method === "getMany";
+		} = query;
+		const isMany = query.many ?? !id;
 		const opts = { limit, offset, order, recursive };
-		if (filter) opts.filter = filter;
+		opts.where ??= where;
 		if (includes)
 			opts.includes = Array.isArray(includes) ? includes : includes.split(",");
 
 		const onDataLoaded = (res) => {
-			if (!isMany) instance[key] = res;
+			if (!isMany) instance.state[key] = res;
 			else {
-				instance[key] = res.items ?? res;
-				if (res.count) instance._data.count = res.count;
+				instance.state[key] = res.items ?? res;
+				if (res.count) query.count = res.count;
 			}
 			instance.requestUpdate();
 			instance.emit("dataLoaded", {
@@ -8696,11 +8709,27 @@ export default async ({ $APP }) => {
 
 	View.plugins.push({
 		name: "dataQuery",
+		init: ({ View }) => {
+			View.properties["data-query"] = T.object({
+				properties: {
+					model: T.string(),
+					id: T.string(),
+					method: T.string(),
+					where: T.object(),
+					includes: T.string(),
+					order: T.string(),
+					limit: T.number(),
+					offset: T.number(),
+					count: T.number(),
+				},
+			});
+		},
 		events: {
 			connected: ({ instance }) => {
-				if (!instance._data) return;
+				const query = instance["data-query"];
+				if (!query) return;
 				instance._listeners = {};
-				const { model, id, key } = instance._data;
+				const { model, id, key } = query;
 				const row = instance[key];
 				const modelRows = $APP.Model[model]?.rows;
 				if (!modelRows) return;
@@ -8722,11 +8751,12 @@ export default async ({ $APP }) => {
 			},
 			disconnected: ({ instance }) => {
 				if (!instance._listeners) return;
+				const query = instance["data-query"];
+				if (!query) return;
 				Object.entries(instance._listeners).forEach(([key, listener]) => {
-					if (!instance?._data?.model || !$APP.Model[instance._data.model])
-						return;
-					if (key === "any") $APP.Model[instance._data.model].offAny(listener);
-					else $APP.Model[instance._data.model].off(key, listener);
+					if (!query.model || !$APP.Model[query.model]) return;
+					if (key === "any") $APP.Model[query.model].offAny(listener);
+					else $APP.Model[query.model].off(key, listener);
 				});
 			},
 		},
@@ -8973,87 +9003,6 @@ export default ({ View, $APP, Backend }) => {
 	$APP.Controller = Controller;
 	return Controller;
 };
-`,mimeType:"application/javascript",skipSW:!1},"/modules/mvc/controller/adapter-url.js":{content:`const getHashParams = () => {
-	const hash = window.location.hash.substring(1);
-	return new URLSearchParams(hash);
-};
-
-const setHashParams = (params) => {
-	const newHash = params.toString();
-	window.location.hash = newHash;
-};
-
-const hash = {
-	get: (key) => {
-		const params = getHashParams();
-		return params.get(key);
-	},
-	has: (key) => {
-		const params = getHashParams();
-		return params.has(key);
-	},
-	set: (key, value) => {
-		const params = getHashParams();
-		params.set(key, value);
-		setHashParams(params);
-		window.dispatchEvent(new Event("popstate"));
-		return { key };
-	},
-	remove: (key) => {
-		const params = getHashParams();
-		params.delete(key);
-		setHashParams(params);
-		return { key };
-	},
-	keys: () => {
-		const params = getHashParams();
-		return [...params.keys()];
-	},
-	entries: () => {
-		const params = getHashParams();
-		return [...params.entries()];
-	},
-};
-
-const querystring = {
-	get(key) {
-		const params = new URLSearchParams(window.location.search);
-		return params.get(key);
-	},
-
-	set(key, value) {
-		const params = new URLSearchParams(window.location.search);
-		params.set(key, value);
-		window.history?.pushState?.(
-			{},
-			"",
-			\`\${window.location.pathname}?\${params}\`,
-		);
-		window.dispatchEvent(new Event("popstate"));
-		return { key };
-	},
-
-	remove(key) {
-		const params = new URLSearchParams(window.location.search);
-		params.delete(key);
-		window.history.pushState?.({}, "", \`\${window.location.pathname}?\${params}\`);
-		return { key };
-	},
-	keys() {
-		const params = new URLSearchParams(window.location.search);
-		return [...params.keys()];
-	},
-	has(key) {
-		const params = new URLSearchParams(window.location.search);
-		return params.has(key);
-	},
-	entries: () => {
-		const params = new URLSearchParams(window.location.search);
-		return [...params.entries()];
-	},
-};
-
-export default { querystring, hash };
 `,mimeType:"application/javascript",skipSW:!1},"/modules/mvc/controller/adapter-storage.js":{content:`const serialize = (value) => {
 	if ((typeof value === "object" && value !== null) || Array.isArray(value)) {
 		return JSON.stringify(value);
@@ -9124,6 +9073,88 @@ const local = createStorageAdapter(window.localStorage);
 const session = createStorageAdapter(window.sessionStorage);
 
 export default { local, ram, session };
+`,mimeType:"application/javascript",skipSW:!1},"/modules/mvc/controller/adapter-url.js":{content:`const getHashParams = () => {
+	const hash = window.location.hash.substring(1);
+	return new URLSearchParams(hash);
+};
+
+const setHashParams = (params) => {
+	const newHash = params.toString();
+	window.location.hash = newHash;
+};
+
+const hash = {
+	get: (key) => {
+		const params = getHashParams();
+		return params.get(key);
+	},
+	has: (key) => {
+		const params = getHashParams();
+		return params.has(key);
+	},
+	set: (key, value) => {
+		const params = getHashParams();
+		params.set(key, value);
+		setHashParams(params);
+		window.dispatchEvent(new Event("popstate"));
+		console.error({ key, value });
+		return { key };
+	},
+	remove: (key) => {
+		const params = getHashParams();
+		params.delete(key);
+		setHashParams(params);
+		return { key };
+	},
+	keys: () => {
+		const params = getHashParams();
+		return [...params.keys()];
+	},
+	entries: () => {
+		const params = getHashParams();
+		return [...params.entries()];
+	},
+};
+
+const querystring = {
+	get(key) {
+		const params = new URLSearchParams(window.location.search);
+		return params.get(key);
+	},
+
+	set(key, value) {
+		const params = new URLSearchParams(window.location.search);
+		params.set(key, value);
+		window.history?.pushState?.(
+			{},
+			"",
+			\`\${window.location.pathname}?\${params}\`,
+		);
+		window.dispatchEvent(new Event("popstate"));
+		return { key };
+	},
+
+	remove(key) {
+		const params = new URLSearchParams(window.location.search);
+		params.delete(key);
+		window.history.pushState?.({}, "", \`\${window.location.pathname}?\${params}\`);
+		return { key };
+	},
+	keys() {
+		const params = new URLSearchParams(window.location.search);
+		return [...params.keys()];
+	},
+	has(key) {
+		const params = new URLSearchParams(window.location.search);
+		return params.has(key);
+	},
+	entries: () => {
+		const params = new URLSearchParams(window.location.search);
+		return [...params.entries()];
+	},
+};
+
+export default { querystring, hash };
 `,mimeType:"application/javascript",skipSW:!1},"/modules/router/index.js":{content:`/**
  * @file Application Router
  * @description A client-side router that supports nested routes, route parameters, and history management.
@@ -9167,7 +9198,6 @@ export default ({ html, Controller, $APP }) => {
 					namedRoutes[route.name] = fullPath;
 				}
 
-				// If the route has children, flatten them recursively
 				if (route.routes) {
 					const { flatRoutes: childFlatRoutes, namedRoutes: childNamedRoutes } =
 						this.flattenRoutes(route.routes, fullPath, route);
@@ -9194,7 +9224,6 @@ export default ({ html, Controller, $APP }) => {
 			this.defaultTitle = defaultTitle;
 
 			window.addEventListener("popstate", () => {
-				// \u2705 FIX: Use the full URL including hash for history navigation.
 				const currentPath =
 					window.location.pathname +
 					window.location.search +
@@ -9202,20 +9231,14 @@ export default ({ html, Controller, $APP }) => {
 				this.handleHistoryNavigation(currentPath);
 			});
 
-			// \u2705 FIX: Use the full URL including hash for the initial route.
 			const initialPath =
 				window.location.pathname +
 				window.location.search +
 				window.location.hash;
-			this.setCurrentRoute(
-				initialPath,
-				false, // Do not push to stack on initial load, as the page is already there.
-			);
+			this.setCurrentRoute(initialPath, false);
 		}
 
 		static handleHistoryNavigation(path) {
-			// \u2705 FIX: This logic is now cleaner. We just need to find the route and update the view,
-			// without pushing to history again. \`setCurrentRoute\` with \`pushToStack=false\` handles this.
 			const stackIndex = this.stack.findIndex(
 				(item) => this.normalizePath(item.path) === this.normalizePath(path),
 			);
@@ -9318,12 +9341,19 @@ export default ({ html, Controller, $APP }) => {
 		static normalizePath(path = "/") {
 			const normalized = path.includes("url=")
 				? path.split("url=")[1]
-				: path.split("?")[0].split("#")[0]; // \u2705 FIX: Also split by hash for matching
+				: path.split("?")[0].split("#")[0];
 			return (normalized || "/").replace(/\\/+$/, "") || "/";
 		}
 
+		/**
+		 * Pushes a new state to the browser's history and dispatches a popstate event.
+		 * @param {string} path - The new URL path.
+		 * @param {object} [state={}] - The state object to associate with the history entry.
+		 */
 		static push(path, state = {}) {
 			window.history.pushState(state, "", path);
+			const popstateEvent = new PopStateEvent("popstate", { state });
+			window.dispatchEvent(popstateEvent);
 		}
 
 		/**
@@ -9334,7 +9364,6 @@ export default ({ html, Controller, $APP }) => {
 		static setCurrentRoute(path, pushToStack = true) {
 			if (!this.routes) return;
 
-			// \u2705 FIX: Prevent pushing a new history state if the URL is identical to the current one.
 			const currentFullUrl =
 				window.location.pathname +
 				window.location.search +
@@ -9343,7 +9372,6 @@ export default ({ html, Controller, $APP }) => {
 				return;
 			}
 
-			// \u2705 FIX: Parse the querystring and hash from the full path.
 			const url = new URL(path, window.location.origin);
 			const querystring = url.search;
 			const hash = url.hash;
@@ -9352,7 +9380,6 @@ export default ({ html, Controller, $APP }) => {
 			const matched = this.matchRoute(normalizedPath);
 
 			if (!matched) {
-				// On initial load, a missing match shouldn't redirect, just warn.
 				if (!pushToStack) {
 					console.warn(
 						\`Router Warning: No route found for initial path "\${path}"\`,
@@ -9362,7 +9389,6 @@ export default ({ html, Controller, $APP }) => {
 				return this.go("/");
 			}
 
-			// \u2705 FIX: Add the parsed parts and the full path to the matched object.
 			matched.path = path;
 			matched.querystring = querystring;
 			matched.hash = hash;
@@ -9372,11 +9398,11 @@ export default ({ html, Controller, $APP }) => {
 
 			if (pushToStack) {
 				this.pushToStack(
-					path, // \u2705 FIX: Use the full, original path.
+					path,
 					matched.params,
 					matched.route.title || this.defaultTitle,
 				);
-				this.push(path, { path: path }); // \u2705 FIX: Use the full, original path.
+				this.push(path, { path: path });
 			}
 		}
 
@@ -9402,7 +9428,6 @@ export default ({ html, Controller, $APP }) => {
 					paramNames.forEach((name, index) => {
 						params[name] = match[index + 1];
 					});
-					console.log(params);
 					if (route.parent) {
 						return {
 							params,
@@ -9464,62 +9489,110 @@ export default ({ html, Controller, $APP }) => {
 
 	return Router;
 };
-`,mimeType:"application/javascript",skipSW:!1},"/index.js":{content:`export default ({ $APP, html }) => {
+`,mimeType:"application/javascript",skipSW:!1},"/index.js":{content:`import { keyed } from "/modules/mvc/view/html/directive.js";
+
+export default ({ $APP, html }) => {
 	const routes = {
 		"/discover": {
-			component: () => html\`<template-discover></template-discover>\`,
+			component: () => html\`<template-discover></template-discovaer>\`,
 			title: "Discover",
 			template: "template-app",
+			ssr: true,
 			routes: {
 				"": {
 					name: "discover",
-					component: () => html\`<mcp-discover-all>
-						</mcp-discover-all>\`,
-					title: "Discover All",
-				},
-				"/servers": {
-					name: "discover-servers",
-					component: () => html\`<mcp-artifact-grid
-							type="server"
-							._data=\${{ model: "servers", key: "artifacts" }}
-						>
-						</mcp-artifact-grid>\`,
+					ssr: true,
+					component: () =>
+						html\`<mcp-discover-list-view type="server"></mcp-discover-list-view>\`,
 					title: "Discover: Servers",
 				},
-				"/server/:id": {
+				"/servers/:id": {
 					name: "discover-server",
+					ssr: true,
 					component: ({ id }) =>
-						html\`<mcp-artifact-detail ._data=\${{ model: "servers", id, key: "artifact" }} type="server"></mcp-artifact-detail>\`,
+						html\`<mcp-artifact-detail .data-query=\${{ model: "servers", id: decodeURIComponent(id), key: "artifact" }} type="server"></mcp-artifact-detail>\`,
 					title: "Discover: Server",
 				},
+				"/servers/tag/:tagId": {
+					ssr: true,
+					name: "discover-servers-by-tag",
+					component: ({ tagId }) => {
+						const decodedTagId = decodeURIComponent(tagId);
+						return keyed(
+							tagId,
+							html\`<mcp-discover-list-view
+                                type="server"
+                                .tagId=\${decodedTagId}
+                            ></mcp-discover-list-view>\`,
+						);
+					},
+					title: "Discover: Servers by Tag",
+				},
+				"/server/:id": {
+					ssr: true,
+					name: "discover-server-redirect",
+					action: ({ id }) => $APP.Router.go(\`/discover/servers/\${id}\`),
+					title: "MCPiquant.com",
+				},
 				"/clients": {
+					ssr: true,
 					name: "discover-clients",
-					component: () => html\`<mcp-artifact-grid
-							type="client"
-							._data=\${{ model: "clients", key: "artifacts" }}
-						>
-						</mcp-artifact-grid>\`,
+					component: () =>
+						html\`<mcp-discover-list-view type="client"></mcp-discover-list-view>\`,
 					title: "Discover: Clients",
 				},
-				"/client/:id": {
+				"/clients/:id": {
+					ssr: true,
 					name: "discover-client",
 					component: ({ id }) =>
-						html\`<mcp-artifact-detail ._data=\${{ model: "clients", id, key: "artifact" }} type="client"></mcp-artifact-detail>\`,
+						html\`<mcp-artifact-detail .data-query=\${{ model: "clients", id: decodeURIComponent(id), key: "artifact" }} type="client"></mcp-artifact-detail>\`,
 					title: "Discover: Client",
+				},
+				"/clients/tag/:tagId": {
+					ssr: true,
+					name: "discover-clients-by-tag",
+					component: ({ tagId }) => {
+						const decodedTagId = decodeURIComponent(tagId);
+						return keyed(
+							tagId,
+							html\`<mcp-discover-list-view
+                                type="client"
+                                tagId=\${decodedTagId}
+                            ></mcp-discover-list-view>\`,
+						);
+					},
+					title: "Discover: Clients by Tag",
+				},
+				"/client/:id": {
+					ssr: true,
+					name: "discover-client-redirect",
+					action: ({ id }) => $APP.Router.go(\`/discover/clients/\${id}\`),
+					title: "MCPiquant.com",
 				},
 				"/agents": {
 					name: "discover-agents",
-					component: () => html\`<mcp-artifact-grid
-							type="agent"
-							._data=\${{ model: "agents", key: "artifacts" }}
-						>
-						</mcp-artifact-grid>\`,
+					component: () =>
+						html\`<mcp-discover-list-view type="agent"></mcp-discover-list-view>\`,
 					title: "Discover: Agents",
+				},
+				"/agents/tag/:tagId": {
+					name: "discover-agents-by-tag",
+					component: ({ tagId }) => {
+						const decodedTagId = decodeURIComponent(tagId);
+						return keyed(
+							tagId,
+							html\`<mcp-discover-list-view
+                                type="agent"
+                                .tagId=\${decodedTagId}
+                            ></mcp-discover-list-view>\`,
+						);
+					},
+					title: "Discover: Agents by Tag",
 				},
 				"/agent/:id": {
 					name: "discover-agent",
 					component: ({ id }) =>
-						html\`<mcp-artifact-detail ._data=\${{ model: "agents", id, key: "artifact" }} type="agent"></mcp-artifact-detail>\`,
+						html\`<mcp-artifact-detail .data-query=\${{ model: "agents", id: decodeURIComponent(id), key: "artifact" }} type="agent"></mcp-artifact-detail>\`,
 					title: "Discover: Agent",
 				},
 				"/discussions": {
@@ -9586,7 +9659,7 @@ export default ({ html, Controller, $APP }) => {
 		"/": {
 			name: "home-redirect",
 			action: () => $APP.Router.go("/discover"),
-			title: "MCPiQuant.com",
+			title: "MCPiquant.com",
 		},
 		"/github": {
 			name: "github-callback",
@@ -9598,6 +9671,106 @@ export default ({ html, Controller, $APP }) => {
 
 	$APP.routes.set(routes);
 };
+`,mimeType:"application/javascript",skipSW:!1},"/modules/mvc/view/html/directive.js":{content:`/**
+ * Creates a user-facing directive function from a Directive class. This
+ * function has the same parameters as the directive's render() method.
+ */
+export const directive =
+	(c) =>
+	(...values) => ({
+		// This property needs to remain unminified.
+		["_$litDirective$"]: c,
+		values,
+	});
+
+/**
+ * Base class for creating custom directives. Users should extend this class,
+ * implement \`render\` and/or \`update\`, and then pass their subclass to
+ * \`directive\`.
+ */
+export class Directive {
+	//@internal
+	__part;
+	//@internal
+	__attributeIndex;
+	//@internal
+	__directive;
+	//@internal
+	_$parent;
+
+	// These will only exist on the AsyncDirective subclass
+	//@internal
+	_$disconnectableChildren;
+	// This property needs to remain unminified.
+	//@internal
+	["_$notifyDirectiveConnectionChanged"];
+
+	constructor(_partInfo) {}
+
+	// See comment in Disconnectable interface for why this is a getter
+	get _$isConnected() {
+		return this._$parent._$isConnected;
+	}
+
+	/** @internal */
+	_$initialize(part, parent, attributeIndex) {
+		this.__part = part;
+		this._$parent = parent;
+		this.__attributeIndex = attributeIndex;
+	}
+	/** @internal */
+	_$resolve(part, props) {
+		return this.update(part, props);
+	}
+
+	render(...props) {
+		throw new Error("The \`render()\` method must be implemented.");
+	}
+
+	update(_part, props) {
+		return this.render(...props);
+	}
+}
+
+// A sentinel value that can never appear as a part value except when set by
+// live(). Used to force a dirty-check to fail and cause a re-render.
+const RESET_VALUE = {};
+
+/**
+ * Sets the committed value of a ChildPart directly without triggering the
+ * commit stage of the part.
+ *
+ * This is useful in cases where a directive needs to update the part such
+ * that the next update detects a value change or not. When value is omitted,
+ * the next update will be guaranteed to be detected as a change.
+ *
+ * @param part
+ * @param value
+ */
+const setCommittedValue = (part, value = RESET_VALUE) =>
+	(part._$committedValue = value);
+const nothing = Symbol.for("lit-nothing");
+class Keyed extends Directive {
+	key = nothing;
+	render(k, v) {
+		this.key = k;
+		return v;
+	}
+	update(part, [k, v]) {
+		if (k !== this.key) {
+			// Clear the part before returning a value. The one-arg form of
+			// setCommittedValue sets the value to a sentinel which forces a
+			// commit the next render.
+			setCommittedValue(part);
+			this.key = k;
+		}
+		return v;
+	}
+}
+
+export const keyed = directive(Keyed);
+
+export const ifDefined = (value) => value ?? nothing;
 `,mimeType:"application/javascript",skipSW:!1},"/modules/p2p/index.js":{content:`export default ({ $APP }) => {
 	const p2p = {};
 	$APP.events.install(p2p);
@@ -11693,7 +11866,7 @@ export default ({ $APP, html }) => {
 				html\`<cms-crud
 							view="board"
 							class="p-8"
-							._data=\${{ model: "tasks", key: "rows" }} 
+							.data-query=\${{ model: "tasks", key: "rows" }} 
 							.allowedActions=\${["import", "export", "changeViewMode", "changeColumns"]}></cms-crud>\`,
 			title: "Data",
 			template: "admin-template",
@@ -12521,6 +12694,12 @@ const createType = (type, options) => {
 	};
 };
 
+const typesHelpers = {
+	createType,
+	stringToType,
+	validateType,
+};
+
 const createRelationType =
 	(relationship) =>
 	(...args) => {
@@ -12550,12 +12729,6 @@ const createRelationType =
 			...options,
 		};
 	};
-
-const typesHelpers = {
-	createType,
-	stringToType,
-	validateType,
-};
 
 const relationshipTypes = ["one", "many", "belongs", "belongs_many"];
 const manyTypes = ["many", "belongs_many"];
@@ -12600,19 +12773,15 @@ export default Types;
 
 		const init = async () => {
 			if (connectionPromise) return connectionPromise;
-
 			connectionPromise = new Promise((resolve, reject) => {
 				const request = indexedDB.open(dbName, dbVersion);
-
 				request.onerror = (event) => {
 					connectionPromise = null;
 					reject(new Error(\`Failed to open database: \${event.target.error}\`));
 				};
-
 				request.onsuccess = (event) => {
 					db = event.target.result;
 					isConnected = true;
-
 					db.onversionchange = () => {
 						if (db) {
 							db.close();
@@ -12662,18 +12831,12 @@ export default Types;
 		};
 
 		const reload = async (props) => {
-			// Block new connections and wait for any pending one to finish.
 			if (connectionPromise) {
 				await connectionPromise;
 			}
-
 			close();
-
-			// Update the version and models before re-initializing.
 			dbVersion = props.version;
 			models = props.models;
-			// The next call to _ensureDb will trigger a fresh init.
-
 			$APP.Backend.broadcast({
 				type: "UPDATE_MODELS",
 				payload: { models },
@@ -12681,7 +12844,6 @@ export default Types;
 			return init();
 		};
 
-		// This is the gatekeeper for all database operations.
 		const _ensureDb = async () => {
 			if (!isConnected || !db) {
 				await init();
@@ -12717,9 +12879,9 @@ export default Types;
 			return updatedRow;
 		};
 
-		const matchesFilter = (item, filter, modelName) => {
+		const matchesFilter = (item, where, modelName) => {
 			const modelSchema = models[modelName];
-			return Object.entries(filter).every(([key, queryValue]) => {
+			return Object.entries(where).every(([key, queryValue]) => {
 				const itemValue = item[key];
 				const fieldSchema = modelSchema?.[key];
 				if (
@@ -12743,7 +12905,7 @@ export default Types;
 								return Array.isArray(operand) && operand.includes(itemValue);
 							case "$nin":
 								return Array.isArray(operand) && !operand.includes(itemValue);
-							case "$contains":
+							case "$includes":
 								if (Array.isArray(itemValue))
 									return itemValue.includes(operand);
 								if (
@@ -12786,12 +12948,12 @@ export default Types;
 			});
 		};
 
-		const findIndexedProperty = (filter, modelName) => {
+		const findIndexedProperty = (where, modelName) => {
 			const modelSchema = models[modelName];
-			if (!modelSchema || typeof filter !== "object" || filter === null)
+			if (!modelSchema || typeof where !== "object" || where === null)
 				return null;
-			for (const key in filter) {
-				if (Object.hasOwn(filter, key)) {
+			for (const key in where) {
+				if (Object.hasOwn(where, key)) {
 					if (modelSchema[key]?.index) {
 						return key;
 					}
@@ -12816,8 +12978,7 @@ export default Types;
 
 		const getMany = async (
 			storeName,
-			filter = {},
-			{ limit = 0, offset = 0, order = null, keys } = {},
+			{ where = {}, limit = 0, offset = 0, order = null, keys } = {},
 		) => {
 			await _ensureDb();
 			return new Promise((resolve, reject) => {
@@ -12862,7 +13023,7 @@ export default Types;
 							),
 						);
 					};
-					if (Array.isArray(filter)) {
+					if (Array.isArray(where)) {
 						const request = store.openCursor();
 						request.onerror = () =>
 							reject(
@@ -12872,7 +13033,7 @@ export default Types;
 							const cursor = event.target.result;
 							if (cursor) {
 								if (
-									filter.includes(cursor.key) &&
+									where.includes(cursor.key) &&
 									(!keys || keys.includes(cursor.key))
 								) {
 									items.push(cursor.value);
@@ -12886,9 +13047,9 @@ export default Types;
 					}
 					let cursorRequest;
 					let useIndex = false;
-					const indexedProp = findIndexedProperty(filter, storeName);
-					if (indexedProp && Object.keys(filter).length > 0) {
-						let queryValue = filter[indexedProp];
+					const indexedProp = findIndexedProperty(where, storeName);
+					if (indexedProp && Object.keys(where).length > 0) {
+						let queryValue = where[indexedProp];
 						if (modelSchema[indexedProp]?.type === "boolean") {
 							queryValue = queryValue ? parseBoolean.true : parseBoolean.false;
 						}
@@ -12922,7 +13083,7 @@ export default Types;
 								cursor.continue();
 								return;
 							}
-							if (matchesFilter(cursor.value, filter, storeName)) {
+							if (matchesFilter(cursor.value, where, storeName)) {
 								items.push(cursor.value);
 							}
 							cursor.continue();
@@ -12933,7 +13094,7 @@ export default Types;
 				} catch (error) {
 					reject(
 						new Error(
-							\`Failed to start transaction: \${error.message}. Query Props: \${JSON.stringify({ storeName, limit, offset, filter, order, keys })}\`,
+							\`Failed to start transaction: \${error.message}. Query Props: \${JSON.stringify({ storeName, limit, offset, where, order, keys })}\`,
 						),
 					);
 				}
@@ -13024,12 +13185,12 @@ export default Types;
 			});
 		};
 
-		const count = async (storeName, { filter = {} } = {}) => {
+		const count = async (storeName, { where = {} } = {}) => {
 			await _ensureDb();
 			return new Promise((resolve, reject) => {
 				const transaction = db.transaction(storeName, "readonly");
 				const store = transaction.objectStore(storeName);
-				if (Object.keys(filter).length === 0) {
+				if (Object.keys(where).length === 0) {
 					const request = store.count();
 					request.onerror = () =>
 						reject(new Error(\`Failed to count: \${request.error}\`));
@@ -13042,7 +13203,7 @@ export default Types;
 					request.onsuccess = (event) => {
 						const cursor = event.target.result;
 						if (cursor) {
-							if (matchesFilter(cursor.value, filter, storeName)) {
+							if (matchesFilter(cursor.value, where, storeName)) {
 								countNum++;
 							}
 							cursor.continue();
@@ -13188,7 +13349,6 @@ export default Types;
 			init,
 			transaction: transactionWrapper,
 			getMany,
-			prepareRow,
 			put,
 			get,
 			remove,
@@ -13369,53 +13529,54 @@ export default async ({ $APP, T, IndexedDBWrapper, metadata, operations }) => {
 			const modelDef = models[modelName];
 			const idsToFetchByModel = {};
 			const relationshipDetails = {};
+			if (includes)
+				for (const relation of includes) {
+					const relationDef = modelDef[relation];
+					if (!relationDef) continue;
+					relationshipDetails[relation] = relationDef;
 
-			for (const relation of includes) {
-				const relationDef = modelDef[relation];
-				if (!relationDef) continue;
-				relationshipDetails[relation] = relationDef;
+					const { targetModel, belongs, polymorphic, mixed } = relationDef;
 
-				const { targetModel, belongs, polymorphic, mixed } = relationDef;
+					for (const row of rows) {
+						let fkValue = row[relation];
 
-				for (const row of rows) {
-					let fkValue = row[relation];
-
-					if (belongs) {
-						fkValue = row[relation];
-					} else {
-						continue;
-					}
-					if (fkValue === null || fkValue === undefined) continue;
-
-					const addId = (model, id) => {
-						if (!idsToFetchByModel[model]) idsToFetchByModel[model] = new Set();
-						idsToFetchByModel[model].add(id);
-					};
-
-					const processFkValue = (val) => {
-						if (polymorphic) {
-							if (typeof val === "string") {
-								const [polyModel, polyId] = val.split("@");
-								if (polyModel && polyId) addId(polyModel, polyId);
-							}
-						} else if (typeof val === "string") {
-							addId(targetModel, val);
-						} else if (mixed && typeof val === "object" && val !== null) {
+						if (belongs) {
+							fkValue = row[relation];
+						} else {
+							continue;
 						}
-					};
-					if (Array.isArray(fkValue)) {
-						fkValue.forEach(processFkValue);
-					} else {
-						processFkValue(fkValue);
+						if (fkValue === null || fkValue === undefined) continue;
+
+						const addId = (model, id) => {
+							if (!idsToFetchByModel[model])
+								idsToFetchByModel[model] = new Set();
+							idsToFetchByModel[model].add(id);
+						};
+
+						const processFkValue = (val) => {
+							if (polymorphic) {
+								if (typeof val === "string") {
+									const [polyModel, polyId] = val.split("@");
+									if (polyModel && polyId) addId(polyModel, polyId);
+								}
+							} else if (typeof val === "string") {
+								addId(targetModel, val);
+							} else if (mixed && typeof val === "object" && val !== null) {
+							}
+						};
+						if (Array.isArray(fkValue)) {
+							fkValue.forEach(processFkValue);
+						} else {
+							processFkValue(fkValue);
+						}
 					}
 				}
-			}
 
 			const fetchedItemsByModel = {};
 			for (const [modelToFetch, idSet] of Object.entries(idsToFetchByModel)) {
 				if (idSet.size > 0) {
 					const ids = Array.from(idSet);
-					const items = await api.getMany(modelToFetch, ids);
+					const items = await api.getMany(modelToFetch, { where: ids });
 					fetchedItemsByModel[modelToFetch] = items.reduce((acc, item) => {
 						acc[item.id] = item;
 						return acc;
@@ -13462,29 +13623,29 @@ export default async ({ $APP, T, IndexedDBWrapper, metadata, operations }) => {
 							row[relation] = stitch(fkValueOnCurrentRow);
 						}
 					} else {
-						let filter;
+						let where;
 						if (polymorphic) {
 							const searchPolymorphicId = \`\${modelName}@\${row.id}\`;
 							const targetFkDef =
 								models[targetModel]?.[relationDef.targetForeignKey];
 							if (targetFkDef?.many) {
-								filter = {
+								where = {
 									[relationDef.targetForeignKey]: {
 										$contains: searchPolymorphicId,
 									},
 								};
 							} else {
-								filter = {
+								where = {
 									[relationDef.targetForeignKey]: searchPolymorphicId,
 								};
 							}
 						} else {
-							filter = { [relationDef.targetForeignKey]: row.id };
+							where = { [relationDef.targetForeignKey]: row.id };
 						}
 						row[relation] =
 							relationDef.relationship === "one"
-								? await api.get(targetModel, filter)
-								: await api.getMany(targetModel, filter);
+								? await api.get(targetModel, { where })
+								: await api.getMany(targetModel, { where });
 					}
 				}
 			}
@@ -13612,12 +13773,11 @@ export default async ({ $APP, T, IndexedDBWrapper, metadata, operations }) => {
 									? relatedValue
 									: [relatedValue];
 								if (fks.length) {
-									const targets = await api.getMany(
-										prop.targetModel,
-										fks.map((fk) =>
+									const targets = await api.getMany(prop.targetModel, {
+										where: fks.map((fk) =>
 											fk && typeof fk === "object" ? fk.id : fk,
 										),
-									);
+									});
 									targets.forEach((target) => {
 										if (target) {
 											const fk = target[prop.targetForeignKey];
@@ -13663,18 +13823,20 @@ export default async ({ $APP, T, IndexedDBWrapper, metadata, operations }) => {
 					return [error, null];
 				}
 			},
-			async get(model, filter, opts = {}) {
-				if (!filter) return null;
-				const { insert = false, includes = [], recursive = null } = opts;
-				let row = await db.get(model, filter);
+			async get(model, idOrOptions, options = {}) {
+				const hasId = typeof idOrOptions !== "object";
+				const id = hasId ? idOrOptions : null;
+				const opts = hasId ? options : idOrOptions;
+				const { where, insert = false, includes = [], recursive = null } = opts;
+				let row = await db.get(model, id ?? { where });
 				if (!row && !insert) return null;
 				if (!row && insert) {
 					const [error, newRow] = await api.add(
 						model,
-						typeof filter === "object" ? filter : { id: filter },
+						typeof where === "object" ? where : { id: where },
 						{
 							skipRelationship: true,
-							...(typeof filter !== "object" && {
+							...(typeof where !== "object" && {
 								overrideId: true,
 								keepIndex: true,
 							}),
@@ -13734,21 +13896,16 @@ export default async ({ $APP, T, IndexedDBWrapper, metadata, operations }) => {
 				}
 				return row;
 			},
-			async getMany(model, filter, opts = {}) {
-				const { limit, offset, order, includes = [], recursive = null } = opts;
-				let items;
-				if (Array.isArray(filter)) {
-					items = (
-						await Promise.all(filter.map((id) => db.get(model, id)))
-					).filter((item) => item !== null);
-				} else {
-					items = await db.getMany(model, filter, {
-						limit,
-						offset,
-						order,
-					});
-				}
-
+			async getMany(model, opts = {}) {
+				const {
+					limit,
+					offset,
+					where,
+					order,
+					includes = [],
+					recursive = null,
+				} = opts;
+				const items = await db.getMany(model, { where, limit, offset, order });
 				if (includes.length && items.length)
 					await _loadRelationshipsForMany(items, model, includes, opts);
 
@@ -13756,7 +13913,6 @@ export default async ({ $APP, T, IndexedDBWrapper, metadata, operations }) => {
 					const visited = new Set();
 					let itemsToProcess = [...items];
 					const relationName = recursive;
-
 					while (itemsToProcess.length > 0) {
 						const currentBatch = [];
 						for (const item of itemsToProcess) {
@@ -13801,7 +13957,7 @@ export default async ({ $APP, T, IndexedDBWrapper, metadata, operations }) => {
 
 				const count = await db.count(
 					model,
-					Array.isArray(filter) ? { id: { $in: filter } } : filter,
+					Array.isArray(where) ? { id: { $in: where } } : where,
 				);
 				return { count, limit, offset, items };
 			},
@@ -13850,10 +14006,9 @@ export default async ({ $APP, T, IndexedDBWrapper, metadata, operations }) => {
 							} else
 								filterForTargets = { [fkFieldNameOnTarget]: valueToRemove };
 
-							const targetsToUpdate = await api.getMany(
-								targetModelName,
-								filterForTargets,
-							);
+							const targetsToUpdate = await api.getMany(targetModelName, {
+								where: filterForTargets,
+							});
 
 							targetsToUpdate.forEach((target) => {
 								let newFkValue;
@@ -13904,11 +14059,11 @@ export default async ({ $APP, T, IndexedDBWrapper, metadata, operations }) => {
 					return false;
 				}
 			},
-			async removeMany(model, filter, opts = {}) {
-				if (!filter && opts.filter) filter = opts.filter;
-				const entries = Array.isArray(filter)
-					? filter.map((item) => (typeof item === "object" ? item.id : item))
-					: (await db.getMany(model, filter)).map((entry) => entry.id);
+			async removeMany(model, where, opts = {}) {
+				if (!where && opts.where) where = opts.where;
+				const entries = Array.isArray(where)
+					? where.map((item) => (typeof item === "object" ? item.id : item))
+					: (await db.getMany(model, { where })).map((entry) => entry.id);
 				return Promise.all(
 					entries
 						.filter(Boolean)
@@ -13931,9 +14086,7 @@ export default async ({ $APP, T, IndexedDBWrapper, metadata, operations }) => {
 				const opts = {
 					..._opts,
 					update: true,
-					currentRow:
-						_opts.currentRow ??
-						(await api.get(model, row.id, { includes: [] })),
+					currentRow: _opts.currentRow ?? (await api.get(model, row.id)),
 				};
 				if (!opts.currentRow) {
 					console.warn(\`Record not found for edit: \${model} with id \${row.id}\`);
@@ -13971,10 +14124,8 @@ export default async ({ $APP, T, IndexedDBWrapper, metadata, operations }) => {
 				);
 				return results;
 			},
-			async editAll(model, filter, updates, opts = {}) {
-				const rows = await db.getMany(model, filter, {
-					...opts,
-				});
+			async editAll(model, updates, opts = {}) {
+				const rows = await db.getMany(model, opts);
 				const results = await Promise.allSettled(
 					rows.map((row) =>
 						api.edit(
@@ -14208,15 +14359,15 @@ export default ({ $APP, Database }) => {
 			const response = await Database.get(
 				model,
 				id ??
-					(opts.filter &&
-						((typeof opts.filter === "string" && JSON.parse(opts.filter)) ||
-							opts.filter)),
+					(opts.where &&
+						((typeof opts.where === "string" && JSON.parse(opts.where)) ||
+							opts.where)),
 				opts,
 			);
 			respond(response);
 		},
 		GET_MANY: async ({ payload: { model, opts = {} }, respond } = {}) => {
-			const response = await Database.getMany(model, opts.filter, opts);
+			const response = await Database.getMany(model, opts);
 			respond(response);
 		},
 	};
@@ -14404,7 +14555,7 @@ const instanceProxyHandler = {
 					);
 				const freshData = await Model.request("GET_MANY", prop.targetModel, {
 					opts: {
-						filter: prop.belongs
+						where: prop.belongs
 							? target[include]
 							: { [prop.targetForeignKey]: target.id },
 					},
@@ -14495,8 +14646,8 @@ const getMethodRegistry = (modelName) => [
 	{
 		type: "static",
 		name: "removeAll",
-		handler: (filter) =>
-			Model.request("REMOVE_MANY", modelName, { opts: { filter } }),
+		handler: (where) =>
+			Model.request("REMOVE_MANY", modelName, { opts: { where } }),
 	},
 	{
 		type: "static",
@@ -14511,8 +14662,8 @@ const getMethodRegistry = (modelName) => [
 	{
 		type: "static",
 		name: "editAll",
-		handler: (filter, updates) =>
-			Model.request("EDIT_MANY", modelName, { opts: { filter, updates } }),
+		handler: (where, updates) =>
+			Model.request("EDIT_MANY", modelName, { opts: { where, updates } }),
 	},
 	{
 		type: "static",
@@ -14599,7 +14750,7 @@ const Model = new Proxy(
 
 								return (value, row = null) => {
 									const payload = {
-										opts: { filter: { [propertyKey]: value } },
+										opts: { where: { [propertyKey]: value } },
 									};
 									if (row) payload.opts.row = row;
 
@@ -14911,9 +15062,9 @@ export default Model;
 		return device || null;
 	};
 
-	const migrateData = async (_data, opts = {}) => {
+	const migrateData = async (data, opts = {}) => {
 		const { skipDynamicCheck = false } = opts;
-		const data = _data ?? $APP.data;
+		data ??= $APP.data;
 		const { SysModel } = $APP;
 		const app = await getApp();
 		const appsData = Object.entries(data);
@@ -15081,7 +15232,6 @@ export default Model;
 `,mimeType:"application/javascript",skipSW:!1},"/models/migration.js":{content:`export const version = 2;
 
 export default ({ T, $APP }) => {
-	// Set up the data models for the application
 	$APP.models.set({
 		users: {
 			name: T.string(),
@@ -15113,23 +15263,34 @@ export default ({ T, $APP }) => {
 			description: T.string(),
 			path: T.string(),
 			icon: T.string(),
+			config: T.object(),
 			favorite: T.boolean({ index: true }),
 			tags: T.belongs_many("tags", "tagged", { polymorphic: true }),
 			hots: T.number({ index: true, default: 0 }),
 			commentsCount: T.number({ default: 0 }),
-			hasBeenHotted: T.boolean({ default: false }),
+			hotted: T.boolean({ default: false }),
 			comments: T.many("comments", "server"),
+			capabilities: T.object(),
+			transports: T.object(),
+			websiteUrl: T.string(),
+			_meta: T.object(),
+			version: T.string(),
+			packages: T.array(),
+			remotes: T.array(),
+			repository: T.object(),
 		},
 		clients: {
 			name: T.string(),
 			description: T.string(),
 			icon: T.string(),
+			url: T.string(),
 			favorite: T.boolean({ index: true }),
 			tags: T.belongs_many("tags", "tagged", { polymorphic: true }),
 			hots: T.number({ index: true, default: 0 }),
 			commentsCount: T.number({ default: 0 }),
-			hasBeenHotted: T.boolean({ default: false }),
+			hotted: T.boolean({ default: false }),
 			comments: T.many("comments", "client"),
+			capabilities: T.object(),
 		},
 		agents: {
 			name: T.string(),
@@ -15139,7 +15300,7 @@ export default ({ T, $APP }) => {
 			tags: T.belongs_many("tags", "tagged", { polymorphic: true }),
 			hots: T.number({ index: true, default: 0 }),
 			commentsCount: T.number({ default: 0 }),
-			hasBeenHotted: T.boolean({ default: false }),
+			hotted: T.boolean({ default: false }),
 			comments: T.many("comments", "agent"),
 		},
 		discussions: {
@@ -15172,7 +15333,6 @@ export default ({ T, $APP }) => {
 		},
 	});
 
-	// Initial data for the application
 	const data = {
 		tags: [
 			{ id: "official", name: "Official" },
@@ -15189,69 +15349,3102 @@ export default ({ T, $APP }) => {
 			{ id: "cli", name: "CLI" },
 			{ id: "data", name: "Data" },
 			{ id: "beta", name: "Beta" },
+			{ id: "coding", name: "Coding" },
+			{ id: "agentic", name: "Agentic" },
+			{ id: "desktop", name: "Desktop" },
+			{ id: "framework", name: "Framework" },
+			{ id: "mobile", name: "Mobile" },
+			{ id: "ide-integration", name: "IDE Integration" },
+			{ id: "open-source", name: "Open Source" },
+			{ id: "workflow", name: "Workflow" },
+			{ id: "chat", name: "Chat" },
+			{ id: "automation", name: "Automation" },
 		],
 		servers: [
 			{
-				id: "default-feature-rich",
-				name: "Default Feature-Rich Server",
+				id: "ai.aliengiraffe/spotdb",
+				name: "ai.aliengiraffe/spotdb",
 				description:
-					"A comprehensive server with a wide range of capabilities, including tools, resources, and prompts.",
-				path: "/templates/servers/basic.js",
-				tags: ["official", "recommended", "full-featured"],
-				icon: "server-cog",
-				favorite: true,
-				hots: 128,
-				commentsCount: 3,
-				hasBeenHotted: true,
+					"Ephemeral data sandbox for AI workflows with guardrails and security",
+				version: "0.1.0",
+				packages: [
+					{
+						registryType: "oci",
+						registryBaseUrl: "https://docker.io",
+						identifier: "aliengiraffe/spotdb",
+						version: "0.1.0",
+						transport: {
+							type: "stdio",
+						},
+						environmentVariables: [
+							{
+								description: "Optional API key for request authentication",
+								format: "string",
+								isSecret: true,
+								name: "X-API-Key",
+							},
+						],
+					},
+				],
+				repository: {
+					url: "https://github.com/aliengiraffe/spotdb",
+					source: "github",
+				},
+				transports: {
+					stdio: true,
+					sse: false,
+					streamableHTTP: false,
+				},
 			},
 			{
-				id: "simple-greeter",
-				name: "Simple Greeter Server",
-				description:
-					"A minimal server that demonstrates basic greeting functionality. Ideal for getting started.",
-				path: "/templates/servers/eval.js",
-				tags: ["example", "beginner"],
-				icon: "bell-ring",
-				favorite: false,
-				hots: 42,
-				commentsCount: 0,
+				id: "ai.alpic.test/test-mcp-server",
+				name: "ai.alpic.test/test-mcp-server",
+				description: "Alpic Test MCP Server - great server!",
+				version: "0.0.1",
+				remotes: [
+					{
+						type: "streamable-http",
+						url: "https://test.alpic.ai/",
+					},
+				],
+				repository: {
+					url: "",
+					source: "",
+				},
+				transports: {
+					stdio: false,
+					sse: false,
+					streamableHTTP: true,
+				},
 			},
 			{
-				id: "chain-of-thought",
-				name: "Chain-of-Thought Reasoner",
+				id: "ai.explorium/mcp-explorium",
+				name: "ai.explorium/mcp-explorium",
 				description:
-					"Step-by-step reasoning framework that breaks down complex problems into logical sequences.",
-				path: "/templates/servers/cot-reasoner.js",
-				tags: ["ai-reasoning", "logic", "advanced"],
-				icon: "workflow",
-				favorite: true,
-				hots: 256,
-				commentsCount: 0,
+					"Access live company and contact data from Explorium's AgentSource B2B platform.",
+				version: "1.0.0",
+				remotes: [
+					{
+						type: "sse",
+						url: "https://mcp-github-registry.explorium.ai/sse",
+					},
+				],
+				repository: {
+					url: "",
+					source: "",
+				},
+				transports: {
+					stdio: false,
+					sse: true,
+					streamableHTTP: false,
+				},
+			},
+			{
+				id: "ai.klavis/strata",
+				name: "ai.klavis/strata",
+				description:
+					"MCP server for progressive tool usage at any scale (see https://klavis.ai)",
+				version: "1.0.0",
+				remotes: [
+					{
+						type: "streamable-http",
+						url: "https://strata.klavis.ai/mcp/",
+					},
+				],
+				repository: {
+					url: "https://github.com/Klavis-AI/klavis",
+					source: "github",
+				},
+				transports: {
+					stdio: false,
+					sse: false,
+					streamableHTTP: true,
+				},
+			},
+			{
+				id: "ai.mcpanalytics/analytics",
+				name: "ai.mcpanalytics/analytics",
+				description:
+					"MCP Analytics, searchable tools and reports with interactive HTML visualization",
+				version: "1.0.3",
+				remotes: [
+					{
+						type: "streamable-http",
+						url: "https://api.mcpanalytics.ai/auth0",
+					},
+				],
+				repository: {
+					url: "https://github.com/embeddedlayers/mcp-analytics",
+					source: "github",
+				},
+				transports: {
+					stdio: false,
+					sse: false,
+					streamableHTTP: true,
+				},
+			},
+			{
+				id: "ai.mcpcap/mcpcap",
+				name: "ai.mcpcap/mcpcap",
+				description: "An MCP server for analyzing PCAP files.",
+				version: "0.6.0",
+				packages: [
+					{
+						registryType: "pypi",
+						registryBaseUrl: "https://pypi.org",
+						identifier: "mcpcap",
+						version: "0.4.4",
+						transport: {
+							type: "stdio",
+						},
+					},
+				],
+				repository: {
+					url: "https://github.com/mcpcap/mcpcap",
+					source: "github",
+				},
+				transports: {
+					stdio: true,
+					sse: false,
+					streamableHTTP: false,
+				},
+			},
+			{
+				id: "ai.shawndurrani/mcp-merchant",
+				name: "ai.shawndurrani/mcp-merchant",
+				description: "Search-only commerce MCP server backed by Stripe (test)",
+				version: "0.1.3",
+				packages: [
+					{
+						registryType: "npm",
+						registryBaseUrl: "https://registry.npmjs.org",
+						identifier: "mcp-merchant",
+						version: "0.1.3",
+						runtimeHint: "npx",
+						transport: {
+							type: "stdio",
+						},
+						environmentVariables: [
+							{
+								description: "Stripe secret key (test mode)",
+								isRequired: true,
+								isSecret: true,
+								name: "STRIPE_SECRET_KEY",
+							},
+							{
+								description: "Max products to cache",
+								default: "100",
+								name: "PRODUCT_LIMIT",
+							},
+							{
+								description: "Catalog refresh interval in seconds",
+								default: "600",
+								name: "REFRESH_INTERVAL_SEC",
+							},
+						],
+					},
+				],
+				remotes: [
+					{
+						type: "sse",
+						url: "https://mcp.shawndurrani.ai/sse",
+					},
+				],
+				repository: {
+					url: "",
+					source: "",
+				},
+				transports: {
+					stdio: true,
+					sse: true,
+					streamableHTTP: false,
+				},
+			},
+			{
+				id: "ai.shawndurrani/mcp-registry",
+				name: "ai.shawndurrani/mcp-registry",
+				description:
+					"Search the public MCP Registry; discover servers and copy SSE URLs.",
+				version: "0.1.3",
+				remotes: [
+					{
+						type: "sse",
+						url: "https://mcp-registry.shawndurrani.ai/sse",
+					},
+				],
+				repository: {
+					url: "",
+					source: "",
+				},
+				transports: {
+					stdio: false,
+					sse: true,
+					streamableHTTP: false,
+				},
+			},
+			{
+				id: "ai.smithery/222wcnm-bilistalkermcp",
+				name: "ai.smithery/222wcnm-bilistalkermcp",
+				description:
+					"Track Bilibili creators and get the latest updates on videos, dynamics, and articles. Fetch user p\u2026",
+				version: "1.15.0",
+				remotes: [
+					{
+						type: "streamable-http",
+						url: "https://server.smithery.ai/@222wcnm/bilistalkermcp/mcp",
+						headers: [
+							{
+								description: "Bearer token for Smithery authentication",
+								value: "Bearer {smithery_api_key}",
+								name: "Authorization",
+							},
+						],
+					},
+				],
+				repository: {
+					url: "https://github.com/222wcnm/BiliStalkerMCP",
+					source: "github",
+				},
+				transports: {
+					stdio: false,
+					sse: false,
+					streamableHTTP: true,
+				},
+			},
+			{
+				id: "ai.smithery/Aman-Amith-Shastry-scientific_computation_mcp",
+				name: "ai.smithery/Aman-Amith-Shastry-scientific_computation_mcp",
+				description:
+					"This MCP server enables users to perform scientific computations regarding linear algebra and vect\u2026",
+				version: "1.13.1",
+				remotes: [
+					{
+						type: "streamable-http",
+						url: "https://server.smithery.ai/@Aman-Amith-Shastry/scientific_computation_mcp/mcp",
+						headers: [
+							{
+								description: "Bearer token for Smithery authentication",
+								isRequired: true,
+								value: "Bearer {smithery_api_key}",
+								isSecret: true,
+								name: "Authorization",
+							},
+						],
+					},
+				],
+				repository: {
+					url: "https://github.com/Aman-Amith-Shastry/scientific_computation_mcp",
+					source: "github",
+				},
+				transports: {
+					stdio: false,
+					sse: false,
+					streamableHTTP: true,
+				},
+			},
+			{
+				id: "ai.smithery/Artin0123-gemini-image-mcp-server",
+				name: "ai.smithery/Artin0123-gemini-image-mcp-server",
+				description:
+					"Analyze images and videos with Gemini to get fast, reliable visual insights. Handle content from U\u2026",
+				version: "1.4.3",
+				remotes: [
+					{
+						type: "streamable-http",
+						url: "https://server.smithery.ai/@Artin0123/gemini-image-mcp-server/mcp",
+						headers: [
+							{
+								description: "Bearer token for Smithery authentication",
+								value: "Bearer {smithery_api_key}",
+								name: "Authorization",
+							},
+						],
+					},
+				],
+				repository: {
+					url: "https://github.com/Artin0123/gemini-vision-mcp",
+					source: "github",
+				},
+				transports: {
+					stdio: false,
+					sse: false,
+					streamableHTTP: true,
+				},
+			},
+			{
+				id: "ai.smithery/BadRooBot-my_test_mcp",
+				name: "ai.smithery/BadRooBot-my_test_mcp",
+				description:
+					"Get current weather for any city and create images from your prompts. Streamline planning, reports\u2026",
+				version: "1.14.0",
+				remotes: [
+					{
+						type: "streamable-http",
+						url: "https://server.smithery.ai/@BadRooBot/my_test_mcp/mcp",
+						headers: [
+							{
+								description: "Bearer token for Smithery authentication",
+								isRequired: true,
+								value: "Bearer {smithery_api_key}",
+								isSecret: true,
+								name: "Authorization",
+							},
+						],
+					},
+				],
+				repository: {
+					url: "https://github.com/BadRooBot/python_mcp",
+					source: "github",
+				},
+				transports: {
+					stdio: false,
+					sse: false,
+					streamableHTTP: true,
+				},
+			},
+			{
+				id: "ai.smithery/BadRooBot-test_m",
+				name: "ai.smithery/BadRooBot-test_m",
+				description:
+					"Send quick greetings, scrape website content, and generate text or images on demand. Perform web s\u2026",
+				version: "1.14.0",
+				remotes: [
+					{
+						type: "streamable-http",
+						url: "https://server.smithery.ai/@BadRooBot/test_m/mcp",
+						headers: [
+							{
+								description: "Bearer token for Smithery authentication",
+								isRequired: true,
+								value: "Bearer {smithery_api_key}",
+								isSecret: true,
+								name: "Authorization",
+							},
+						],
+					},
+				],
+				repository: {
+					url: "https://github.com/BadRooBot/test_m",
+					source: "github",
+				},
+				transports: {
+					stdio: false,
+					sse: false,
+					streamableHTTP: true,
+				},
+			},
+			{
+				id: "ai.smithery/BigVik193-reddit-ads-mcp",
+				name: "ai.smithery/BigVik193-reddit-ads-mcp",
+				description:
+					"Manage Reddit advertising across accounts, campaigns, ad groups, posts, and ads. List accounts, fu\u2026",
+				version: "1.0.0",
+				remotes: [
+					{
+						type: "streamable-http",
+						url: "https://server.smithery.ai/@BigVik193/reddit-ads-mcp/mcp",
+						headers: [
+							{
+								description: "Bearer token for Smithery authentication",
+								isRequired: true,
+								value: "Bearer {smithery_api_key}",
+								isSecret: true,
+								name: "Authorization",
+							},
+						],
+					},
+				],
+				repository: {
+					url: "https://github.com/BigVik193/reddit-ads-mcp",
+					source: "github",
+				},
+				transports: {
+					stdio: false,
+					sse: false,
+					streamableHTTP: true,
+				},
+			},
+			{
+				id: "ai.smithery/BigVik193-reddit-ads-mcp-api",
+				name: "ai.smithery/BigVik193-reddit-ads-mcp-api",
+				description:
+					"Manage Reddit advertising end to end across accounts, funding methods, campaigns, ad groups, and a\u2026",
+				version: "1.0.0",
+				remotes: [
+					{
+						type: "streamable-http",
+						url: "https://server.smithery.ai/@BigVik193/reddit-ads-mcp-api/mcp",
+						headers: [
+							{
+								description: "Bearer token for Smithery authentication",
+								isRequired: true,
+								value: "Bearer {smithery_api_key}",
+								isSecret: true,
+								name: "Authorization",
+							},
+						],
+					},
+				],
+				repository: {
+					url: "https://github.com/BigVik193/reddit-ads-mcp-api",
+					source: "github",
+				},
+				transports: {
+					stdio: false,
+					sse: false,
+					streamableHTTP: true,
+				},
+			},
+			{
+				id: "ai.smithery/BigVik193-reddit-ads-mcp-test",
+				name: "ai.smithery/BigVik193-reddit-ads-mcp-test",
+				description:
+					"Manage Reddit advertising end-to-end: browse ad accounts and payment methods, and organize campaig\u2026",
+				version: "1.0.0",
+				remotes: [
+					{
+						type: "streamable-http",
+						url: "https://server.smithery.ai/@BigVik193/reddit-ads-mcp-test/mcp",
+						headers: [
+							{
+								description: "Bearer token for Smithery authentication",
+								isRequired: true,
+								value: "Bearer {smithery_api_key}",
+								isSecret: true,
+								name: "Authorization",
+							},
+						],
+					},
+				],
+				repository: {
+					url: "https://github.com/BigVik193/reddit-ads-mcp",
+					source: "github",
+				},
+				transports: {
+					stdio: false,
+					sse: false,
+					streamableHTTP: true,
+				},
+			},
+			{
+				id: "ai.smithery/BigVik193-reddit-user-mcp",
+				name: "ai.smithery/BigVik193-reddit-user-mcp",
+				description:
+					"Browse and manage Reddit posts, comments, and threads. Fetch user activity, explore hot/new/rising\u2026",
+				version: "1.0.0",
+				remotes: [
+					{
+						type: "streamable-http",
+						url: "https://server.smithery.ai/@BigVik193/reddit-user-mcp/mcp",
+						headers: [
+							{
+								description: "Bearer token for Smithery authentication",
+								isRequired: true,
+								value: "Bearer {smithery_api_key}",
+								isSecret: true,
+								name: "Authorization",
+							},
+						],
+					},
+				],
+				repository: {
+					url: "https://github.com/BigVik193/reddit-user-mcp",
+					source: "github",
+				},
+				transports: {
+					stdio: false,
+					sse: false,
+					streamableHTTP: true,
+				},
+			},
+			{
+				id: "ai.smithery/BowenXU0126-aistudio_hw3",
+				name: "ai.smithery/BowenXU0126-aistudio_hw3",
+				description:
+					"Send personalized greetings with optional pirate flair. Compose friendly salutations for any name\u2026",
+				version: "1.16.0",
+				remotes: [
+					{
+						type: "streamable-http",
+						url: "https://server.smithery.ai/@BowenXU0126/aistudio_hw3/mcp",
+						headers: [
+							{
+								description: "Bearer token for Smithery authentication",
+								value: "Bearer {smithery_api_key}",
+								name: "Authorization",
+							},
+						],
+					},
+				],
+				repository: {
+					url: "https://github.com/BowenXU0126/aistudio_hw3",
+					source: "github",
+				},
+				transports: {
+					stdio: false,
+					sse: false,
+					streamableHTTP: true,
+				},
+			},
+			{
+				id: "ai.smithery/ChiR24-unreal_mcp",
+				name: "ai.smithery/ChiR24-unreal_mcp",
+				description:
+					"Control Unreal Engine to browse assets, import content, and manage levels and sequences. Automate\u2026",
+				version: "0.4.6",
+				remotes: [
+					{
+						type: "streamable-http",
+						url: "https://server.smithery.ai/@ChiR24/unreal_mcp/mcp",
+						headers: [
+							{
+								description: "Bearer token for Smithery authentication",
+								value: "Bearer {smithery_api_key}",
+								name: "Authorization",
+							},
+						],
+					},
+				],
+				repository: {
+					url: "https://github.com/ChiR24/Unreal_mcp",
+					source: "github",
+				},
+				transports: {
+					stdio: false,
+					sse: false,
+					streamableHTTP: true,
+				},
+			},
+			{
+				id: "ai.smithery/ChiR24-unreal_mcp_server",
+				name: "ai.smithery/ChiR24-unreal_mcp_server",
+				description:
+					"A comprehensive Model Context Protocol (MCP) server that enables AI assistants to control Unreal E\u2026",
+				version: "0.4.4",
+				remotes: [
+					{
+						type: "streamable-http",
+						url: "https://server.smithery.ai/@ChiR24/unreal_mcp_server/mcp",
+						headers: [
+							{
+								description: "Bearer token for Smithery authentication",
+								value: "Bearer {smithery_api_key}",
+								name: "Authorization",
+							},
+						],
+					},
+				],
+				repository: {
+					url: "https://github.com/ChiR24/Unreal_mcp",
+					source: "github",
+				},
+				transports: {
+					stdio: false,
+					sse: false,
+					streamableHTTP: true,
+				},
+			},
+			{
+				id: "ai.smithery/CollectiveSpend-collectivespend-smithery-mcp",
+				name: "ai.smithery/CollectiveSpend-collectivespend-smithery-mcp",
+				description:
+					"Connect CollectiveSpend with Xero to manage contacts. Retrieve, create, and update contact records\u2026",
+				version: "1.0.0",
+				remotes: [
+					{
+						type: "streamable-http",
+						url: "https://server.smithery.ai/@CollectiveSpend/collectivespend-smithery-mcp/mcp",
+						headers: [
+							{
+								description: "Bearer token for Smithery authentication",
+								isRequired: true,
+								value: "Bearer {smithery_api_key}",
+								isSecret: true,
+								name: "Authorization",
+							},
+						],
+					},
+				],
+				repository: {
+					url: "",
+					source: "",
+				},
+				transports: {
+					stdio: false,
+					sse: false,
+					streamableHTTP: true,
+				},
+			},
+			{
+				id: "ai.smithery/CryptoCultCurt-appfolio-mcp-server",
+				name: "ai.smithery/CryptoCultCurt-appfolio-mcp-server",
+				description:
+					"Provide seamless access to Appfolio Property Manager Reporting API through a standardized MCP serv\u2026",
+				version: "1.0.1",
+				remotes: [
+					{
+						type: "streamable-http",
+						url: "https://server.smithery.ai/@CryptoCultCurt/appfolio-mcp-server/mcp",
+						headers: [
+							{
+								description: "Bearer token for Smithery authentication",
+								isRequired: true,
+								value: "Bearer {smithery_api_key}",
+								isSecret: true,
+								name: "Authorization",
+							},
+						],
+					},
+				],
+				repository: {
+					url: "https://github.com/CryptoCultCurt/appfolio-mcp-server",
+					source: "github",
+				},
+				transports: {
+					stdio: false,
+					sse: false,
+					streamableHTTP: true,
+				},
+			},
+			{
+				id: "ai.smithery/Danushkumar-V-mcp-discord",
+				name: "ai.smithery/Danushkumar-V-mcp-discord",
+				description:
+					"An MCP server that integrates with Discord to provide AI-powered features.",
+				version: "1.2.0",
+				remotes: [
+					{
+						type: "streamable-http",
+						url: "https://server.smithery.ai/@Danushkumar-V/mcp-discord/mcp",
+						headers: [
+							{
+								description: "Bearer token for Smithery authentication",
+								isRequired: true,
+								value: "Bearer {smithery_api_key}",
+								isSecret: true,
+								name: "Authorization",
+							},
+						],
+					},
+				],
+				repository: {
+					url: "https://github.com/Danushkumar-V/mcp-discord",
+					source: "github",
+				},
+				transports: {
+					stdio: false,
+					sse: false,
+					streamableHTTP: true,
+				},
+			},
+			{
+				id: "ai.smithery/DynamicEndpoints-autogen_mcp",
+				name: "ai.smithery/DynamicEndpoints-autogen_mcp",
+				description:
+					"Create and manage AI agents that collaborate and solve problems through natural language interacti\u2026",
+				version: "0.3.0",
+				remotes: [
+					{
+						type: "streamable-http",
+						url: "https://server.smithery.ai/@DynamicEndpoints/autogen_mcp/mcp",
+						headers: [
+							{
+								description: "Bearer token for Smithery authentication",
+								isRequired: true,
+								value: "Bearer {smithery_api_key}",
+								isSecret: true,
+								name: "Authorization",
+							},
+						],
+					},
+				],
+				repository: {
+					url: "https://github.com/DynamicEndpoints/Autogen_MCP",
+					source: "github",
+				},
+				transports: {
+					stdio: false,
+					sse: false,
+					streamableHTTP: true,
+				},
+			},
+			{
+				id: "io.prisma/mcp",
+				name: "io.prisma/mcp",
+				description: "MCP server for managing Prisma Postgres.",
+				version: "1.0.0",
+				remotes: [
+					{
+						type: "sse",
+						url: "https://mcp.prisma.io/sse",
+						headers: [
+							{
+								description: "Bearer token for Prisma platform authentication",
+								name: "Authorization",
+							},
+						],
+					},
+					{
+						type: "streamable-http",
+						url: "https://mcp.prisma.io/mcp",
+						headers: [
+							{
+								description: "Bearer token for Prisma platform authentication",
+								name: "Authorization",
+							},
+						],
+					},
+				],
+				repository: {
+					url: "https://github.com/prisma/mcp",
+					source: "github",
+				},
+				transports: {
+					stdio: false,
+					sse: true,
+					streamableHTTP: true,
+				},
+			},
+			{
+				id: "io.scorecard/mcp",
+				name: "io.scorecard/mcp",
+				description:
+					"MCP server providing access to the Scorecard API to evaluate and optimize LLM systems.",
+				version: "2.1.1",
+				packages: [
+					{
+						registryType: "npm",
+						registryBaseUrl: "https://registry.npmjs.org",
+						identifier: "scorecard-ai-mcp",
+						version: "2.1.1",
+						transport: {
+							type: "stdio",
+						},
+						environmentVariables: [
+							{
+								description:
+									"Scorecard API key for authentication. Get your API key from https://app.scorecard.io/settings",
+								isRequired: true,
+								format: "string",
+								isSecret: true,
+								name: "SCORECARD_API_KEY",
+							},
+						],
+					},
+				],
+				remotes: [
+					{
+						type: "streamable-http",
+						url: "https://mcp.scorecard.io/mcp",
+					},
+				],
+				repository: {
+					url: "https://github.com/scorecard-ai/scorecard-node",
+					source: "github",
+				},
+				transports: {
+					stdio: true,
+					sse: false,
+					streamableHTTP: true,
+				},
+			},
+			{
+				id: "io.slingdata/sling-cli",
+				name: "io.slingdata/sling-cli",
+				description:
+					"Sling CLI MCP server for querying any database, running data pipelines and managing replications",
+				version: "1.4.25",
+				packages: [
+					{
+						registryType: "pypi",
+						identifier: "sling",
+						version: "1.4.23.post1",
+						transport: {
+							type: "stdio",
+						},
+					},
+				],
+				repository: {
+					url: "",
+					source: "",
+				},
+				transports: {
+					stdio: true,
+					sse: false,
+					streamableHTTP: false,
+				},
+			},
+			{
+				id: "io.snapcall/mcp",
+				name: "io.snapcall/mcp",
+				description: "MCP Server that generate video call url",
+				version: "1.0.0",
+				remotes: [
+					{
+						type: "streamable-http",
+						url: "https://mcp.snapcall.io",
+					},
+				],
+				repository: {
+					url: "",
+					source: "",
+				},
+				transports: {
+					stdio: false,
+					sse: false,
+					streamableHTTP: true,
+				},
+			},
+			{
+				id: "io.snyk/mcp",
+				name: "io.snyk/mcp",
+				description:
+					"Easily find and fix security issues in your applications leveraging Snyk platform capabilities.",
+				version: "1.1299.1",
+				packages: [
+					{
+						registryType: "npm",
+						identifier: "snyk",
+						version: "1.1299.1",
+						transport: {
+							type: "stdio",
+						},
+						packageArguments: [
+							{
+								value: "mcp",
+								type: "positional",
+							},
+							{
+								value: "stdio",
+								type: "named",
+								name: "-t",
+							},
+						],
+					},
+				],
+				repository: {
+					url: "https://github.com/snyk/snyk-ls",
+					source: "github",
+					subfolder: "mcp_extension",
+				},
+				transports: {
+					stdio: true,
+					sse: false,
+					streamableHTTP: false,
+				},
+			},
+			{
+				id: "io.wordlift/mcp-server",
+				name: "io.wordlift/mcp-server",
+				description:
+					"WordLift MCP Server: AI-powered content optimization and semantic analysis",
+				version: "1.0.4",
+				remotes: [
+					{
+						type: "sse",
+						url: "https://mcp.wordlift.io/sse",
+					},
+				],
+				repository: {
+					url: "",
+					source: "",
+				},
+				transports: {
+					stdio: false,
+					sse: true,
+					streamableHTTP: false,
+				},
+			},
+			{
+				id: "md.install/try",
+				name: "md.install/try",
+				description:
+					"Create guides as MCP servers to instruct coding agents to use your software (library, API, etc).",
+				version: "0.1.1",
+				remotes: [
+					{
+						type: "streamable-http",
+						url: "https://install.md/mcp/try",
+					},
+				],
+				repository: {
+					url: "",
+					source: "",
+				},
+				transports: {
+					stdio: false,
+					sse: false,
+					streamableHTTP: true,
+				},
+			},
+			{
+				id: "net.gepuro.mcp-company-lens-v1/company-lens-mcp-registry",
+				name: "net.gepuro.mcp-company-lens-v1/company-lens-mcp-registry",
+				description: "Search Japanese company database",
+				version: "1.0.0",
+				remotes: [
+					{
+						type: "streamable-http",
+						url: "https://mcp-company-lens-v1.gepuro.net/mcp",
+					},
+				],
+				repository: {
+					url: "https://github.com/gepuro/company-lens-mcp-registry",
+					source: "github",
+				},
+				transports: {
+					stdio: false,
+					sse: false,
+					streamableHTTP: true,
+				},
+			},
+			{
+				id: "net.nymbo/tools",
+				name: "net.nymbo/tools",
+				description:
+					"Remote MCP server: fetch, search, Python, TTS, memory, image, video.",
+				version: "1.0.0",
+				remotes: [
+					{
+						type: "sse",
+						url: "https://mcp.nymbo.net/gradio_api/mcp/sse",
+					},
+				],
+				repository: {
+					url: "",
+					source: "",
+				},
+				transports: {
+					stdio: false,
+					sse: true,
+					streamableHTTP: false,
+				},
+			},
+			{
+				id: "net.singular/mcp-server",
+				name: "net.singular/mcp-server",
+				description:
+					"Marketing intelligence MCP server providing campaign performance data and analytics tools.",
+				version: "1.0.0",
+				remotes: [
+					{
+						type: "sse",
+						url: "https://mcp.singular.net/mcp-server/mcp",
+					},
+					{
+						type: "streamable-http",
+						url: "https://mcp.singular.net/mcp-server/mcp",
+					},
+				],
+				repository: {
+					url: "",
+					source: "",
+				},
+				transports: {
+					stdio: false,
+					sse: true,
+					streamableHTTP: true,
+				},
+			},
+			{
+				id: "net.todoist/mcp",
+				name: "net.todoist/mcp",
+				description:
+					"Official Todoist MCP server for AI assistants to manage tasks, projects, and workflows.",
+				version: "1.0.0",
+				remotes: [
+					{
+						type: "streamable-http",
+						url: "https://ai.todoist.net/mcp",
+					},
+				],
+				repository: {
+					url: "",
+					source: "",
+				},
+				transports: {
+					stdio: false,
+					sse: false,
+					streamableHTTP: true,
+				},
+			},
+			{
+				id: "so.jinko/jinko-mcp",
+				name: "so.jinko/jinko-mcp",
+				description:
+					"Jinko is a travel MCP server that provides hotel search and booking capabilities.",
+				version: "0.0.27",
+				remotes: [
+					{
+						type: "streamable-http",
+						url: "https://mcp-remote.jinko.so/mcp",
+					},
+				],
+				repository: {
+					url: "https://github.com/jinkoso/jinko-mcp",
+					source: "github",
+				},
+				transports: {
+					stdio: false,
+					sse: false,
+					streamableHTTP: true,
+				},
+			},
+			{
+				id: "technology.draup/api-server",
+				name: "technology.draup/api-server",
+				description:
+					"Global labour & market data for skills, workforce, planning, stakeholders, jobs, news & profiles",
+				version: "1.0.0",
+				remotes: [
+					{
+						type: "streamable-http",
+						url: "https://mcp.draup.technology/mcp/",
+						headers: [
+							{
+								description:
+									"Get the API key from Draup Support (support@draup.com)",
+								isRequired: true,
+								isSecret: true,
+								name: "X-API-Key",
+							},
+						],
+					},
+				],
+				repository: {
+					url: "",
+					source: "",
+				},
+				transports: {
+					stdio: false,
+					sse: false,
+					streamableHTTP: true,
+				},
+			},
+			{
+				id: "trade.neglect/mcp-server",
+				name: "trade.neglect/mcp-server",
+				description:
+					"Full Solana DeFi coverage: launchpads, tokens, trades, and wallets, decoded at scale.",
+				version: "1.0.0",
+				remotes: [
+					{
+						type: "streamable-http",
+						url: "https://api.neglect.trade/mcp",
+					},
+				],
+				repository: {
+					url: "https://github.com/609NFT/solana-mcp",
+					source: "github",
+				},
+				transports: {
+					stdio: false,
+					sse: false,
+					streamableHTTP: true,
+				},
+			},
+			{
+				id: "travel.kismet/mcp-server",
+				name: "travel.kismet/mcp-server",
+				description:
+					"Semantic hotel search with real-time availability and price comparison for Kismet Travel",
+				version: "0.0.0",
+				remotes: [
+					{
+						type: "streamable-http",
+						url: "https://mcp.kismet.travel/mcp",
+					},
+					{
+						type: "sse",
+						url: "https://mcp.kismet.travel/sse",
+					},
+				],
+				repository: {
+					url: "https://github.com/kismet-tech/kismet-travel-mcp-v2",
+					source: "github",
+				},
+				transports: {
+					stdio: false,
+					sse: true,
+					streamableHTTP: true,
+				},
+			},
+			{
+				id: "xyz.dreamtap/mcp",
+				name: "xyz.dreamtap/mcp",
+				description:
+					"Dreamtap provides sources of inspiration to your AI to make it more creative.",
+				version: "0.1.0",
+				remotes: [
+					{
+						type: "streamable-http",
+						url: "https://dreamtap.xyz/mcp",
+					},
+				],
+				repository: {
+					url: "https://github.com/salexashenko/dreamtap",
+					source: "github",
+				},
+				transports: {
+					stdio: false,
+					sse: false,
+					streamableHTTP: true,
+				},
 			},
 		],
 		clients: [
 			{
-				id: "client-1",
-				name: "Web UI Client",
+				id: "5ire",
+				name: "5ire",
 				description:
-					"The standard web-based client for interacting with MCP servers and agents in the browser.",
-				icon: "monitor",
-				tags: ["official", "web", "ui"],
-				favorite: true,
-				hots: 99,
+					"5ire is an open source cross-platform desktop AI assistant that supports tools through MCP servers.",
+				url: "https://github.com/nanbingxyz/5ire",
+				tags: ["desktop", "open-source"],
+				favorite: false,
+				hots: 0,
 				commentsCount: 0,
-				hasBeenHotted: true,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
 			},
 			{
-				id: "client-2",
-				name: "Command-Line Interface",
+				id: "agentai",
+				name: "AgentAI",
 				description:
-					"A powerful CLI for developers and power-users to script and automate interactions with MCP.",
-				icon: "terminal",
-				tags: ["developer-tools", "cli"],
+					"AgentAI is a Rust library designed to simplify the creation of AI agents. The library includes seamless integration with MCP Servers.",
+				icon: "code",
+				url: "https://github.com/AdamStrojek/rust-agentai",
+				tags: ["framework", "ai-reasoning", "open-source"],
 				favorite: false,
-				hots: 76,
-				commentsCount: 1,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "agenticflow",
+				name: "AgenticFlow",
+				description:
+					"AgenticFlow is a no-code AI platform that helps you build agents that handle sales, marketing, and creative tasks around the clock. Connect 2,500+ APIs and 10,000+ tools securely via MCP.",
+				icon: "workflow",
+				url: "https://agenticflow.ai/mcp",
+				tags: ["workflow", "no-code", "agentic"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: true,
+					prompts: true,
+					tools: true,
+					discovery: true,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "aiql-tuui",
+				name: "AIQL TUUI",
+				description:
+					"AIQL TUUI is a native, cross-platform desktop AI chat application with MCP support. It supports multiple AI providers (e.g., Anthropic, Cloudflare, Deepseek, OpenAI, Qwen), local AI models (via vLLM, Ray, etc.), and aggregated API platforms (such as Deepinfra, Openrouter, and more).",
+				url: "https://github.com/AI-QL/tuui",
+				tags: ["desktop", "chat", "open-source"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: true,
+					prompts: true,
+					tools: true,
+					discovery: true,
+					sampling: true,
+					roots: false,
+					elicitation: true,
+				},
+			},
+			{
+				id: "amazon-q-cli",
+				name: "Amazon Q CLI",
+				description:
+					"Amazon Q CLI is an open-source, agentic coding assistant for terminals.",
+				icon: "terminal",
+				url: "https://github.com/aws/amazon-q-developer-cli",
+				tags: ["cli", "agentic", "coding", "open-source"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: true,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "amazon-q-ide",
+				name: "Amazon Q IDE",
+				description:
+					"Amazon Q IDE is an open-source, agentic coding assistant for IDEs.",
+				icon: "code",
+				url: "https://aws.amazon.com/q/developer",
+				tags: ["ide-integration", "agentic", "coding", "open-source"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "amp",
+				name: "Amp",
+				description:
+					"Amp is an agentic coding tool built by Sourcegraph. It runs in VS Code (and compatible forks like Cursor, Windsurf, and VSCodium), JetBrains IDEs, Neovim, and as a command-line tool. It\u2019s also multiplayer \u2014 you can share threads and collaborate with your team.",
+				icon: "binary",
+				url: "https://ampcode.com",
+				tags: ["coding", "agentic", "ide-integration"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: true,
+					prompts: true,
+					tools: true,
+					discovery: false,
+					sampling: true,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "apify-mcp-tester",
+				name: "Apify MCP Tester",
+				description:
+					"Apify MCP Tester is an open-source client that connects to any MCP server using Server-Sent Events (SSE). It is a standalone Apify Actor designed for testing MCP servers over SSE, with support for Authorization headers.",
+				icon: "test-tube",
+				url: "https://github.com/apify/tester-mcp-client",
+				tags: ["testing", "open-source"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: true,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "augment-code",
+				name: "Augment Code",
+				description:
+					"Augment Code is an AI-powered coding platform for VS Code and JetBrains with autonomous agents, chat, and completions. Both local and remote agents are backed by full codebase awareness and native support for MCP, enabling enhanced context through external sources and tools.",
+				icon: "binary",
+				url: "https://augmentcode.com",
+				tags: ["coding", "agentic", "ide-integration"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "beeai-framework",
+				name: "BeeAI Framework",
+				description:
+					"BeeAI Framework is an open-source framework for building, deploying, and serving powerful agentic workflows at scale. The framework includes the MCP Tool, a native feature that simplifies the integration of MCP servers into agentic workflows.",
+				icon: "cog",
+				url: "https://i-am-bee.github.io/beeai-framework",
+				tags: ["framework", "agentic", "open-source", "workflow"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "boltai",
+				name: "BoltAI",
+				description:
+					"BoltAI is a native, all-in-one AI chat client with MCP support. BoltAI supports multiple AI providers (OpenAI, Anthropic, Google AI...), including local AI models (via Ollama, LM Studio or LMX)",
+				icon: "chat",
+				url: "https://boltai.com",
+				tags: ["chat", "desktop"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "call-chirp",
+				name: "Call Chirp",
+				description:
+					"Call Chirp uses AI to capture every critical detail from your business conversations, automatically syncing insights to your CRM and project tools so you never miss another deal-closing moment.",
+				icon: "phone",
+				url: "https://www.call-chirp.com",
+				tags: ["voice-ai", "automation"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: true,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "chatbox",
+				name: "Chatbox",
+				description:
+					"Chatbox is a better UI and desktop app for ChatGPT, Claude, and other LLMs, available on Windows, Mac, Linux, and the web. It's open-source and has garnered 37K stars\u2B50 on GitHub.",
+				icon: "chat",
+				url: "https://chatboxai.app",
+				tags: ["chat", "desktop", "open-source"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "chatframe",
+				name: "ChatFrame",
+				description:
+					"A cross-platform desktop chatbot that unifies access to multiple AI language models, supports custom tool integration via MCP servers, and enables RAG conversations with your local files\u2014all in a single, polished app for macOS and Windows.",
+				icon: "chat",
+				url: "https://chatframe.co",
+				tags: ["chat", "desktop"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "chatgpt",
+				name: "ChatGPT",
+				description:
+					"ChatGPT is OpenAI's AI assistant that provides MCP support for remote servers to conduct deep research.",
+				icon: "chat",
+				url: "https://chatgpt.com",
+				tags: ["chat", "ai-reasoning"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "chatwise",
+				name: "ChatWise",
+				description:
+					"ChatWise is a desktop-optimized, high-performance chat application that lets you bring your own API keys. It supports a wide range of LLMs and integrates with MCP to enable tool workflows.",
+				icon: "chat",
+				url: "https://chatwise.app",
+				tags: ["chat", "desktop"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "claude-ai",
+				name: "Claude.ai",
+				description:
+					"Claude.ai is Anthropic's web-based AI assistant that provides MCP support for remote servers.",
+				icon: "chat",
+				url: "https://claude.ai",
+				tags: ["chat", "web", "ai-reasoning"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: true,
+					prompts: true,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "claude-code",
+				name: "Claude Code",
+				description:
+					"Claude Code is an interactive agentic coding tool from Anthropic that helps you code faster through natural language commands. It supports MCP integration for resources, prompts, tools, and roots, and also functions as an MCP server to integrate with other clients.",
+				icon: "code",
+				url: "https://claude.com/product/claude-code",
+				tags: ["coding", "agentic", "ai-reasoning"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: true,
+					prompts: true,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: true,
+					elicitation: false,
+				},
+			},
+			{
+				id: "claude-desktop-app",
+				name: "Claude Desktop App",
+				description:
+					"The Claude desktop application provides comprehensive support for MCP, enabling deep integration with local tools and data sources.",
+				icon: "desktop-computer",
+				url: "https://claude.ai/download",
+				tags: ["desktop", "ai-reasoning"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: true,
+					prompts: true,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "chorus",
+				name: "Chorus",
+				description:
+					"Chorus is a native Mac app for chatting with AIs. Chat with multiple models at once, run tools and MCPs, create projects, quick chat, bring your own key, all in a blazing fast, keyboard shortcut friendly app.",
+				icon: "microphone",
+				url: "https://chorus.sh",
+				tags: ["desktop", "chat"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "cline",
+				name: "Cline",
+				description:
+					"Cline is an autonomous coding agent in VS Code that edits files, runs commands, uses a browser, and more\u2013with your permission at each step.",
+				icon: "code-branch",
+				url: "https://github.com/cline/cline",
+				tags: ["coding", "agentic", "ide-integration", "open-source"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: true,
+					prompts: false,
+					tools: true,
+					discovery: true,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "codegpt",
+				name: "CodeGPT",
+				description:
+					"CodeGPT is a popular VS Code and Jetbrains extension that brings AI-powered coding assistance to your editor. It supports integration with MCP servers for tools, allowing users to leverage external AI capabilities directly within their development workflow.",
+				icon: "code",
+				url: "https://codegpt.co",
+				tags: ["coding", "ide-integration"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "continue",
+				name: "Continue",
+				description:
+					"Continue is an open-source AI code assistant, with built-in support for all MCP features.",
+				icon: "code",
+				url: "https://github.com/continuedev/continue",
+				tags: ["coding", "open-source", "ide-integration"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: true,
+					prompts: true,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "copilot-mcp",
+				name: "Copilot-MCP",
+				description: "Copilot-MCP enables AI coding assistance via MCP.",
+				icon: "code-merge",
+				url: "https://github.com/VikashLoomba/copilot-mcp",
+				tags: ["coding", "ai-reasoning"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: true,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "cursor",
+				name: "Cursor",
+				description: "Cursor is an AI code editor.",
+				icon: "binary",
+				url: "https://cursor.com",
+				tags: ["coding", "ide-integration"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: true,
+					prompts: true,
+					tools: true,
+					discovery: false,
+					sampling: true,
+					roots: true,
+					elicitation: true,
+				},
+			},
+			{
+				id: "daydreams-agents",
+				name: "Daydreams Agents",
+				description:
+					"Daydreams is a generative agent framework for executing anything onchain",
+				icon: "robot",
+				url: "https://github.com/daydreamsai/daydreams",
+				tags: ["framework", "agentic"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: true,
+					prompts: true,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "eca",
+				name: "ECA - Editor Code Assistant",
+				description:
+					"ECA is a Free and open-source editor-agnostic tool that aims to easily link LLMs and Editors, giving the best UX possible for AI pair programming using a well-defined protocol",
+				icon: "binary",
+				url: "https://eca.dev",
+				tags: ["coding", "ide-integration", "open-source"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: true,
+					prompts: true,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: true,
+					elicitation: false,
+				},
+			},
+			{
+				id: "emacs-mcp",
+				name: "Emacs Mcp",
+				description:
+					"Emacs Mcp is an Emacs client designed to interface with MCP servers, enabling seamless connections and interactions. It provides MCP tool invocation support for AI plugins like gptel and llm, adhering to Emacs' standard tool invocation format. This integration enhances the functionality of AI tools within the Emacs ecosystem.",
+				icon: "code",
+				url: "https://github.com/lizqwerscott/mcp.el",
+				tags: ["ide-integration", "open-source"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "fast-agent",
+				name: "fast-agent",
+				description:
+					"fast-agent is a Python Agent framework, with simple declarative support for creating Agents and Workflows, with full multi-modal support for Anthropic and OpenAI models.",
+				icon: "zap",
+				url: "https://github.com/evalstate/fast-agent",
+				tags: ["framework", "agentic", "python", "open-source"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: true,
+					prompts: true,
+					tools: true,
+					discovery: true,
+					sampling: true,
+					roots: true,
+					elicitation: true,
+				},
+			},
+			{
+				id: "flowdown",
+				name: "FlowDown",
+				description:
+					"FlowDown is a blazing fast and smooth client app for using AI/LLM, with a strong emphasis on privacy and user experience. It supports MCP servers to extend its capabilities with external tools, allowing users to build powerful, customized workflows.",
+				icon: "download",
+				url: "https://github.com/Lakr233/FlowDown",
+				tags: ["desktop", "privacy", "workflow"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "flujo",
+				name: "FLUJO",
+				description:
+					"Think n8n + ChatGPT. FLUJO is an desktop application that integrates with MCP to provide a workflow-builder interface for AI interactions. Built with Next.js and React, it supports both online and offline (ollama) models, it manages API Keys and environment variables centrally and can install MCP Servers from GitHub.",
+				icon: "flowchart",
+				url: "https://github.com/mario-andreschak/flujo",
+				tags: ["desktop", "workflow"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "genkit",
+				name: "Genkit",
+				description:
+					"Genkit is a cross-language SDK for building and integrating GenAI features into applications. The genkitx-mcp plugin enables consuming MCP servers as a client or creating MCP servers from Genkit tools and prompts.",
+				icon: "puzzle-piece",
+				url: "https://github.com/firebase/genkit",
+				tags: ["framework", "ai-reasoning"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: true,
+					prompts: true,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "glama",
+				name: "Glama",
+				description:
+					"Glama is a comprehensive AI workspace and integration platform that offers a unified interface to leading LLM providers, including OpenAI, Anthropic, and others. It supports the Model Context Protocol (MCP) ecosystem, enabling developers and enterprises to easily discover, build, and manage MCP servers.",
+				icon: "workspace",
+				url: "https://glama.ai/chat",
+				tags: ["web", "ai-reasoning"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: true,
+					prompts: true,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "gemini-cli",
+				name: "Gemini CLI",
+				description:
+					"Gemini CLI is an open-source, agentic coding assistant for terminals.", // Placeholder, original description not provided.
+				icon: "terminal",
+				url: "https://goo.gle/gemini-cli",
+				tags: ["cli", "agentic", "coding"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: true,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "genaiscript",
+				name: "GenAIScript",
+				description:
+					"Programmatically assemble prompts for LLMs using GenAIScript (in JavaScript). Orchestrate LLMs, tools, and data in JavaScript.",
+				icon: "code-square",
+				url: "https://microsoft.github.io/genaiscript/reference/scripts/mcp-tools/",
+				tags: ["developer-tools", "javascript"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "github-copilot-coding-agent",
+				name: "GitHub Copilot coding agent",
+				description:
+					"Delegate tasks to GitHub Copilot coding agent and let it work in the background while you stay focused on the highest-impact and most interesting work",
+				icon: "github",
+				url: "https://docs.github.com/en/enterprise-cloud@latest/copilot/concepts/about-copilot-coding-agent",
+				tags: ["coding", "agentic", "ide-integration"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "goose",
+				name: "Goose",
+				description:
+					"Goose is an open source AI agent that supercharges your software development by automating coding tasks.",
+				icon: "feather",
+				url: "https://block.github.io/goose/docs/goose-architecture/#interoperability-with-extensions",
+				tags: ["coding", "agentic", "open-source"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: true,
+					prompts: true,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "gptme",
+				name: "gptme",
+				description:
+					"gptme is a open-source terminal-based personal AI assistant/agent, designed to assist with programming tasks and general knowledge work.",
+				icon: "terminal",
+				url: "https://github.com/gptme/gptme",
+				tags: ["cli", "agentic", "open-source"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "hyperagent",
+				name: "HyperAgent",
+				description:
+					"HyperAgent is Playwright supercharged with AI. With HyperAgent, you no longer need brittle scripts, just powerful natural language commands. Using MCP servers, you can extend the capability of HyperAgent, without having to write any code.",
+				icon: "browser",
+				url: "https://github.com/hyperbrowserai/HyperAgent",
+				tags: ["automation", "ai-reasoning"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "jenova",
+				name: "Jenova",
+				description:
+					"Jenova is the best MCP client for non-technical users, especially on mobile.",
+				icon: "mobile",
+				url: "https://jenova.ai",
+				tags: ["mobile", "ai-reasoning"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: true,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "jetbrains-ai-assistant",
+				name: "JetBrains AI Assistant",
+				description:
+					"JetBrains AI Assistant plugin provides AI-powered features for software development available in all JetBrains IDEs.",
+				icon: "brain",
+				url: "https://plugins.jetbrains.com/plugin/22282-jetbrains-ai-assistant",
+				tags: ["ide-integration", "ai-reasoning"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "jetbrains-junie",
+				name: "JetBrains Junie",
+				description:
+					"Junie is JetBrains\u2019 AI coding agent for JetBrains IDEs and Android Studio.",
+				icon: "robot",
+				url: "https://www.jetbrains.com/junie",
+				tags: ["ide-integration", "coding", "agentic"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "kilo-code",
+				name: "Kilo Code",
+				description:
+					"Kilo Code is an autonomous coding AI dev team in VS Code that edits files, runs commands, uses a browser, and more.",
+				icon: "code-branch",
+				url: "https://github.com/Kilo-Org/kilocode",
+				tags: ["coding", "agentic", "ide-integration", "open-source"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: true,
+					prompts: false,
+					tools: true,
+					discovery: true,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "klavis-ai-slack-discord-web",
+				name: "Klavis AI Slack/Discord/Web",
+				description:
+					"Klavis AI is an Open-Source Infra to Use, Build & Scale MCPs with ease.",
+				icon: "message-circle",
+				url: "https://www.klavis.ai/",
+				tags: ["chat", "open-source"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: true,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "langflow",
+				name: "Langflow",
+				description:
+					"Langflow is an open-source visual builder that lets developers rapidly prototype and build AI applications, it integrates with the Model Context Protocol (MCP) as both an MCP server and an MCP client.",
+				icon: "flowchart",
+				url: "https://github.com/langflow-ai/langflow",
+				tags: ["workflow", "open-source", "developer-tools"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "librechat",
+				name: "LibreChat",
+				description:
+					"LibreChat is an open-source, customizable AI chat UI that supports multiple AI providers, now including MCP integration.",
+				icon: "chat",
+				url: "https://github.com/danny-avila/LibreChat",
+				tags: ["chat", "open-source", "ui"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "lm-studio",
+				name: "LM Studio",
+				description:
+					"LM Studio is a cross-platform desktop app for discovering, downloading, and running open-source LLMs locally. You can now connect local models to tools via Model Context Protocol (MCP).",
+				icon: "download",
+				url: "https://lmstudio.ai",
+				tags: ["desktop", "developer-tools"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "lutra",
+				name: "Lutra",
+				description:
+					"Lutra is an AI agent that transforms conversations into actionable, automated workflows.",
+				icon: "bot",
+				url: "https://lutra.ai",
+				tags: ["agentic", "automation", "workflow"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: true,
+					prompts: true,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "mcp-agent",
+				name: "mcp-agent",
+				description:
+					"mcp-agent is a simple, composable framework to build agents using Model Context Protocol.",
+				icon: "shield-check",
+				url: "https://github.com/lastmile-ai/mcp-agent",
+				tags: ["framework", "agentic", "open-source"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: true,
+					prompts: true,
+					tools: true,
+					discovery: false,
+					sampling: true,
+					roots: true,
+					elicitation: true,
+				},
+			},
+			{
+				id: "mcp-client-chatbot",
+				name: "mcp-client-chatbot",
+				description:
+					"mcp-client-chatbot is a local-first chatbot built with Vercel's Next.js, AI SDK, and Shadcn UI.",
+				icon: "chat",
+				url: "https://github.com/cgoinglove/mcp-client-chatbot",
+				tags: ["chat", "open-source", "ui"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "mcpjam",
+				name: "MCPJam",
+				description:
+					"MCPJam is an open source testing and debugging tool for MCP servers - Postman for MCP servers.",
+				icon: "bug",
+				url: "https://github.com/MCPJam/inspector",
+				tags: ["testing", "developer-tools", "open-source"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: true,
+					prompts: true,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: true,
+				},
+			},
+			{
+				id: "mcp-use",
+				name: "mcp-use",
+				description:
+					"mcp-use is an open source python library to very easily connect any LLM to any MCP server both locally and remotely.",
+				icon: "plug",
+				url: "https://github.com/pietrozullo/mcp-use",
+				tags: ["framework", "python", "open-source"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: true,
+					prompts: true,
+					tools: true,
+					discovery: true,
+					sampling: true,
+					roots: false,
+					elicitation: true,
+				},
+			},
+			{
+				id: "modelcontextchat-com",
+				name: "modelcontextchat.com",
+				description:
+					"modelcontextchat.com is a web-based MCP client designed for working with remote MCP servers, featuring comprehensive authentication support and integration with OpenRouter.",
+				icon: "globe",
+				url: "https://modelcontextchat.com",
+				tags: ["web", "chat"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "mcphub",
+				name: "MCPHub",
+				description:
+					"MCPHub is a powerful Neovim plugin that integrates MCP (Model Context Protocol) servers into your workflow.",
+				icon: "package",
+				url: "https://github.com/ravitemer/mcphub.nvim",
+				tags: ["ide-integration", "open-source"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: true,
+					prompts: true,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "mcpomni-connect",
+				name: "MCPOmni-Connect",
+				description:
+					"MCPOmni-Connect is a versatile command-line interface (CLI) client designed to connect to various Model Context Protocol (MCP) servers using both stdio and SSE transport.",
+				icon: "terminal",
+				url: "https://github.com/Abiorh001/mcp_omni_connect",
+				tags: ["cli", "automation", "open-source"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: true,
+					prompts: true,
+					tools: true,
+					discovery: false,
+					sampling: true,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "memex",
+				name: "Memex",
+				description:
+					"Memex is the first MCP client and MCP server builder - all-in-one desktop app. Unlike traditional MCP clients that only consume existing servers, Memex can create custom MCP servers from natural language prompts, immediately integrate them into its toolkit, and use them to solve problems\u2014all within a single conversation.",
+				icon: "database",
+				url: "https://memex.tech/",
+				tags: ["desktop", "agentic", "developer-tools"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: true,
+					prompts: true,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "microsoft-copilot-studio",
+				name: "Microsoft Copilot Studio",
+				description:
+					"Microsoft Copilot Studio is a robust SaaS platform designed for building custom AI-driven applications and intelligent agents, empowering developers to create, deploy, and manage sophisticated AI solutions.",
+				icon: "microsoft",
+				url: "https://learn.microsoft.com/en-us/microsoft-copilot-studio/agent-extend-action-mcp",
+				tags: ["saas", "agentic", "workflow"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: true,
+					prompts: false,
+					tools: true,
+					discovery: true,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "mindpal",
+				name: "MindPal",
+				description:
+					"MindPal is a no-code platform for building and running AI agents and multi-agent workflows for business processes.",
+				icon: "brain",
+				url: "https://mindpal.io",
+				tags: ["no-code", "agentic", "workflow"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "mistral-ai-le-chat",
+				name: "Mistral AI: Le Chat",
+				description:
+					"Mistral AI: Le Chat is Mistral AI assistant with MCP support for remote servers and enterprise workflows.",
+				icon: "message-circle",
+				url: "https://chat.mistral.ai",
+				tags: ["chat", "ai-reasoning"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "moopoint",
+				name: "MooPoint",
+				description:
+					"MooPoint is a web-based AI chat platform built for developers and advanced users, letting you interact with multiple large language models (LLMs) through a single, unified interface. Connect your own API keys (OpenAI, Anthropic, and more) and securely manage custom MCP server integrations.",
+				icon: "globe",
+				url: "https://moopoint.io",
+				tags: ["web", "chat", "developer-tools"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: true,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "msty-studio",
+				name: "Msty Studio",
+				description:
+					"Msty Studio is a privacy-first AI productivity platform that seamlessly integrates local and online language models (LLMs) into customizable workflows. Designed for both technical and non-technical users, Msty Studio offers a suite of tools to enhance AI interactions, automate tasks, and maintain full control over data and model behavior.",
+				icon: "palette",
+				url: "https://msty.ai",
+				tags: ["workflow", "privacy", "automation"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "needle",
+				name: "Needle",
+				description:
+					"Needle is a RAG worflow platform that also works as an MCP client, letting you connect and use MCP servers in seconds.",
+				icon: "pin",
+				url: "https://needle.app",
+				tags: ["workflow"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: true,
+					prompts: true,
+					tools: true,
+					discovery: true,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "nvidia-agent-intelligence-toolkit",
+				name: "NVIDIA Agent Intelligence toolkit",
+				description:
+					"NVIDIA Agent Intelligence (AIQ) toolkit is a flexible, lightweight, and unifying library that allows you to easily connect existing enterprise agents to data sources and tools across any framework.",
+				icon: "chip",
+				url: "https://github.com/NVIDIA/AIQToolkit",
+				tags: ["framework", "agentic", "developer-tools"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "opensumi",
+				name: "OpenSumi",
+				description:
+					"OpenSumi is a framework helps you quickly build AI Native IDE products.",
+				icon: "binary",
+				url: "https://github.com/opensumi/core",
+				tags: ["framework", "ide-integration", "open-source"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "oterm",
+				name: "oterm",
+				description:
+					"oterm is a terminal client for Ollama allowing users to create chats/agents.",
+				icon: "terminal",
+				url: "https://github.com/ggozad/oterm",
+				tags: ["cli", "chat", "agentic"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: true,
+					tools: true,
+					discovery: false,
+					sampling: true,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "postman",
+				name: "Postman",
+				description:
+					"Postman is the most popular API client and now supports MCP server testing and debugging.",
+				icon: "api",
+				url: "https://postman.com/downloads",
+				tags: ["api", "developer-tools", "testing"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: true,
+					prompts: true,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "recursechat",
+				name: "RecurseChat",
+				description:
+					"RecurseChat is a powerful, fast, local-first chat client with MCP support. RecurseChat supports multiple AI providers including LLaMA.cpp, Ollama, and OpenAI, Anthropic.",
+				icon: "chat",
+				url: "https://recurse.chat",
+				tags: ["chat", "desktop"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "roo-code",
+				name: "Roo Code",
+				description: "Roo Code enables AI coding assistance via MCP.",
+				icon: "code",
+				url: "https://roocode.com",
+				tags: ["coding", "ai-reasoning"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: true,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "shortwave",
+				name: "Shortwave",
+				description:
+					"Shortwave is an AI-powered email client that supports MCP tools to enhance email productivity and workflow automation.",
+				icon: "mail",
+				url: "https://www.shortwave.com",
+				tags: ["automation", "workflow"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "simtheory",
+				name: "Simtheory",
+				description:
+					"Simtheory is an agentic AI workspace that unifies multiple AI models, tools, and capabilities under a single subscription. It provides comprehensive MCP support through its MCP Store, allowing users to extend their workspace with productivity tools and integrations.",
+				icon: "infinity",
+				url: "https://simtheory.ai",
+				tags: ["agentic", "ai-reasoning", "workflow"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: true,
+					prompts: true,
+					tools: true,
+					discovery: true,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "slack-mcp-client",
+				name: "Slack MCP Client",
+				description:
+					"Slack MCP Client acts as a bridge between Slack and Model Context Protocol (MCP) servers. Using Slack as the interface, it enables large language models (LLMs) to connect and interact with various MCP servers through standardized MCP tools.",
+				icon: "slack",
+				url: "https://github.com/tuannvm/slack-mcp-client",
+				tags: ["chat", "open-source"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "smithery-playground",
+				name: "Smithery Playground",
+				description:
+					"Smithery Playground is a developer-first MCP client for exploring, testing and debugging MCP servers against LLMs. It provides detailed traces of MCP RPCs to help troubleshoot implementation issues.",
+				icon: "flask-conical",
+				url: "https://smithery.ai/playground",
+				tags: ["developer-tools", "testing"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: true,
+					prompts: true,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "spinai",
+				name: "SpinAI",
+				description:
+					"SpinAI is an open-source TypeScript framework for building observable AI agents. The framework provides native MCP compatibility, allowing agents to seamlessly integrate with MCP servers and tools.",
+				icon: "sparkles",
+				url: "https://spinai.dev",
+				tags: ["framework", "agentic", "open-source"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "superinterface",
+				name: "Superinterface",
+				description:
+					"Superinterface is AI infrastructure and a developer platform to build in-app AI assistants with support for MCP, interactive components, client-side function calling and more.",
+				icon: "plug",
+				url: "https://superinterface.ai",
+				tags: ["developer-tools", "ai-reasoning"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "superjoin",
+				name: "Superjoin",
+				description:
+					"Superjoin brings the power of MCP directly into Google Sheets extension. With Superjoin, users can access and invoke MCP tools and agents without leaving their spreadsheets, enabling powerful AI workflows and automation right where their data lives.",
+				icon: "spreadsheet",
+				url: "https://superjoin.ai",
+				tags: ["automation", "workflow", "google-sheets"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "swarms",
+				name: "Swarms",
+				description:
+					"Swarms is a production-grade multi-agent orchestration framework that supports MCP integration for dynamic tool discovery and execution.",
+				icon: "package-2",
+				url: "https://github.com/kyegomez/swarms",
+				tags: ["framework", "agentic", "open-source"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: true,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "systemprompt",
+				name: "systemprompt",
+				description:
+					"systemprompt is a voice-controlled mobile app that manages your MCP servers. Securely leverage MCP agents from your pocket. Available on iOS and Android.",
+				icon: "mobile",
+				url: "https://systemprompt.io",
+				tags: ["mobile", "voice-ai", "automation"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: true,
+					prompts: true,
+					tools: true,
+					discovery: false,
+					sampling: true,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "tambo",
+				name: "Tambo",
+				description:
+					"Tambo is a platform for building custom chat experiences in React, with integrated custom user interface components.",
+				icon: "react",
+				url: "https://tambo.co",
+				tags: ["web", "chat", "ui", "react"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "tencent-cloudbase-ai-devkit",
+				name: "Tencent CloudBase AI DevKit",
+				description:
+					"Tencent CloudBase AI DevKit is a tool for building AI agents in minutes, featuring zero-code tools, secure data integration, and extensible plugins via MCP.",
+				icon: "cloud",
+				url: "https://docs.cloudbase.net/ai/agent/mcp",
+				tags: ["developer-tools", "ai-reasoning"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "theiaai-theiaide",
+				name: "TheiaAI/TheiaIDE",
+				description:
+					"Theia AI is a framework for building AI-enhanced tools and IDEs. The AI-powered Theia IDE is an open and flexible development environment built on Theia AI.",
+				icon: "binary",
+				url: "https://eclipsesource.com/blogs/2024/12/19/theia-ide-and-theia-ai-support-mcp/",
+				tags: ["framework", "ide-integration", "open-source"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "tome",
+				name: "Tome",
+				description:
+					"Tome is an open source cross-platform desktop app designed for working with local LLMs and MCP servers. It is designed to be beginner friendly and abstract away the nitty gritty of configuration for people getting started with MCP.",
+				icon: "book",
+				url: "https://github.com/runebookai/tome",
+				tags: ["desktop", "open-source"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "typingmind-app",
+				name: "TypingMind App",
+				description:
+					"TypingMind is an advanced frontend for LLMs with MCP support. TypingMind supports all popular LLM providers like OpenAI, Gemini, Claude, and users can use with their own API keys.",
+				icon: "keyboard",
+				url: "https://www.typingmind.com",
+				tags: ["web", "desktop", "chat"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "vs-code-github-copilot",
+				name: "VS Code GitHub Copilot",
+				description:
+					"VS Code integrates MCP with GitHub Copilot through agent mode, allowing direct interaction with MCP-provided tools within your agentic coding workflow. Configure servers in Claude Desktop, workspace or user settings, with guided MCP installation and secure handling of keys in input variables to avoid leaking hard-coded keys.",
+				icon: "vscode",
+				url: "https://code.visualstudio.com/",
+				tags: ["coding", "ide-integration", "agentic"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: true,
+					prompts: true,
+					tools: true,
+					discovery: true,
+					sampling: true,
+					roots: true,
+					elicitation: true,
+				},
+			},
+			{
+				id: "warp",
+				name: "Warp",
+				description:
+					"Warp is the intelligent terminal with AI and your dev team's knowledge built-in. With natural language capabilities integrated directly into an agentic command line, Warp enables developers to code, automate, and collaborate more efficiently -- all within a terminal that features a modern UX.",
+				icon: "terminal",
+				url: "https://www.warp.dev/",
+				tags: ["cli", "agentic", "coding"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: true,
+					prompts: false,
+					tools: true,
+					discovery: true,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "whatsmcp",
+				name: "WhatsMCP",
+				description:
+					"WhatsMCP is an MCP client for WhatsApp. WhatsMCP lets you interact with your AI stack from the comfort of a WhatsApp chat.",
+				icon: "whatsapp",
+				url: "https://wassist.app/mcp/",
+				tags: ["chat", "mobile"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "windsurf-editor",
+				name: "Windsurf Editor",
+				description:
+					"Windsurf Editor is an agentic IDE that combines AI assistance with developer workflows. It features an innovative AI Flow system that enables both collaborative and independent AI interactions while maintaining developer control.",
+				icon: "wind",
+				url: "https://codeium.com/windsurf",
+				tags: ["ide-integration", "agentic", "coding"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: true,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "witsy",
+				name: "Witsy",
+				description:
+					"Witsy is an AI desktop assistant, supporting Anthropic models and MCP servers as LLM tools.",
+				icon: "star",
+				url: "https://github.com/nbonamy/witsy",
+				tags: ["desktop", "ai-reasoning"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "zed",
+				name: "Zed",
+				description:
+					"Zed is a high-performance code editor with built-in MCP support, focusing on prompt templates and tool integration.",
+				icon: "binary",
+				url: "https://zed.dev/docs/assistant/model-context-protocol",
+				tags: ["ide-integration", "coding"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: true,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
+			},
+			{
+				id: "zencoder",
+				name: "Zencoder",
+				description:
+					"Zencoder is a coding agent that's available as an extension for VS Code and JetBrains family of IDEs, meeting developers where they already work. It comes with RepoGrokking (deep contextual codebase understanding), agentic pipeline, and the ability to create and share custom agents.",
+				icon: "zap",
+				url: "https://zecoder.ai",
+				tags: ["coding", "agentic", "ide-integration"],
+				favorite: false,
+				hots: 0,
+				commentsCount: 0,
+				hotted: false,
+				capabilities: {
+					resources: false,
+					prompts: false,
+					tools: true,
+					discovery: false,
+					sampling: false,
+					roots: false,
+					elicitation: false,
+				},
 			},
 		],
 		agents: [
@@ -15355,7 +18548,7 @@ export default ({ T, $APP }) => {
 				authorName: "Maria Garcia",
 				authorAvatar: "https://i.pravatar.cc/40?u=maria-g",
 				createdAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(), // 3 days ago
-				client: "client-2",
+				client: "command-line-interface", // This would need to be updated to a new ID if 'client-2' is removed
 			},
 		],
 		users: [
@@ -15459,6 +18652,15 @@ $APP.models.set({
 		}),
 		deployedAt: T.string(),
 		files: T.array(),
+	},
+});
+`,mimeType:"application/javascript",skipSW:!1},"/modules/app/container.js":{content:`export default ({ routes, T }) => ({
+	tag: "app-container",
+	class: "flex flex-grow",
+	extends: "router-ui",
+	properties: {
+		routes: T.object({ defaultValue: routes }),
+		full: T.boolean(true),
 	},
 });
 `,mimeType:"application/javascript",skipSW:!1},"/theme.css":{content:`body {
@@ -15640,16 +18842,7 @@ div [container][horizontal] {
 	display: flex;
 	flex-direction: col;
 }
-`,mimeType:"text/css",skipSW:!1},"/modules/app/container.js":{content:`export default ({ routes, T }) => ({
-	tag: "app-container",
-	class: "flex flex-grow",
-	extends: "router-ui",
-	properties: {
-		routes: T.object({ defaultValue: routes }),
-		full: T.boolean(true),
-	},
-});
-`,mimeType:"application/javascript",skipSW:!1},"/modules/router/ui.js":{content:`export default ({ html, T }) => ({
+`,mimeType:"text/css",skipSW:!1},"/modules/router/ui.js":{content:`export default ({ html, T }) => ({
 	tag: "router-ui",
 	properties: {
 		currentRoute: T.object({
@@ -15877,14 +19070,17 @@ div [container][horizontal] {
 		properties: {
 			version: T.string(\`v\${new Date().toISOString().slice(0, 10)}\`),
 			notes: T.string(""),
-			deploymentType: T.string(null), // Can be 'spa', 'ssg', or null
+			deployMode: T.string("hybrid"), // Default to hybrid
+			isDeploying: T.boolean(false),
 		},
-		async handleDeploy(type) {
-			this.deploymentType = type;
+		async handleDeploy() {
+			if (this.isDeploying) return;
+
+			this.isDeploying = true;
 			const credentials = await $APP.Model.credentials.get("singleton");
 			if (!credentials || !credentials.token) {
 				alert("Please provide a GitHub token before deploying.");
-				this.deploymentType = null;
+				this.isDeploying = false;
 				return;
 			}
 
@@ -15895,13 +19091,14 @@ div [container][horizontal] {
 					notes: this.notes,
 					status: "pending",
 					deployedAt: new Date(),
-					deployType: type,
+					deployType: this.deployMode,
 				});
-				console.log({ Bundler });
-				const files =
-					type === "spa"
-						? await Bundler.bundleSPA(credentials)
-						: await Bundler.bundleSSG(credentials);
+
+				// Using the new unified deploy method
+				const files = await Bundler.deploy({
+					...credentials,
+					mode: this.deployMode,
+				});
 
 				await $APP.Model.releases.edit({
 					...newRelease,
@@ -15909,9 +19106,12 @@ div [container][horizontal] {
 					files,
 				});
 
-				alert(\`Deployment (\${type.toUpperCase()}) successful!\`);
+				alert(\`Deployment (\${this.deployMode.toUpperCase()}) successful!\`);
 			} catch (error) {
-				console.error(\`Deployment failed for \${type.toUpperCase()}:\`, error);
+				console.error(
+					\`Deployment failed for \${this.deployMode.toUpperCase()}:\`,
+					error,
+				);
 				alert(\`Deployment failed: \${error.message}\`);
 				if (newRelease?._id) {
 					await $APP.Model.releases.edit({
@@ -15920,38 +19120,44 @@ div [container][horizontal] {
 					});
 				}
 			} finally {
-				this.deploymentType = null;
+				this.isDeploying = false;
 			}
 		},
 		render() {
 			return html\`
-      <h2 class="text-2xl font-bold text-gray-800 border-b pb-2">
-        New Release
-      </h2>
-      <uix-input
-        label="Version"
-        .value=\${this.version}
-        @change=\${(e) => (this.version = e.target.value)}
-      ></uix-input>
-      <uix-input
-        type="textarea"
-        label="Release Notes"
-        .value=\${this.notes}
-        @change=\${(e) => (this.notes = e.target.value)}
-      ></uix-input>
-      <div class="flex justify-end gap-2">
-        <uix-button
-          @click=\${() => this.handleDeploy("spa")}
-          label=\${this.deploymentType === "spa" ? "Deploying..." : "Deploy SPA"}
-          ?disabled=\${this.deploymentType !== null}
-        ></uix-button>
-        <uix-button
-          @click=\${() => this.handleDeploy("ssg")}
-          label=\${this.deploymentType === "ssg" ? "Deploying..." : "Deploy SSG"}
-          ?disabled=\${this.deploymentType !== null}
-        ></uix-button>
-      </div>
-    \`;
+                <h2 class="text-2xl font-bold text-gray-800 border-b pb-2">New Release</h2>
+                <uix-input
+                    label="Version"
+                    .value=\${this.version}
+                    @change=\${(e) => (this.version = e.target.value)}
+                ></uix-input>
+                <uix-input
+                    type="textarea"
+                    label="Release Notes"
+                    .value=\${this.notes}
+                    @change=\${(e) => (this.notes = e.target.value)}
+                ></uix-input>
+                
+                <div class="flex items-center justify-end gap-2">
+                    <uix-input
+                        type="select" 
+                        label="Deployment Mode"
+                        .value=\${this.deployMode}
+                        @change=\${(e) => (this.deployMode = e.target.value)}
+                        .options=\${[
+													{ value: "spa", label: "SPA" },
+													{ value: "ssg", label: "SSG" },
+													{ value: "hybrid", label: "Hybrid" },
+												]}
+                    >
+                    </uix-input>
+                    <uix-button
+                        @click=\${() => this.handleDeploy()}
+                        label=\${this.isDeploying ? \`Deploying \${this.deployMode.toUpperCase()}...\` : "Deploy"}
+                        ?disabled=\${this.isDeploying}
+                    ></uix-button>
+                </div>
+            \`;
 		},
 	});
 
@@ -15986,41 +19192,41 @@ div [container][horizontal] {
 								.sort((a, b) => new Date(b.deployedAt) - new Date(a.deployedAt))
 								.map(
 									(release) => html\`
-                  <div
-                    class="flex flex-col p-2 rounded-md \${this.getStatusClass(
-											release.status,
-										)}"
-                  >
-                    <div class="grid grid-cols-3 items-center gap-2">
-                      <div class="font-semibold">\${release.version}</div>
-                      <div class="flex items-center gap-2">
-                        <span>\${release.status}</span>
-                        \${
-													release.deployType
-														? html\`<span
-                                    class="text-xs font-mono px-2 py-1 rounded bg-gray-200 text-gray-700"
-                                    >\${release.deployType.toUpperCase()}</span
-                                  >\`
-														: ""
-												}
-                      </div>
-                      <div class="text-sm text-right">
-                        \${new Date(release.deployedAt).toLocaleString()}
-                      </div>
+                <div
+                  class="flex flex-col p-2 rounded-md \${this.getStatusClass(
+										release.status,
+									)}"
+                >
+                  <div class="grid grid-cols-3 items-center gap-2">
+                    <div class="font-semibold">\${release.version}</div>
+                    <div class="flex items-center gap-2">
+                      <span>\${release.status}</span>
+                      \${
+												release.deployType
+													? html\`<span
+                          class="text-xs font-mono px-2 py-1 rounded bg-gray-200 text-gray-700"
+                          >\${release.deployType.toUpperCase()}</span
+                        >\`
+													: ""
+											}
                     </div>
-                    \${
-											release.notes
-												? html\`<p class="text-sm text-gray-600 pt-2">
-                                \${release.notes}
-                              </p>\`
-												: ""
-										}
+                    <div class="text-sm text-right">
+                      \${new Date(release.deployedAt).toLocaleString()}
+                    </div>
                   </div>
-                \`,
+                  \${
+										release.notes
+											? html\`<p class="text-sm text-gray-600 pt-2">
+                        \${release.notes}
+                      </p>\`
+											: ""
+									}
+                </div>
+              \`,
 								)
 						: html\`<p class="text-center text-gray-500">
-                    No releases yet.
-                  </p>\`
+              No releases yet.
+            </p>\`
 				}
       </div>
     \`;
@@ -16053,52 +19259,52 @@ div [container][horizontal] {
 				return html\`<div class="text-center p-4">Loading settings...</div>\`;
 			}
 			return html\`
-            <h2 class="text-2xl font-bold text-gray-800 border-b pb-2">
-                App Settings
-            </h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <uix-input
-                    label="App Name"
-                    .value=\${this._settings.name}
-                    @change=\${(e) => (this._settings.name = e.target.value)}
-                ></uix-input>
-                <uix-input
-                    label="Short Name"
-                    .value=\${this._settings.short_name}
-                    @change=\${(e) => (this._settings.short_name = e.target.value)}
-                ></uix-input>
-                <uix-input
-                    label="Start URL"
-                    .value=\${this._settings.url}
-                    @change=\${(e) => (this._settings.url = e.target.value)}
-                ></uix-input>
-                 <uix-input
-                    label="Theme Color"
-                    type="color" 
-                    .value=\${this._settings.theme_color}
-                    @change=\${(e) => (this._settings.theme_color = e.target.value)}
-                ></uix-input>
-                <uix-input
-                    class="md:col-span-2"
-                    label="Open Graph Image URL"
-                    .value=\${this._settings.og_image}
-                    @change=\${(e) => (this._settings.og_image = e.target.value)}
-                ></uix-input>
-                <uix-input
-                    class="md:col-span-2"
-                    type="textarea"
-                    label="Description"
-                    .value=\${this._settings.description}
-                    @change=\${(e) => (this._settings.description = e.target.value)}
-                ></uix-input>
-            </div>
-            <div class="flex justify-end">
-                <uix-button
-                    @click=\${this.handleSave.bind(this)}
-                    label="Save Settings"
-                ></uix-button>
-            </div>
-        \`;
+                <h2 class="text-2xl font-bold text-gray-800 border-b pb-2">
+                    App Settings
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <uix-input
+                        label="App Name"
+                        .value=\${this._settings.name}
+                        @change=\${(e) => (this._settings.name = e.target.value)}
+                    ></uix-input>
+                    <uix-input
+                        label="Short Name"
+                        .value=\${this._settings.short_name}
+                        @change=\${(e) => (this._settings.short_name = e.target.value)}
+                    ></uix-input>
+                    <uix-input
+                        label="Start URL"
+                        .value=\${this._settings.url}
+                        @change=\${(e) => (this._settings.url = e.target.value)}
+                    ></uix-input>
+                     <uix-input
+                        label="Theme Color"
+                        type="color" 
+                        .value=\${this._settings.theme_color}
+                        @change=\${(e) => (this._settings.theme_color = e.target.value)}
+                    ></uix-input>
+                    <uix-input
+                        class="md:col-span-2"
+                        label="Open Graph Image URL"
+                        .value=\${this._settings.og_image}
+                        @change=\${(e) => (this._settings.og_image = e.target.value)}
+                    ></uix-input>
+                    <uix-input
+                        class="md:col-span-2"
+                        type="textarea"
+                        label="Description"
+                        .value=\${this._settings.description}
+                        @change=\${(e) => (this._settings.description = e.target.value)}
+                    ></uix-input>
+                </div>
+                <div class="flex justify-end">
+                    <uix-button
+                        @click=\${this.handleSave.bind(this)}
+                        label="Save Settings"
+                    ></uix-button>
+                </div>
+            \`;
 		},
 	});
 
@@ -16107,115 +19313,23 @@ div [container][horizontal] {
 		class: "flex flex-col gap-6 p-6 bg-gray-50 min-h-screen",
 		render() {
 			return html\`
-            <h1 class="text-4xl font-extrabold text-gray-900">Release Manager</h1>
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="flex flex-col gap-6">
-                    <settings-editor></settings-editor> 
-                    <credentials-manager
-                        ._data=\${{ model: "credentials", id: "singleton", key: "row" }}
-                    ></credentials-manager>
-                    <release-creator></release-creator>
+                <h1 class="text-4xl font-extrabold text-gray-900">Release Manager</h1>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="flex flex-col gap-6">
+                        <settings-editor></settings-editor> 
+                        <credentials-manager
+                            .data-query=\${{ model: "credentials", id: "singleton", key: "row" }}
+                        ></credentials-manager>
+                        <release-creator></release-creator>
+                    </div>
+                    <release-history
+                        .data-query=\${{ model: "releases", order: "-deployedAt", key: "rows" }}
+                    ></release-history>
                 </div>
-                <release-history
-                    ._data=\${{ model: "releases", order: "-deployedAt", key: "rows" }}
-                ></release-history>
-            </div>
-        \`;
+            \`;
 		},
 	};
 };
-`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/layout/list.js":{content:`export default ({ T }) => ({
-	tag: "uix-list",
-	style: true,
-	properties: {
-		multiple: T.boolean(),
-		multipleWithCtrl: T.boolean(),
-		multipleWithShift: T.boolean(),
-		lastSelectedIndex: T.number(),
-		selectedIds: T.array(),
-		onSelectedChanged: T.function(),
-		gap: T.string({ defaultValue: "md" }),
-		itemId: T.string(".uix-link"),
-		selectable: T.boolean(),
-	},
-	connected() {
-		if (this.selectable)
-			this.addEventListener("click", this.handleClick.bind(this));
-	},
-	disconnected() {
-		if (this.selectable)
-			this.removeEventListener("click", this.handleClick.bind(this));
-	},
-	handleClick: function (e) {
-		const link = e.target.closest(".uix-link");
-		if (!link || !this.contains(link)) return;
-		e.preventDefault();
-		const links = Array.from(this.qa(".uix-link"));
-		const index = links.indexOf(link);
-		if (index === -1) return;
-		if (
-			this.multipleWithShift &&
-			e.shiftKey &&
-			this.lastSelectedIndex !== null
-		) {
-			const start = Math.min(this.lastSelectedIndex, index);
-			const end = Math.max(this.lastSelectedIndex, index);
-			links
-				.slice(start, end + 1)
-				.forEach((el) => el.setAttribute("selected", ""));
-			this.lastSelectedIndex = index;
-			this.updateSelectedIds();
-			return;
-		}
-		if (this.multipleWithCtrl) {
-			if (e.ctrlKey) {
-				link.hasAttribute("selected")
-					? link.removeAttribute("selected")
-					: link.setAttribute("selected", "");
-				this.lastSelectedIndex = index;
-				this.updateSelectedIds();
-				return;
-			}
-			links.forEach((el) => el.removeAttribute("selected"));
-			if (link.hasAttribute("selected")) {
-				link.removeAttribute("selected");
-				this.lastSelectedIndex = null;
-			} else {
-				link.setAttribute("selected", "");
-				this.lastSelectedIndex = index;
-			}
-			this.updateSelectedIds();
-			return;
-		}
-
-		if (this.multiple) {
-			link.hasAttribute("selected")
-				? link.removeAttribute("selected")
-				: link.setAttribute("selected", "");
-			this.lastSelectedIndex = index;
-			this.updateSelectedIds();
-			return;
-		}
-
-		if (link.hasAttribute("selected")) {
-			links.forEach((el) => el.removeAttribute("selected"));
-			this.lastSelectedIndex = null;
-		} else {
-			links.forEach((el) => el.removeAttribute("selected"));
-			link.setAttribute("selected", "");
-			this.lastSelectedIndex = index;
-		}
-		this.updateSelectedIds();
-	},
-	updateSelectedIds() {
-		const links = Array.from(this.qa(this.itemId));
-		this.selectedIds = links.reduce((ids, el, index) => {
-			if (el.hasAttribute("selected")) ids.push(index);
-			return ids;
-		}, []);
-		if (this.onSelectedChanged) this.onSelectedChanged(this.selectedIds);
-	},
-});
 `,mimeType:"application/javascript",skipSW:!1},"/modules/uix/display/link.js":{content:`export default ({ T, html, Router }) => ({
 	tag: "uix-link",
 	style: true,
@@ -16247,38 +19361,26 @@ div [container][horizontal] {
 		click: T.function(),
 		confirmation: T.string(),
 	},
-
 	connected() {
 		this.boundHandleOutsideClick = this.handleOutsideClick.bind(this);
 		this.boundHandleEscKey = this.handleEscKey.bind(this);
-
-		if (this.context) {
+		if (this.context)
 			this.addEventListener("contextmenu", this.handleContextMenu);
-		}
 	},
-
 	disconnected() {
-		// --- REFACTOR: Clean up all listeners on disconnect.
 		this.removeEventListener("contextmenu", this.handleContextMenu);
 		this._removeGlobalListeners();
 	},
-
-	// --- NEW: Helper method to add global listeners.
 	_addGlobalListeners() {
-		// Use a slight delay to prevent the same click that opened the popup from closing it.
 		setTimeout(() => {
 			document.addEventListener("click", this.boundHandleOutsideClick);
 			document.addEventListener("keydown", this.boundHandleEscKey);
 		}, 0);
 	},
-
-	// --- NEW: Helper method to remove global listeners.
 	_removeGlobalListeners() {
 		document.removeEventListener("click", this.boundHandleOutsideClick);
 		document.removeEventListener("keydown", this.boundHandleEscKey);
 	},
-
-	// --- NEW: A single method to close all popups and clean up listeners.
 	closeAllPopups() {
 		let wasOpen = false;
 		if (this.hasAttribute("selected")) {
@@ -16295,7 +19397,6 @@ div [container][horizontal] {
 			wasOpen = true;
 		}
 
-		// Only remove listeners if something was actually closed.
 		if (wasOpen) {
 			this._removeGlobalListeners();
 		}
@@ -16316,7 +19417,6 @@ div [container][horizontal] {
 
 		if (this.float) {
 			this.toggleAttribute("floatOpen");
-			// --- REFACTOR: Use helpers to manage listeners.
 			this.hasAttribute("floatOpen")
 				? this._addGlobalListeners()
 				: this._removeGlobalListeners();
@@ -16411,6 +19511,98 @@ div [container][horizontal] {
 				}
         \${!this.float ? null : html\`<div float>\${this.float}</div>\`}
     \`;
+	},
+});
+`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/layout/list.js":{content:`export default ({ T }) => ({
+	tag: "uix-list",
+	style: true,
+	properties: {
+		multiple: T.boolean(),
+		multipleWithCtrl: T.boolean(),
+		multipleWithShift: T.boolean(),
+		lastSelectedIndex: T.number(),
+		selectedIds: T.array(),
+		onSelectedChanged: T.function(),
+		gap: T.string({ defaultValue: "md" }),
+		itemId: T.string(".uix-link"),
+		selectable: T.boolean(),
+	},
+	connected() {
+		if (this.selectable)
+			this.addEventListener("click", this.handleClick.bind(this));
+	},
+	disconnected() {
+		if (this.selectable)
+			this.removeEventListener("click", this.handleClick.bind(this));
+	},
+	handleClick: function (e) {
+		const link = e.target.closest(".uix-link");
+		if (!link || !this.contains(link)) return;
+		e.preventDefault();
+		const links = Array.from(this.qa(".uix-link"));
+		const index = links.indexOf(link);
+		if (index === -1) return;
+		if (
+			this.multipleWithShift &&
+			e.shiftKey &&
+			this.lastSelectedIndex !== null
+		) {
+			const start = Math.min(this.lastSelectedIndex, index);
+			const end = Math.max(this.lastSelectedIndex, index);
+			links
+				.slice(start, end + 1)
+				.forEach((el) => el.setAttribute("selected", ""));
+			this.lastSelectedIndex = index;
+			this.updateSelectedIds();
+			return;
+		}
+		if (this.multipleWithCtrl) {
+			if (e.ctrlKey) {
+				link.hasAttribute("selected")
+					? link.removeAttribute("selected")
+					: link.setAttribute("selected", "");
+				this.lastSelectedIndex = index;
+				this.updateSelectedIds();
+				return;
+			}
+			links.forEach((el) => el.removeAttribute("selected"));
+			if (link.hasAttribute("selected")) {
+				link.removeAttribute("selected");
+				this.lastSelectedIndex = null;
+			} else {
+				link.setAttribute("selected", "");
+				this.lastSelectedIndex = index;
+			}
+			this.updateSelectedIds();
+			return;
+		}
+
+		if (this.multiple) {
+			link.hasAttribute("selected")
+				? link.removeAttribute("selected")
+				: link.setAttribute("selected", "");
+			this.lastSelectedIndex = index;
+			this.updateSelectedIds();
+			return;
+		}
+
+		if (link.hasAttribute("selected")) {
+			links.forEach((el) => el.removeAttribute("selected"));
+			this.lastSelectedIndex = null;
+		} else {
+			links.forEach((el) => el.removeAttribute("selected"));
+			link.setAttribute("selected", "");
+			this.lastSelectedIndex = index;
+		}
+		this.updateSelectedIds();
+	},
+	updateSelectedIds() {
+		const links = Array.from(this.qa(this.itemId));
+		this.selectedIds = links.reduce((ids, el, index) => {
+			if (el.hasAttribute("selected")) ids.push(index);
+			return ids;
+		}, []);
+		if (this.onSelectedChanged) this.onSelectedChanged(this.selectedIds);
 	},
 });
 `,mimeType:"application/javascript",skipSW:!1},"/modules/uix/form/input.js":{content:`import { ifDefined } from "/modules/mvc/view/html/directive.js";
@@ -16653,39 +19845,7 @@ export default ({ T, html }) => ({
         \`;
 	},
 });
-`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/layout/list.css":{content:`.uix-list {
-	display: flex;
-	&[vertical] {
-		flex-direction: column;
-	}
-}
-`,mimeType:"text/css",skipSW:!1},"/modules/uix/navigation/navbar.css":{content:`.uix-navbar {
-	--uix-navbar-text-color: var(--color-default-90);
-	--uix-navbar-hover-text-color: var(--color-surface-80);
-	--uix-navbar-border-radius: 0px;
-	--uix-navbar-border-color: var(--color-default-60);
-	--uix-navbar-border-size: 1px;
-	--uix-navbar-border-style: solid;
-	--uix-navbar-hover-background-color: var(--color-default-40);
-	--uix-container-position: var(--uix-navbar-position);
-	display: flex;
-	flex-direction: column;
-	&[docked] {
-		--uix-list-button-radius: 0;
-		border-bottom: 0;
-		position: fixed;
-		bottom: 0px;
-		background-color: var(--uix-navbar-background-color, var(--color-default-5));
-		> * {
-			border-right: 0;
-			border-bottom: 0;
-			&:first-child {
-				border-left: 0;
-			}
-		}
-	}
-}
-`,mimeType:"text/css",skipSW:!1},"/modules/uix/display/link.css":{content:`:where(.uix-link) {
+`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/display/link.css":{content:`:where(.uix-link) {
 	font-weight: var(--uix-link-font-weight, 600);
 	width: var(--uix-link-width, auto);
 	color: var(--uix-link-text-color, var(--colors-default-900));
@@ -16939,107 +20099,39 @@ export default ({ T, html }) => ({
 		box-shadow: var(--shadow-lg, 0 10px 15px -3px rgb(0 0 0 / 0.1));
 	}
 }
-`,mimeType:"text/css",skipSW:!1},"/modules/mvc/view/html/directive.js":{content:`/**
- * Creates a user-facing directive function from a Directive class. This
- * function has the same parameters as the directive's render() method.
- */
-export const directive =
-	(c) =>
-	(...values) => ({
-		// This property needs to remain unminified.
-		["_$litDirective$"]: c,
-		values,
-	});
-
-/**
- * Base class for creating custom directives. Users should extend this class,
- * implement \`render\` and/or \`update\`, and then pass their subclass to
- * \`directive\`.
- */
-export class Directive {
-	//@internal
-	__part;
-	//@internal
-	__attributeIndex;
-	//@internal
-	__directive;
-	//@internal
-	_$parent;
-
-	// These will only exist on the AsyncDirective subclass
-	//@internal
-	_$disconnectableChildren;
-	// This property needs to remain unminified.
-	//@internal
-	["_$notifyDirectiveConnectionChanged"];
-
-	constructor(_partInfo) {}
-
-	// See comment in Disconnectable interface for why this is a getter
-	get _$isConnected() {
-		return this._$parent._$isConnected;
-	}
-
-	/** @internal */
-	_$initialize(part, parent, attributeIndex) {
-		this.__part = part;
-		this._$parent = parent;
-		this.__attributeIndex = attributeIndex;
-	}
-	/** @internal */
-	_$resolve(part, props) {
-		return this.update(part, props);
-	}
-
-	render(...props) {
-		throw new Error("The \`render()\` method must be implemented.");
-	}
-
-	update(_part, props) {
-		return this.render(...props);
+`,mimeType:"text/css",skipSW:!1},"/modules/uix/layout/list.css":{content:`.uix-list {
+	display: flex;
+	&[vertical] {
+		flex-direction: column;
 	}
 }
-
-// A sentinel value that can never appear as a part value except when set by
-// live(). Used to force a dirty-check to fail and cause a re-render.
-const RESET_VALUE = {};
-
-/**
- * Sets the committed value of a ChildPart directly without triggering the
- * commit stage of the part.
- *
- * This is useful in cases where a directive needs to update the part such
- * that the next update detects a value change or not. When value is omitted,
- * the next update will be guaranteed to be detected as a change.
- *
- * @param part
- * @param value
- */
-const setCommittedValue = (part, value = RESET_VALUE) =>
-	(part._$committedValue = value);
-const nothing = Symbol.for("lit-nothing");
-class Keyed extends Directive {
-	key = nothing;
-	render(k, v) {
-		this.key = k;
-		return v;
-	}
-	update(part, [k, v]) {
-		if (k !== this.key) {
-			// Clear the part before returning a value. The one-arg form of
-			// setCommittedValue sets the value to a sentinel which forces a
-			// commit the next render.
-			setCommittedValue(part);
-			this.key = k;
+`,mimeType:"text/css",skipSW:!1},"/modules/uix/navigation/navbar.css":{content:`.uix-navbar {
+	--uix-navbar-text-color: var(--color-default-90);
+	--uix-navbar-hover-text-color: var(--color-surface-80);
+	--uix-navbar-border-radius: 0px;
+	--uix-navbar-border-color: var(--color-default-60);
+	--uix-navbar-border-size: 1px;
+	--uix-navbar-border-style: solid;
+	--uix-navbar-hover-background-color: var(--color-default-40);
+	--uix-container-position: var(--uix-navbar-position);
+	display: flex;
+	flex-direction: column;
+	&[docked] {
+		--uix-list-button-radius: 0;
+		border-bottom: 0;
+		position: fixed;
+		bottom: 0px;
+		background-color: var(--uix-navbar-background-color, var(--color-default-5));
+		> * {
+			border-right: 0;
+			border-bottom: 0;
+			&:first-child {
+				border-left: 0;
+			}
 		}
-		return v;
 	}
 }
-
-export const keyed = directive(Keyed);
-
-export const ifDefined = (value) => value ?? nothing;
-`,mimeType:"application/javascript",skipSW:!1},"/modules/uix/display/icon.js":{content:`export default ({ T, html, $APP, Icons, theme }) => ({
+`,mimeType:"text/css",skipSW:!1},"/modules/uix/display/icon.js":{content:`export default ({ T, html, $APP, Icons, theme }) => ({
 	tag: "uix-icon",
 	style: true,
 	properties: {
@@ -17306,18 +20398,20 @@ export const ifDefined = (value) => value ?? nothing;
 		}
 	}
 }
-`,mimeType:"text/css",skipSW:!1},"/modules/uix/display/icon.css":{content:`.uix-icon {
+`,mimeType:"text/css",skipSW:!1},"/modules/uix/display/icon.css":{content:`:where(.uix-icon) {
 	display: inline-block;
 	vertical-align: middle;
+	width: 1rem;
+	height: 1rem;
 	svg {
 		height: inherit;
 		width: inherit;
 	}
-}
 
-&[solid] {
-	stroke: currentColor;
-	fill: currentColor;
+	&[solid] {
+		stroke: currentColor;
+		fill: currentColor;
+	}
 }
-`,mimeType:"text/css",skipSW:!1},"/modules/icon-lucide/lucide/cog.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12 20a8 8 0 1 0 0-16a8 8 0 0 0 0 16"/><path d="M12 14a2 2 0 1 0 0-4a2 2 0 0 0 0 4m0-12v2m0 18v-2m5 .66l-1-1.73m-5-8.66L7 3.34M20.66 17l-1.73-1M3.34 7l1.73 1M14 12h8M2 12h2m16.66-5l-1.73 1M3.34 17l1.73-1M17 3.34l-1 1.73m-5 8.66l-4 6.93"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/square-mouse-pointer.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12.034 12.681a.498.498 0 0 1 .647-.647l9 3.5a.5.5 0 0 1-.033.943l-3.444 1.068a1 1 0 0 0-.66.66l-1.067 3.443a.5.5 0 0 1-.943.033z"/><path d="M21 11V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/server-cog.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M4.5 10H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-.5m-15 4H4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2h-.5M6 6h.01M6 18h.01m9.69-4.6l-.9-.3m-5.6-2.2l-.9-.3m2.3 5.1l.3-.9m2.7.9l-.4-1m-2.4-5.4l-.4-1m-2.1 5.3l1-.4m5.4-2.4l1-.4m-2.3-2.1l-.3.9"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/bot-message-square.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V2H8m0 16l-4 4V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2Zm-6-6h2m5-1v2m6-2v2m5-1h2"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/sun.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/settings.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2"/><circle cx="12" cy="12" r="3"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/style.css":{content:`@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_P-bnBeA.woff2) format("woff2");unicode-range:U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_G-bnBeA.woff2) format("woff2");unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_B-bnBeA.woff2) format("woff2");unicode-range:U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_N-bnBeA.woff2) format("woff2");unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_M-bnBeA.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_C-bk.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}@supports ((-webkit-hyphens: none) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color:rgb(from red r g b)))){*,:before,:after,::backdrop{--un-bg-opacity:100%;--un-text-opacity:100%;--un-ease:initial;--un-leading:initial;--un-translate-x:initial;--un-translate-y:initial;--un-translate-z:initial;--un-border-opacity:100%;--un-space-y-reverse:initial;--un-space-x-reverse:initial;--un-ring-opacity:100%;--un-placeholder-opacity:100%}}@property --un-text-opacity{syntax:"<percentage>";inherits:false;initial-value:100%;}@property --un-leading{syntax:"*";inherits:false;}@property --un-border-opacity{syntax:"<percentage>";inherits:false;initial-value:100%;}@property --un-bg-opacity{syntax:"<percentage>";inherits:false;initial-value:100%;}@property --un-ring-opacity{syntax:"<percentage>";inherits:false;initial-value:100%;}@property --un-inset-ring-color{syntax:"*";inherits:false;}@property --un-inset-ring-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-inset-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-inset-shadow-color{syntax:"*";inherits:false;}@property --un-ring-color{syntax:"*";inherits:false;}@property --un-ring-inset{syntax:"*";inherits:false;}@property --un-ring-offset-color{syntax:"*";inherits:false;}@property --un-ring-offset-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-ring-offset-width{syntax:"<length>";inherits:false;initial-value:0px;}@property --un-ring-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-shadow-color{syntax:"*";inherits:false;}@property --un-translate-x{syntax:"*";inherits:false;initial-value:0;}@property --un-translate-y{syntax:"*";inherits:false;initial-value:0;}@property --un-translate-z{syntax:"*";inherits:false;initial-value:0;}@property --un-ease{syntax:"*";inherits:false;}@property --un-placeholder-opacity{syntax:"<percentage>";inherits:false;initial-value:100%;}@property --un-space-x-reverse{syntax:"*";inherits:false;initial-value:0;}@property --un-space-y-reverse{syntax:"*";inherits:false;initial-value:0;}:root,:host{--spacing: .25rem;--font-sans: "Manrope",ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";--font-serif: ui-serif,Georgia,Cambria,"Times New Roman",Times,serif;--font-mono: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;--font-family: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;--font-icon-family: lucide;--colors-black: #000;--colors-white: #fff;--colors-slate-50: oklch(98.4% .003 247.858);--colors-slate-100: oklch(96.8% .007 247.896);--colors-slate-200: oklch(92.9% .013 255.508);--colors-slate-300: oklch(86.9% .022 252.894);--colors-slate-400: oklch(70.4% .04 256.788);--colors-slate-500: oklch(55.4% .046 257.417);--colors-slate-600: oklch(44.6% .043 257.281);--colors-slate-700: oklch(37.2% .044 257.287);--colors-slate-800: oklch(27.9% .041 260.031);--colors-slate-900: oklch(20.8% .042 265.755);--colors-slate-950: oklch(12.9% .042 264.695);--colors-slate-DEFAULT: oklch(70.4% .04 256.788);--colors-gray-50: oklch(98.5% .002 247.839);--colors-gray-100: oklch(96.7% .003 264.542);--colors-gray-200: oklch(92.8% .006 264.531);--colors-gray-300: oklch(87.2% .01 258.338);--colors-gray-400: oklch(70.7% .022 261.325);--colors-gray-500: oklch(55.1% .027 264.364);--colors-gray-600: oklch(44.6% .03 256.802);--colors-gray-700: oklch(37.3% .034 259.733);--colors-gray-800: oklch(27.8% .033 256.848);--colors-gray-900: oklch(21% .034 264.665);--colors-gray-950: oklch(13% .028 261.692);--colors-gray-DEFAULT: oklch(70.7% .022 261.325);--colors-zinc-50: oklch(98.5% 0 0);--colors-zinc-100: oklch(96.7% .001 286.375);--colors-zinc-200: oklch(92% .004 286.32);--colors-zinc-300: oklch(87.1% .006 286.286);--colors-zinc-400: oklch(70.5% .015 286.067);--colors-zinc-500: oklch(55.2% .016 285.938);--colors-zinc-600: oklch(44.2% .017 285.786);--colors-zinc-700: oklch(37% .013 285.805);--colors-zinc-800: oklch(27.4% .006 286.033);--colors-zinc-900: oklch(21% .006 285.885);--colors-zinc-950: oklch(14.1% .005 285.823);--colors-zinc-DEFAULT: oklch(70.5% .015 286.067);--colors-neutral-50: oklch(98.5% 0 0);--colors-neutral-100: oklch(97% 0 0);--colors-neutral-200: oklch(92.2% 0 0);--colors-neutral-300: oklch(87% 0 0);--colors-neutral-400: oklch(70.8% 0 0);--colors-neutral-500: oklch(55.6% 0 0);--colors-neutral-600: oklch(43.9% 0 0);--colors-neutral-700: oklch(37.1% 0 0);--colors-neutral-800: oklch(26.9% 0 0);--colors-neutral-900: oklch(20.5% 0 0);--colors-neutral-950: oklch(14.5% 0 0);--colors-neutral-DEFAULT: oklch(70.8% 0 0);--colors-stone-50: oklch(98.5% .001 106.423);--colors-stone-100: oklch(97% .001 106.424);--colors-stone-200: oklch(92.3% .003 48.717);--colors-stone-300: oklch(86.9% .005 56.366);--colors-stone-400: oklch(70.9% .01 56.259);--colors-stone-500: oklch(55.3% .013 58.071);--colors-stone-600: oklch(44.4% .011 73.639);--colors-stone-700: oklch(37.4% .01 67.558);--colors-stone-800: oklch(26.8% .007 34.298);--colors-stone-900: oklch(21.6% .006 56.043);--colors-stone-950: oklch(14.7% .004 49.25);--colors-stone-DEFAULT: oklch(70.9% .01 56.259);--colors-red-50: oklch(97.1% .013 17.38);--colors-red-100: oklch(93.6% .032 17.717);--colors-red-200: oklch(88.5% .062 18.334);--colors-red-300: oklch(80.8% .114 19.571);--colors-red-400: oklch(70.4% .191 22.216);--colors-red-500: oklch(63.7% .237 25.331);--colors-red-600: oklch(57.7% .245 27.325);--colors-red-700: oklch(50.5% .213 27.518);--colors-red-800: oklch(44.4% .177 26.899);--colors-red-900: oklch(39.6% .141 25.723);--colors-red-950: oklch(25.8% .092 26.042);--colors-red-DEFAULT: oklch(70.4% .191 22.216);--colors-orange-50: oklch(98% .016 73.684);--colors-orange-100: oklch(95.4% .038 75.164);--colors-orange-200: oklch(90.1% .076 70.697);--colors-orange-300: oklch(83.7% .128 66.29);--colors-orange-400: oklch(75% .183 55.934);--colors-orange-500: oklch(70.5% .213 47.604);--colors-orange-600: oklch(64.6% .222 41.116);--colors-orange-700: oklch(55.3% .195 38.402);--colors-orange-800: oklch(47% .157 37.304);--colors-orange-900: oklch(40.8% .123 38.172);--colors-orange-950: oklch(26.6% .079 36.259);--colors-orange-DEFAULT: oklch(75% .183 55.934);--colors-amber-50: oklch(98.7% .022 95.277);--colors-amber-100: oklch(96.2% .059 95.617);--colors-amber-200: oklch(92.4% .12 95.746);--colors-amber-300: oklch(87.9% .169 91.605);--colors-amber-400: oklch(82.8% .189 84.429);--colors-amber-500: oklch(76.9% .188 70.08);--colors-amber-600: oklch(66.6% .179 58.318);--colors-amber-700: oklch(55.5% .163 48.998);--colors-amber-800: oklch(47.3% .137 46.201);--colors-amber-900: oklch(41.4% .112 45.904);--colors-amber-950: oklch(27.9% .077 45.635);--colors-amber-DEFAULT: oklch(82.8% .189 84.429);--colors-yellow-50: oklch(98.7% .026 102.212);--colors-yellow-100: oklch(97.3% .071 103.193);--colors-yellow-200: oklch(94.5% .129 101.54);--colors-yellow-300: oklch(90.5% .182 98.111);--colors-yellow-400: oklch(85.2% .199 91.936);--colors-yellow-500: oklch(79.5% .184 86.047);--colors-yellow-600: oklch(68.1% .162 75.834);--colors-yellow-700: oklch(55.4% .135 66.442);--colors-yellow-800: oklch(47.6% .114 61.907);--colors-yellow-900: oklch(42.1% .095 57.708);--colors-yellow-950: oklch(28.6% .066 53.813);--colors-yellow-DEFAULT: oklch(85.2% .199 91.936);--colors-lime-50: oklch(98.6% .031 120.757);--colors-lime-100: oklch(96.7% .067 122.328);--colors-lime-200: oklch(93.8% .127 124.321);--colors-lime-300: oklch(89.7% .196 126.665);--colors-lime-400: oklch(84.1% .238 128.85);--colors-lime-500: oklch(76.8% .233 130.85);--colors-lime-600: oklch(64.8% .2 131.684);--colors-lime-700: oklch(53.2% .157 131.589);--colors-lime-800: oklch(45.3% .124 130.933);--colors-lime-900: oklch(40.5% .101 131.063);--colors-lime-950: oklch(27.4% .072 132.109);--colors-lime-DEFAULT: oklch(84.1% .238 128.85);--colors-green-50: oklch(98.2% .018 155.826);--colors-green-100: oklch(96.2% .044 156.743);--colors-green-200: oklch(92.5% .084 155.995);--colors-green-300: oklch(87.1% .15 154.449);--colors-green-400: oklch(79.2% .209 151.711);--colors-green-500: oklch(72.3% .219 149.579);--colors-green-600: oklch(62.7% .194 149.214);--colors-green-700: oklch(52.7% .154 150.069);--colors-green-800: oklch(44.8% .119 151.328);--colors-green-900: oklch(39.3% .095 152.535);--colors-green-950: oklch(26.6% .065 152.934);--colors-green-DEFAULT: oklch(79.2% .209 151.711);--colors-emerald-50: oklch(97.9% .021 166.113);--colors-emerald-100: oklch(95% .052 163.051);--colors-emerald-200: oklch(90.5% .093 164.15);--colors-emerald-300: oklch(84.5% .143 164.978);--colors-emerald-400: oklch(76.5% .177 163.223);--colors-emerald-500: oklch(69.6% .17 162.48);--colors-emerald-600: oklch(59.6% .145 163.225);--colors-emerald-700: oklch(50.8% .118 165.612);--colors-emerald-800: oklch(43.2% .095 166.913);--colors-emerald-900: oklch(37.8% .077 168.94);--colors-emerald-950: oklch(26.2% .051 172.552);--colors-emerald-DEFAULT: oklch(76.5% .177 163.223);--colors-teal-50: oklch(98.4% .014 180.72);--colors-teal-100: oklch(95.3% .051 180.801);--colors-teal-200: oklch(91% .096 180.426);--colors-teal-300: oklch(85.5% .138 181.071);--colors-teal-400: oklch(77.7% .152 181.912);--colors-teal-500: oklch(70.4% .14 182.503);--colors-teal-600: oklch(60% .118 184.704);--colors-teal-700: oklch(51.1% .096 186.391);--colors-teal-800: oklch(43.7% .078 188.216);--colors-teal-900: oklch(38.6% .063 188.416);--colors-teal-950: oklch(27.7% .046 192.524);--colors-teal-DEFAULT: oklch(77.7% .152 181.912);--colors-cyan-50: oklch(98.4% .019 200.873);--colors-cyan-100: oklch(95.6% .045 203.388);--colors-cyan-200: oklch(91.7% .08 205.041);--colors-cyan-300: oklch(86.5% .127 207.078);--colors-cyan-400: oklch(78.9% .154 211.53);--colors-cyan-500: oklch(71.5% .143 215.221);--colors-cyan-600: oklch(60.9% .126 221.723);--colors-cyan-700: oklch(52% .105 223.128);--colors-cyan-800: oklch(45% .085 224.283);--colors-cyan-900: oklch(39.8% .07 227.392);--colors-cyan-950: oklch(30.2% .056 229.695);--colors-cyan-DEFAULT: oklch(78.9% .154 211.53);--colors-sky-50: oklch(97.7% .013 236.62);--colors-sky-100: oklch(95.1% .026 236.824);--colors-sky-200: oklch(90.1% .058 230.902);--colors-sky-300: oklch(82.8% .111 230.318);--colors-sky-400: oklch(74.6% .16 232.661);--colors-sky-500: oklch(68.5% .169 237.323);--colors-sky-600: oklch(58.8% .158 241.966);--colors-sky-700: oklch(50% .134 242.749);--colors-sky-800: oklch(44.3% .11 240.79);--colors-sky-900: oklch(39.1% .09 240.876);--colors-sky-950: oklch(29.3% .066 243.157);--colors-sky-DEFAULT: oklch(74.6% .16 232.661);--colors-blue-50: oklch(97% .014 254.604);--colors-blue-100: oklch(93.2% .032 255.585);--colors-blue-200: oklch(88.2% .059 254.128);--colors-blue-300: oklch(80.9% .105 251.813);--colors-blue-400: oklch(70.7% .165 254.624);--colors-blue-500: oklch(62.3% .214 259.815);--colors-blue-600: oklch(54.6% .245 262.881);--colors-blue-700: oklch(48.8% .243 264.376);--colors-blue-800: oklch(42.4% .199 265.638);--colors-blue-900: oklch(37.9% .146 265.522);--colors-blue-950: oklch(28.2% .091 267.935);--colors-blue-DEFAULT: oklch(70.7% .165 254.624);--colors-indigo-50: oklch(96.2% .018 272.314);--colors-indigo-100: oklch(93% .034 272.788);--colors-indigo-200: oklch(87% .065 274.039);--colors-indigo-300: oklch(78.5% .115 274.713);--colors-indigo-400: oklch(67.3% .182 276.935);--colors-indigo-500: oklch(58.5% .233 277.117);--colors-indigo-600: oklch(51.1% .262 276.966);--colors-indigo-700: oklch(45.7% .24 277.023);--colors-indigo-800: oklch(39.8% .195 277.366);--colors-indigo-900: oklch(35.9% .144 278.697);--colors-indigo-950: oklch(25.7% .09 281.288);--colors-indigo-DEFAULT: oklch(67.3% .182 276.935);--colors-violet-50: oklch(96.9% .016 293.756);--colors-violet-100: oklch(94.3% .029 294.588);--colors-violet-200: oklch(89.4% .057 293.283);--colors-violet-300: oklch(81.1% .111 293.571);--colors-violet-400: oklch(70.2% .183 293.541);--colors-violet-500: oklch(60.6% .25 292.717);--colors-violet-600: oklch(54.1% .281 293.009);--colors-violet-700: oklch(49.1% .27 292.581);--colors-violet-800: oklch(43.2% .232 292.759);--colors-violet-900: oklch(38% .189 293.745);--colors-violet-950: oklch(28.3% .141 291.089);--colors-violet-DEFAULT: oklch(70.2% .183 293.541);--colors-purple-50: oklch(97.7% .014 308.299);--colors-purple-100: oklch(94.6% .033 307.174);--colors-purple-200: oklch(90.2% .063 306.703);--colors-purple-300: oklch(82.7% .119 306.383);--colors-purple-400: oklch(71.4% .203 305.504);--colors-purple-500: oklch(62.7% .265 303.9);--colors-purple-600: oklch(55.8% .288 302.321);--colors-purple-700: oklch(49.6% .265 301.924);--colors-purple-800: oklch(43.8% .218 303.724);--colors-purple-900: oklch(38.1% .176 304.987);--colors-purple-950: oklch(29.1% .149 302.717);--colors-purple-DEFAULT: oklch(71.4% .203 305.504);--colors-fuchsia-50: oklch(97.7% .017 320.058);--colors-fuchsia-100: oklch(95.2% .037 318.852);--colors-fuchsia-200: oklch(90.3% .076 319.62);--colors-fuchsia-300: oklch(83.3% .145 321.434);--colors-fuchsia-400: oklch(74% .238 322.16);--colors-fuchsia-500: oklch(66.7% .295 322.15);--colors-fuchsia-600: oklch(59.1% .293 322.896);--colors-fuchsia-700: oklch(51.8% .253 323.949);--colors-fuchsia-800: oklch(45.2% .211 324.591);--colors-fuchsia-900: oklch(40.1% .17 325.612);--colors-fuchsia-950: oklch(29.3% .136 325.661);--colors-fuchsia-DEFAULT: oklch(74% .238 322.16);--colors-pink-50: oklch(97.1% .014 343.198);--colors-pink-100: oklch(94.8% .028 342.258);--colors-pink-200: oklch(89.9% .061 343.231);--colors-pink-300: oklch(82.3% .12 346.018);--colors-pink-400: oklch(71.8% .202 349.761);--colors-pink-500: oklch(65.6% .241 354.308);--colors-pink-600: oklch(59.2% .249 .584);--colors-pink-700: oklch(52.5% .223 3.958);--colors-pink-800: oklch(45.9% .187 3.815);--colors-pink-900: oklch(40.8% .153 2.432);--colors-pink-950: oklch(28.4% .109 3.907);--colors-pink-DEFAULT: oklch(71.8% .202 349.761);--colors-rose-50: oklch(96.9% .015 12.422);--colors-rose-100: oklch(94.1% .03 12.58);--colors-rose-200: oklch(89.2% .058 10.001);--colors-rose-300: oklch(81% .117 11.638);--colors-rose-400: oklch(71.2% .194 13.428);--colors-rose-500: oklch(64.5% .246 16.439);--colors-rose-600: oklch(58.6% .253 17.585);--colors-rose-700: oklch(51.4% .222 16.935);--colors-rose-800: oklch(45.5% .188 13.697);--colors-rose-900: oklch(41% .159 10.272);--colors-rose-950: oklch(27.1% .105 12.094);--colors-rose-DEFAULT: oklch(71.2% .194 13.428);--colors-light-50: oklch(99.4% 0 0);--colors-light-100: oklch(99.11% 0 0);--colors-light-200: oklch(98.51% 0 0);--colors-light-300: oklch(98.16% .0017 247.84);--colors-light-400: oklch(97.31% 0 0);--colors-light-500: oklch(96.12% 0 0);--colors-light-600: oklch(96.32% .0034 247.86);--colors-light-700: oklch(94.17% .0052 247.88);--colors-light-800: oklch(91.09% .007 247.9);--colors-light-900: oklch(90.72% .0051 228.82);--colors-light-950: oklch(89.23% .006 239.83);--colors-light-DEFAULT: oklch(97.31% 0 0);--colors-dark-50: oklch(40.91% 0 0);--colors-dark-100: oklch(35.62% 0 0);--colors-dark-200: oklch(31.71% 0 0);--colors-dark-300: oklch(29.72% 0 0);--colors-dark-400: oklch(25.2% 0 0);--colors-dark-500: oklch(23.93% 0 0);--colors-dark-600: oklch(22.73% .0038 286.09);--colors-dark-700: oklch(22.21% 0 0);--colors-dark-800: oklch(20.9% 0 0);--colors-dark-900: oklch(16.84% 0 0);--colors-dark-950: oklch(13.44% 0 0);--colors-dark-DEFAULT: oklch(25.2% 0 0);--colors-primary-50: hsl(198, 100%, 97%);--colors-primary-100: hsl(198, 100%, 92%);--colors-primary-200: hsl(198, 100%, 84%);--colors-primary-300: hsl(198, 100%, 75%);--colors-primary-400: hsl(198, 100%, 66%);--colors-primary-500: hsl(198, 100%, 55%);--colors-primary-600: hsl(198, 100%, 45%);--colors-primary-700: hsl(198, 100%, 35%);--colors-primary-800: hsl(198, 100%, 24%);--colors-primary-900: hsl(198, 100%, 15%);--colors-primary-DEFAULT: hsl(198, 100%, 55%);--colors-secondary-50: hsl(120, 100%, 97%);--colors-secondary-100: hsl(120, 100%, 92%);--colors-secondary-200: hsl(120, 100%, 84%);--colors-secondary-300: hsl(120, 100%, 75%);--colors-secondary-400: hsl(120, 100%, 66%);--colors-secondary-500: hsl(120, 100%, 55%);--colors-secondary-600: hsl(120, 100%, 45%);--colors-secondary-700: hsl(120, 100%, 35%);--colors-secondary-800: hsl(120, 100%, 24%);--colors-secondary-900: hsl(120, 100%, 15%);--colors-secondary-DEFAULT: hsl(120, 100%, 55%);--colors-tertiary-50: hsl(175, 100%, 97%);--colors-tertiary-100: hsl(175, 100%, 92%);--colors-tertiary-200: hsl(175, 100%, 84%);--colors-tertiary-300: hsl(175, 100%, 75%);--colors-tertiary-400: hsl(175, 100%, 66%);--colors-tertiary-500: hsl(175, 100%, 55%);--colors-tertiary-600: hsl(175, 100%, 45%);--colors-tertiary-700: hsl(175, 100%, 35%);--colors-tertiary-800: hsl(175, 100%, 24%);--colors-tertiary-900: hsl(175, 100%, 15%);--colors-tertiary-DEFAULT: hsl(175, 100%, 55%);--colors-success-50: hsl(149, 87%, 97%);--colors-success-100: hsl(149, 87%, 92%);--colors-success-200: hsl(149, 87%, 84%);--colors-success-300: hsl(149, 87%, 75%);--colors-success-400: hsl(149, 87%, 66%);--colors-success-500: hsl(149, 87%, 55%);--colors-success-600: hsl(149, 87%, 45%);--colors-success-700: hsl(149, 87%, 35%);--colors-success-800: hsl(149, 87%, 24%);--colors-success-900: hsl(149, 87%, 15%);--colors-success-DEFAULT: hsl(149, 87%, 55%);--colors-warning-50: hsl(32, 100%, 97%);--colors-warning-100: hsl(32, 100%, 92%);--colors-warning-200: hsl(32, 100%, 84%);--colors-warning-300: hsl(32, 100%, 75%);--colors-warning-400: hsl(32, 100%, 66%);--colors-warning-500: hsl(32, 100%, 55%);--colors-warning-600: hsl(32, 100%, 45%);--colors-warning-700: hsl(32, 100%, 35%);--colors-warning-800: hsl(32, 100%, 24%);--colors-warning-900: hsl(32, 100%, 15%);--colors-warning-DEFAULT: hsl(32, 100%, 55%);--colors-danger-50: hsl(345, 100%, 97%);--colors-danger-100: hsl(345, 100%, 92%);--colors-danger-200: hsl(345, 100%, 84%);--colors-danger-300: hsl(345, 100%, 75%);--colors-danger-400: hsl(345, 100%, 66%);--colors-danger-500: hsl(345, 100%, 55%);--colors-danger-600: hsl(345, 100%, 45%);--colors-danger-700: hsl(345, 100%, 35%);--colors-danger-800: hsl(345, 100%, 24%);--colors-danger-900: hsl(345, 100%, 15%);--colors-danger-DEFAULT: hsl(345, 100%, 55%);--colors-default-50: hsl(0, 0%, 97%);--colors-default-100: hsl(0, 0%, 92%);--colors-default-200: hsl(0, 0%, 84%);--colors-default-300: hsl(0, 0%, 75%);--colors-default-400: hsl(0, 0%, 66%);--colors-default-500: hsl(0, 0%, 55%);--colors-default-600: hsl(0, 0%, 45%);--colors-default-700: hsl(0, 0%, 35%);--colors-default-800: hsl(0, 0%, 24%);--colors-default-900: hsl(0, 0%, 15%);--colors-default-DEFAULT: hsl(0, 0%, 35%);--colors-surface-50: hsl(0, 0%, 97%);--colors-surface-100: hsl(0, 0%, 92%);--colors-surface-200: hsl(0, 0%, 84%);--colors-surface-300: hsl(0, 0%, 75%);--colors-surface-400: hsl(0, 0%, 66%);--colors-surface-500: hsl(0, 0%, 55%);--colors-surface-600: hsl(0, 0%, 45%);--colors-surface-700: hsl(0, 0%, 35%);--colors-surface-800: hsl(0, 0%, 24%);--colors-surface-900: hsl(0, 0%, 15%);--colors-surface-DEFAULT: hsl(0, 0%, 35%);--text-xs-fontSize: .75rem;--text-xs-lineHeight: 1rem;--text-sm-fontSize: .875rem;--text-sm-lineHeight: 1.25rem;--text-base-fontSize: 1rem;--text-base-lineHeight: 1.5rem;--text-lg-fontSize: 1.125rem;--text-lg-lineHeight: 1.75rem;--text-xl-fontSize: 1.25rem;--text-xl-lineHeight: 1.75rem;--text-2xl-fontSize: 1.5rem;--text-2xl-lineHeight: 2rem;--text-3xl-fontSize: 1.875rem;--text-3xl-lineHeight: 2.25rem;--text-4xl-fontSize: 2.25rem;--text-4xl-lineHeight: 2.5rem;--text-5xl-fontSize: 3rem;--text-5xl-lineHeight: 1;--text-6xl-fontSize: 3.75rem;--text-6xl-lineHeight: 1;--text-7xl-fontSize: 4.5rem;--text-7xl-lineHeight: 1;--text-8xl-fontSize: 6rem;--text-8xl-lineHeight: 1;--text-9xl-fontSize: 8rem;--text-9xl-lineHeight: 1;--text-color: var(--color-surface-100);--fontWeight-thin: 100;--fontWeight-extralight: 200;--fontWeight-light: 300;--fontWeight-normal: 400;--fontWeight-medium: 500;--fontWeight-semibold: 600;--fontWeight-bold: 700;--fontWeight-extrabold: 800;--fontWeight-black: 900;--tracking-tighter: -.05em;--tracking-tight: -.025em;--tracking-normal: 0em;--tracking-wide: .025em;--tracking-wider: .05em;--tracking-widest: .1em;--leading-none: 1;--leading-tight: 1.25;--leading-snug: 1.375;--leading-normal: 1.5;--leading-relaxed: 1.625;--leading-loose: 2;--textStrokeWidth-DEFAULT: 1.5rem;--textStrokeWidth-none: 0;--textStrokeWidth-sm: thin;--textStrokeWidth-md: medium;--textStrokeWidth-lg: thick;--radius-DEFAULT: .25rem;--radius-none: 0;--radius-xs: .125rem;--radius-sm: .25rem;--radius-md: .375rem;--radius-lg: .5rem;--radius-xl: .75rem;--radius-2xl: 1rem;--radius-3xl: 1.5rem;--radius-4xl: 2rem;--ease-linear: linear;--ease-in: cubic-bezier(.4, 0, 1, 1);--ease-out: cubic-bezier(0, 0, .2, 1);--ease-in-out: cubic-bezier(.4, 0, .2, 1);--ease-DEFAULT: cubic-bezier(.4, 0, .2, 1);--blur-DEFAULT: 8px;--blur-xs: 4px;--blur-sm: 8px;--blur-md: 12px;--blur-lg: 16px;--blur-xl: 24px;--blur-2xl: 40px;--blur-3xl: 64px;--perspective-dramatic: 100px;--perspective-near: 300px;--perspective-normal: 500px;--perspective-midrange: 800px;--perspective-distant: 1200px;--default-transition-duration: .15s;--default-transition-timingFunction: cubic-bezier(.4, 0, .2, 1);--default-font-family: var(--font-sans);--default-font-featureSettings: var(--font-sans--font-feature-settings);--default-font-variationSettings: var(--font-sans--font-variation-settings);--default-monoFont-family: var(--font-mono);--default-monoFont-featureSettings: var(--font-mono--font-feature-settings);--default-monoFont-variationSettings: var(--font-mono--font-variation-settings);--container-3xs: 16rem;--container-2xs: 18rem;--container-xs: 20rem;--container-sm: 24rem;--container-md: 28rem;--container-lg: 32rem;--container-xl: 36rem;--container-2xl: 42rem;--container-3xl: 48rem;--container-4xl: 56rem;--container-5xl: 64rem;--container-6xl: 72rem;--container-7xl: 80rem;--container-prose: 65ch;--background-color: var(--colors-primary-100);--boxShadow-md: 0 4px 6px -1px rgb(0 0 0 / .1), 0 2px 4px -2px rgb(0 0 0 / .1);--boxShadow-lg: 0 10px 15px -3px rgb(0 0 0 / .1), 0 4px 6px -4px rgb(0 0 0 / .1);--theme-font-family: "Manrope"}*,:after,:before,::backdrop,::file-selector-button{box-sizing:border-box;margin:0;padding:0;border:0 solid}html,:host{line-height:1.5;-webkit-text-size-adjust:100%;tab-size:4;font-family:var( --default-font-family, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" );font-feature-settings:var(--default-font-featureSettings, normal);font-variation-settings:var(--default-font-variationSettings, normal);-webkit-tap-highlight-color:transparent}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;-webkit-text-decoration:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,samp,pre{font-family:var( --default-monoFont-family, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace );font-feature-settings:var(--default-monoFont-featureSettings, normal);font-variation-settings:var(--default-monoFont-variationSettings, normal);font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}:-moz-focusring{outline:auto}progress{vertical-align:baseline}summary{display:list-item}ol,ul,menu{list-style:none}img,svg,video,canvas,audio,iframe,embed,object{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}button,input,select,optgroup,textarea,::file-selector-button{font:inherit;font-feature-settings:inherit;font-variation-settings:inherit;letter-spacing:inherit;color:inherit;border-radius:0;background-color:transparent;opacity:1}:where(select:is([multiple],[size])) optgroup{font-weight:bolder}:where(select:is([multiple],[size])) optgroup option{padding-inline-start:20px}::file-selector-button{margin-inline-end:4px}::placeholder{opacity:1}@supports (not (-webkit-appearance: -apple-pay-button)) or (contain-intrinsic-size: 1px){::placeholder{color:color-mix(in oklab,currentcolor 50%,transparent)}}textarea{resize:vertical}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-date-and-time-value{min-height:1lh;text-align:inherit}::-webkit-datetime-edit{display:inline-flex}::-webkit-datetime-edit-fields-wrapper{padding:0}::-webkit-datetime-edit,::-webkit-datetime-edit-year-field,::-webkit-datetime-edit-month-field,::-webkit-datetime-edit-day-field,::-webkit-datetime-edit-hour-field,::-webkit-datetime-edit-minute-field,::-webkit-datetime-edit-second-field,::-webkit-datetime-edit-millisecond-field,::-webkit-datetime-edit-meridiem-field{padding-block:0}:-moz-ui-invalid{box-shadow:none}button,input:where([type=button],[type=reset],[type=submit]),::file-selector-button{appearance:button}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[hidden]:where(:not([hidden=until-found])){display:none!important}.container{width:100%}@media (min-width: 40rem){.container{max-width:40rem}}@media (min-width: 48rem){.container{max-width:48rem}}@media (min-width: 64rem){.container{max-width:64rem}}@media (min-width: 80rem){.container{max-width:80rem}}@media (min-width: 96rem){.container{max-width:96rem}}.text-2xl{font-size:var(--text-2xl-fontSize);line-height:var(--un-leading, var(--text-2xl-lineHeight))}.text-3xl{font-size:var(--text-3xl-fontSize);line-height:var(--un-leading, var(--text-3xl-lineHeight))}.text-4xl{font-size:var(--text-4xl-fontSize);line-height:var(--un-leading, var(--text-4xl-lineHeight))}.text-lg{font-size:var(--text-lg-fontSize);line-height:var(--un-leading, var(--text-lg-lineHeight))}.text-sm{font-size:var(--text-sm-fontSize);line-height:var(--un-leading, var(--text-sm-lineHeight))}.text-xl{font-size:var(--text-xl-fontSize);line-height:var(--un-leading, var(--text-xl-lineHeight))}.text-xs{font-size:var(--text-xs-fontSize);line-height:var(--un-leading, var(--text-xs-lineHeight))}.text-\\[\\#1d2021\\]{color:color-mix(in oklab,#1d2021 var(--un-text-opacity),transparent)}.text-\\[\\#282828\\]{color:color-mix(in oklab,#282828 var(--un-text-opacity),transparent)}.text-\\[\\#665c54\\]{color:color-mix(in oklab,#665c54 var(--un-text-opacity),transparent)}.text-\\[\\#83a598\\]{color:color-mix(in oklab,#83a598 var(--un-text-opacity),transparent)}.text-\\[\\#928374\\]{color:color-mix(in oklab,#928374 var(--un-text-opacity),transparent)}.text-\\[\\#a89984\\]{color:color-mix(in oklab,#a89984 var(--un-text-opacity),transparent)}.text-\\[\\#b8bb26\\]{color:color-mix(in oklab,#b8bb26 var(--un-text-opacity),transparent)}.text-\\[\\#bdae93\\]{color:color-mix(in oklab,#bdae93 var(--un-text-opacity),transparent)}.text-\\[\\#d3869b\\]{color:color-mix(in oklab,#d3869b var(--un-text-opacity),transparent)}.text-\\[\\#d5c4a1\\]{color:color-mix(in oklab,#d5c4a1 var(--un-text-opacity),transparent)}.text-\\[\\#ebdbb2\\]{color:color-mix(in oklab,#ebdbb2 var(--un-text-opacity),transparent)}.text-\\[\\#fabd2f\\]{color:color-mix(in oklab,#fabd2f var(--un-text-opacity),transparent)}.text-amber-600{color:color-mix(in srgb,var(--colors-amber-600) var(--un-text-opacity),transparent)}.text-amber-900{color:color-mix(in srgb,var(--colors-amber-900) var(--un-text-opacity),transparent)}.text-blue-100{color:color-mix(in srgb,var(--colors-blue-100) var(--un-text-opacity),transparent)}.text-blue-600{color:color-mix(in srgb,var(--colors-blue-600) var(--un-text-opacity),transparent)}.text-blue-700{color:color-mix(in srgb,var(--colors-blue-700) var(--un-text-opacity),transparent)}.text-gray-200{color:color-mix(in srgb,var(--colors-gray-200) var(--un-text-opacity),transparent)}.text-gray-300{color:color-mix(in srgb,var(--colors-gray-300) var(--un-text-opacity),transparent)}.text-gray-400{color:color-mix(in srgb,var(--colors-gray-400) var(--un-text-opacity),transparent)}.text-gray-500{color:color-mix(in srgb,var(--colors-gray-500) var(--un-text-opacity),transparent)}.text-gray-600{color:color-mix(in srgb,var(--colors-gray-600) var(--un-text-opacity),transparent)}.text-gray-700{color:color-mix(in srgb,var(--colors-gray-700) var(--un-text-opacity),transparent)}.text-gray-800{color:color-mix(in srgb,var(--colors-gray-800) var(--un-text-opacity),transparent)}.text-gray-900{color:color-mix(in srgb,var(--colors-gray-900) var(--un-text-opacity),transparent)}.text-green-400{color:color-mix(in srgb,var(--colors-green-400) var(--un-text-opacity),transparent)}.text-green-800{color:color-mix(in srgb,var(--colors-green-800) var(--un-text-opacity),transparent)}.text-red-100{color:color-mix(in srgb,var(--colors-red-100) var(--un-text-opacity),transparent)}.text-red-400{color:color-mix(in srgb,var(--colors-red-400) var(--un-text-opacity),transparent)}.text-red-700{color:color-mix(in srgb,var(--colors-red-700) var(--un-text-opacity),transparent)}.text-red-800{color:color-mix(in srgb,var(--colors-red-800) var(--un-text-opacity),transparent)}.text-white{color:color-mix(in srgb,var(--colors-white) var(--un-text-opacity),transparent)}.text-yellow-800{color:color-mix(in srgb,var(--colors-yellow-800) var(--un-text-opacity),transparent)}.hover\\:text-\\[\\#83a598\\]:hover{color:color-mix(in oklab,#83a598 var(--un-text-opacity),transparent)}.hover\\:text-\\[\\#b8bb26\\]:hover{color:color-mix(in oklab,#b8bb26 var(--un-text-opacity),transparent)}.hover\\:text-\\[\\#ebdbb2\\]:hover{color:color-mix(in oklab,#ebdbb2 var(--un-text-opacity),transparent)}.hover\\:text-\\[\\#fb4934\\]:hover{color:color-mix(in oklab,#fb4934 var(--un-text-opacity),transparent)}.hover\\:text-blue:hover{color:color-mix(in srgb,var(--colors-blue-DEFAULT) var(--un-text-opacity),transparent)}.leading-none{--un-leading:var(--leading-none);line-height:var(--leading-none)}.tracking-wider{--un-tracking:var(--tracking-wider);letter-spacing:var(--tracking-wider)}.font-bold{--un-font-weight:var(--fontWeight-bold);font-weight:var(--fontWeight-bold)}.font-extrabold{--un-font-weight:var(--fontWeight-extrabold);font-weight:var(--fontWeight-extrabold)}.font-medium{--un-font-weight:var(--fontWeight-medium);font-weight:var(--fontWeight-medium)}.font-mono{font-family:var(--font-mono)}.font-sans{font-family:var(--font-sans)}.font-semibold{--un-font-weight:var(--fontWeight-semibold);font-weight:var(--fontWeight-semibold)}.tab{-moz-tab-size:4;-o-tab-size:4;tab-size:4}.m\\[1\\]{margin:1}.m10\\.065{margin:calc(var(--spacing) * 10.065)}.m12{margin:calc(var(--spacing) * 12)}.m15{margin:calc(var(--spacing) * 15)}.m15\\.5{margin:calc(var(--spacing) * 15.5)}.m16{margin:calc(var(--spacing) * 16)}.m21{margin:calc(var(--spacing) * 21)}.m21\\.73{margin:calc(var(--spacing) * 21.73)}.m22{margin:calc(var(--spacing) * 22)}.m4{margin:calc(var(--spacing) * 4)}.m5{margin:calc(var(--spacing) * 5)}.m6{margin:calc(var(--spacing) * 6)}.m9{margin:calc(var(--spacing) * 9)}.mx-auto{margin-inline:auto}.my-4{margin-block:calc(var(--spacing) * 4)}.-mb-4{margin-bottom:calc(calc(var(--spacing) * 4) * -1)}.mb-1{margin-bottom:calc(var(--spacing) * 1)}.mb-2{margin-bottom:calc(var(--spacing) * 2)}.mb-3{margin-bottom:calc(var(--spacing) * 3)}.mb-4{margin-bottom:calc(var(--spacing) * 4)}.mb-6{margin-bottom:calc(var(--spacing) * 6)}.mb-8{margin-bottom:calc(var(--spacing) * 8)}.ml-1{margin-left:calc(var(--spacing) * 1)}.ml-2{margin-left:calc(var(--spacing) * 2)}.ml-auto{margin-left:auto}.mr-2{margin-right:calc(var(--spacing) * 2)}.mr-3{margin-right:calc(var(--spacing) * 3)}.mt-1{margin-top:calc(var(--spacing) * 1)}.mt-1\\.5{margin-top:calc(var(--spacing) * 1.5)}.mt-2{margin-top:calc(var(--spacing) * 2)}.mt-4{margin-top:calc(var(--spacing) * 4)}.mt-6{margin-top:calc(var(--spacing) * 6)}.mt-8{margin-top:calc(var(--spacing) * 8)}.mt-auto{margin-top:auto}.p-1{padding:calc(var(--spacing) * 1)}.p-1\\.5{padding:calc(var(--spacing) * 1.5)}.p-2{padding:calc(var(--spacing) * 2)}.p-3{padding:calc(var(--spacing) * 3)}.p-4{padding:calc(var(--spacing) * 4)}.p-6{padding:calc(var(--spacing) * 6)}.p-8{padding:calc(var(--spacing) * 8)}.\\[\\&\\>a\\]\\:px-5>a{padding-inline:calc(var(--spacing) * 5)}.\\[\\&\\>a\\]\\:py-2\\.5>a{padding-block:calc(var(--spacing) * 2.5)}.px-1\\.5{padding-inline:calc(var(--spacing) * 1.5)}.px-2{padding-inline:calc(var(--spacing) * 2)}.px-3{padding-inline:calc(var(--spacing) * 3)}.px-4{padding-inline:calc(var(--spacing) * 4)}.px-6{padding-inline:calc(var(--spacing) * 6)}.py-0\\.5{padding-block:calc(var(--spacing) * .5)}.py-1{padding-block:calc(var(--spacing) * 1)}.py-1\\.5{padding-block:calc(var(--spacing) * 1.5)}.py-2{padding-block:calc(var(--spacing) * 2)}.py-8{padding-block:calc(var(--spacing) * 8)}.pb-2{padding-bottom:calc(var(--spacing) * 2)}.pb-4{padding-bottom:calc(var(--spacing) * 4)}.pb-5{padding-bottom:calc(var(--spacing) * 5)}.pl-10{padding-left:calc(var(--spacing) * 10)}.pr-10{padding-right:calc(var(--spacing) * 10)}.pr-16{padding-right:calc(var(--spacing) * 16)}.pr-2{padding-right:calc(var(--spacing) * 2)}.pr-4{padding-right:calc(var(--spacing) * 4)}.pt-1\\.5{padding-top:calc(var(--spacing) * 1.5)}.pt-2{padding-top:calc(var(--spacing) * 2)}.pt-4{padding-top:calc(var(--spacing) * 4)}.pt-6{padding-top:calc(var(--spacing) * 6)}.text-center{text-align:center}.text-left{text-align:left}.text-right{text-align:right}.focus\\:outline-none:focus{--un-outline-style:none;outline-style:none}.b,.border{border-width:1px}.border-2{border-width:2px}.border-4{border-width:4px}.border-b{border-bottom-width:1px}.border-b-2{border-bottom-width:2px}.border-l{border-left-width:1px}.border-l-4{border-left-width:4px}.border-r{border-right-width:1px}.border-t{border-top-width:1px}.border-t-2{border-top-width:2px}.border-\\[\\#3c3836\\]{border-color:color-mix(in oklab,#3c3836 var(--un-border-opacity),transparent)}.border-\\[\\#504945\\]{border-color:color-mix(in oklab,#504945 var(--un-border-opacity),transparent)}.border-\\[\\#665c54\\]{border-color:color-mix(in oklab,#665c54 var(--un-border-opacity),transparent)}.border-\\[\\#83a598\\]{border-color:color-mix(in oklab,#83a598 var(--un-border-opacity),transparent)}.border-\\[\\#fb4934\\]{border-color:color-mix(in oklab,#fb4934 var(--un-border-opacity),transparent)}.border-amber-200{border-color:color-mix(in srgb,var(--colors-amber-200) var(--un-border-opacity),transparent)}.border-amber-400{border-color:color-mix(in srgb,var(--colors-amber-400) var(--un-border-opacity),transparent)}.border-black\\/20{border-color:color-mix(in srgb,var(--colors-black) 20%,transparent)}.border-gray-200{border-color:color-mix(in srgb,var(--colors-gray-200) var(--un-border-opacity),transparent)}.border-white{border-color:color-mix(in srgb,var(--colors-white) var(--un-border-opacity),transparent)}.hover\\:border-\\[\\#83a598\\]:hover{border-color:color-mix(in oklab,#83a598 var(--un-border-opacity),transparent)}.focus\\:border-\\[\\#83a598\\]:focus{border-color:color-mix(in oklab,#83a598 var(--un-border-opacity),transparent)}.border-t-transparent{border-top-color:transparent}.rounded{border-radius:var(--radius-DEFAULT)}.rounded-full{border-radius:calc(infinity * 1px)}.rounded-lg{border-radius:var(--radius-lg)}.rounded-md{border-radius:var(--radius-md)}.rounded-xl{border-radius:var(--radius-xl)}.rounded-b-lg{border-bottom-left-radius:var(--radius-lg);border-bottom-right-radius:var(--radius-lg)}.rounded-l-md{border-top-left-radius:var(--radius-md);border-bottom-left-radius:var(--radius-md)}.rounded-r-md{border-top-right-radius:var(--radius-md);border-bottom-right-radius:var(--radius-md)}.border-dashed{--un-border-style:dashed;border-style:dashed}.bg-\\[\\#1d2021\\]{background-color:color-mix(in oklab,#1d2021 var(--un-bg-opacity),transparent)}.bg-\\[\\#282828\\]{background-color:color-mix(in oklab,#282828 var(--un-bg-opacity),transparent)}.bg-\\[\\#3c3836\\]{background-color:color-mix(in oklab,#3c3836 var(--un-bg-opacity),transparent)}.bg-\\[\\#458588\\]{background-color:color-mix(in oklab,#458588 var(--un-bg-opacity),transparent)}.bg-\\[\\#504945\\],.data-\\[active\\=true\\]\\:bg-\\[\\#504945\\][data-active=true]{background-color:color-mix(in oklab,#504945 var(--un-bg-opacity),transparent)}.bg-\\[\\#83a598\\]{background-color:color-mix(in oklab,#83a598 var(--un-bg-opacity),transparent)}.bg-\\[\\#b16286\\]{background-color:color-mix(in oklab,#b16286 var(--un-bg-opacity),transparent)}.bg-\\[\\#b8bb26\\]{background-color:color-mix(in oklab,#b8bb26 var(--un-bg-opacity),transparent)}.bg-\\[\\#d65d0e\\]{background-color:color-mix(in oklab,#d65d0e var(--un-bg-opacity),transparent)}.bg-\\[\\#ebdbb2\\]{background-color:color-mix(in oklab,#ebdbb2 var(--un-bg-opacity),transparent)}.bg-\\[\\#fb4934\\]{background-color:color-mix(in oklab,#fb4934 var(--un-bg-opacity),transparent)}.bg-\\[\\#fe8019\\]{background-color:color-mix(in oklab,#fe8019 var(--un-bg-opacity),transparent)}.bg-amber-50{background-color:color-mix(in srgb,var(--colors-amber-50) var(--un-bg-opacity),transparent)}.bg-black\\/60{background-color:color-mix(in srgb,var(--colors-black) 60%,transparent)}.bg-blue-50{background-color:color-mix(in srgb,var(--colors-blue-50) var(--un-bg-opacity),transparent)}.bg-gray-100{background-color:color-mix(in srgb,var(--colors-gray-100) var(--un-bg-opacity),transparent)}.bg-gray-200{background-color:color-mix(in srgb,var(--colors-gray-200) var(--un-bg-opacity),transparent)}.bg-gray-50{background-color:color-mix(in srgb,var(--colors-gray-50) var(--un-bg-opacity),transparent)}.bg-gray-600{background-color:color-mix(in srgb,var(--colors-gray-600) var(--un-bg-opacity),transparent)}.bg-gray-800{background-color:color-mix(in srgb,var(--colors-gray-800) var(--un-bg-opacity),transparent)}.bg-gray-900{background-color:color-mix(in srgb,var(--colors-gray-900) var(--un-bg-opacity),transparent)}.bg-green-100{background-color:color-mix(in srgb,var(--colors-green-100) var(--un-bg-opacity),transparent)}.bg-green-700{background-color:color-mix(in srgb,var(--colors-green-700) var(--un-bg-opacity),transparent)}.bg-red-100{background-color:color-mix(in srgb,var(--colors-red-100) var(--un-bg-opacity),transparent)}.bg-red-50{background-color:color-mix(in srgb,var(--colors-red-50) var(--un-bg-opacity),transparent)}.bg-red-700{background-color:color-mix(in srgb,var(--colors-red-700) var(--un-bg-opacity),transparent)}.bg-red-900\\/50{background-color:color-mix(in srgb,var(--colors-red-900) 50%,transparent)}.bg-white{background-color:color-mix(in srgb,var(--colors-white) var(--un-bg-opacity),transparent)}.bg-yellow-100{background-color:color-mix(in srgb,var(--colors-yellow-100) var(--un-bg-opacity),transparent)}.hover\\:bg-\\[\\#1d2021\\]:hover{background-color:color-mix(in oklab,#1d2021 var(--un-bg-opacity),transparent)}.hover\\:bg-\\[\\#3c3836\\]:hover{background-color:color-mix(in oklab,#3c3836 var(--un-bg-opacity),transparent)}.hover\\:bg-\\[\\#504945\\]:hover{background-color:color-mix(in oklab,#504945 var(--un-bg-opacity),transparent)}.hover\\:bg-\\[\\#665c54\\]:hover{background-color:color-mix(in oklab,#665c54 var(--un-bg-opacity),transparent)}.hover\\:bg-\\[\\#83a598\\]:hover{background-color:color-mix(in oklab,#83a598 var(--un-bg-opacity),transparent)}.hover\\:bg-amber-100:hover{background-color:color-mix(in srgb,var(--colors-amber-100) var(--un-bg-opacity),transparent)}.hover\\:bg-black\\/10:hover{background-color:color-mix(in srgb,var(--colors-black) 10%,transparent)}.hover\\:bg-gray-100:hover{background-color:color-mix(in srgb,var(--colors-gray-100) var(--un-bg-opacity),transparent)}.hover\\:bg-gray-700:hover{background-color:color-mix(in srgb,var(--colors-gray-700) var(--un-bg-opacity),transparent)}.opacity-0{opacity:0%}.group:hover .group-hover\\:opacity-100{opacity:100%}.hover\\:opacity-80:hover{opacity:80%}.disabled\\:opacity-50:disabled{opacity:50%}.hover\\:underline:hover{text-decoration-line:underline}.\\[\\&\\>a\\]\\:flex>a,.flex{display:flex}.flex-1{flex:1 1 0%}.flex-shrink-0,.shrink-0{flex-shrink:0}.flex-grow{flex-grow:1}.flex-row-reverse{flex-direction:row-reverse}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.gap-1{gap:calc(var(--spacing) * 1)}.gap-1\\.5{gap:calc(var(--spacing) * 1.5)}.gap-2{gap:calc(var(--spacing) * 2)}.gap-3{gap:calc(var(--spacing) * 3)}.gap-4{gap:calc(var(--spacing) * 4)}.gap-6{gap:calc(var(--spacing) * 6)}.gap-8{gap:calc(var(--spacing) * 8)}.gap-x-6{column-gap:calc(var(--spacing) * 6)}.gap-y-10{row-gap:calc(var(--spacing) * 10)}.grid{display:grid}.col-span-1{grid-column:span 1/span 1}.grid-cols-\\[1fr_auto\\]{grid-template-columns:1fr auto}.grid-rows-\\[1fr_auto\\]{grid-template-rows:1fr auto}.grid-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))}.grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.\\[\\&\\>a\\]\\:w-full>a,.w-full{width:100%}.h-\\[34px\\]{height:34px}.h-\\[80vh\\]{height:80vh}.h-10{height:calc(var(--spacing) * 10)}.h-12{height:calc(var(--spacing) * 12)}.h-15{height:calc(var(--spacing) * 15)}.h-16{height:calc(var(--spacing) * 16)}.h-3\\.5{height:calc(var(--spacing) * 3.5)}.h-4{height:calc(var(--spacing) * 4)}.h-5{height:calc(var(--spacing) * 5)}.h-50{height:calc(var(--spacing) * 50)}.h-6{height:calc(var(--spacing) * 6)}.h-60{height:calc(var(--spacing) * 60)}.h-7{height:calc(var(--spacing) * 7)}.h-8{height:calc(var(--spacing) * 8)}.h-full{height:100%}.h-screen{height:100vh}.max-h-\\[700px\\]{max-height:700px}.max-h-32{max-height:calc(var(--spacing) * 32)}.max-h-48{max-height:calc(var(--spacing) * 48)}.max-h-60{max-height:calc(var(--spacing) * 60)}.max-w-\\[75\\%\\]{max-width:75%}.max-w-2xl{max-width:var(--container-2xl)}.max-w-md{max-width:var(--container-md)}.max-w-none{max-width:none}.min-h-\\[2\\.5rem\\]{min-height:2.5rem}.min-h-\\[200px\\]{min-height:200px}.min-h-0{min-height:calc(var(--spacing) * 0)}.min-h-screen{min-height:100vh}.min-w-0{min-width:calc(var(--spacing) * 0)}.w-1\\/3{width:33.3333333333%}.w-10{width:calc(var(--spacing) * 10)}.w-12{width:calc(var(--spacing) * 12)}.w-16{width:calc(var(--spacing) * 16)}.w-2{width:calc(var(--spacing) * 2)}.w-2\\/3{width:66.6666666667%}.w-3{width:calc(var(--spacing) * 3)}.w-3\\.5{width:calc(var(--spacing) * 3.5)}.w-3xs{width:var(--container-3xs)}.w-4{width:calc(var(--spacing) * 4)}.w-5{width:calc(var(--spacing) * 5)}.w-6{width:calc(var(--spacing) * 6)}.w-64{width:calc(var(--spacing) * 64)}.w-8{width:calc(var(--spacing) * 8)}.w-80{width:calc(var(--spacing) * 80)}.inline{display:inline}.\\[\\&\\>a\\]\\:block>a,.block{display:block}.inline-block{display:inline-block}.contents{display:contents}.hidden{display:none}.visible{visibility:visible}.cursor-pointer{cursor:pointer}.cursor-not-allowed{cursor:not-allowed}.disabled\\:cursor-not-allowed:disabled{cursor:not-allowed}.resize-none{resize:none}.whitespace-pre-wrap{white-space:pre-wrap}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.text-ellipsis{text-overflow:ellipsis}.uppercase{text-transform:uppercase}.capitalize{text-transform:capitalize}.antialiased{-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}.focus\\:ring-2:focus{--un-ring-shadow:var(--un-ring-inset,) 0 0 0 calc(2px + var(--un-ring-offset-width)) var(--un-ring-color, currentColor);box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.focus\\:ring-\\[\\#83a598\\]:focus{--un-ring-color:color-mix(in oklab, #83a598 var(--un-ring-opacity), transparent)}.shadow,.shadow-sm{--un-shadow:0 1px 3px 0 var(--un-shadow-color, rgb(0 0 0 / .1)),0 1px 2px -1px var(--un-shadow-color, rgb(0 0 0 / .1));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.shadow-\\[4px_4px_0px_\\#1d2021\\]{--un-shadow:4px 4px 0px var(--un-shadow-color, rgb(29 32 33));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.shadow-2xl{--un-shadow:0 25px 50px -12px var(--un-shadow-color, rgb(0 0 0 / .25));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.shadow-lg{--un-shadow:0 10px 15px -3px var(--un-shadow-color, rgb(0 0 0 / .1)),0 4px 6px -4px var(--un-shadow-color, rgb(0 0 0 / .1));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.shadow-md{--un-shadow:0 4px 6px -1px var(--un-shadow-color, rgb(0 0 0 / .1)),0 2px 4px -2px var(--un-shadow-color, rgb(0 0 0 / .1));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.hover\\:shadow-\\[6px_6px_0px_\\#83a598\\]:hover{--un-shadow:6px 6px 0px var(--un-shadow-color, rgb(131 165 152));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.focus\\:shadow-\\[2px_2px_0px_\\#1d2021\\]:focus{--un-shadow:2px 2px 0px var(--un-shadow-color, rgb(29 32 33));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.-translate-y-1\\/2{--un-translate-y:-50%;translate:var(--un-translate-x) var(--un-translate-y)}.translate-x-4{--un-translate-x:calc(var(--spacing) * 4);translate:var(--un-translate-x) var(--un-translate-y)}.rotate-180{rotate:180deg}.transform{transform:var(--un-rotate-x) var(--un-rotate-y) var(--un-rotate-z) var(--un-skew-x) var(--un-skew-y)}.transition{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,--un-gradient-from,--un-gradient-via,--un-gradient-to,opacity,box-shadow,transform,translate,scale,rotate,filter,-webkit-backdrop-filter,backdrop-filter;transition-timing-function:var(--un-ease, var(--default-transition-timingFunction));transition-duration:var(--un-duration, var(--default-transition-duration))}.transition-all{transition-property:all;transition-timing-function:var(--un-ease, var(--default-transition-timingFunction));transition-duration:var(--un-duration, var(--default-transition-duration))}.transition-colors{transition-property:color,background-color,border-color,text-decoration-color,fill,stroke,--un-gradient-from,--un-gradient-via,--un-gradient-to;transition-timing-function:var(--un-ease, var(--default-transition-timingFunction));transition-duration:var(--un-duration, var(--default-transition-duration))}.transition-opacity{transition-property:opacity;transition-timing-function:var(--un-ease, var(--default-transition-timingFunction));transition-duration:var(--un-duration, var(--default-transition-duration))}.transition-transform{transition-property:transform,translate,scale,rotate;transition-timing-function:var(--un-ease, var(--default-transition-timingFunction));transition-duration:var(--un-duration, var(--default-transition-duration))}.duration-200{--un-duration:.2s;transition-duration:.2s}.ease-in-out{--un-ease:var(--ease-in-out);transition-timing-function:var(--ease-in-out)}.items-start{align-items:flex-start}.items-center{align-items:center}.items-baseline{align-items:baseline}.self-start{align-self:flex-start}.self-end{align-self:flex-end}.self-center{align-self:center}.inset-0{inset:calc(var(--spacing) * 0)}.bottom-2\\.5{bottom:calc(var(--spacing) * 2.5)}.bottom-full{bottom:100%}.left-3{left:calc(var(--spacing) * 3)}.right-2{right:calc(var(--spacing) * 2)}.right-3{right:calc(var(--spacing) * 3)}.top-1\\/2{top:50%}.top-2{top:calc(var(--spacing) * 2)}.justify-end{justify-content:flex-end}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.absolute{position:absolute}.fixed{position:fixed}.relative{position:relative}.static{position:static}.z-10{z-index:10}.overflow-auto{overflow:auto}.overflow-hidden{overflow:hidden}.overflow-y-auto{overflow-y:auto}@keyframes pulse{0%,to{opacity:1}50%{opacity:.5}}@keyframes spin{0%{transform:rotate(0)}to{transform:rotate(360deg)}}.animate-pulse{animation:pulse 2s cubic-bezier(.4,0,.6,1) infinite}.animate-spin{animation:spin 1s linear infinite}.filter{filter:var(--un-blur,) var(--un-brightness,) var(--un-contrast,) var(--un-grayscale,) var(--un-hue-rotate,) var(--un-invert,) var(--un-saturate,) var(--un-sepia,) var(--un-drop-shadow,)}.placeholder-\\[\\#928374\\]::placeholder{color:color-mix(in oklab,#928374 var(--un-placeholder-opacity),transparent)}.table{display:table}.table-row{display:table-row}.space-x-2>:not(:last-child){--un-space-x-reverse:0;margin-inline-start:calc(calc(var(--spacing) * 2) * var(--un-space-x-reverse));margin-inline-end:calc(calc(var(--spacing) * 2) * calc(1 - var(--un-space-x-reverse)))}.space-x-3>:not(:last-child){--un-space-x-reverse:0;margin-inline-start:calc(calc(var(--spacing) * 3) * var(--un-space-x-reverse));margin-inline-end:calc(calc(var(--spacing) * 3) * calc(1 - var(--un-space-x-reverse)))}.space-y-1>:not(:last-child){--un-space-y-reverse:0;margin-block-start:calc(calc(var(--spacing) * 1) * var(--un-space-y-reverse));margin-block-end:calc(calc(var(--spacing) * 1) * calc(1 - var(--un-space-y-reverse)))}.space-y-2>:not(:last-child){--un-space-y-reverse:0;margin-block-start:calc(calc(var(--spacing) * 2) * var(--un-space-y-reverse));margin-block-end:calc(calc(var(--spacing) * 2) * calc(1 - var(--un-space-y-reverse)))}.space-y-3>:not(:last-child){--un-space-y-reverse:0;margin-block-start:calc(calc(var(--spacing) * 3) * var(--un-space-y-reverse));margin-block-end:calc(calc(var(--spacing) * 3) * calc(1 - var(--un-space-y-reverse)))}.space-y-4>:not(:last-child){--un-space-y-reverse:0;margin-block-start:calc(calc(var(--spacing) * 4) * var(--un-space-y-reverse));margin-block-end:calc(calc(var(--spacing) * 4) * calc(1 - var(--un-space-y-reverse)))}.space-y-6>:not(:last-child){--un-space-y-reverse:0;margin-block-start:calc(calc(var(--spacing) * 6) * var(--un-space-y-reverse));margin-block-end:calc(calc(var(--spacing) * 6) * calc(1 - var(--un-space-y-reverse)))}@supports (color: color-mix(in lab,red,red)){.text-amber-600{color:color-mix(in oklab,var(--colors-amber-600) var(--un-text-opacity),transparent)}.text-amber-900{color:color-mix(in oklab,var(--colors-amber-900) var(--un-text-opacity),transparent)}.text-blue-100{color:color-mix(in oklab,var(--colors-blue-100) var(--un-text-opacity),transparent)}.text-blue-600{color:color-mix(in oklab,var(--colors-blue-600) var(--un-text-opacity),transparent)}.text-blue-700{color:color-mix(in oklab,var(--colors-blue-700) var(--un-text-opacity),transparent)}.text-gray-200{color:color-mix(in oklab,var(--colors-gray-200) var(--un-text-opacity),transparent)}.text-gray-300{color:color-mix(in oklab,var(--colors-gray-300) var(--un-text-opacity),transparent)}.text-gray-400{color:color-mix(in oklab,var(--colors-gray-400) var(--un-text-opacity),transparent)}.text-gray-500{color:color-mix(in oklab,var(--colors-gray-500) var(--un-text-opacity),transparent)}.text-gray-600{color:color-mix(in oklab,var(--colors-gray-600) var(--un-text-opacity),transparent)}.text-gray-700{color:color-mix(in oklab,var(--colors-gray-700) var(--un-text-opacity),transparent)}.text-gray-800{color:color-mix(in oklab,var(--colors-gray-800) var(--un-text-opacity),transparent)}.text-gray-900{color:color-mix(in oklab,var(--colors-gray-900) var(--un-text-opacity),transparent)}.text-green-400{color:color-mix(in oklab,var(--colors-green-400) var(--un-text-opacity),transparent)}.text-green-800{color:color-mix(in oklab,var(--colors-green-800) var(--un-text-opacity),transparent)}.text-red-100{color:color-mix(in oklab,var(--colors-red-100) var(--un-text-opacity),transparent)}.text-red-400{color:color-mix(in oklab,var(--colors-red-400) var(--un-text-opacity),transparent)}.text-red-700{color:color-mix(in oklab,var(--colors-red-700) var(--un-text-opacity),transparent)}.text-red-800{color:color-mix(in oklab,var(--colors-red-800) var(--un-text-opacity),transparent)}.text-white{color:color-mix(in oklab,var(--colors-white) var(--un-text-opacity),transparent)}.text-yellow-800{color:color-mix(in oklab,var(--colors-yellow-800) var(--un-text-opacity),transparent)}.hover\\:text-blue:hover{color:color-mix(in oklab,var(--colors-blue-DEFAULT) var(--un-text-opacity),transparent)}.border-amber-200{border-color:color-mix(in oklab,var(--colors-amber-200) var(--un-border-opacity),transparent)}.border-amber-400{border-color:color-mix(in oklab,var(--colors-amber-400) var(--un-border-opacity),transparent)}.border-black\\/20{border-color:color-mix(in oklab,var(--colors-black) 20%,transparent)}.border-gray-200{border-color:color-mix(in oklab,var(--colors-gray-200) var(--un-border-opacity),transparent)}.border-white{border-color:color-mix(in oklab,var(--colors-white) var(--un-border-opacity),transparent)}.bg-amber-50{background-color:color-mix(in oklab,var(--colors-amber-50) var(--un-bg-opacity),transparent)}.bg-black\\/60{background-color:color-mix(in oklab,var(--colors-black) 60%,transparent)}.bg-blue-50{background-color:color-mix(in oklab,var(--colors-blue-50) var(--un-bg-opacity),transparent)}.bg-gray-100{background-color:color-mix(in oklab,var(--colors-gray-100) var(--un-bg-opacity),transparent)}.bg-gray-200{background-color:color-mix(in oklab,var(--colors-gray-200) var(--un-bg-opacity),transparent)}.bg-gray-50{background-color:color-mix(in oklab,var(--colors-gray-50) var(--un-bg-opacity),transparent)}.bg-gray-600{background-color:color-mix(in oklab,var(--colors-gray-600) var(--un-bg-opacity),transparent)}.bg-gray-800{background-color:color-mix(in oklab,var(--colors-gray-800) var(--un-bg-opacity),transparent)}.bg-gray-900{background-color:color-mix(in oklab,var(--colors-gray-900) var(--un-bg-opacity),transparent)}.bg-green-100{background-color:color-mix(in oklab,var(--colors-green-100) var(--un-bg-opacity),transparent)}.bg-green-700{background-color:color-mix(in oklab,var(--colors-green-700) var(--un-bg-opacity),transparent)}.bg-red-100{background-color:color-mix(in oklab,var(--colors-red-100) var(--un-bg-opacity),transparent)}.bg-red-50{background-color:color-mix(in oklab,var(--colors-red-50) var(--un-bg-opacity),transparent)}.bg-red-700{background-color:color-mix(in oklab,var(--colors-red-700) var(--un-bg-opacity),transparent)}.bg-red-900\\/50{background-color:color-mix(in oklab,var(--colors-red-900) 50%,transparent)}.bg-white{background-color:color-mix(in oklab,var(--colors-white) var(--un-bg-opacity),transparent)}.bg-yellow-100{background-color:color-mix(in oklab,var(--colors-yellow-100) var(--un-bg-opacity),transparent)}.hover\\:bg-amber-100:hover{background-color:color-mix(in oklab,var(--colors-amber-100) var(--un-bg-opacity),transparent)}.hover\\:bg-black\\/10:hover{background-color:color-mix(in oklab,var(--colors-black) 10%,transparent)}.hover\\:bg-gray-100:hover{background-color:color-mix(in oklab,var(--colors-gray-100) var(--un-bg-opacity),transparent)}.hover\\:bg-gray-700:hover{background-color:color-mix(in oklab,var(--colors-gray-700) var(--un-bg-opacity),transparent)}}@media (min-width: 48rem){.md\\:p-8{padding:calc(var(--spacing) * 8)}.md\\:flex-row{flex-direction:row}.md\\:col-span-2{grid-column:span 2/span 2}.md\\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.md\\:w-64{width:calc(var(--spacing) * 64)}.md\\:w-72{width:calc(var(--spacing) * 72)}.md\\:w-auto{width:auto}.md\\:items-start{align-items:flex-start}.md\\:items-center{align-items:center}.md\\:justify-between{justify-content:space-between}}@media (min-width: 64rem){.lg\\:flex{display:flex}.lg\\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}}@media (min-width: 80rem){.xl\\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}}body{font-family:var(--font-family)}html,body{font-family:var(--theme-font-family);background-color:var(--theme-background-color)!important;color:var(--text-color)!important;width:100%;min-height:100%;height:100%;padding:0;margin:0}body:not(.production) *:not(:defined){border:1px solid red}.dark{filter:invert(1) hue-rotate(180deg)}.dark img,.dark dialog,.dark video,.dark iframe{filter:invert(1) hue-rotate(180deg)}html{font-size:14px}@media (max-width: 768px){html{font-size:18px}}@media (max-width: 480px){html{font-size:20px}}textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;color:inherit;margin:0;padding:0}:root{box-sizing:border-box;-moz-text-size-adjust:none;-webkit-text-size-adjust:none;text-size-adjust:none;line-height:1.2;-webkit-font-smoothing:antialiased}*,*:before,*:after{box-sizing:border-box}*{margin:0}body{-webkit-font-smoothing:antialiased;font-family:var(--font-family)}button,textarea,select{background-color:inherit;border-width:0;color:inherit}img,picture,video,canvas,svg{display:block;max-width:100%}input,button,textarea,select{font:inherit}p,h1,h2,h3,h4,h5,h6{font-family:var(--font-family);overflow-wrap:break-word}dialog::backdrop{background-color:#000c}*::-webkit-scrollbar{width:8px;margin-right:10px}*::-webkit-scrollbar-track{background:transparent}*::-webkit-scrollbar-thumb{&:hover{scrollbar-color:rgba(154,153,150,.8) transparent}border-radius:10px;border:none}*::-webkit-scrollbar-button{background:transparent;color:transparent}*{scrollbar-width:thin;scrollbar-color:transparent transparent;&:hover{scrollbar-color:rgba(154,153,150,.8) transparent}}[full]{width:100%;height:100vh}[w-full]{width:100%}[grow]{flex-grow:1}[hide],.hide{display:none!important}[noscroll]{overflow:hidden}div [container]{display:flex}div [container][horizontal]{display:flex;flex-direction:col}.uix-list{display:flex;&[vertical]{flex-direction:column}}.uix-navbar{--uix-navbar-text-color: var(--color-default-90);--uix-navbar-hover-text-color: var(--color-surface-80);--uix-navbar-border-radius: 0px;--uix-navbar-border-color: var(--color-default-60);--uix-navbar-border-size: 1px;--uix-navbar-border-style: solid;--uix-navbar-hover-background-color: var(--color-default-40);--uix-container-position: var(--uix-navbar-position);display:flex;flex-direction:column;&[docked]{--uix-list-button-radius: 0;border-bottom:0;position:fixed;bottom:0;background-color:var(--uix-navbar-background-color, var(--color-default-5));>*{border-right:0;border-bottom:0;&:first-child{border-left:0}}}}:where(.uix-link){font-weight:var(--uix-link-font-weight, 600);width:var(--uix-link-width, auto);color:var(--uix-link-text-color, var(--colors-default-900));--uix-link-indent: 0;cursor:pointer;&[vertical]{margin:0 auto}a,button{width:inherit;cursor:pointer;padding:var(--uix-link-padding);&:hover{color:var(--uix-link-hover-color, var(--uix-link-text-color))}}.uix-text-icon__element{display:flex;align-items:center;gap:var(--uix-link-icon-gap, .5rem);&[reverse][vertical]{flex-direction:column-reverse}&:not([reverse])[vertical]{flex-direction:column}&[reverse]:not([vertical]){flex-direction:row-reverse}&:not([reverse]):not([vertical]){flex-direction:row}}transition:all .3s ease-in-out;&[indent]{>a,>button{padding-left:var(--uix-link-indent)}}&[active]:hover{color:var(--uix-link-hover-text-color, var(--colors-primary-400))}&[selectable][selected]{background-color:var(--colors-primary-400)}&:hover{[tooltip]{display:flex}}&[tooltip]{display:inline-block;&:hover{[tooltip]{visibility:visible}}[tooltip]{visibility:hidden;width:120px;background-color:#000;color:#fff;text-align:center;border-radius:6px;padding:5px 10px;margin-left:3px;position:absolute;z-index:1000000000;top:50%;left:100%;transform:translateY(-50%)}}&[position~=top] [tooltip]{bottom:100%;left:50%;transform:translate(-50%)}&[position~=bottom] [tooltip]{top:100%;left:50%;transform:translate(-50%)}&[position~=left] [tooltip]{top:50%;right:100%;transform:translateY(-50%)}&[tooltip],&[dropdown],&[context],&[float]{position:relative}&[dropdown],&[accordion]{flex-direction:column}[float],[dropdown],[accordion],[context]{display:none}&[floatopen]>a{display:none}&[floatopen] [float]{display:block;position:relative;bottom:0;right:0}&[context]{z-index:auto}[context][open]{display:flex;flex-direction:column}[dropdown],[context][open]{position:absolute;left:0;top:100%;width:100%;min-width:200px;z-index:1000;background-color:var(--colors-primary-100);box-shadow:0 8px 16px #0003;.uix-link:hover,input{background-color:var(--colors-primary-200)}>.uix-link{width:100%}}[context][open]{display:flex}&[selected]{[dropdown],[accordion]{display:flex;flex-direction:column}}}:where(.uix-button){border:var(--uix-button-borderSize, 0) solid var(--uix-button-borderColor);border-radius:var(--uix-button-borderRadius, var(--radius-md));box-shadow:var(--uix-button-shadow);width:var(--uix-button-width);min-width:fit-content;background-color:var(--uix-button-backgroundColor, black);color:var(--uix-button-textColor, var(--colors-default-100));font-weight:var(--uix-button-fontWeight, 700);display:flex;text-align:center;transition:transform .2s ease-in-out,opacity .2s ease-in-out,background-color .2s ease-in-out;&:hover{opacity:var(--uix-button-hover-opacity, .4)}&:active{transform:scale(.97)}>button,>a,>input{width:max-content;display:block;border-radius:inherit;cursor:var(--uix-button-cursor, pointer);height:calc(var(--spacing) * 10);line-height:calc(var(--spacing) * 5);padding:var( --uix-button-padding, calc(var(--spacing) * 2.5) calc(var(--spacing) * 4) );word-break:keep-all;flex-basis:100%}.uix-icon,button,input,a{cursor:pointer}&[bordered]{--uix-button-border-size: 1px;--uix-button-backgroundColor: transparent;--uix-button-hoverBackgroundColor: var(--_variant-color-300);--uix-button-borderColor: var(--_variant-color-400);--uix-button-textColor: var(--_variant-color-700)}&[ghost]{--uix-button-backgroundColor: transparent;--uix-button-hoverBackgroundColor: var(--_variant-color-300);--uix-button-borderSize: 0px;--uix-button-textColor: var(--_variant-color-700)}&[outline]{--uix-button-backgroundColor: transparent;--uix-button-hoverBackgroundColor: var(--_variant-color-300);--uix-button-textColor: var(--_variant-color-800);--uix-button-borderSize: 1px;--uix-button-borderColor: var(--_variant-color-400)}&[float]{background-color:#000;--uix-button-hoverBackgroundColor: var(--_variant-color-500);--uix-button-textColor: var(--_variant-color-50);--uix-button-borderSize: 0px;--uix-button-borderRadius: 9999px;--uix-button-width: var(--uix-button-height);box-shadow:var(--shadow-md, 0 4px 6px -1px rgb(0 0 0 / .1));--uix-button-padding: .5rem}&[float]:hover{box-shadow:var(--shadow-lg, 0 10px 15px -3px rgb(0 0 0 / .1))}}:where(.uix-input){--uix-input-background-color: var(--colors-surface-100);--uix-input-border-color: var(--colors-gray-900);--uix-input-text-color: var(--colors-gray-900);--uix-input-placeholder-color: var(--colors-default-500);--uix-input-border-radius: var(--border-radius-md);--uix-input-border-width: 2px;--uix-input-padding-x: calc(var(--spacing) * 4);--uix-input-padding-y: calc(var(--spacing) * 2.5);--uix-input-font-size: var(--font-size-base);--uix-input-height: 2.5rem;--uix-input-disabled-opacity: .6;--uix-input-label-font-size: var(--font-size-sm);--uix-input-label-font-weight: var(--font-weight-bold);--uix-input-label-color: var(--colors-default-700);--uix-input-checkbox-size: 1.5rem;--uix-input-checkbox-border-radius: var(--border-radius-sm);--uix-input-checkbox-checked-bg: var(--colors-primary-600);--uix-input-checkbox-check-color: var(--colors-surface-100);width:100%;display:flex;flex-direction:column;input,select,textarea{width:100%;height:var(--uix-input-height);border-radius:var(--uix-input-border-radius);border:var(--uix-input-border-width) solid var(--uix-input-border-color);font-size:var(--uix-input-font-size);background-color:var(--uix-input-background-color);color:var(--uix-input-text-color);transition:var(--uix-transition);outline:none;padding:var(--uix-input-padding-y) var(--uix-input-padding-x)}textarea{resize:vertical}&:has(textarea){height:auto}select{appearance:none;-webkit-appearance:none;cursor:pointer;font-weight:600;padding-block:0;option{font-weight:600;background-color:var(--uix-input-background-color);font-size:1.1rem;line-height:1.5rem;color:#333;padding:50px;border:2px solid red}}.select-container{position:relative;.select-arrow{position:absolute;right:calc(2 * var(--spacing))}}input::placeholder{color:transparent}label{font-weight:var(--uix-input-label-font-weight);color:var(--uix-input-label-color, var(--colors-gray-600));margin-bottom:var(--spacing);font-size:.9rem;padding:0 4px;transition:all .2s ease-in-out;pointer-events:none;&[required]:after{content:"*";color:var(--colors-danger-500);margin-left:2px}}input:not(:placeholder-shown)+label,textarea:not(:placeholder-shown)+label,&:focus-within label,&.has-value label{top:-2px;transform:translateY(0);font-size:var(--uix-input-label-font-size)}&:focus-within input,&:focus-within select,&:focus-within textarea{box-shadow:0 0 var(--uix-input-focus-ring-width, 5px) var(--uix-input-focus-ring-color, rgba(0, 0, 255, .5))}&[disabled]{cursor:not-allowed;opacity:var(--uix-input-disabled-opacity);& label{cursor:not-allowed}}.input-icon,.select-arrow{position:absolute;top:50%;right:var(--spacing);transform:translateY(-50%);pointer-events:none;color:var(--uix-input-label-color);transition:transform .2s ease-in-out}&:has(select:hover:active) .select-arrow{transform:translateY(-50%) rotate(180deg)}&:has(.input-icon:not(.select-arrow))>input{padding-right:calc(var(--uix-input-padding-x) + 1.75em)}&[type=checkbox],&[type=radio]{flex-direction:row;align-items:center;border:0;height:auto;width:auto;background-color:transparent;box-shadow:none;gap:.75rem;cursor:pointer;label{margin:0;line-height:1.5rem;position:static;transform:none;background-color:transparent;padding:0;cursor:pointer;font-weight:var(--font-weight-normal);order:2;pointer-events:auto}input{appearance:none;-webkit-appearance:none;width:var(--uix-input-checkbox-size);height:var(--uix-input-checkbox-size);margin:0;border:var(--uix-input-border-width) solid var(--uix-input-border-color);background-color:var(--uix-input-background-color);cursor:pointer;position:relative;transition:var(--uix-transition);padding:0;&:after{content:"";position:absolute;display:none;left:50%;top:50%}&:checked{background-color:var(--uix-input-checkbox-checked-bg);border-color:var(--uix-input-checkbox-checked-bg);&:after{display:block}}&:focus-visible{box-shadow:0 0 0 var(--uix-input-focus-ring-width) var(--uix-input-focus-ring-color);border-color:var(--uix-input-focus-ring-color)}}}&[type=checkbox] input:after{width:.375rem;height:.75rem;border:solid var(--uix-input-checkbox-check-color);border-width:0 2px 2px 0;transform:translate(-50%,-60%) rotate(45deg)}&[type=radio] input{border-radius:var(--border-radius-full);&:after{width:calc(var(--uix-input-checkbox-size) / 2);height:calc(var(--uix-input-checkbox-size) / 2);border-radius:var(--border-radius-full);background-color:var(--uix-input-checkbox-check-color);transform:translate(-50%,-50%)}}&[ghost]{&:focus-within select{box-shadow:none}.select-arrow{margin-left:5px;padding-left:5px}select{background:inherit;border:0}}}.uix-icon{display:inline-block;vertical-align:middle;svg{height:inherit;width:inherit}}&[solid]{stroke:currentColor;fill:currentColor}
+`,mimeType:"text/css",skipSW:!1},"/modules/icon-lucide/lucide/square-mouse-pointer.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12.034 12.681a.498.498 0 0 1 .647-.647l9 3.5a.5.5 0 0 1-.033.943l-3.444 1.068a1 1 0 0 0-.66.66l-1.067 3.443a.5.5 0 0 1-.943.033z"/><path d="M21 11V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h6"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/cog.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12 20a8 8 0 1 0 0-16a8 8 0 0 0 0 16"/><path d="M12 14a2 2 0 1 0 0-4a2 2 0 0 0 0 4m0-12v2m0 18v-2m5 .66l-1-1.73m-5-8.66L7 3.34M20.66 17l-1.73-1M3.34 7l1.73 1M14 12h8M2 12h2m16.66-5l-1.73 1M3.34 17l1.73-1M17 3.34l-1 1.73m-5 8.66l-4 6.93"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/server-cog.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M4.5 10H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-.5m-15 4H4a2 2 0 0 0-2 2v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a2 2 0 0 0-2-2h-.5M6 6h.01M6 18h.01m9.69-4.6l-.9-.3m-5.6-2.2l-.9-.3m2.3 5.1l.3-.9m2.7.9l-.4-1m-2.4-5.4l-.4-1m-2.1 5.3l1-.4m5.4-2.4l1-.4m-2.3-2.1l-.3.9"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/settings.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2"/><circle cx="12" cy="12" r="3"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/sun.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32l1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></g></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/bot-message-square.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V2H8m0 16l-4 4V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2Zm-6-6h2m5-1v2m6-2v2m5-1h2"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/modules/icon-lucide/lucide/chevron-down.svg":{content:'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m6 9l6 6l6-6"/></svg>',mimeType:"image/svg+xml",skipSW:!1},"/style.css":{content:`@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_P-bnBeA.woff2) format("woff2");unicode-range:U+0460-052F,U+1C80-1C8A,U+20B4,U+2DE0-2DFF,U+A640-A69F,U+FE2E-FE2F}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_G-bnBeA.woff2) format("woff2");unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_B-bnBeA.woff2) format("woff2");unicode-range:U+0370-0377,U+037A-037F,U+0384-038A,U+038C,U+038E-03A1,U+03A3-03FF}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_N-bnBeA.woff2) format("woff2");unicode-range:U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_M-bnBeA.woff2) format("woff2");unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF}@font-face{font-family:Manrope;font-style:normal;font-weight:400;font-display:swap;src:url(https://fonts.gstatic.com/s/manrope/v20/xn7_YHE41ni1AdIRqAuZuw1Bx9mbZk79FN_C-bk.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}@supports ((-webkit-hyphens: none) and (not (margin-trim: inline))) or ((-moz-orient: inline) and (not (color:rgb(from red r g b)))){*,:before,:after,::backdrop{--un-bg-opacity:100%;--un-text-opacity:100%}}@property --un-text-opacity{syntax:"<percentage>";inherits:false;initial-value:100%;}@property --un-bg-opacity{syntax:"<percentage>";inherits:false;initial-value:100%;}@property --un-inset-ring-color{syntax:"*";inherits:false;}@property --un-inset-ring-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-inset-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-inset-shadow-color{syntax:"*";inherits:false;}@property --un-ring-color{syntax:"*";inherits:false;}@property --un-ring-inset{syntax:"*";inherits:false;}@property --un-ring-offset-color{syntax:"*";inherits:false;}@property --un-ring-offset-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-ring-offset-width{syntax:"<length>";inherits:false;initial-value:0px;}@property --un-ring-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-shadow{syntax:"*";inherits:false;initial-value:0 0 #0000;}@property --un-shadow-color{syntax:"*";inherits:false;}:root,:host{--spacing: .25rem;--font-sans: "Manrope",ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";--font-serif: ui-serif,Georgia,Cambria,"Times New Roman",Times,serif;--font-mono: ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;--font-family: "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;--font-icon-family: lucide;--colors-black: #000;--colors-white: #fff;--colors-slate-50: oklch(98.4% .003 247.858);--colors-slate-100: oklch(96.8% .007 247.896);--colors-slate-200: oklch(92.9% .013 255.508);--colors-slate-300: oklch(86.9% .022 252.894);--colors-slate-400: oklch(70.4% .04 256.788);--colors-slate-500: oklch(55.4% .046 257.417);--colors-slate-600: oklch(44.6% .043 257.281);--colors-slate-700: oklch(37.2% .044 257.287);--colors-slate-800: oklch(27.9% .041 260.031);--colors-slate-900: oklch(20.8% .042 265.755);--colors-slate-950: oklch(12.9% .042 264.695);--colors-slate-DEFAULT: oklch(70.4% .04 256.788);--colors-gray-50: oklch(98.5% .002 247.839);--colors-gray-100: oklch(96.7% .003 264.542);--colors-gray-200: oklch(92.8% .006 264.531);--colors-gray-300: oklch(87.2% .01 258.338);--colors-gray-400: oklch(70.7% .022 261.325);--colors-gray-500: oklch(55.1% .027 264.364);--colors-gray-600: oklch(44.6% .03 256.802);--colors-gray-700: oklch(37.3% .034 259.733);--colors-gray-800: oklch(27.8% .033 256.848);--colors-gray-900: oklch(21% .034 264.665);--colors-gray-950: oklch(13% .028 261.692);--colors-gray-DEFAULT: oklch(70.7% .022 261.325);--colors-zinc-50: oklch(98.5% 0 0);--colors-zinc-100: oklch(96.7% .001 286.375);--colors-zinc-200: oklch(92% .004 286.32);--colors-zinc-300: oklch(87.1% .006 286.286);--colors-zinc-400: oklch(70.5% .015 286.067);--colors-zinc-500: oklch(55.2% .016 285.938);--colors-zinc-600: oklch(44.2% .017 285.786);--colors-zinc-700: oklch(37% .013 285.805);--colors-zinc-800: oklch(27.4% .006 286.033);--colors-zinc-900: oklch(21% .006 285.885);--colors-zinc-950: oklch(14.1% .005 285.823);--colors-zinc-DEFAULT: oklch(70.5% .015 286.067);--colors-neutral-50: oklch(98.5% 0 0);--colors-neutral-100: oklch(97% 0 0);--colors-neutral-200: oklch(92.2% 0 0);--colors-neutral-300: oklch(87% 0 0);--colors-neutral-400: oklch(70.8% 0 0);--colors-neutral-500: oklch(55.6% 0 0);--colors-neutral-600: oklch(43.9% 0 0);--colors-neutral-700: oklch(37.1% 0 0);--colors-neutral-800: oklch(26.9% 0 0);--colors-neutral-900: oklch(20.5% 0 0);--colors-neutral-950: oklch(14.5% 0 0);--colors-neutral-DEFAULT: oklch(70.8% 0 0);--colors-stone-50: oklch(98.5% .001 106.423);--colors-stone-100: oklch(97% .001 106.424);--colors-stone-200: oklch(92.3% .003 48.717);--colors-stone-300: oklch(86.9% .005 56.366);--colors-stone-400: oklch(70.9% .01 56.259);--colors-stone-500: oklch(55.3% .013 58.071);--colors-stone-600: oklch(44.4% .011 73.639);--colors-stone-700: oklch(37.4% .01 67.558);--colors-stone-800: oklch(26.8% .007 34.298);--colors-stone-900: oklch(21.6% .006 56.043);--colors-stone-950: oklch(14.7% .004 49.25);--colors-stone-DEFAULT: oklch(70.9% .01 56.259);--colors-red-50: oklch(97.1% .013 17.38);--colors-red-100: oklch(93.6% .032 17.717);--colors-red-200: oklch(88.5% .062 18.334);--colors-red-300: oklch(80.8% .114 19.571);--colors-red-400: oklch(70.4% .191 22.216);--colors-red-500: oklch(63.7% .237 25.331);--colors-red-600: oklch(57.7% .245 27.325);--colors-red-700: oklch(50.5% .213 27.518);--colors-red-800: oklch(44.4% .177 26.899);--colors-red-900: oklch(39.6% .141 25.723);--colors-red-950: oklch(25.8% .092 26.042);--colors-red-DEFAULT: oklch(70.4% .191 22.216);--colors-orange-50: oklch(98% .016 73.684);--colors-orange-100: oklch(95.4% .038 75.164);--colors-orange-200: oklch(90.1% .076 70.697);--colors-orange-300: oklch(83.7% .128 66.29);--colors-orange-400: oklch(75% .183 55.934);--colors-orange-500: oklch(70.5% .213 47.604);--colors-orange-600: oklch(64.6% .222 41.116);--colors-orange-700: oklch(55.3% .195 38.402);--colors-orange-800: oklch(47% .157 37.304);--colors-orange-900: oklch(40.8% .123 38.172);--colors-orange-950: oklch(26.6% .079 36.259);--colors-orange-DEFAULT: oklch(75% .183 55.934);--colors-amber-50: oklch(98.7% .022 95.277);--colors-amber-100: oklch(96.2% .059 95.617);--colors-amber-200: oklch(92.4% .12 95.746);--colors-amber-300: oklch(87.9% .169 91.605);--colors-amber-400: oklch(82.8% .189 84.429);--colors-amber-500: oklch(76.9% .188 70.08);--colors-amber-600: oklch(66.6% .179 58.318);--colors-amber-700: oklch(55.5% .163 48.998);--colors-amber-800: oklch(47.3% .137 46.201);--colors-amber-900: oklch(41.4% .112 45.904);--colors-amber-950: oklch(27.9% .077 45.635);--colors-amber-DEFAULT: oklch(82.8% .189 84.429);--colors-yellow-50: oklch(98.7% .026 102.212);--colors-yellow-100: oklch(97.3% .071 103.193);--colors-yellow-200: oklch(94.5% .129 101.54);--colors-yellow-300: oklch(90.5% .182 98.111);--colors-yellow-400: oklch(85.2% .199 91.936);--colors-yellow-500: oklch(79.5% .184 86.047);--colors-yellow-600: oklch(68.1% .162 75.834);--colors-yellow-700: oklch(55.4% .135 66.442);--colors-yellow-800: oklch(47.6% .114 61.907);--colors-yellow-900: oklch(42.1% .095 57.708);--colors-yellow-950: oklch(28.6% .066 53.813);--colors-yellow-DEFAULT: oklch(85.2% .199 91.936);--colors-lime-50: oklch(98.6% .031 120.757);--colors-lime-100: oklch(96.7% .067 122.328);--colors-lime-200: oklch(93.8% .127 124.321);--colors-lime-300: oklch(89.7% .196 126.665);--colors-lime-400: oklch(84.1% .238 128.85);--colors-lime-500: oklch(76.8% .233 130.85);--colors-lime-600: oklch(64.8% .2 131.684);--colors-lime-700: oklch(53.2% .157 131.589);--colors-lime-800: oklch(45.3% .124 130.933);--colors-lime-900: oklch(40.5% .101 131.063);--colors-lime-950: oklch(27.4% .072 132.109);--colors-lime-DEFAULT: oklch(84.1% .238 128.85);--colors-green-50: oklch(98.2% .018 155.826);--colors-green-100: oklch(96.2% .044 156.743);--colors-green-200: oklch(92.5% .084 155.995);--colors-green-300: oklch(87.1% .15 154.449);--colors-green-400: oklch(79.2% .209 151.711);--colors-green-500: oklch(72.3% .219 149.579);--colors-green-600: oklch(62.7% .194 149.214);--colors-green-700: oklch(52.7% .154 150.069);--colors-green-800: oklch(44.8% .119 151.328);--colors-green-900: oklch(39.3% .095 152.535);--colors-green-950: oklch(26.6% .065 152.934);--colors-green-DEFAULT: oklch(79.2% .209 151.711);--colors-emerald-50: oklch(97.9% .021 166.113);--colors-emerald-100: oklch(95% .052 163.051);--colors-emerald-200: oklch(90.5% .093 164.15);--colors-emerald-300: oklch(84.5% .143 164.978);--colors-emerald-400: oklch(76.5% .177 163.223);--colors-emerald-500: oklch(69.6% .17 162.48);--colors-emerald-600: oklch(59.6% .145 163.225);--colors-emerald-700: oklch(50.8% .118 165.612);--colors-emerald-800: oklch(43.2% .095 166.913);--colors-emerald-900: oklch(37.8% .077 168.94);--colors-emerald-950: oklch(26.2% .051 172.552);--colors-emerald-DEFAULT: oklch(76.5% .177 163.223);--colors-teal-50: oklch(98.4% .014 180.72);--colors-teal-100: oklch(95.3% .051 180.801);--colors-teal-200: oklch(91% .096 180.426);--colors-teal-300: oklch(85.5% .138 181.071);--colors-teal-400: oklch(77.7% .152 181.912);--colors-teal-500: oklch(70.4% .14 182.503);--colors-teal-600: oklch(60% .118 184.704);--colors-teal-700: oklch(51.1% .096 186.391);--colors-teal-800: oklch(43.7% .078 188.216);--colors-teal-900: oklch(38.6% .063 188.416);--colors-teal-950: oklch(27.7% .046 192.524);--colors-teal-DEFAULT: oklch(77.7% .152 181.912);--colors-cyan-50: oklch(98.4% .019 200.873);--colors-cyan-100: oklch(95.6% .045 203.388);--colors-cyan-200: oklch(91.7% .08 205.041);--colors-cyan-300: oklch(86.5% .127 207.078);--colors-cyan-400: oklch(78.9% .154 211.53);--colors-cyan-500: oklch(71.5% .143 215.221);--colors-cyan-600: oklch(60.9% .126 221.723);--colors-cyan-700: oklch(52% .105 223.128);--colors-cyan-800: oklch(45% .085 224.283);--colors-cyan-900: oklch(39.8% .07 227.392);--colors-cyan-950: oklch(30.2% .056 229.695);--colors-cyan-DEFAULT: oklch(78.9% .154 211.53);--colors-sky-50: oklch(97.7% .013 236.62);--colors-sky-100: oklch(95.1% .026 236.824);--colors-sky-200: oklch(90.1% .058 230.902);--colors-sky-300: oklch(82.8% .111 230.318);--colors-sky-400: oklch(74.6% .16 232.661);--colors-sky-500: oklch(68.5% .169 237.323);--colors-sky-600: oklch(58.8% .158 241.966);--colors-sky-700: oklch(50% .134 242.749);--colors-sky-800: oklch(44.3% .11 240.79);--colors-sky-900: oklch(39.1% .09 240.876);--colors-sky-950: oklch(29.3% .066 243.157);--colors-sky-DEFAULT: oklch(74.6% .16 232.661);--colors-blue-50: oklch(97% .014 254.604);--colors-blue-100: oklch(93.2% .032 255.585);--colors-blue-200: oklch(88.2% .059 254.128);--colors-blue-300: oklch(80.9% .105 251.813);--colors-blue-400: oklch(70.7% .165 254.624);--colors-blue-500: oklch(62.3% .214 259.815);--colors-blue-600: oklch(54.6% .245 262.881);--colors-blue-700: oklch(48.8% .243 264.376);--colors-blue-800: oklch(42.4% .199 265.638);--colors-blue-900: oklch(37.9% .146 265.522);--colors-blue-950: oklch(28.2% .091 267.935);--colors-blue-DEFAULT: oklch(70.7% .165 254.624);--colors-indigo-50: oklch(96.2% .018 272.314);--colors-indigo-100: oklch(93% .034 272.788);--colors-indigo-200: oklch(87% .065 274.039);--colors-indigo-300: oklch(78.5% .115 274.713);--colors-indigo-400: oklch(67.3% .182 276.935);--colors-indigo-500: oklch(58.5% .233 277.117);--colors-indigo-600: oklch(51.1% .262 276.966);--colors-indigo-700: oklch(45.7% .24 277.023);--colors-indigo-800: oklch(39.8% .195 277.366);--colors-indigo-900: oklch(35.9% .144 278.697);--colors-indigo-950: oklch(25.7% .09 281.288);--colors-indigo-DEFAULT: oklch(67.3% .182 276.935);--colors-violet-50: oklch(96.9% .016 293.756);--colors-violet-100: oklch(94.3% .029 294.588);--colors-violet-200: oklch(89.4% .057 293.283);--colors-violet-300: oklch(81.1% .111 293.571);--colors-violet-400: oklch(70.2% .183 293.541);--colors-violet-500: oklch(60.6% .25 292.717);--colors-violet-600: oklch(54.1% .281 293.009);--colors-violet-700: oklch(49.1% .27 292.581);--colors-violet-800: oklch(43.2% .232 292.759);--colors-violet-900: oklch(38% .189 293.745);--colors-violet-950: oklch(28.3% .141 291.089);--colors-violet-DEFAULT: oklch(70.2% .183 293.541);--colors-purple-50: oklch(97.7% .014 308.299);--colors-purple-100: oklch(94.6% .033 307.174);--colors-purple-200: oklch(90.2% .063 306.703);--colors-purple-300: oklch(82.7% .119 306.383);--colors-purple-400: oklch(71.4% .203 305.504);--colors-purple-500: oklch(62.7% .265 303.9);--colors-purple-600: oklch(55.8% .288 302.321);--colors-purple-700: oklch(49.6% .265 301.924);--colors-purple-800: oklch(43.8% .218 303.724);--colors-purple-900: oklch(38.1% .176 304.987);--colors-purple-950: oklch(29.1% .149 302.717);--colors-purple-DEFAULT: oklch(71.4% .203 305.504);--colors-fuchsia-50: oklch(97.7% .017 320.058);--colors-fuchsia-100: oklch(95.2% .037 318.852);--colors-fuchsia-200: oklch(90.3% .076 319.62);--colors-fuchsia-300: oklch(83.3% .145 321.434);--colors-fuchsia-400: oklch(74% .238 322.16);--colors-fuchsia-500: oklch(66.7% .295 322.15);--colors-fuchsia-600: oklch(59.1% .293 322.896);--colors-fuchsia-700: oklch(51.8% .253 323.949);--colors-fuchsia-800: oklch(45.2% .211 324.591);--colors-fuchsia-900: oklch(40.1% .17 325.612);--colors-fuchsia-950: oklch(29.3% .136 325.661);--colors-fuchsia-DEFAULT: oklch(74% .238 322.16);--colors-pink-50: oklch(97.1% .014 343.198);--colors-pink-100: oklch(94.8% .028 342.258);--colors-pink-200: oklch(89.9% .061 343.231);--colors-pink-300: oklch(82.3% .12 346.018);--colors-pink-400: oklch(71.8% .202 349.761);--colors-pink-500: oklch(65.6% .241 354.308);--colors-pink-600: oklch(59.2% .249 .584);--colors-pink-700: oklch(52.5% .223 3.958);--colors-pink-800: oklch(45.9% .187 3.815);--colors-pink-900: oklch(40.8% .153 2.432);--colors-pink-950: oklch(28.4% .109 3.907);--colors-pink-DEFAULT: oklch(71.8% .202 349.761);--colors-rose-50: oklch(96.9% .015 12.422);--colors-rose-100: oklch(94.1% .03 12.58);--colors-rose-200: oklch(89.2% .058 10.001);--colors-rose-300: oklch(81% .117 11.638);--colors-rose-400: oklch(71.2% .194 13.428);--colors-rose-500: oklch(64.5% .246 16.439);--colors-rose-600: oklch(58.6% .253 17.585);--colors-rose-700: oklch(51.4% .222 16.935);--colors-rose-800: oklch(45.5% .188 13.697);--colors-rose-900: oklch(41% .159 10.272);--colors-rose-950: oklch(27.1% .105 12.094);--colors-rose-DEFAULT: oklch(71.2% .194 13.428);--colors-light-50: oklch(99.4% 0 0);--colors-light-100: oklch(99.11% 0 0);--colors-light-200: oklch(98.51% 0 0);--colors-light-300: oklch(98.16% .0017 247.84);--colors-light-400: oklch(97.31% 0 0);--colors-light-500: oklch(96.12% 0 0);--colors-light-600: oklch(96.32% .0034 247.86);--colors-light-700: oklch(94.17% .0052 247.88);--colors-light-800: oklch(91.09% .007 247.9);--colors-light-900: oklch(90.72% .0051 228.82);--colors-light-950: oklch(89.23% .006 239.83);--colors-light-DEFAULT: oklch(97.31% 0 0);--colors-dark-50: oklch(40.91% 0 0);--colors-dark-100: oklch(35.62% 0 0);--colors-dark-200: oklch(31.71% 0 0);--colors-dark-300: oklch(29.72% 0 0);--colors-dark-400: oklch(25.2% 0 0);--colors-dark-500: oklch(23.93% 0 0);--colors-dark-600: oklch(22.73% .0038 286.09);--colors-dark-700: oklch(22.21% 0 0);--colors-dark-800: oklch(20.9% 0 0);--colors-dark-900: oklch(16.84% 0 0);--colors-dark-950: oklch(13.44% 0 0);--colors-dark-DEFAULT: oklch(25.2% 0 0);--colors-primary-50: hsl(198, 100%, 97%);--colors-primary-100: hsl(198, 100%, 92%);--colors-primary-200: hsl(198, 100%, 84%);--colors-primary-300: hsl(198, 100%, 75%);--colors-primary-400: hsl(198, 100%, 66%);--colors-primary-500: hsl(198, 100%, 55%);--colors-primary-600: hsl(198, 100%, 45%);--colors-primary-700: hsl(198, 100%, 35%);--colors-primary-800: hsl(198, 100%, 24%);--colors-primary-900: hsl(198, 100%, 15%);--colors-primary-DEFAULT: hsl(198, 100%, 55%);--colors-secondary-50: hsl(120, 100%, 97%);--colors-secondary-100: hsl(120, 100%, 92%);--colors-secondary-200: hsl(120, 100%, 84%);--colors-secondary-300: hsl(120, 100%, 75%);--colors-secondary-400: hsl(120, 100%, 66%);--colors-secondary-500: hsl(120, 100%, 55%);--colors-secondary-600: hsl(120, 100%, 45%);--colors-secondary-700: hsl(120, 100%, 35%);--colors-secondary-800: hsl(120, 100%, 24%);--colors-secondary-900: hsl(120, 100%, 15%);--colors-secondary-DEFAULT: hsl(120, 100%, 55%);--colors-tertiary-50: hsl(175, 100%, 97%);--colors-tertiary-100: hsl(175, 100%, 92%);--colors-tertiary-200: hsl(175, 100%, 84%);--colors-tertiary-300: hsl(175, 100%, 75%);--colors-tertiary-400: hsl(175, 100%, 66%);--colors-tertiary-500: hsl(175, 100%, 55%);--colors-tertiary-600: hsl(175, 100%, 45%);--colors-tertiary-700: hsl(175, 100%, 35%);--colors-tertiary-800: hsl(175, 100%, 24%);--colors-tertiary-900: hsl(175, 100%, 15%);--colors-tertiary-DEFAULT: hsl(175, 100%, 55%);--colors-success-50: hsl(149, 87%, 97%);--colors-success-100: hsl(149, 87%, 92%);--colors-success-200: hsl(149, 87%, 84%);--colors-success-300: hsl(149, 87%, 75%);--colors-success-400: hsl(149, 87%, 66%);--colors-success-500: hsl(149, 87%, 55%);--colors-success-600: hsl(149, 87%, 45%);--colors-success-700: hsl(149, 87%, 35%);--colors-success-800: hsl(149, 87%, 24%);--colors-success-900: hsl(149, 87%, 15%);--colors-success-DEFAULT: hsl(149, 87%, 55%);--colors-warning-50: hsl(32, 100%, 97%);--colors-warning-100: hsl(32, 100%, 92%);--colors-warning-200: hsl(32, 100%, 84%);--colors-warning-300: hsl(32, 100%, 75%);--colors-warning-400: hsl(32, 100%, 66%);--colors-warning-500: hsl(32, 100%, 55%);--colors-warning-600: hsl(32, 100%, 45%);--colors-warning-700: hsl(32, 100%, 35%);--colors-warning-800: hsl(32, 100%, 24%);--colors-warning-900: hsl(32, 100%, 15%);--colors-warning-DEFAULT: hsl(32, 100%, 55%);--colors-danger-50: hsl(345, 100%, 97%);--colors-danger-100: hsl(345, 100%, 92%);--colors-danger-200: hsl(345, 100%, 84%);--colors-danger-300: hsl(345, 100%, 75%);--colors-danger-400: hsl(345, 100%, 66%);--colors-danger-500: hsl(345, 100%, 55%);--colors-danger-600: hsl(345, 100%, 45%);--colors-danger-700: hsl(345, 100%, 35%);--colors-danger-800: hsl(345, 100%, 24%);--colors-danger-900: hsl(345, 100%, 15%);--colors-danger-DEFAULT: hsl(345, 100%, 55%);--colors-default-50: hsl(0, 0%, 97%);--colors-default-100: hsl(0, 0%, 92%);--colors-default-200: hsl(0, 0%, 84%);--colors-default-300: hsl(0, 0%, 75%);--colors-default-400: hsl(0, 0%, 66%);--colors-default-500: hsl(0, 0%, 55%);--colors-default-600: hsl(0, 0%, 45%);--colors-default-700: hsl(0, 0%, 35%);--colors-default-800: hsl(0, 0%, 24%);--colors-default-900: hsl(0, 0%, 15%);--colors-default-DEFAULT: hsl(0, 0%, 35%);--colors-surface-50: hsl(0, 0%, 97%);--colors-surface-100: hsl(0, 0%, 92%);--colors-surface-200: hsl(0, 0%, 84%);--colors-surface-300: hsl(0, 0%, 75%);--colors-surface-400: hsl(0, 0%, 66%);--colors-surface-500: hsl(0, 0%, 55%);--colors-surface-600: hsl(0, 0%, 45%);--colors-surface-700: hsl(0, 0%, 35%);--colors-surface-800: hsl(0, 0%, 24%);--colors-surface-900: hsl(0, 0%, 15%);--colors-surface-DEFAULT: hsl(0, 0%, 35%);--text-xs-fontSize: .75rem;--text-xs-lineHeight: 1rem;--text-sm-fontSize: .875rem;--text-sm-lineHeight: 1.25rem;--text-base-fontSize: 1rem;--text-base-lineHeight: 1.5rem;--text-lg-fontSize: 1.125rem;--text-lg-lineHeight: 1.75rem;--text-xl-fontSize: 1.25rem;--text-xl-lineHeight: 1.75rem;--text-2xl-fontSize: 1.5rem;--text-2xl-lineHeight: 2rem;--text-3xl-fontSize: 1.875rem;--text-3xl-lineHeight: 2.25rem;--text-4xl-fontSize: 2.25rem;--text-4xl-lineHeight: 2.5rem;--text-5xl-fontSize: 3rem;--text-5xl-lineHeight: 1;--text-6xl-fontSize: 3.75rem;--text-6xl-lineHeight: 1;--text-7xl-fontSize: 4.5rem;--text-7xl-lineHeight: 1;--text-8xl-fontSize: 6rem;--text-8xl-lineHeight: 1;--text-9xl-fontSize: 8rem;--text-9xl-lineHeight: 1;--text-color: var(--color-surface-100);--fontWeight-thin: 100;--fontWeight-extralight: 200;--fontWeight-light: 300;--fontWeight-normal: 400;--fontWeight-medium: 500;--fontWeight-semibold: 600;--fontWeight-bold: 700;--fontWeight-extrabold: 800;--fontWeight-black: 900;--tracking-tighter: -.05em;--tracking-tight: -.025em;--tracking-normal: 0em;--tracking-wide: .025em;--tracking-wider: .05em;--tracking-widest: .1em;--leading-none: 1;--leading-tight: 1.25;--leading-snug: 1.375;--leading-normal: 1.5;--leading-relaxed: 1.625;--leading-loose: 2;--textStrokeWidth-DEFAULT: 1.5rem;--textStrokeWidth-none: 0;--textStrokeWidth-sm: thin;--textStrokeWidth-md: medium;--textStrokeWidth-lg: thick;--radius-DEFAULT: .25rem;--radius-none: 0;--radius-xs: .125rem;--radius-sm: .25rem;--radius-md: .375rem;--radius-lg: .5rem;--radius-xl: .75rem;--radius-2xl: 1rem;--radius-3xl: 1.5rem;--radius-4xl: 2rem;--ease-linear: linear;--ease-in: cubic-bezier(.4, 0, 1, 1);--ease-out: cubic-bezier(0, 0, .2, 1);--ease-in-out: cubic-bezier(.4, 0, .2, 1);--ease-DEFAULT: cubic-bezier(.4, 0, .2, 1);--blur-DEFAULT: 8px;--blur-xs: 4px;--blur-sm: 8px;--blur-md: 12px;--blur-lg: 16px;--blur-xl: 24px;--blur-2xl: 40px;--blur-3xl: 64px;--perspective-dramatic: 100px;--perspective-near: 300px;--perspective-normal: 500px;--perspective-midrange: 800px;--perspective-distant: 1200px;--default-transition-duration: .15s;--default-transition-timingFunction: cubic-bezier(.4, 0, .2, 1);--default-font-family: var(--font-sans);--default-font-featureSettings: var(--font-sans--font-feature-settings);--default-font-variationSettings: var(--font-sans--font-variation-settings);--default-monoFont-family: var(--font-mono);--default-monoFont-featureSettings: var(--font-mono--font-feature-settings);--default-monoFont-variationSettings: var(--font-mono--font-variation-settings);--container-3xs: 16rem;--container-2xs: 18rem;--container-xs: 20rem;--container-sm: 24rem;--container-md: 28rem;--container-lg: 32rem;--container-xl: 36rem;--container-2xl: 42rem;--container-3xl: 48rem;--container-4xl: 56rem;--container-5xl: 64rem;--container-6xl: 72rem;--container-7xl: 80rem;--container-prose: 65ch;--background-color: var(--colors-primary-100);--boxShadow-md: 0 4px 6px -1px rgb(0 0 0 / .1), 0 2px 4px -2px rgb(0 0 0 / .1);--boxShadow-lg: 0 10px 15px -3px rgb(0 0 0 / .1), 0 4px 6px -4px rgb(0 0 0 / .1);--theme-font-family: "Manrope"}*,:after,:before,::backdrop,::file-selector-button{box-sizing:border-box;margin:0;padding:0;border:0 solid}html,:host{line-height:1.5;-webkit-text-size-adjust:100%;tab-size:4;font-family:var( --default-font-family, ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" );font-feature-settings:var(--default-font-featureSettings, normal);font-variation-settings:var(--default-font-variationSettings, normal);-webkit-tap-highlight-color:transparent}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;-webkit-text-decoration:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,samp,pre{font-family:var( --default-monoFont-family, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace );font-feature-settings:var(--default-monoFont-featureSettings, normal);font-variation-settings:var(--default-monoFont-variationSettings, normal);font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}:-moz-focusring{outline:auto}progress{vertical-align:baseline}summary{display:list-item}ol,ul,menu{list-style:none}img,svg,video,canvas,audio,iframe,embed,object{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}button,input,select,optgroup,textarea,::file-selector-button{font:inherit;font-feature-settings:inherit;font-variation-settings:inherit;letter-spacing:inherit;color:inherit;border-radius:0;background-color:transparent;opacity:1}:where(select:is([multiple],[size])) optgroup{font-weight:bolder}:where(select:is([multiple],[size])) optgroup option{padding-inline-start:20px}::file-selector-button{margin-inline-end:4px}::placeholder{opacity:1}@supports (not (-webkit-appearance: -apple-pay-button)) or (contain-intrinsic-size: 1px){::placeholder{color:color-mix(in oklab,currentcolor 50%,transparent)}}textarea{resize:vertical}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-date-and-time-value{min-height:1lh;text-align:inherit}::-webkit-datetime-edit{display:inline-flex}::-webkit-datetime-edit-fields-wrapper{padding:0}::-webkit-datetime-edit,::-webkit-datetime-edit-year-field,::-webkit-datetime-edit-month-field,::-webkit-datetime-edit-day-field,::-webkit-datetime-edit-hour-field,::-webkit-datetime-edit-minute-field,::-webkit-datetime-edit-second-field,::-webkit-datetime-edit-millisecond-field,::-webkit-datetime-edit-meridiem-field{padding-block:0}:-moz-ui-invalid{box-shadow:none}button,input:where([type=button],[type=reset],[type=submit]),::file-selector-button{appearance:button}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[hidden]:where(:not([hidden=until-found])){display:none!important}.text-2xl{font-size:var(--text-2xl-fontSize);line-height:var(--un-leading, var(--text-2xl-lineHeight))}.text-4xl{font-size:var(--text-4xl-fontSize);line-height:var(--un-leading, var(--text-4xl-lineHeight))}.text-sm{font-size:var(--text-sm-fontSize);line-height:var(--un-leading, var(--text-sm-lineHeight))}.text-xs{font-size:var(--text-xs-fontSize);line-height:var(--un-leading, var(--text-xs-lineHeight))}.text-gray-500{color:color-mix(in srgb,var(--colors-gray-500) var(--un-text-opacity),transparent)}.text-gray-700{color:color-mix(in srgb,var(--colors-gray-700) var(--un-text-opacity),transparent)}.text-gray-800{color:color-mix(in srgb,var(--colors-gray-800) var(--un-text-opacity),transparent)}.text-gray-900{color:color-mix(in srgb,var(--colors-gray-900) var(--un-text-opacity),transparent)}.text-green-800{color:color-mix(in srgb,var(--colors-green-800) var(--un-text-opacity),transparent)}.text-yellow-800{color:color-mix(in srgb,var(--colors-yellow-800) var(--un-text-opacity),transparent)}.font-bold{--un-font-weight:var(--fontWeight-bold);font-weight:var(--fontWeight-bold)}.font-extrabold{--un-font-weight:var(--fontWeight-extrabold);font-weight:var(--fontWeight-extrabold)}.font-mono{font-family:var(--font-mono)}.font-semibold{--un-font-weight:var(--fontWeight-semibold);font-weight:var(--fontWeight-semibold)}.m6{margin:calc(var(--spacing) * 6)}.p-2{padding:calc(var(--spacing) * 2)}.p-4{padding:calc(var(--spacing) * 4)}.p-6{padding:calc(var(--spacing) * 6)}.px-2{padding-inline:calc(var(--spacing) * 2)}.py-1{padding-block:calc(var(--spacing) * 1)}.pb-2{padding-bottom:calc(var(--spacing) * 2)}.text-center{text-align:center}.text-right{text-align:right}.border{border-width:1px}.border-b{border-bottom-width:1px}.rounded{border-radius:var(--radius-DEFAULT)}.rounded-lg{border-radius:var(--radius-lg)}.rounded-md{border-radius:var(--radius-md)}.bg-gray-100{background-color:color-mix(in srgb,var(--colors-gray-100) var(--un-bg-opacity),transparent)}.bg-gray-200{background-color:color-mix(in srgb,var(--colors-gray-200) var(--un-bg-opacity),transparent)}.bg-gray-50{background-color:color-mix(in srgb,var(--colors-gray-50) var(--un-bg-opacity),transparent)}.bg-green-100{background-color:color-mix(in srgb,var(--colors-green-100) var(--un-bg-opacity),transparent)}.bg-white{background-color:color-mix(in srgb,var(--colors-white) var(--un-bg-opacity),transparent)}.bg-yellow-100{background-color:color-mix(in srgb,var(--colors-yellow-100) var(--un-bg-opacity),transparent)}.flex{display:flex}.flex-1{flex:1 1 0%}.flex-shrink-0{flex-shrink:0}.flex-grow{flex-grow:1}.flex-col{flex-direction:column}.gap-2{gap:calc(var(--spacing) * 2)}.gap-3{gap:calc(var(--spacing) * 3)}.gap-4{gap:calc(var(--spacing) * 4)}.gap-6{gap:calc(var(--spacing) * 6)}.grid{display:grid}.grid-cols-1{grid-template-columns:repeat(1,minmax(0,1fr))}.grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.h-full{height:100%}.min-h-screen{min-height:100vh}.w-full{width:100%}.shadow-md{--un-shadow:0 4px 6px -1px var(--un-shadow-color, rgb(0 0 0 / .1)),0 2px 4px -2px var(--un-shadow-color, rgb(0 0 0 / .1));box-shadow:var(--un-inset-shadow),var(--un-inset-ring-shadow),var(--un-ring-offset-shadow),var(--un-ring-shadow),var(--un-shadow)}.items-center{align-items:center}.justify-end{justify-content:flex-end}.justify-between{justify-content:space-between}@supports (color: color-mix(in lab,red,red)){.text-gray-500{color:color-mix(in oklab,var(--colors-gray-500) var(--un-text-opacity),transparent)}.text-gray-700{color:color-mix(in oklab,var(--colors-gray-700) var(--un-text-opacity),transparent)}.text-gray-800{color:color-mix(in oklab,var(--colors-gray-800) var(--un-text-opacity),transparent)}.text-gray-900{color:color-mix(in oklab,var(--colors-gray-900) var(--un-text-opacity),transparent)}.text-green-800{color:color-mix(in oklab,var(--colors-green-800) var(--un-text-opacity),transparent)}.text-yellow-800{color:color-mix(in oklab,var(--colors-yellow-800) var(--un-text-opacity),transparent)}.bg-gray-100{background-color:color-mix(in oklab,var(--colors-gray-100) var(--un-bg-opacity),transparent)}.bg-gray-200{background-color:color-mix(in oklab,var(--colors-gray-200) var(--un-bg-opacity),transparent)}.bg-gray-50{background-color:color-mix(in oklab,var(--colors-gray-50) var(--un-bg-opacity),transparent)}.bg-green-100{background-color:color-mix(in oklab,var(--colors-green-100) var(--un-bg-opacity),transparent)}.bg-white{background-color:color-mix(in oklab,var(--colors-white) var(--un-bg-opacity),transparent)}.bg-yellow-100{background-color:color-mix(in oklab,var(--colors-yellow-100) var(--un-bg-opacity),transparent)}}@media (min-width: 48rem){.md\\:col-span-2{grid-column:span 2/span 2}.md\\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}}@media (min-width: 64rem){.lg\\:grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}}body{font-family:var(--font-family)}html,body{font-family:var(--theme-font-family);background-color:var(--theme-background-color)!important;color:var(--text-color)!important;width:100%;min-height:100%;height:100%;padding:0;margin:0}body:not(.production) *:not(:defined){border:1px solid red}.dark{filter:invert(1) hue-rotate(180deg)}.dark img,.dark dialog,.dark video,.dark iframe{filter:invert(1) hue-rotate(180deg)}html{font-size:14px}@media (max-width: 768px){html{font-size:18px}}@media (max-width: 480px){html{font-size:20px}}textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;color:inherit;margin:0;padding:0}:root{box-sizing:border-box;-moz-text-size-adjust:none;-webkit-text-size-adjust:none;text-size-adjust:none;line-height:1.2;-webkit-font-smoothing:antialiased}*,*:before,*:after{box-sizing:border-box}*{margin:0}body{-webkit-font-smoothing:antialiased;font-family:var(--font-family)}button,textarea,select{background-color:inherit;border-width:0;color:inherit}img,picture,video,canvas,svg{display:block;max-width:100%}input,button,textarea,select{font:inherit}p,h1,h2,h3,h4,h5,h6{font-family:var(--font-family);overflow-wrap:break-word}dialog::backdrop{background-color:#000c}*::-webkit-scrollbar{width:8px;margin-right:10px}*::-webkit-scrollbar-track{background:transparent}*::-webkit-scrollbar-thumb{&:hover{scrollbar-color:rgba(154,153,150,.8) transparent}border-radius:10px;border:none}*::-webkit-scrollbar-button{background:transparent;color:transparent}*{scrollbar-width:thin;scrollbar-color:transparent transparent;&:hover{scrollbar-color:rgba(154,153,150,.8) transparent}}[full]{width:100%;height:100vh}[w-full]{width:100%}[grow]{flex-grow:1}[hide],.hide{display:none!important}[noscroll]{overflow:hidden}div [container]{display:flex}div [container][horizontal]{display:flex;flex-direction:col}:where(.uix-link){font-weight:var(--uix-link-font-weight, 600);width:var(--uix-link-width, auto);color:var(--uix-link-text-color, var(--colors-default-900));--uix-link-indent: 0;cursor:pointer;&[vertical]{margin:0 auto}a,button{width:inherit;cursor:pointer;padding:var(--uix-link-padding);&:hover{color:var(--uix-link-hover-color, var(--uix-link-text-color))}}.uix-text-icon__element{display:flex;align-items:center;gap:var(--uix-link-icon-gap, .5rem);&[reverse][vertical]{flex-direction:column-reverse}&:not([reverse])[vertical]{flex-direction:column}&[reverse]:not([vertical]){flex-direction:row-reverse}&:not([reverse]):not([vertical]){flex-direction:row}}transition:all .3s ease-in-out;&[indent]{>a,>button{padding-left:var(--uix-link-indent)}}&[active]:hover{color:var(--uix-link-hover-text-color, var(--colors-primary-400))}&[selectable][selected]{background-color:var(--colors-primary-400)}&:hover{[tooltip]{display:flex}}&[tooltip]{display:inline-block;&:hover{[tooltip]{visibility:visible}}[tooltip]{visibility:hidden;width:120px;background-color:#000;color:#fff;text-align:center;border-radius:6px;padding:5px 10px;margin-left:3px;position:absolute;z-index:1000000000;top:50%;left:100%;transform:translateY(-50%)}}&[position~=top] [tooltip]{bottom:100%;left:50%;transform:translate(-50%)}&[position~=bottom] [tooltip]{top:100%;left:50%;transform:translate(-50%)}&[position~=left] [tooltip]{top:50%;right:100%;transform:translateY(-50%)}&[tooltip],&[dropdown],&[context],&[float]{position:relative}&[dropdown],&[accordion]{flex-direction:column}[float],[dropdown],[accordion],[context]{display:none}&[floatopen]>a{display:none}&[floatopen] [float]{display:block;position:relative;bottom:0;right:0}&[context]{z-index:auto}[context][open]{display:flex;flex-direction:column}[dropdown],[context][open]{position:absolute;left:0;top:100%;width:100%;min-width:200px;z-index:1000;background-color:var(--colors-primary-100);box-shadow:0 8px 16px #0003;.uix-link:hover,input{background-color:var(--colors-primary-200)}>.uix-link{width:100%}}[context][open]{display:flex}&[selected]{[dropdown],[accordion]{display:flex;flex-direction:column}}}:where(.uix-button){border:var(--uix-button-borderSize, 0) solid var(--uix-button-borderColor);border-radius:var(--uix-button-borderRadius, var(--radius-md));box-shadow:var(--uix-button-shadow);width:var(--uix-button-width);min-width:fit-content;background-color:var(--uix-button-backgroundColor, black);color:var(--uix-button-textColor, var(--colors-default-100));font-weight:var(--uix-button-fontWeight, 700);display:flex;text-align:center;transition:transform .2s ease-in-out,opacity .2s ease-in-out,background-color .2s ease-in-out;&:hover{opacity:var(--uix-button-hover-opacity, .4)}&:active{transform:scale(.97)}>button,>a,>input{width:max-content;display:block;border-radius:inherit;cursor:var(--uix-button-cursor, pointer);height:calc(var(--spacing) * 10);line-height:calc(var(--spacing) * 5);padding:var( --uix-button-padding, calc(var(--spacing) * 2.5) calc(var(--spacing) * 4) );word-break:keep-all;flex-basis:100%}.uix-icon,button,input,a{cursor:pointer}&[bordered]{--uix-button-border-size: 1px;--uix-button-backgroundColor: transparent;--uix-button-hoverBackgroundColor: var(--_variant-color-300);--uix-button-borderColor: var(--_variant-color-400);--uix-button-textColor: var(--_variant-color-700)}&[ghost]{--uix-button-backgroundColor: transparent;--uix-button-hoverBackgroundColor: var(--_variant-color-300);--uix-button-borderSize: 0px;--uix-button-textColor: var(--_variant-color-700)}&[outline]{--uix-button-backgroundColor: transparent;--uix-button-hoverBackgroundColor: var(--_variant-color-300);--uix-button-textColor: var(--_variant-color-800);--uix-button-borderSize: 1px;--uix-button-borderColor: var(--_variant-color-400)}&[float]{background-color:#000;--uix-button-hoverBackgroundColor: var(--_variant-color-500);--uix-button-textColor: var(--_variant-color-50);--uix-button-borderSize: 0px;--uix-button-borderRadius: 9999px;--uix-button-width: var(--uix-button-height);box-shadow:var(--shadow-md, 0 4px 6px -1px rgb(0 0 0 / .1));--uix-button-padding: .5rem}&[float]:hover{box-shadow:var(--shadow-lg, 0 10px 15px -3px rgb(0 0 0 / .1))}}.uix-list{display:flex;&[vertical]{flex-direction:column}}.uix-navbar{--uix-navbar-text-color: var(--color-default-90);--uix-navbar-hover-text-color: var(--color-surface-80);--uix-navbar-border-radius: 0px;--uix-navbar-border-color: var(--color-default-60);--uix-navbar-border-size: 1px;--uix-navbar-border-style: solid;--uix-navbar-hover-background-color: var(--color-default-40);--uix-container-position: var(--uix-navbar-position);display:flex;flex-direction:column;&[docked]{--uix-list-button-radius: 0;border-bottom:0;position:fixed;bottom:0;background-color:var(--uix-navbar-background-color, var(--color-default-5));>*{border-right:0;border-bottom:0;&:first-child{border-left:0}}}}:where(.uix-input){--uix-input-background-color: var(--colors-surface-100);--uix-input-border-color: var(--colors-gray-900);--uix-input-text-color: var(--colors-gray-900);--uix-input-placeholder-color: var(--colors-default-500);--uix-input-border-radius: var(--border-radius-md);--uix-input-border-width: 2px;--uix-input-padding-x: calc(var(--spacing) * 4);--uix-input-padding-y: calc(var(--spacing) * 2.5);--uix-input-font-size: var(--font-size-base);--uix-input-height: 2.5rem;--uix-input-disabled-opacity: .6;--uix-input-label-font-size: var(--font-size-sm);--uix-input-label-font-weight: var(--font-weight-bold);--uix-input-label-color: var(--colors-default-700);--uix-input-checkbox-size: 1.5rem;--uix-input-checkbox-border-radius: var(--border-radius-sm);--uix-input-checkbox-checked-bg: var(--colors-primary-600);--uix-input-checkbox-check-color: var(--colors-surface-100);width:100%;display:flex;flex-direction:column;input,select,textarea{width:100%;height:var(--uix-input-height);border-radius:var(--uix-input-border-radius);border:var(--uix-input-border-width) solid var(--uix-input-border-color);font-size:var(--uix-input-font-size);background-color:var(--uix-input-background-color);color:var(--uix-input-text-color);transition:var(--uix-transition);outline:none;padding:var(--uix-input-padding-y) var(--uix-input-padding-x)}textarea{resize:vertical}&:has(textarea){height:auto}select{appearance:none;-webkit-appearance:none;cursor:pointer;font-weight:600;padding-block:0;option{font-weight:600;background-color:var(--uix-input-background-color);font-size:1.1rem;line-height:1.5rem;color:#333;padding:50px;border:2px solid red}}.select-container{position:relative;.select-arrow{position:absolute;right:calc(2 * var(--spacing))}}input::placeholder{color:transparent}label{font-weight:var(--uix-input-label-font-weight);color:var(--uix-input-label-color, var(--colors-gray-600));margin-bottom:var(--spacing);font-size:.9rem;padding:0 4px;transition:all .2s ease-in-out;pointer-events:none;&[required]:after{content:"*";color:var(--colors-danger-500);margin-left:2px}}input:not(:placeholder-shown)+label,textarea:not(:placeholder-shown)+label,&:focus-within label,&.has-value label{top:-2px;transform:translateY(0);font-size:var(--uix-input-label-font-size)}&:focus-within input,&:focus-within select,&:focus-within textarea{box-shadow:0 0 var(--uix-input-focus-ring-width, 5px) var(--uix-input-focus-ring-color, rgba(0, 0, 255, .5))}&[disabled]{cursor:not-allowed;opacity:var(--uix-input-disabled-opacity);& label{cursor:not-allowed}}.input-icon,.select-arrow{position:absolute;top:50%;right:var(--spacing);transform:translateY(-50%);pointer-events:none;color:var(--uix-input-label-color);transition:transform .2s ease-in-out}&:has(select:hover:active) .select-arrow{transform:translateY(-50%) rotate(180deg)}&:has(.input-icon:not(.select-arrow))>input{padding-right:calc(var(--uix-input-padding-x) + 1.75em)}&[type=checkbox],&[type=radio]{flex-direction:row;align-items:center;border:0;height:auto;width:auto;background-color:transparent;box-shadow:none;gap:.75rem;cursor:pointer;label{margin:0;line-height:1.5rem;position:static;transform:none;background-color:transparent;padding:0;cursor:pointer;font-weight:var(--font-weight-normal);order:2;pointer-events:auto}input{appearance:none;-webkit-appearance:none;width:var(--uix-input-checkbox-size);height:var(--uix-input-checkbox-size);margin:0;border:var(--uix-input-border-width) solid var(--uix-input-border-color);background-color:var(--uix-input-background-color);cursor:pointer;position:relative;transition:var(--uix-transition);padding:0;&:after{content:"";position:absolute;display:none;left:50%;top:50%}&:checked{background-color:var(--uix-input-checkbox-checked-bg);border-color:var(--uix-input-checkbox-checked-bg);&:after{display:block}}&:focus-visible{box-shadow:0 0 0 var(--uix-input-focus-ring-width) var(--uix-input-focus-ring-color);border-color:var(--uix-input-focus-ring-color)}}}&[type=checkbox] input:after{width:.375rem;height:.75rem;border:solid var(--uix-input-checkbox-check-color);border-width:0 2px 2px 0;transform:translate(-50%,-60%) rotate(45deg)}&[type=radio] input{border-radius:var(--border-radius-full);&:after{width:calc(var(--uix-input-checkbox-size) / 2);height:calc(var(--uix-input-checkbox-size) / 2);border-radius:var(--border-radius-full);background-color:var(--uix-input-checkbox-check-color);transform:translate(-50%,-50%)}}&[ghost]{&:focus-within select{box-shadow:none}.select-arrow{margin-left:5px;padding-left:5px}select{background:inherit;border:0}}}:where(.uix-icon){display:inline-block;vertical-align:middle;width:1rem;height:1rem;svg{height:inherit;width:inherit}&[solid]{stroke:currentColor;fill:currentColor}}
 `,metaType:"text/css"}};self.addEventListener("install",t=>t.waitUntil(self.skipWaiting())),self.addEventListener("activate",t=>t.waitUntil(self.clients.claim())),self.addEventListener("fetch",t=>{const e=new URL(t.request.url),n=FILE_BUNDLE[e.pathname];n&&t.respondWith(new Response(n.content,{headers:{"Content-Type":n.metaType||"application/javascript"}}))});
