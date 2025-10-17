@@ -336,7 +336,6 @@
 .justify-between{justify-content:space-between;}
 .absolute{position:absolute;}
 .relative{position:relative;}
-.sticky{position:sticky;}
 .overflow-auto{overflow:auto;}
 .overflow-hidden{overflow:hidden;}
 .overflow-x-auto{overflow-x:auto;}
@@ -836,21 +835,6 @@
 		box-shadow: var(--shadow-lg, 0 10px 15px -3px rgb(0 0 0 / 0.1));
 	}
 }
-:where(.uix-icon) {
-	display: inline-block;
-	vertical-align: middle;
-	width: 1rem;
-	height: 1rem;
-	svg {
-		height: inherit;
-		width: inherit;
-	}
-
-	&[solid] {
-		stroke: currentColor;
-		fill: currentColor;
-	}
-}
 :where(.uix-input) {
 	--uix-input-background-color: var(--colors-surface-100);
 	--uix-input-border-color: var(--colors-gray-900);
@@ -1077,6 +1061,21 @@
 			background: inherit;
 			border: 0;
 		}
+	}
+}
+:where(.uix-icon) {
+	display: inline-block;
+	vertical-align: middle;
+	width: 1rem;
+	height: 1rem;
+	svg {
+		height: inherit;
+		width: inherit;
+	}
+
+	&[solid] {
+		stroke: currentColor;
+		fill: currentColor;
 	}
 }
 .app-template {
@@ -1616,22 +1615,6 @@ div [container][horizontal] {
 	}
 }
 
-:where(.uix-icon) {
-	display: inline-block;
-	vertical-align: middle;
-	width: 1rem;
-	height: 1rem;
-	svg {
-		height: inherit;
-		width: inherit;
-	}
-
-	&[solid] {
-		stroke: currentColor;
-		fill: currentColor;
-	}
-}
-
 :where(.uix-input) {
 	--uix-input-background-color: var(--colors-surface-100);
 	--uix-input-border-color: var(--colors-gray-900);
@@ -1858,6 +1841,22 @@ div [container][horizontal] {
 			background: inherit;
 			border: 0;
 		}
+	}
+}
+
+:where(.uix-icon) {
+	display: inline-block;
+	vertical-align: middle;
+	width: 1rem;
+	height: 1rem;
+	svg {
+		height: inherit;
+		width: inherit;
+	}
+
+	&[solid] {
+		stroke: currentColor;
+		fill: currentColor;
 	}
 }
 
