@@ -556,21 +556,6 @@
 		flex-direction: column;
 	}
 }
-:where(.uix-icon) {
-	display: inline-block;
-	vertical-align: middle;
-	width: 1rem;
-	height: 1rem;
-	svg {
-		height: inherit;
-		width: inherit;
-	}
-
-	&[solid] {
-		stroke: currentColor;
-		fill: currentColor;
-	}
-}
 .uix-navbar {
 	--uix-navbar-text-color: var(--color-default-90);
 	--uix-navbar-hover-text-color: var(--color-surface-80);
@@ -849,6 +834,21 @@
 	}
 	&[float]:hover {
 		box-shadow: var(--shadow-lg, 0 10px 15px -3px rgb(0 0 0 / 0.1));
+	}
+}
+:where(.uix-icon) {
+	display: inline-block;
+	vertical-align: middle;
+	width: 1rem;
+	height: 1rem;
+	svg {
+		height: inherit;
+		width: inherit;
+	}
+
+	&[solid] {
+		stroke: currentColor;
+		fill: currentColor;
 	}
 }
 :where(.uix-input) {
@@ -1333,22 +1333,6 @@ div [container][horizontal] {
 	}
 }
 
-:where(.uix-icon) {
-	display: inline-block;
-	vertical-align: middle;
-	width: 1rem;
-	height: 1rem;
-	svg {
-		height: inherit;
-		width: inherit;
-	}
-
-	&[solid] {
-		stroke: currentColor;
-		fill: currentColor;
-	}
-}
-
 .uix-navbar {
 	--uix-navbar-text-color: var(--color-default-90);
 	--uix-navbar-hover-text-color: var(--color-surface-80);
@@ -1629,6 +1613,22 @@ div [container][horizontal] {
 	}
 	&[float]:hover {
 		box-shadow: var(--shadow-lg, 0 10px 15px -3px rgb(0 0 0 / 0.1));
+	}
+}
+
+:where(.uix-icon) {
+	display: inline-block;
+	vertical-align: middle;
+	width: 1rem;
+	height: 1rem;
+	svg {
+		height: inherit;
+		width: inherit;
+	}
+
+	&[solid] {
+		stroke: currentColor;
+		fill: currentColor;
 	}
 }
 
